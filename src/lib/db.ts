@@ -46,7 +46,10 @@ export async function fetchMemberByAuthId(authId: string): Promise<Member | null
     .select('*')
     .eq('auth_id', authId)
     .single();
-  if (error || !data) return null;
+  if (error || !data) {
+    console.error('[fetchMemberByAuthId] error:', error, 'authId:', authId);
+    return null;
+  }
   return rowToMember(data);
 }
 

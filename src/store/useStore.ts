@@ -156,10 +156,16 @@ export const useStore = create<AppState>()(
 
       login: async (email, password) => {
         const { data, error } = await db.signIn(email, password);
-        if (error || !data.user) return false;
+        if (error || !data.user) {
+          console.error('[login] signIn failed:', error?.message, error?.status);
+          return false;
+        }
 
         const member = await db.fetchMemberByAuthId(data.user.id);
-        if (!member) return false;
+        if (!member) {
+          console.error('[login] member not found for authId:', data.user.id);
+          return false;
+        }
 
         set({
           currentUser: member,
