@@ -187,10 +187,11 @@ export default function ProductDetail() {
             {product.setOptions && product.setOptions.length > 0 ? (
               <div className="mb-5">
                 {/* Table header */}
-                <div className="grid grid-cols-[48px_1fr_130px_110px] text-[11px] font-semibold text-[#999] uppercase tracking-wide bg-[#f8f8fa] border border-[#e5e5e5] rounded-t-lg px-3 py-2.5">
+                <div className="grid grid-cols-[48px_1fr_120px_140px_110px] text-[11px] font-semibold text-[#999] uppercase tracking-wide bg-[#f8f8fa] border border-[#e5e5e5] rounded-t-lg px-3 py-2.5">
                   <span>Set</span>
                   <span>Description</span>
                   <span className="text-right">Unit Price</span>
+                  <span className="text-right">Set Total</span>
                   <span className="text-right">Qty</span>
                 </div>
 
@@ -198,11 +199,13 @@ export default function ProductDetail() {
                 <div className="border-x border-b border-[#e5e5e5] rounded-b-lg divide-y divide-[#f0f0f0]">
                   {product.setOptions.map((opt: SetOption) => {
                     const qty = setQty[opt.id] ?? 0;
-                    const unitPrice = Math.round(opt.wholesalePrice / opt.unitsPerSet);
+                    const unitWholesale = Math.round(opt.wholesalePrice / opt.unitsPerSet);
+                    const unitOriginal = Math.round(opt.originalPrice / opt.unitsPerSet);
+                    const setTotal = opt.wholesalePrice;
                     return (
                       <div
                         key={opt.id}
-                        className={`grid grid-cols-[48px_1fr_130px_110px] items-center px-3 py-3 transition-colors ${
+                        className={`grid grid-cols-[48px_1fr_120px_140px_110px] items-center px-3 py-3 transition-colors ${
                           qty > 0 ? 'bg-[#f0f7ff]' : 'hover:bg-[#fafafa]'
                         }`}
                       >
@@ -212,29 +215,43 @@ export default function ProductDetail() {
                         {/* Description */}
                         <div>
                           <p className="text-[13px] text-[#333] font-medium">{opt.description}</p>
-                          {canSeePrice && opt.unitsPerSet > 1 && (
-                            <p className="text-[11px] text-[#999] mt-0.5">
-                              {formatPrice(unitPrice)} / unit
-                            </p>
-                          )}
+                          <p className="text-[11px] text-[#999] mt-0.5">{opt.unitsPerSet} units / set</p>
                         </div>
 
-                        {/* Price */}
+                        {/* Unit Price */}
                         <div className="text-right">
                           {canSeePrice ? (
                             <>
                               <p className="text-[11px] text-[#bbb] line-through">
-                                {formatPrice(opt.originalPrice)}
+                                {formatPrice(unitOriginal)}
                               </p>
-                              <p className="text-[14px] font-bold text-[#333]">
-                                {formatPrice(opt.wholesalePrice)}
+                              <p className="text-[13px] font-semibold text-[#333]">
+                                {formatPrice(unitWholesale)}
                               </p>
+                              <p className="text-[10px] text-[#999]">/ unit</p>
                             </>
                           ) : (
                             <div className="flex items-center justify-end gap-1 text-[#999]">
                               <Lock size={12} />
                               <span className="text-[12px]">Login</span>
                             </div>
+                          )}
+                        </div>
+
+                        {/* Set Total */}
+                        <div className="text-right">
+                          {canSeePrice ? (
+                            <>
+                              <p className="text-[11px] text-[#bbb] line-through">
+                                {formatPrice(opt.originalPrice)}
+                              </p>
+                              <p className="text-[14px] font-bold text-[#e53e3e]">
+                                {formatPrice(setTotal)}
+                              </p>
+                              <p className="text-[10px] text-[#999]">1 set ({opt.unitsPerSet}pcs)</p>
+                            </>
+                          ) : (
+                            <span className="text-[12px] text-[#ccc]">—</span>
                           )}
                         </div>
 
