@@ -61,6 +61,7 @@ export default function Checkout() {
   const [poNumber, setPoNumber] = useState('');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<Partial<ShippingAddress>>({});
+  const [confirmedTotals, setConfirmedTotals] = useState({ subtotal: 0, vat: 0, total: 0 });
 
   const [shipping, setShipping] = useState<ShippingAddress>({
     company: currentUser?.companyName ?? '',
@@ -152,6 +153,7 @@ export default function Checkout() {
       notes: notes.trim() || undefined,
       shippingAddress: shipping,
     });
+    setConfirmedTotals({ subtotal, vat, total });
     clearCart();
     setOrderId(id);
     setStep('confirmed');
@@ -616,15 +618,15 @@ export default function Checkout() {
               <div className="px-5 py-4 space-y-2 text-[13px]">
                 <div className="flex justify-between">
                   <span className="text-[#666]">Subtotal (excl. VAT)</span>
-                  <span>{formatPrice(subtotal)}</span>
+                  <span>{formatPrice(confirmedTotals.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#666]">VAT (10%)</span>
-                  <span>{formatPrice(vat)}</span>
+                  <span>{formatPrice(confirmedTotals.vat)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-[15px] pt-3 border-t border-[#e5e5e5]">
                   <span>Grand Total</span>
-                  <span>{formatPrice(total)}</span>
+                  <span>{formatPrice(confirmedTotals.total)}</span>
                 </div>
               </div>
             </div>
