@@ -35,9 +35,6 @@ const STATUS_CONFIG: Record<
   cancelled:  { label: 'Cancelled',  color: 'bg-red-50 text-red-700 border-red-200',            icon: <XCircle size={13} /> },
 };
 
-function fmt(n: number) {
-  return new Intl.NumberFormat('en-US').format(n);
-}
 
 export default function MyAccount() {
   const navigate = useNavigate();
@@ -106,7 +103,7 @@ export default function MyAccount() {
       return;
     }
     setAccountSaving(true);
-    updateMember(currentUser.id, accountForm);
+    updateMember(currentUser!.id, accountForm);
     setAccountSaving(false);
     showToast('Account information updated successfully.', 'success');
   }
@@ -128,7 +125,7 @@ export default function MyAccount() {
     setPwSaving(true);
     // Verify current password via Supabase re-auth
     const { error: signInErr } = await supabase.auth.signInWithPassword({
-      email: currentUser.email,
+      email: currentUser!.email,
       password: pwForm.current,
     });
     if (signInErr) {

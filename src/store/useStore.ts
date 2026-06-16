@@ -135,7 +135,7 @@ interface AppState {
 
 export const useStore = create<AppState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       // ── Auth ──────────────────────────────────────────────────
       currentUser: null,
       isAuthenticated: false,
@@ -241,8 +241,7 @@ export const useStore = create<AppState>()(
         });
       },
 
-      changePassword: async (id, newPassword) => {
-        // Supabase Auth handles password updates
+      changePassword: async (_id, newPassword) => {
         await db.supabase.auth.updateUser({ password: newPassword });
       },
 

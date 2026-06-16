@@ -13,7 +13,7 @@ import {
   ChevronDown,
   User,
   LogOut,
-  Settings,
+
   LayoutDashboard,
 } from 'lucide-react';
 

@@ -43,9 +43,6 @@ const COUNTRIES = [
 
 const VAT_RATE = 0.1;
 
-function fmt(n: number) {
-  return new Intl.NumberFormat('en-US').format(n);
-}
 
 function genOrderId() {
   const d = new Date();
