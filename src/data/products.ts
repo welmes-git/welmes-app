@@ -249,6 +249,7 @@ export const brands = [
   'Round Lab',
   'ロート製薬',
   '花王 (KAO)',
+  'FANCL',
 ];
 
 export const categories = ['All', 'Skincare', 'Makeup', 'Body/Hair', 'Health Food', 'Beauty Tools', 'Fragrance'];
