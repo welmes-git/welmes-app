@@ -772,13 +772,11 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3">
                             <p className="font-medium text-[#333]">
-                              {formatPrice(product.wholesalePrice)}원
-                            </p>
+                              {formatPrice(product.wholesalePrice)}                            </p>
                             {product.discount > 0 && (
                               <p className="text-[11px] text-[#999]">
                                 <span className="line-through">
-                                  {formatPrice(product.originalPrice)}원
-                                </span>{' '}
+                                  {formatPrice(product.originalPrice)}                                </span>{' '}
                                 <span className="text-[#ff4d6d]">
                                   -{product.discount}%
                                 </span>
