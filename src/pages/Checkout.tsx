@@ -74,7 +74,7 @@ export default function Checkout() {
   });
 
   const subtotal = cart.reduce(
-    (sum, item) => sum + item.product.wholesalePrice * item.quantity,
+    (sum, item) => sum + (item.setOption?.wholesalePrice ?? item.product.wholesalePrice) * item.quantity,
     0
   );
   const vat = Math.round(subtotal * VAT_RATE);
@@ -236,7 +236,7 @@ export default function Checkout() {
                 </div>
 
                 {cart.map((item) => {
-                  const lineTotal = item.product.wholesalePrice * item.quantity;
+                  const lineTotal = (item.setOption?.wholesalePrice ?? item.product.wholesalePrice) * item.quantity;
                   return (
                     <div
                       key={`${item.product.id}-${item.setOption?.id}`}

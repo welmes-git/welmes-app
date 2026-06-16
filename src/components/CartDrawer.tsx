@@ -13,7 +13,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { formatPrice } = useCurrency();
 
   const total = cart.reduce(
-    (sum, item) => sum + item.product.wholesalePrice * item.quantity,
+    (sum, item) => sum + (item.setOption?.wholesalePrice ?? item.product.wholesalePrice) * item.quantity,
     0
   );
 
@@ -89,8 +89,10 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       </p>
                     )}
                     <p className="text-[14px] font-bold text-[#333] mt-1">
-                      {formatPrice(item.product.wholesalePrice)}
-                      <span className="text-[11px] text-[#aaa] font-normal ml-1">/ set</span>
+                      {formatPrice(item.setOption?.wholesalePrice ?? item.product.wholesalePrice)}
+                      <span className="text-[11px] text-[#aaa] font-normal ml-1">
+                        {item.setOption ? `/ set (${item.setOption.unitsPerSet}pcs)` : '/ unit'}
+                      </span>
                     </p>
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-2">

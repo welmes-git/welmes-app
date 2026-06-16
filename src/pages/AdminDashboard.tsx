@@ -70,7 +70,7 @@ export default function AdminDashboard() {
   const [editingProduct, setEditingProduct] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Discount rates per set option (UI-only state, not stored in SetOption)
+  const [discountRates, setDiscountRates] = useState<number[]>([]);
 
   // Product form
   const [productForm, setProductForm] = useState({
@@ -91,23 +91,25 @@ export default function AdminDashboard() {
     const u = productForm.wholesalePrice;
     const o = productForm.originalPrice;
     if (!u || !o) { showToast('Enter unit prices first', 'error'); return; }
+    setDiscountRates([0, 3, 6]);
     setProductForm((f) => ({
       ...f,
       setOptions: [
-        { id: 'S1', description: 'Single Unit',      unitsPerSet: 1,  wholesalePrice: u,      originalPrice: o },
-        { id: 'S2', description: 'Box of 12 Units',  unitsPerSet: 12, wholesalePrice: u * 12, originalPrice: o * 12 },
-        { id: 'S3', description: 'Case of 24 Units', unitsPerSet: 24, wholesalePrice: u * 24, originalPrice: o * 24 },
+        { id: 'S1', description: 'Single Unit',      unitsPerSet: 1,  wholesalePrice: u,                                     originalPrice: o },
+        { id: 'S2', description: 'Box of 12 Units',  unitsPerSet: 12, wholesalePrice: Math.round(u * 12 * 0.97 / 100) * 100, originalPrice: o * 12 },
+        { id: 'S3', description: 'Case of 24 Units', unitsPerSet: 24, wholesalePrice: Math.round(u * 24 * 0.94 / 100) * 100, originalPrice: o * 24 },
       ],
     }));
   };
 
-  const updateSetUnits = (idx: number, units: number) => {
-    const u = productForm.wholesalePrice;
-    const o = productForm.originalPrice;
+  const calcSetTotal = (unitWholesale: number, units: number, discountPct: number) =>
+    Math.round(unitWholesale * units * (1 - discountPct / 100) / 100) * 100 || unitWholesale * units * (1 - discountPct / 100);
+
+  const updateSetOption = (idx: number, field: keyof SetOption, value: string | number) => {
     setProductForm((f) => ({
       ...f,
       setOptions: f.setOptions.map((s, i) =>
-        i === idx ? { ...s, unitsPerSet: units, wholesalePrice: u * units, originalPrice: o * units } : s
+        i === idx ? { ...s, [field]: typeof value === 'string' ? (field === 'id' || field === 'description' ? value : Number(value)) : value } : s
       ),
     }));
   };
@@ -119,10 +121,23 @@ export default function AdminDashboard() {
     }));
   };
 
+  const updateSetUnits = (idx: number, units: number) => {
+    const rate = discountRates[idx] ?? 0;
+    const u = productForm.wholesalePrice;
+    const o = productForm.originalPrice;
+    setProductForm((f) => ({
+      ...f,
+      setOptions: f.setOptions.map((s, i) =>
+        i === idx ? { ...s, unitsPerSet: units, wholesalePrice: calcSetTotal(u, units, rate), originalPrice: o * units } : s
+      ),
+    }));
+  };
+
   const addSetOption = () => {
     const nextId = `S${productForm.setOptions.length + 1}`;
     const u = productForm.wholesalePrice;
     const o = productForm.originalPrice;
+    setDiscountRates((r) => [...r, 0]);
     setProductForm((f) => ({
       ...f,
       setOptions: [
@@ -133,6 +148,7 @@ export default function AdminDashboard() {
   };
 
   const removeSetOption = (idx: number) => {
+    setDiscountRates((r) => r.filter((_, i) => i !== idx));
     setProductForm((f) => ({
       ...f,
       setOptions: f.setOptions.filter((_, i) => i !== idx),
@@ -204,6 +220,12 @@ export default function AdminDashboard() {
     setEditingProduct(product.id);
     const opts = product.setOptions ? [...product.setOptions] : [];
     const u = product.wholesalePrice;
+    setDiscountRates(
+      opts.map((s) => {
+        if (!u || !s.unitsPerSet) return 0;
+        return Math.round((1 - s.wholesalePrice / (u * s.unitsPerSet)) * 100);
+      })
+    );
     setProductForm({
       name: product.name,
       brand: product.brand,
@@ -1044,55 +1066,73 @@ export default function AdminDashboard() {
                         ) : (
                           <div className="border border-[#e5e5e5] rounded-lg overflow-hidden">
                             {/* Table header */}
-                            <div className="grid grid-cols-[40px_1fr_80px_120px_32px] gap-1 bg-[#f8f8fa] px-2 py-2 text-[10px] font-semibold text-[#999] uppercase tracking-wide border-b border-[#e5e5e5]">
+                            <div className="grid grid-cols-[40px_1fr_56px_88px_88px_32px] gap-1 bg-[#f8f8fa] px-2 py-2 text-[10px] font-semibold text-[#999] uppercase tracking-wide border-b border-[#e5e5e5]">
                               <span>ID</span>
                               <span>Description</span>
-                              <span className="text-center">Units/Set</span>
-                              <span className="text-right">Set Total (auto)</span>
+                              <span className="text-center">Units</span>
+                              <span className="text-right">Ref Price</span>
+                              <span className="text-right">W/S Price</span>
                               <span />
                             </div>
                             {/* Rows */}
                             {productForm.setOptions.map((opt, idx) => (
-                              <div
-                                key={idx}
-                                className="grid grid-cols-[40px_1fr_80px_120px_32px] gap-1 items-center px-2 py-2 border-b border-[#f0f0f0] last:border-0 hover:bg-[#fafafa]"
-                              >
-                                <input
-                                  value={opt.id}
-                                  onChange={(e) => updateSetField(idx, 'id', e.target.value)}
-                                  className="w-full h-7 px-1.5 border border-[#e5e5e5] rounded text-[12px] font-bold text-center focus:outline-none focus:border-[#4a90e2]"
-                                  maxLength={3}
-                                />
-                                <input
-                                  value={opt.description}
-                                  onChange={(e) => updateSetField(idx, 'description', e.target.value)}
-                                  placeholder="e.g. Box of 12"
-                                  className="w-full h-7 px-2 border border-[#e5e5e5] rounded text-[12px] focus:outline-none focus:border-[#4a90e2]"
-                                />
-                                {/* Units per set */}
-                                <input
-                                  type="number"
-                                  value={opt.unitsPerSet}
-                                  onChange={(e) => updateSetUnits(idx, Number(e.target.value))}
-                                  min={1}
-                                  className="w-full h-7 px-1.5 border border-[#e5e5e5] rounded text-[12px] text-center focus:outline-none focus:border-[#4a90e2]"
-                                />
-                                {/* Set total (read-only, auto-calculated) */}
-                                <div className="text-right pr-1">
-                                  <p className="text-[13px] font-bold text-[#4a90e2]">
-                                    ¥{(productForm.wholesalePrice * opt.unitsPerSet).toLocaleString()}
-                                  </p>
-                                  <p className="text-[10px] text-[#aaa]">
-                                    ¥{productForm.wholesalePrice.toLocaleString()} × {opt.unitsPerSet}
-                                  </p>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => removeSetOption(idx)}
-                                  className="w-7 h-7 flex items-center justify-center text-[#ccc] hover:text-[#ff4d6d] hover:bg-red-50 rounded transition-colors"
+                              <div key={idx}>
+                                <div
+                                  className="grid grid-cols-[40px_1fr_56px_88px_88px_32px] gap-1 items-center px-2 py-1.5 border-b border-[#f0f0f0] hover:bg-[#fafafa]"
                                 >
-                                  <XIcon size={13} />
-                                </button>
+                                  <input
+                                    value={opt.id}
+                                    onChange={(e) => updateSetField(idx, 'id', e.target.value)}
+                                    className="w-full h-7 px-1.5 border border-[#e5e5e5] rounded text-[12px] font-bold text-center focus:outline-none focus:border-[#4a90e2]"
+                                    maxLength={3}
+                                  />
+                                  <input
+                                    value={opt.description}
+                                    onChange={(e) => updateSetField(idx, 'description', e.target.value)}
+                                    placeholder="e.g. Box of 12"
+                                    className="w-full h-7 px-2 border border-[#e5e5e5] rounded text-[12px] focus:outline-none focus:border-[#4a90e2]"
+                                  />
+                                  {/* Units/Set */}
+                                  <input
+                                    type="number"
+                                    value={opt.unitsPerSet}
+                                    onChange={(e) => updateSetUnits(idx, Number(e.target.value))}
+                                    min={1}
+                                    className="w-full h-7 px-1.5 border border-[#e5e5e5] rounded text-[12px] text-center focus:outline-none focus:border-[#4a90e2]"
+                                  />
+                                  {/* Ref Price (set total original) */}
+                                  <input
+                                    type="number"
+                                    value={opt.originalPrice}
+                                    onChange={(e) => updateSetOption(idx, 'originalPrice', e.target.value)}
+                                    className="w-full h-7 px-1.5 border border-[#e5e5e5] rounded text-[12px] text-right focus:outline-none focus:border-[#4a90e2]"
+                                  />
+                                  {/* W/S Price (set total wholesale) */}
+                                  <input
+                                    type="number"
+                                    value={opt.wholesalePrice}
+                                    onChange={(e) => updateSetOption(idx, 'wholesalePrice', e.target.value)}
+                                    className="w-full h-7 px-1.5 border border-[#4a90e2]/40 rounded text-[12px] text-right font-medium focus:outline-none focus:border-[#4a90e2]"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeSetOption(idx)}
+                                    className="w-7 h-7 flex items-center justify-center text-[#ccc] hover:text-[#ff4d6d] hover:bg-red-50 rounded transition-colors"
+                                  >
+                                    <XIcon size={13} />
+                                  </button>
+                                </div>
+                                {/* Set total auto-display */}
+                                <div className="grid grid-cols-[40px_1fr_56px_88px_88px_32px] gap-1 px-2 py-1 bg-[#f8fbff] border-b border-[#f0f0f0] last:border-0">
+                                  <span />
+                                  <span className="text-[10px] text-[#aaa]">
+                                    {opt.unitsPerSet > 1 ? `1 set (${opt.unitsPerSet} units)` : ''}
+                                  </span>
+                                  <span />
+                                  <span className="text-[10px] text-[#bbb] text-right line-through">¥{opt.originalPrice.toLocaleString()}</span>
+                                  <span className="text-[11px] font-bold text-[#4a90e2] text-right">¥{opt.wholesalePrice.toLocaleString()}</span>
+                                  <span />
+                                </div>
                               </div>
                             ))}
 
