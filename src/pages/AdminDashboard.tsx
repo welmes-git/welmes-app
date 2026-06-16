@@ -70,6 +70,9 @@ export default function AdminDashboard() {
   const [editingProduct, setEditingProduct] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  // Discount rates per set option (UI-only state, not stored in SetOption)
+  const [discountRates, setDiscountRates] = useState<number[]>([]);
+
   // Product form
   const [productForm, setProductForm] = useState({
     name: '',
@@ -89,37 +92,69 @@ export default function AdminDashboard() {
     const u = productForm.wholesalePrice;
     const o = productForm.originalPrice;
     if (!u || !o) { showToast('Enter unit prices first', 'error'); return; }
+    setDiscountRates([0, 3, 6]);
     setProductForm((f) => ({
       ...f,
       setOptions: [
-        { id: 'S1', description: 'Single Unit',     unitsPerSet: 1,  wholesalePrice: u, originalPrice: o },
-        { id: 'S2', description: 'Box of 12 Units', unitsPerSet: 12, wholesalePrice: Math.round(u * 12 * 0.97 / 100) * 100, originalPrice: o * 12 },
-        { id: 'S3', description: 'Case of 24 Units',unitsPerSet: 24, wholesalePrice: Math.round(u * 24 * 0.94 / 100) * 100, originalPrice: o * 24 },
+        { id: 'S1', description: 'Single Unit',     unitsPerSet: 1,  wholesalePrice: u,                                           originalPrice: o },
+        { id: 'S2', description: 'Box of 12 Units', unitsPerSet: 12, wholesalePrice: Math.round(u * 12 * 0.97 / 100) * 100,       originalPrice: o * 12 },
+        { id: 'S3', description: 'Case of 24 Units',unitsPerSet: 24, wholesalePrice: Math.round(u * 24 * 0.94 / 100) * 100,       originalPrice: o * 24 },
       ],
     }));
   };
 
-  const updateSetOption = (idx: number, field: keyof SetOption, value: string | number) => {
+  const calcSetTotal = (unitWholesale: number, units: number, discountPct: number) =>
+    Math.round(unitWholesale * units * (1 - discountPct / 100) / 100) * 100 || unitWholesale * units * (1 - discountPct / 100);
+
+  const updateSetUnits = (idx: number, units: number) => {
+    const rate = discountRates[idx] ?? 0;
+    const u = productForm.wholesalePrice;
+    const o = productForm.originalPrice;
     setProductForm((f) => ({
       ...f,
       setOptions: f.setOptions.map((s, i) =>
-        i === idx ? { ...s, [field]: field === 'id' || field === 'description' ? value : Number(value) } : s
+        i === idx ? { ...s, unitsPerSet: units, wholesalePrice: calcSetTotal(u, units, rate), originalPrice: o * units } : s
       ),
+    }));
+  };
+
+  const updateSetDiscount = (idx: number, rate: number) => {
+    const newRates = discountRates.map((r, i) => (i === idx ? rate : r));
+    setDiscountRates(newRates);
+    const u = productForm.wholesalePrice;
+    const o = productForm.originalPrice;
+    const units = productForm.setOptions[idx]?.unitsPerSet ?? 1;
+    setProductForm((f) => ({
+      ...f,
+      setOptions: f.setOptions.map((s, i) =>
+        i === idx ? { ...s, wholesalePrice: calcSetTotal(u, units, rate), originalPrice: o * units } : s
+      ),
+    }));
+  };
+
+  const updateSetField = (idx: number, field: 'id' | 'description', value: string) => {
+    setProductForm((f) => ({
+      ...f,
+      setOptions: f.setOptions.map((s, i) => (i === idx ? { ...s, [field]: value } : s)),
     }));
   };
 
   const addSetOption = () => {
     const nextId = `S${productForm.setOptions.length + 1}`;
+    const u = productForm.wholesalePrice;
+    const o = productForm.originalPrice;
+    setDiscountRates((r) => [...r, 0]);
     setProductForm((f) => ({
       ...f,
       setOptions: [
         ...f.setOptions,
-        { id: nextId, description: '', unitsPerSet: 1, wholesalePrice: 0, originalPrice: 0 },
+        { id: nextId, description: '', unitsPerSet: 1, wholesalePrice: u, originalPrice: o },
       ],
     }));
   };
 
   const removeSetOption = (idx: number) => {
+    setDiscountRates((r) => r.filter((_, i) => i !== idx));
     setProductForm((f) => ({
       ...f,
       setOptions: f.setOptions.filter((_, i) => i !== idx),
@@ -189,6 +224,14 @@ export default function AdminDashboard() {
 
   const handleEditProduct = (product: (typeof allProducts)[0]) => {
     setEditingProduct(product.id);
+    const opts = product.setOptions ? [...product.setOptions] : [];
+    const u = product.wholesalePrice;
+    setDiscountRates(
+      opts.map((s) => {
+        if (!u || !s.unitsPerSet) return 0;
+        return Math.round((1 - s.wholesalePrice / (u * s.unitsPerSet)) * 100);
+      })
+    );
     setProductForm({
       name: product.name,
       brand: product.brand,
@@ -199,7 +242,7 @@ export default function AdminDashboard() {
       description: product.description,
       tags: product.tags.join(', '),
       status: product.status,
-      setOptions: product.setOptions ? [...product.setOptions] : [],
+      setOptions: opts,
       image: product.image || '',
     });
     setShowProductModal(true);
@@ -1029,51 +1072,62 @@ export default function AdminDashboard() {
                         ) : (
                           <div className="border border-[#e5e5e5] rounded-lg overflow-hidden">
                             {/* Table header */}
-                            <div className="grid grid-cols-[44px_1fr_64px_96px_96px_32px] gap-1 bg-[#f8f8fa] px-2 py-2 text-[10px] font-semibold text-[#999] uppercase tracking-wide border-b border-[#e5e5e5]">
+                            <div className="grid grid-cols-[40px_1fr_72px_68px_110px_32px] gap-1 bg-[#f8f8fa] px-2 py-2 text-[10px] font-semibold text-[#999] uppercase tracking-wide border-b border-[#e5e5e5]">
                               <span>ID</span>
                               <span>Description</span>
-                              <span className="text-center">Units</span>
-                              <span className="text-right">Ref Price</span>
-                              <span className="text-right">W/S Price</span>
+                              <span className="text-center">Units/Set</span>
+                              <span className="text-center">Disc%</span>
+                              <span className="text-right">Set Total (auto)</span>
                               <span />
                             </div>
                             {/* Rows */}
                             {productForm.setOptions.map((opt, idx) => (
                               <div
                                 key={idx}
-                                className="grid grid-cols-[44px_1fr_64px_96px_96px_32px] gap-1 items-center px-2 py-1.5 border-b border-[#f0f0f0] last:border-0 hover:bg-[#fafafa]"
+                                className="grid grid-cols-[40px_1fr_72px_68px_110px_32px] gap-1 items-center px-2 py-2 border-b border-[#f0f0f0] last:border-0 hover:bg-[#fafafa]"
                               >
                                 <input
                                   value={opt.id}
-                                  onChange={(e) => updateSetOption(idx, 'id', e.target.value)}
+                                  onChange={(e) => updateSetField(idx, 'id', e.target.value)}
                                   className="w-full h-7 px-1.5 border border-[#e5e5e5] rounded text-[12px] font-bold text-center focus:outline-none focus:border-[#4a90e2]"
                                   maxLength={3}
                                 />
                                 <input
                                   value={opt.description}
-                                  onChange={(e) => updateSetOption(idx, 'description', e.target.value)}
+                                  onChange={(e) => updateSetField(idx, 'description', e.target.value)}
                                   placeholder="e.g. Box of 12"
                                   className="w-full h-7 px-2 border border-[#e5e5e5] rounded text-[12px] focus:outline-none focus:border-[#4a90e2]"
                                 />
+                                {/* Units per set */}
                                 <input
                                   type="number"
                                   value={opt.unitsPerSet}
-                                  onChange={(e) => updateSetOption(idx, 'unitsPerSet', e.target.value)}
+                                  onChange={(e) => updateSetUnits(idx, Number(e.target.value))}
                                   min={1}
                                   className="w-full h-7 px-1.5 border border-[#e5e5e5] rounded text-[12px] text-center focus:outline-none focus:border-[#4a90e2]"
                                 />
-                                <input
-                                  type="number"
-                                  value={opt.originalPrice}
-                                  onChange={(e) => updateSetOption(idx, 'originalPrice', e.target.value)}
-                                  className="w-full h-7 px-1.5 border border-[#e5e5e5] rounded text-[12px] text-right focus:outline-none focus:border-[#4a90e2]"
-                                />
-                                <input
-                                  type="number"
-                                  value={opt.wholesalePrice}
-                                  onChange={(e) => updateSetOption(idx, 'wholesalePrice', e.target.value)}
-                                  className="w-full h-7 px-1.5 border border-[#4a90e2]/40 rounded text-[12px] text-right font-medium text-[#333] focus:outline-none focus:border-[#4a90e2]"
-                                />
+                                {/* Discount % */}
+                                <div className="relative">
+                                  <input
+                                    type="number"
+                                    value={discountRates[idx] ?? 0}
+                                    onChange={(e) => updateSetDiscount(idx, Number(e.target.value))}
+                                    min={0}
+                                    max={99}
+                                    className="w-full h-7 pl-1.5 pr-5 border border-[#e5e5e5] rounded text-[12px] text-center focus:outline-none focus:border-[#4a90e2]"
+                                  />
+                                  <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] text-[#aaa]">%</span>
+                                </div>
+                                {/* Set total (read-only) */}
+                                <div className="text-right pr-1">
+                                  <p className="text-[13px] font-bold text-[#4a90e2]">
+                                    ¥{opt.wholesalePrice.toLocaleString()}
+                                  </p>
+                                  <p className="text-[10px] text-[#aaa]">
+                                    ¥{productForm.wholesalePrice.toLocaleString()} × {opt.unitsPerSet}
+                                    {(discountRates[idx] ?? 0) > 0 && ` −${discountRates[idx]}%`}
+                                  </p>
+                                </div>
                                 <button
                                   type="button"
                                   onClick={() => removeSetOption(idx)}
@@ -1087,7 +1141,7 @@ export default function AdminDashboard() {
                             {/* Summary row */}
                             <div className="px-3 py-2 bg-[#f8f8fa] border-t border-[#e5e5e5] text-[11px] text-[#999]">
                               {productForm.setOptions.length} set{productForm.setOptions.length !== 1 ? 's' : ''} configured
-                              {productForm.setOptions[0] && ` · Unit price: ₩${productForm.setOptions[0].wholesalePrice.toLocaleString()}`}
+                              {productForm.wholesalePrice > 0 && ` · Unit price: ¥${productForm.wholesalePrice.toLocaleString()}`}
                             </div>
                           </div>
                         )}
