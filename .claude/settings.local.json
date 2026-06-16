@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p /Users/kimmingyu/Desktop/WELMES/app/.claude)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(ipconfig getifaddr *)"
+    ]
+  }
+}
