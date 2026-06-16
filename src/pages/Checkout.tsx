@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { useStore } from '../store/useStore';
 import type { ShippingAddress } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
@@ -134,7 +135,7 @@ export default function Checkout() {
   }
 
   /* ─── Place Order ─── */
-  function handlePlaceOrder() {
+  function handlePlaceOrder(paymentMethod: 'paypal' | 'invoice' = 'invoice') {
     if (!validateShipping()) return;
     const id = genOrderId();
     addOrder({
@@ -145,7 +146,7 @@ export default function Checkout() {
       subtotal,
       vat,
       total,
-      status: 'pending',
+      status: paymentMethod === 'paypal' ? 'processing' : 'pending',
       date: new Date().toISOString().split('T')[0],
       poNumber: poNumber.trim() || undefined,
       notes: notes.trim() || undefined,
@@ -154,6 +155,29 @@ export default function Checkout() {
     clearCart();
     setOrderId(id);
     setStep('confirmed');
+  }
+
+  /* ─── PayPal ─── */
+  const [{ isPending: paypalLoading }] = usePayPalScriptReducer();
+
+  function createPayPalOrder(_data: unknown, actions: { order: { create: (o: object) => Promise<string> } }) {
+    if (!validateShipping()) return Promise.reject('invalid');
+    return actions.order.create({
+      intent: 'CAPTURE',
+      purchase_units: [{
+        amount: {
+          currency_code: 'JPY',
+          value: String(total),
+        },
+        description: `WELMES Order — ${cart.length} item(s)`,
+      }],
+    });
+  }
+
+  function onPayPalApprove(_data: unknown, actions: { order?: { capture: () => Promise<unknown> } }) {
+    return actions.order!.capture().then(() => {
+      handlePlaceOrder('paypal');
+    });
   }
 
   /* ─── Step indicator ─── */
@@ -507,15 +531,38 @@ export default function Checkout() {
                     <span>{formatPrice(total)}</span>
                   </div>
                 </div>
-                <div className="px-5 pb-5">
+                <div className="px-5 pb-5 space-y-3">
+                  {/* PayPal */}
+                  <div>
+                    <p className="text-[11px] text-[#999] text-center mb-2">Pay now with PayPal</p>
+                    {paypalLoading ? (
+                      <div className="w-full h-11 bg-[#f5c542] rounded-lg animate-pulse" />
+                    ) : (
+                      <PayPalButtons
+                        style={{ layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 44 }}
+                        createOrder={createPayPalOrder}
+                        onApprove={onPayPalApprove}
+                        onError={() => showToast('PayPal payment failed. Please try again.', 'error')}
+                      />
+                    )}
+                  </div>
+
+                  {/* Divider */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 border-t border-[#e5e5e5]" />
+                    <span className="text-[11px] text-[#bbb]">or</span>
+                    <div className="flex-1 border-t border-[#e5e5e5]" />
+                  </div>
+
+                  {/* Invoice */}
                   <button
-                    onClick={handlePlaceOrder}
+                    onClick={() => handlePlaceOrder('invoice')}
                     className="w-full py-3 bg-[#4a90e2] text-white rounded-lg text-[14px] font-semibold hover:bg-[#357abd] transition-colors flex items-center justify-center gap-2"
                   >
-                    Place Order
+                    Place Order (Invoice / Wire Transfer)
                     <ChevronRight size={16} />
                   </button>
-                  <p className="text-[10px] text-[#bbb] text-center mt-2">
+                  <p className="text-[10px] text-[#bbb] text-center">
                     By placing this order you agree to our Terms &amp; Conditions.
                   </p>
                 </div>
