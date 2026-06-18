@@ -3,7 +3,7 @@ import type { Order, CartItem } from '../store/useStore';
 
 async function invoke(type: string, data: Record<string, unknown>) {
   try {
-    const { error } = await supabase.functions.invoke('resend-email', {
+    const { error } = await supabase.functions.invoke('send-email', {
       body: { type, data },
     });
     if (error) console.error(`[email:${type}]`, error.message);
