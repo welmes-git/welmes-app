@@ -75,8 +75,8 @@ export default function Header() {
     <>
       {/* Top Utility Bar */}
       <div className="bg-[#f8f8fa] border-b border-[#e5e5e5]">
-        <div className="max-w-[1100px] mx-auto px-4 flex justify-end items-center h-9" style={{overflowX: 'auto', scrollbarWidth: 'none'}}>
-          <div className="flex items-center gap-3 text-[12px] text-[#666666]" style={{flexShrink: 0}}>
+        <div className="max-w-[1100px] mx-auto px-4 flex justify-end items-center h-9">
+          <div className="flex items-center gap-3 text-[12px] text-[#666666]">
             {!isAuthenticated ? (
               <>
                 <Link to="/register" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
