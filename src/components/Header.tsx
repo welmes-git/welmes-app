@@ -73,29 +73,30 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Utility Bar — hidden on mobile via JS to prevent horizontal overflow */}
-      {!isMobile && <div className="bg-[#f8f8fa] border-b border-[#e5e5e5]">
-        <div className="max-w-[1100px] mx-auto px-4 flex justify-end items-center h-9">
-          <div className="flex items-center gap-3 text-[12px] text-[#666666]">
+      {/* Top Utility Bar */}
+      <div className="bg-[#f8f8fa] border-b border-[#e5e5e5]">
+        <div className="max-w-[1100px] mx-auto px-4 flex justify-end items-center h-9" style={{overflowX: 'auto', scrollbarWidth: 'none'}}>
+          <div className="flex items-center gap-3 text-[12px] text-[#666666]" style={{flexShrink: 0}}>
             {!isAuthenticated ? (
               <>
-                <Link to="/register" className="hover:text-[#ff4d6d] transition-colors">
+                <Link to="/register" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
                   Register
                 </Link>
                 <span className="text-[#ddd]">|</span>
-                <Link to="/login" className="hover:text-[#ff4d6d] transition-colors">
+                <Link to="/login" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
                   Login
                 </Link>
               </>
             ) : (
               <>
-                <span className="text-[#333] font-medium">
+                <span className="text-[#333] font-medium" style={{whiteSpace: 'nowrap'}}>
                   {currentUser?.companyName || currentUser?.email}
                 </span>
                 <span className="text-[#ddd]">|</span>
                 <Link
                   to="/account"
                   className="hover:text-[#ff4d6d] transition-colors"
+                  style={{whiteSpace: 'nowrap'}}
                 >
                   My Account
                 </Link>
@@ -103,6 +104,7 @@ export default function Header() {
                 <button
                   onClick={handleLogout}
                   className="hover:text-[#ff4d6d] transition-colors flex items-center gap-1"
+                  style={{whiteSpace: 'nowrap'}}
                 >
                   <LogOut size={12} />
                   Logout
@@ -110,14 +112,14 @@ export default function Header() {
               </>
             )}
             <span className="text-[#ddd]">|</span>
-            <Link to="/support" className="hover:text-[#ff4d6d] transition-colors">
+            <Link to="/support" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
               Support
             </Link>
             <span className="text-[#ddd]">|</span>
             <CurrencySelector />
           </div>
         </div>
-      </div>}
+      </div>
 
       {/* Main Header */}
       <header className="bg-white sticky top-0 z-40 border-b border-[#e5e5e5]">
