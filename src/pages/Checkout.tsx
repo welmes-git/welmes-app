@@ -54,7 +54,7 @@ function genOrderId() {
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { cart, currentUser, addOrder, clearCart, isAuthenticated } = useStore();
+  const { cart, currentUser, addOrder, clearCart, isAuthenticated, showToast } = useStore();
   const { formatPrice } = useCurrency();
   const [step, setStep] = useState<Step>('review');
   const [orderId, setOrderId] = useState('');
@@ -162,7 +162,8 @@ export default function Checkout() {
   /* ─── PayPal ─── */
   const [{ isPending: paypalLoading }] = usePayPalScriptReducer();
 
-  function createPayPalOrder(_data: unknown, actions: { order: { create: (o: object) => Promise<string> } }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function createPayPalOrder(_data: unknown, actions: any) {
     if (!validateShipping()) return Promise.reject('invalid');
     return actions.order.create({
       intent: 'CAPTURE',
