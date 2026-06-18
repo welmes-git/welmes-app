@@ -67,7 +67,7 @@ export default function Header() {
   return (
     <>
       {/* Top Utility Bar */}
-      <div className="hidden sm:block bg-[#f8f8fa] border-b border-[#e5e5e5]">
+      <div className="bg-[#f8f8fa] border-b border-[#e5e5e5]">
         <div className="max-w-[1100px] mx-auto px-4 flex justify-end items-center h-9">
           <div className="flex items-center gap-3 text-[12px] text-[#666666]">
             {!isAuthenticated ? (

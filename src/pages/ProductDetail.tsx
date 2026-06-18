@@ -185,9 +185,10 @@ export default function ProductDetail() {
 
             {/* Set Order Table */}
             {product.setOptions && product.setOptions.length > 0 ? (
-              <div className="mb-5">
-                {/* Desktop Table header */}
-                <div className="hidden sm:grid grid-cols-[48px_1fr_120px_140px_110px] text-[11px] font-semibold text-[#999] uppercase tracking-wide bg-[#f8f8fa] border border-[#e5e5e5] rounded-t-lg px-3 py-2.5">
+              <div className="mb-5 overflow-x-auto -mx-4 px-4">
+                <div style={{minWidth: '520px'}}>
+                {/* Table header */}
+                <div className="grid grid-cols-[48px_1fr_120px_140px_110px] text-[11px] font-semibold text-[#999] uppercase tracking-wide bg-[#f8f8fa] border border-[#e5e5e5] rounded-t-lg px-3 py-2.5">
                   <span>Set</span>
                   <span>Description</span>
                   <span className="text-right">Unit Price</span>
@@ -195,8 +196,8 @@ export default function ProductDetail() {
                   <span className="text-right">Qty</span>
                 </div>
 
-                {/* Desktop Rows */}
-                <div className="hidden sm:block border-x border-b border-[#e5e5e5] rounded-b-lg divide-y divide-[#f0f0f0]">
+                {/* Rows */}
+                <div className="border-x border-b border-[#e5e5e5] rounded-b-lg divide-y divide-[#f0f0f0]">
                   {product.setOptions.map((opt: SetOption) => {
                     const qty = setQty[opt.id] ?? 0;
                     const unitWholesale = Math.round(opt.wholesalePrice / opt.unitsPerSet);
@@ -247,62 +248,6 @@ export default function ProductDetail() {
                     );
                   })}
                 </div>
-
-                {/* Mobile Cards */}
-                <div className="sm:hidden space-y-2">
-                  {product.setOptions.map((opt: SetOption) => {
-                    const qty = setQty[opt.id] ?? 0;
-                    const unitWholesale = Math.round(opt.wholesalePrice / opt.unitsPerSet);
-                    const unitOriginal = Math.round(opt.originalPrice / opt.unitsPerSet);
-                    return (
-                      <div
-                        key={opt.id}
-                        className={`border rounded-lg p-3 transition-colors ${
-                          qty > 0 ? 'bg-[#f0f7ff] border-[#4a90e2]' : 'bg-white border-[#e5e5e5]'
-                        }`}
-                      >
-                        {/* Card header */}
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <span className="text-[12px] font-bold text-[#4a90e2] bg-[#eef4ff] px-2 py-0.5 rounded mr-2">{opt.id}</span>
-                            <span className="text-[13px] font-semibold text-[#333]">{opt.description}</span>
-                            <p className="text-[11px] text-[#999] mt-0.5">{opt.unitsPerSet} units / set</p>
-                          </div>
-                        </div>
-                        {/* Prices row */}
-                        <div className="flex items-end justify-between">
-                          <div>
-                            {canSeePrice ? (
-                              <>
-                                <p className="text-[10px] text-[#999]">Unit price</p>
-                                <p className="text-[11px] text-[#bbb] line-through">{formatPrice(unitOriginal)}</p>
-                                <p className="text-[13px] font-semibold text-[#333]">{formatPrice(unitWholesale)} <span className="text-[10px] font-normal text-[#999]">/ unit</span></p>
-                              </>
-                            ) : (
-                              <div className="flex items-center gap-1 text-[#999]"><Lock size={12} /><span className="text-[12px]">Login to view price</span></div>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            {canSeePrice ? (
-                              <>
-                                <p className="text-[10px] text-[#999]">Set total</p>
-                                <p className="text-[11px] text-[#bbb] line-through">{formatPrice(opt.originalPrice)}</p>
-                                <p className="text-[15px] font-bold text-[#e53e3e]">{formatPrice(opt.wholesalePrice)}</p>
-                                <p className="text-[10px] text-[#999]">1 set ({opt.unitsPerSet}pcs)</p>
-                              </>
-                            ) : null}
-                          </div>
-                        </div>
-                        {/* Qty stepper */}
-                        <div className="flex items-center justify-end mt-2 pt-2 border-t border-[#f0f0f0]">
-                          <span className="text-[12px] text-[#666] mr-auto">Qty</span>
-                          <button onClick={() => changeQty(opt.id, -1)} disabled={!canSeePrice} className="w-8 h-8 border border-[#ddd] flex items-center justify-center rounded-l hover:bg-[#f0f0f0] disabled:opacity-30"><Minus size={12} /></button>
-                          <span className="w-10 h-8 border-t border-b border-[#ddd] flex items-center justify-center text-[14px] font-medium">{qty}</span>
-                          <button onClick={() => changeQty(opt.id, 1)} disabled={!canSeePrice} className="w-8 h-8 border border-[#ddd] flex items-center justify-center rounded-r hover:bg-[#f0f0f0] disabled:opacity-30"><Plus size={12} /></button>
-                        </div>
-                      </div>
-                    );
-                  })}
                 </div>
 
                 {/* Login prompt */}
