@@ -26,6 +26,7 @@ export default function ProductDetail() {
   const [setQty, setSetQty] = useState<Record<string, number>>({});
   const [activeTab, setActiveTab] = useState<'info' | 'reviews' | 'shipping'>('info');
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
   useEffect(() => {
@@ -118,15 +119,52 @@ export default function ProductDetail() {
 
         {/* Product Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
-          {/* Left - Image */}
+          {/* Left - Image Gallery */}
           <div>
-            <div className="aspect-square bg-[#f8f8fa] rounded-lg overflow-hidden mb-3">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            {(() => {
+              const imgs = product.images && product.images.length > 0
+                ? product.images
+                : product.image ? [product.image] : [];
+              const current = imgs[activeImageIdx] || imgs[0] || '';
+              return (
+                <>
+                  <div className="aspect-square bg-[#f8f8fa] rounded-lg overflow-hidden mb-3 relative">
+                    <img
+                      src={current}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {imgs.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setActiveImageIdx((i) => (i - 1 + imgs.length) % imgs.length)}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-[#333] hover:bg-white shadow"
+                        >‹</button>
+                        <button
+                          onClick={() => setActiveImageIdx((i) => (i + 1) % imgs.length)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-[#333] hover:bg-white shadow"
+                        >›</button>
+                      </>
+                    )}
+                  </div>
+                  {imgs.length > 1 && (
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {imgs.map((url, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setActiveImageIdx(idx)}
+                          className={`shrink-0 w-16 h-16 rounded border-2 overflow-hidden bg-[#f8f8fa] transition-colors ${
+                            idx === activeImageIdx ? 'border-[#333]' : 'border-[#e5e5e5]'
+                          }`}
+                        >
+                          <img src={url} alt={`thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {/* Right - Info */}

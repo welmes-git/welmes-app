@@ -86,7 +86,10 @@ export default function AdminDashboard() {
     status: 'active' as 'active' | 'inactive',
     setOptions: [] as SetOption[],
     image: '',
+    images: [] as string[],
   });
+
+  const [imageUrlInput, setImageUrlInput] = useState('');
 
   const autoGenerateSets = () => {
     const u = productForm.wholesalePrice;
@@ -223,7 +226,9 @@ export default function AdminDashboard() {
       status: 'active',
       setOptions: [],
       image: '',
+      images: [],
     });
+    setImageUrlInput('');
     setShowProductModal(true);
   };
 
@@ -246,7 +251,9 @@ export default function AdminDashboard() {
       status: product.status,
       setOptions: opts,
       image: product.image || '',
+      images: product.images && product.images.length > 0 ? product.images : (product.image ? [product.image] : []),
     });
+    setImageUrlInput('');
     setShowProductModal(true);
   };
 
@@ -267,7 +274,8 @@ export default function AdminDashboard() {
       name: productForm.name,
       brand: productForm.brand,
       category: productForm.category,
-      image: productForm.image || '',
+      image: productForm.images[0] || productForm.image || '',
+      images: productForm.images,
       originalPrice: productForm.originalPrice,
       wholesalePrice: productForm.wholesalePrice,
       discount,
@@ -857,36 +865,102 @@ export default function AdminDashboard() {
                         />
                       </div>
 
-                      {/* Image URL */}
+                      {/* Product Images (multi) */}
                       <div>
                         <label className="block text-[12px] text-[#666] mb-1">
-                          Product Image URL
+                          Product Images
+                          <span className="ml-1 text-[#aaa] font-normal">— first image is the main thumbnail</span>
                         </label>
-                        <div className="flex gap-2 items-start">
+
+                        {/* Existing images grid */}
+                        {productForm.images.length > 0 && (
+                          <div className="grid grid-cols-4 gap-2 mb-2">
+                            {productForm.images.map((url, idx) => (
+                              <div key={idx} className="relative group aspect-square bg-[#f8f8fa] rounded border border-[#e5e5e5] overflow-hidden">
+                                <img
+                                  src={url}
+                                  alt={`image ${idx + 1}`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => { (e.target as HTMLImageElement).src = ''; }}
+                                />
+                                {idx === 0 && (
+                                  <span className="absolute top-0.5 left-0.5 bg-[#ff4d6d] text-white text-[9px] font-bold px-1 rounded">Main</span>
+                                )}
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                  {idx > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const imgs = [...productForm.images];
+                                        [imgs[idx - 1], imgs[idx]] = [imgs[idx], imgs[idx - 1]];
+                                        setProductForm({ ...productForm, images: imgs });
+                                      }}
+                                      className="w-6 h-6 bg-white rounded text-[#333] text-[11px] flex items-center justify-center hover:bg-[#f0f0f0]"
+                                      title="Move left"
+                                    >←</button>
+                                  )}
+                                  {idx < productForm.images.length - 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const imgs = [...productForm.images];
+                                        [imgs[idx], imgs[idx + 1]] = [imgs[idx + 1], imgs[idx]];
+                                        setProductForm({ ...productForm, images: imgs });
+                                      }}
+                                      className="w-6 h-6 bg-white rounded text-[#333] text-[11px] flex items-center justify-center hover:bg-[#f0f0f0]"
+                                      title="Move right"
+                                    >→</button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const imgs = productForm.images.filter((_, i) => i !== idx);
+                                      setProductForm({ ...productForm, images: imgs });
+                                    }}
+                                    className="w-6 h-6 bg-[#ff4d6d] rounded text-white text-[11px] flex items-center justify-center hover:bg-[#e03060]"
+                                    title="Remove"
+                                  >✕</button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Add image URL input */}
+                        <div className="flex gap-2">
                           <input
                             type="text"
-                            value={productForm.image}
-                            onChange={(e) =>
-                              setProductForm({ ...productForm, image: e.target.value })
-                            }
+                            value={imageUrlInput}
+                            onChange={(e) => setImageUrlInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const url = imageUrlInput.trim();
+                                if (url && !productForm.images.includes(url)) {
+                                  setProductForm({ ...productForm, images: [...productForm.images, url] });
+                                  setImageUrlInput('');
+                                }
+                              }
+                            }}
                             placeholder="https://example.com/image.jpg"
                             className="flex-1 h-10 px-3 border border-[#e5e5e5] rounded text-[13px] focus:outline-none focus:border-[#333]"
                           />
-                          {productForm.image && (
-                            <div className="w-10 h-10 rounded border border-[#e5e5e5] overflow-hidden shrink-0 bg-[#f8f8fa]">
-                              <img
-                                src={productForm.image}
-                                alt="preview"
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = 'none';
-                                }}
-                              />
-                            </div>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const url = imageUrlInput.trim();
+                              if (url && !productForm.images.includes(url)) {
+                                setProductForm({ ...productForm, images: [...productForm.images, url] });
+                                setImageUrlInput('');
+                              }
+                            }}
+                            className="h-10 px-4 bg-[#333] text-white text-[13px] rounded hover:bg-[#555] whitespace-nowrap"
+                          >
+                            + Add
+                          </button>
                         </div>
                         <p className="text-[11px] text-[#aaa] mt-1">
-                          Paste a direct image URL. Leave blank to use the default placeholder.
+                          Paste a URL and press Enter or click Add. Hover over a thumbnail to reorder or remove.
                         </p>
                       </div>
 
