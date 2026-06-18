@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import CartDrawer from './CartDrawer';
@@ -45,6 +45,13 @@ export default function Header() {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,8 +73,8 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Utility Bar */}
-      <div className="bg-[#f8f8fa] border-b border-[#e5e5e5]">
+      {/* Top Utility Bar — hidden on mobile via JS to prevent horizontal overflow */}
+      {!isMobile && <div className="bg-[#f8f8fa] border-b border-[#e5e5e5]">
         <div className="max-w-[1100px] mx-auto px-4 flex justify-end items-center h-9">
           <div className="flex items-center gap-3 text-[12px] text-[#666666]">
             {!isAuthenticated ? (
@@ -110,7 +117,7 @@ export default function Header() {
             <CurrencySelector />
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* Main Header */}
       <header className="bg-white sticky top-0 z-40 border-b border-[#e5e5e5]">
