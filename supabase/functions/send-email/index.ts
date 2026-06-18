@@ -1,5 +1,5 @@
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
-const FROM_EMAIL = 'WELMES <noreply@welmes.kr>'
+const FROM_EMAIL = Deno.env.get('FROM_EMAIL') ?? 'WELMES <onboarding@resend.dev>'
 const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') ?? 'admin@welmes.kr'
 
 const corsHeaders = {
