@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import type { SetOption } from '../store/useStore';
@@ -26,6 +26,13 @@ export default function ProductDetail() {
   const [setQty, setSetQty] = useState<Record<string, number>>({});
   const [activeTab, setActiveTab] = useState<'info' | 'reviews' | 'shipping'>('info');
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   const allProducts = products.length > 0 ? products : initialProducts;
   const product = allProducts.find((p) => p.id === Number(id));
@@ -185,70 +192,116 @@ export default function ProductDetail() {
 
             {/* Set Order Table */}
             {product.setOptions && product.setOptions.length > 0 ? (
-              <div className="mb-5 overflow-x-auto -mx-4 px-4">
-                <div style={{minWidth: '520px'}}>
-                {/* Table header */}
-                <div className="grid grid-cols-[48px_1fr_120px_140px_110px] text-[11px] font-semibold text-[#999] uppercase tracking-wide bg-[#f8f8fa] border border-[#e5e5e5] rounded-t-lg px-3 py-2.5">
-                  <span>Set</span>
-                  <span>Description</span>
-                  <span className="text-right">Unit Price</span>
-                  <span className="text-right">Set Total</span>
-                  <span className="text-right">Qty</span>
-                </div>
-
-                {/* Rows */}
-                <div className="border-x border-b border-[#e5e5e5] rounded-b-lg divide-y divide-[#f0f0f0]">
-                  {product.setOptions.map((opt: SetOption) => {
-                    const qty = setQty[opt.id] ?? 0;
-                    const unitWholesale = Math.round(opt.wholesalePrice / opt.unitsPerSet);
-                    const unitOriginal = Math.round(opt.originalPrice / opt.unitsPerSet);
-                    const setTotal = opt.wholesalePrice;
-                    return (
-                      <div
-                        key={opt.id}
-                        className={`grid grid-cols-[48px_1fr_120px_140px_110px] items-center px-3 py-3 transition-colors ${
-                          qty > 0 ? 'bg-[#f0f7ff]' : 'hover:bg-[#fafafa]'
-                        }`}
-                      >
-                        <span className="text-[13px] font-bold text-[#333]">{opt.id}</span>
-                        <div>
-                          <p className="text-[13px] text-[#333] font-medium">{opt.description}</p>
-                          <p className="text-[11px] text-[#999] mt-0.5">{opt.unitsPerSet} units / set</p>
-                        </div>
-                        <div className="text-right">
-                          {canSeePrice ? (
-                            <>
-                              <p className="text-[11px] text-[#bbb] line-through">{formatPrice(unitOriginal)}</p>
-                              <p className="text-[13px] font-semibold text-[#333]">{formatPrice(unitWholesale)}</p>
-                              <p className="text-[10px] text-[#999]">/ unit</p>
-                            </>
-                          ) : (
-                            <div className="flex items-center justify-end gap-1 text-[#999]">
-                              <Lock size={12} /><span className="text-[12px]">Login</span>
+              <div className="mb-5">
+                {isMobile ? (
+                  /* Mobile: Card layout */
+                  <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
+                    {product.setOptions.map((opt: SetOption) => {
+                      const qty = setQty[opt.id] ?? 0;
+                      const unitWholesale = Math.round(opt.wholesalePrice / opt.unitsPerSet);
+                      const unitOriginal = Math.round(opt.originalPrice / opt.unitsPerSet);
+                      return (
+                        <div
+                          key={opt.id}
+                          style={{
+                            border: qty > 0 ? '1.5px solid #4a90e2' : '1px solid #e5e5e5',
+                            borderRadius: '10px',
+                            padding: '12px',
+                            backgroundColor: qty > 0 ? '#f0f7ff' : '#fff',
+                          }}
+                        >
+                          <div style={{display:'flex', alignItems:'center', gap:'8px', marginBottom:'8px'}}>
+                            <span style={{fontSize:'11px', fontWeight:700, color:'#4a90e2', background:'#eef4ff', padding:'2px 7px', borderRadius:'4px'}}>{opt.id}</span>
+                            <span style={{fontSize:'13px', fontWeight:600, color:'#333'}}>{opt.description}</span>
+                          </div>
+                          <p style={{fontSize:'11px', color:'#999', marginBottom:'8px'}}>{opt.unitsPerSet} units / set</p>
+                          <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'10px'}}>
+                            <div>
+                              {canSeePrice ? (
+                                <>
+                                  <p style={{fontSize:'10px', color:'#999'}}>Unit price</p>
+                                  <p style={{fontSize:'11px', color:'#bbb', textDecoration:'line-through'}}>{formatPrice(unitOriginal)}</p>
+                                  <p style={{fontSize:'13px', fontWeight:600, color:'#333'}}>{formatPrice(unitWholesale)} <span style={{fontSize:'10px', fontWeight:400, color:'#999'}}>/ unit</span></p>
+                                </>
+                              ) : (
+                                <span style={{fontSize:'12px', color:'#999'}}>Login to view price</span>
+                              )}
                             </div>
-                          )}
+                            {canSeePrice && (
+                              <div style={{textAlign:'right'}}>
+                                <p style={{fontSize:'10px', color:'#999'}}>Set total</p>
+                                <p style={{fontSize:'11px', color:'#bbb', textDecoration:'line-through'}}>{formatPrice(opt.originalPrice)}</p>
+                                <p style={{fontSize:'15px', fontWeight:700, color:'#e53e3e'}}>{formatPrice(opt.wholesalePrice)}</p>
+                                <p style={{fontSize:'10px', color:'#999'}}>1 set ({opt.unitsPerSet}pcs)</p>
+                              </div>
+                            )}
+                          </div>
+                          <div style={{display:'flex', alignItems:'center', borderTop:'1px solid #f0f0f0', paddingTop:'8px'}}>
+                            <span style={{fontSize:'12px', color:'#666', flex:1}}>Qty</span>
+                            <button onClick={() => changeQty(opt.id, -1)} disabled={!canSeePrice} style={{width:'32px', height:'32px', border:'1px solid #ddd', background:'#fff', borderRadius:'6px 0 0 6px', display:'flex', alignItems:'center', justifyContent:'center', opacity: !canSeePrice ? 0.3 : 1}}><Minus size={12} /></button>
+                            <span style={{width:'40px', height:'32px', border:'1px solid #ddd', borderLeft:'none', borderRight:'none', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'14px', fontWeight:500}}>{qty}</span>
+                            <button onClick={() => changeQty(opt.id, 1)} disabled={!canSeePrice} style={{width:'32px', height:'32px', border:'1px solid #ddd', background:'#fff', borderRadius:'0 6px 6px 0', display:'flex', alignItems:'center', justifyContent:'center', opacity: !canSeePrice ? 0.3 : 1}}><Plus size={12} /></button>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          {canSeePrice ? (
-                            <>
-                              <p className="text-[11px] text-[#bbb] line-through">{formatPrice(opt.originalPrice)}</p>
-                              <p className="text-[14px] font-bold text-[#e53e3e]">{formatPrice(setTotal)}</p>
-                              <p className="text-[10px] text-[#999]">1 set ({opt.unitsPerSet}pcs)</p>
-                            </>
-                          ) : (
-                            <span className="text-[12px] text-[#ccc]">—</span>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-end">
-                          <button onClick={() => changeQty(opt.id, -1)} disabled={!canSeePrice} className="w-7 h-7 border border-[#ddd] flex items-center justify-center rounded-l hover:bg-[#f0f0f0] disabled:opacity-30"><Minus size={11} /></button>
-                          <span className="w-9 h-7 border-t border-b border-[#ddd] flex items-center justify-center text-[13px] font-medium">{qty}</span>
-                          <button onClick={() => changeQty(opt.id, 1)} disabled={!canSeePrice} className="w-7 h-7 border border-[#ddd] flex items-center justify-center rounded-r hover:bg-[#f0f0f0] disabled:opacity-30"><Plus size={11} /></button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* Desktop: Table layout */
+                  <>
+                    <div className="grid grid-cols-[48px_1fr_120px_140px_110px] text-[11px] font-semibold text-[#999] uppercase tracking-wide bg-[#f8f8fa] border border-[#e5e5e5] rounded-t-lg px-3 py-2.5">
+                      <span>Set</span>
+                      <span>Description</span>
+                      <span className="text-right">Unit Price</span>
+                      <span className="text-right">Set Total</span>
+                      <span className="text-right">Qty</span>
+                    </div>
+                    <div className="border-x border-b border-[#e5e5e5] rounded-b-lg divide-y divide-[#f0f0f0]">
+                      {product.setOptions.map((opt: SetOption) => {
+                        const qty = setQty[opt.id] ?? 0;
+                        const unitWholesale = Math.round(opt.wholesalePrice / opt.unitsPerSet);
+                        const unitOriginal = Math.round(opt.originalPrice / opt.unitsPerSet);
+                        const setTotal = opt.wholesalePrice;
+                        return (
+                          <div key={opt.id} className={`grid grid-cols-[48px_1fr_120px_140px_110px] items-center px-3 py-3 transition-colors ${qty > 0 ? 'bg-[#f0f7ff]' : 'hover:bg-[#fafafa]'}`}>
+                            <span className="text-[13px] font-bold text-[#333]">{opt.id}</span>
+                            <div>
+                              <p className="text-[13px] text-[#333] font-medium">{opt.description}</p>
+                              <p className="text-[11px] text-[#999] mt-0.5">{opt.unitsPerSet} units / set</p>
+                            </div>
+                            <div className="text-right">
+                              {canSeePrice ? (
+                                <>
+                                  <p className="text-[11px] text-[#bbb] line-through">{formatPrice(unitOriginal)}</p>
+                                  <p className="text-[13px] font-semibold text-[#333]">{formatPrice(unitWholesale)}</p>
+                                  <p className="text-[10px] text-[#999]">/ unit</p>
+                                </>
+                              ) : (
+                                <div className="flex items-center justify-end gap-1 text-[#999]"><Lock size={12} /><span className="text-[12px]">Login</span></div>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              {canSeePrice ? (
+                                <>
+                                  <p className="text-[11px] text-[#bbb] line-through">{formatPrice(opt.originalPrice)}</p>
+                                  <p className="text-[14px] font-bold text-[#e53e3e]">{formatPrice(setTotal)}</p>
+                                  <p className="text-[10px] text-[#999]">1 set ({opt.unitsPerSet}pcs)</p>
+                                </>
+                              ) : (
+                                <span className="text-[12px] text-[#ccc]">—</span>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-end">
+                              <button onClick={() => changeQty(opt.id, -1)} disabled={!canSeePrice} className="w-7 h-7 border border-[#ddd] flex items-center justify-center rounded-l hover:bg-[#f0f0f0] disabled:opacity-30"><Minus size={11} /></button>
+                              <span className="w-9 h-7 border-t border-b border-[#ddd] flex items-center justify-center text-[13px] font-medium">{qty}</span>
+                              <button onClick={() => changeQty(opt.id, 1)} disabled={!canSeePrice} className="w-7 h-7 border border-[#ddd] flex items-center justify-center rounded-r hover:bg-[#f0f0f0] disabled:opacity-30"><Plus size={11} /></button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
 
                 {/* Login prompt */}
                 {!canSeePrice && (
