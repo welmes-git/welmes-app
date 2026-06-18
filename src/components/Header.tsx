@@ -277,6 +277,53 @@ export default function Header() {
           </nav>
         </div>
 
+        {/* Mobile Search Bar */}
+        {isMobile && (
+          <div style={{padding: '8px 16px', borderTop: '1px solid #e5e5e5'}}>
+            <form onSubmit={handleSearch}>
+              <div style={{position: 'relative'}}>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search products, brands..."
+                  style={{
+                    width: '100%',
+                    height: '38px',
+                    paddingLeft: '16px',
+                    paddingRight: '44px',
+                    border: '1.5px solid #333',
+                    borderRadius: '999px',
+                    fontSize: '13px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <button
+                  type="submit"
+                  style={{
+                    position: 'absolute',
+                    right: '4px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#333',
+                  }}
+                >
+                  <Search size={16} />
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         {/* Mobile Navigation Tab Bar */}
         {isMobile && (
           <div style={{
