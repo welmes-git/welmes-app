@@ -230,7 +230,7 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Navigation Bar */}
+          {/* Navigation Bar — desktop only */}
           <nav className="hidden md:flex items-center border-t border-[#e5e5e5]">
             {/* Category with dropdown */}
             <div
@@ -274,6 +274,54 @@ export default function Header() {
             ))}
           </nav>
         </div>
+
+        {/* Mobile Navigation Tab Bar */}
+        {isMobile && (
+          <div style={{
+            borderTop: '1px solid #e5e5e5',
+            overflowX: 'auto',
+            display: 'flex',
+            scrollbarWidth: 'none',
+            WebkitOverflowScrolling: 'touch',
+          }}>
+            <Link
+              to="/products"
+              onClick={() => setShowCategoryDropdown(false)}
+              style={{
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '10px 14px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#333',
+                whiteSpace: 'nowrap',
+                textDecoration: 'none',
+              }}
+            >
+              <Menu size={14} />
+              CATEGORY
+            </Link>
+            {navItems.map((item) => (
+              <Link
+                key={item.label}
+                to={item.path}
+                style={{
+                  flexShrink: 0,
+                  padding: '10px 14px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: isActive(item.path) ? '#ff4d6d' : '#333',
+                  whiteSpace: 'nowrap',
+                  textDecoration: 'none',
+                }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
