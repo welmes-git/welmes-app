@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CurrencyCode } from '../lib/currency';
 import * as db from '../lib/db';
+import { emailOrderPlaced, emailMemberApproved, emailMemberRejected, emailOrderShipped } from '../lib/email';
 
 export interface SetOption {
   id: string;
@@ -140,7 +141,7 @@ interface AppState {
 
 export const useStore = create<AppState>()(
   persist(
-    (set, _get) => ({
+    (set, get) => ({
       // ── Auth ──────────────────────────────────────────────────
       currentUser: null,
       isAuthenticated: false,
@@ -263,6 +264,8 @@ export const useStore = create<AppState>()(
             m.id === id ? { ...m, status: 'approved' as const } : m
           ),
         }));
+        const member = get().members.find((m) => m.id === id);
+        if (member) emailMemberApproved(member.email, member.companyName);
       },
 
       rejectMember: async (id) => {
@@ -272,6 +275,8 @@ export const useStore = create<AppState>()(
             m.id === id ? { ...m, status: 'rejected' as const } : m
           ),
         }));
+        const member = get().members.find((m) => m.id === id);
+        if (member) emailMemberRejected(member.email, member.companyName);
       },
 
       // ── Cart (local only) ─────────────────────────────────────
@@ -327,6 +332,10 @@ export const useStore = create<AppState>()(
       addOrder: async (order) => {
         await db.insertOrder(order);
         set((state) => ({ orders: [order, ...state.orders] }));
+        const user = get().currentUser;
+        if (user?.email) {
+          emailOrderPlaced(order, user.email, get().selectedCurrency);
+        }
       },
 
       updateOrderStatus: async (id, status) => {
@@ -348,6 +357,11 @@ export const useStore = create<AppState>()(
               : o
           ),
         }));
+        const order = get().orders.find((o) => o.id === id);
+        const member = get().members.find((m) => m.id === order?.memberId);
+        if (member?.email && order) {
+          emailOrderShipped(member.email, id, order.memberName, carrier, trackingNumber, shippedAt);
+        }
       },
 
       // ── Currency ──────────────────────────────────────────────
