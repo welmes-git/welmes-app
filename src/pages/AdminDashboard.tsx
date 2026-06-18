@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import type { Order, SetOption } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { initialProducts, brands, categories } from '../data/products';
+import { supabase } from '../lib/supabase';
 import {
   LayoutDashboard,
   Users,
@@ -23,6 +24,8 @@ import {
   TrendingUp,
   TrendingDown,
   X as XIcon,
+  Upload,
+  ImageIcon,
 } from 'lucide-react';
 
 type AdminTab = 'dashboard' | 'members' | 'products' | 'orders';
@@ -90,6 +93,26 @@ export default function AdminDashboard() {
   });
 
   const [imageUrlInput, setImageUrlInput] = useState('');
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const uploadFiles = useCallback(async (files: FileList | File[]) => {
+    const fileArr = Array.from(files).filter((f) => f.type.startsWith('image/'));
+    if (fileArr.length === 0) return;
+    setUploadingImages(true);
+    const uploaded: string[] = [];
+    for (const file of fileArr) {
+      const ext = file.name.split('.').pop() ?? 'jpg';
+      const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from('product-images').upload(path, file);
+      if (error) { console.error('Upload error:', error.message); continue; }
+      const { data } = supabase.storage.from('product-images').getPublicUrl(path);
+      uploaded.push(data.publicUrl);
+    }
+    setProductForm((f) => ({ ...f, images: [...f.images, ...uploaded] }));
+    setUploadingImages(false);
+  }, []);
 
   const autoGenerateSets = () => {
     const u = productForm.wholesalePrice;
@@ -926,8 +949,47 @@ export default function AdminDashboard() {
                           </div>
                         )}
 
-                        {/* Add image URL input */}
-                        <div className="flex gap-2">
+                        {/* Drag & Drop Upload Zone */}
+                        <div
+                          onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
+                          onDragLeave={() => setIsDraggingOver(false)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setIsDraggingOver(false);
+                            uploadFiles(e.dataTransfer.files);
+                          }}
+                          onClick={() => fileInputRef.current?.click()}
+                          className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors mb-2 ${
+                            isDraggingOver ? 'border-[#4a90e2] bg-[#f0f7ff]' : 'border-[#e5e5e5] hover:border-[#bbb] bg-[#fafafa]'
+                          }`}
+                        >
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={(e) => { if (e.target.files) uploadFiles(e.target.files); e.target.value = ''; }}
+                          />
+                          {uploadingImages ? (
+                            <div className="flex items-center justify-center gap-2 text-[13px] text-[#4a90e2]">
+                              <div className="w-4 h-4 border-2 border-[#4a90e2] border-t-transparent rounded-full animate-spin" />
+                              Uploading…
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center gap-1 pointer-events-none">
+                              <Upload size={20} className="text-[#aaa]" />
+                              <p className="text-[13px] text-[#666]">
+                                <span className="font-semibold text-[#4a90e2]">Click to browse</span> or drag & drop images here
+                              </p>
+                              <p className="text-[11px] text-[#aaa]">PNG, JPG, WEBP — multiple files supported</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* URL input */}
+                        <div className="flex gap-2 items-center">
+                          <ImageIcon size={14} className="text-[#aaa] shrink-0" />
                           <input
                             type="text"
                             value={imageUrlInput}
@@ -942,8 +1004,8 @@ export default function AdminDashboard() {
                                 }
                               }
                             }}
-                            placeholder="https://example.com/image.jpg"
-                            className="flex-1 h-10 px-3 border border-[#e5e5e5] rounded text-[13px] focus:outline-none focus:border-[#333]"
+                            placeholder="Or paste an image URL and press Enter"
+                            className="flex-1 h-9 px-3 border border-[#e5e5e5] rounded text-[13px] focus:outline-none focus:border-[#333]"
                           />
                           <button
                             type="button"
@@ -954,13 +1016,13 @@ export default function AdminDashboard() {
                                 setImageUrlInput('');
                               }
                             }}
-                            className="h-10 px-4 bg-[#333] text-white text-[13px] rounded hover:bg-[#555] whitespace-nowrap"
+                            className="h-9 px-3 bg-[#333] text-white text-[13px] rounded hover:bg-[#555] whitespace-nowrap"
                           >
-                            + Add
+                            Add
                           </button>
                         </div>
                         <p className="text-[11px] text-[#aaa] mt-1">
-                          Paste a URL and press Enter or click Add. Hover over a thumbnail to reorder or remove.
+                          First image = main thumbnail. Hover thumbnails to reorder or remove.
                         </p>
                       </div>
 
