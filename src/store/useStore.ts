@@ -76,6 +76,9 @@ export interface Order {
   poNumber?: string;
   notes?: string;
   shippingAddress?: ShippingAddress;
+  trackingCarrier?: string;
+  trackingNumber?: string;
+  trackingShippedAt?: string;
 }
 
 interface AppState {
@@ -123,6 +126,7 @@ interface AppState {
   loadOrders: () => Promise<void>;
   addOrder: (order: Order) => Promise<void>;
   updateOrderStatus: (id: string, status: Order['status']) => Promise<void>;
+  updateOrderShipping: (id: string, carrier: string, trackingNumber: string) => Promise<void>;
 
   // Currency
   selectedCurrency: CurrencyCode;
@@ -330,6 +334,18 @@ export const useStore = create<AppState>()(
         set((state) => ({
           orders: state.orders.map((o) =>
             o.id === id ? { ...o, status } : o
+          ),
+        }));
+      },
+
+      updateOrderShipping: async (id, carrier, trackingNumber) => {
+        const shippedAt = new Date().toISOString().split('T')[0];
+        await db.updateOrderShippingById(id, carrier, trackingNumber, shippedAt);
+        set((state) => ({
+          orders: state.orders.map((o) =>
+            o.id === id
+              ? { ...o, status: 'shipped' as const, trackingCarrier: carrier, trackingNumber, trackingShippedAt: shippedAt }
+              : o
           ),
         }));
       },

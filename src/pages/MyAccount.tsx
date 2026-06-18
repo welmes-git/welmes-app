@@ -327,6 +327,34 @@ export default function MyAccount() {
                             </div>
                           )}
 
+                          {/* Tracking */}
+                          {order.trackingNumber && (
+                            <div className="bg-[#f0f7ff] border border-[#c8e0f8] rounded-lg p-3">
+                              <p className="text-[12px] font-semibold text-[#4a90e2] uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                                <Truck size={13} />
+                                Shipment Tracking
+                              </p>
+                              <div className="flex items-center justify-between gap-3 flex-wrap">
+                                <div>
+                                  <p className="text-[13px] text-[#333] font-medium">{order.trackingCarrier}</p>
+                                  <p className="text-[13px] font-mono text-[#555]">{order.trackingNumber}</p>
+                                  {order.trackingShippedAt && (
+                                    <p className="text-[11px] text-[#aaa] mt-0.5">Shipped on {order.trackingShippedAt}</p>
+                                  )}
+                                </div>
+                                <a
+                                  href={`https://www.17track.net/en/track#nums=${order.trackingNumber}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="shrink-0 h-8 px-4 bg-[#4a90e2] text-white text-[12px] font-semibold rounded-lg flex items-center gap-1.5 hover:bg-[#3a7bc8] transition-colors"
+                                >
+                                  <Truck size={12} />
+                                  Track Package
+                                </a>
+                              </div>
+                            </div>
+                          )}
+
                           {/* PO / Notes */}
                           {(order.poNumber || order.notes) && (
                             <div className="flex gap-4 text-[12px] text-[#888]">

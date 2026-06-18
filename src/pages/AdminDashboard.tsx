@@ -53,6 +53,7 @@ export default function AdminDashboard() {
     updateProduct,
     deleteProduct,
     updateOrderStatus,
+    updateOrderShipping,
     loadMembers,
     loadOrders,
     logout,
@@ -94,6 +95,10 @@ export default function AdminDashboard() {
 
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [uploadingImages, setUploadingImages] = useState(false);
+
+  // Shipping modal state
+  const [shippingModal, setShippingModal] = useState<{ orderId: string } | null>(null);
+  const [shippingForm, setShippingForm] = useState({ carrier: 'EMS', trackingNumber: '' });
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -1361,22 +1366,34 @@ export default function AdminDashboard() {
                             {order.date}
                           </td>
                           <td className="px-4 py-3">
-                            <select
-                              value={order.status}
-                              onChange={(e) =>
-                                updateOrderStatus(
-                                  order.id,
-                                  e.target.value as Order['status']
-                                )
-                              }
-                              className="text-[12px] border border-[#ddd] rounded px-2 py-1 focus:outline-none"
-                            >
-                              <option value="pending">Pending</option>
-                              <option value="processing">Processing</option>
-                              <option value="shipped">Shipped</option>
-                              <option value="completed">Completed</option>
-                              <option value="cancelled">Cancelled</option>
-                            </select>
+                            <div className="flex flex-col gap-1.5">
+                              <select
+                                value={order.status}
+                                onChange={(e) => {
+                                  const newStatus = e.target.value as Order['status'];
+                                  if (newStatus === 'shipped') {
+                                    setShippingForm({ carrier: 'EMS', trackingNumber: order.trackingNumber || '' });
+                                    setShippingModal({ orderId: order.id });
+                                  } else {
+                                    updateOrderStatus(order.id, newStatus);
+                                  }
+                                }}
+                                className="text-[12px] border border-[#ddd] rounded px-2 py-1 focus:outline-none"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+                              {order.trackingNumber && (
+                                <div className="text-[10px] text-[#4a90e2] leading-tight">
+                                  <span className="font-semibold">{order.trackingCarrier}</span>
+                                  <span className="text-[#999] mx-1">·</span>
+                                  <span className="font-mono">{order.trackingNumber}</span>
+                                </div>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -1388,6 +1405,75 @@ export default function AdminDashboard() {
           )}
         </div>
       </main>
+
+      {/* Shipping Info Modal */}
+      {shippingModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-[16px] font-bold text-[#222]">Enter Shipping Info</h3>
+              <button onClick={() => setShippingModal(null)} className="text-[#aaa] hover:text-[#555]">
+                <XIcon size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[12px] text-[#666] mb-1.5 font-medium">Carrier</label>
+                <select
+                  value={shippingForm.carrier}
+                  onChange={(e) => setShippingForm({ ...shippingForm, carrier: e.target.value })}
+                  className="w-full h-10 px-3 border border-[#e5e5e5] rounded-lg text-[13px] focus:outline-none focus:border-[#333]"
+                >
+                  <option value="EMS">EMS (Japan Post)</option>
+                  <option value="DHL">DHL</option>
+                  <option value="FedEx">FedEx</option>
+                  <option value="UPS">UPS</option>
+                  <option value="Yamato">Yamato (ヤマト運輸)</option>
+                  <option value="Sagawa">Sagawa (佐川急便)</option>
+                  <option value="SF Express">SF Express</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[12px] text-[#666] mb-1.5 font-medium">Tracking Number</label>
+                <input
+                  type="text"
+                  value={shippingForm.trackingNumber}
+                  onChange={(e) => setShippingForm({ ...shippingForm, trackingNumber: e.target.value })}
+                  placeholder="e.g. EJ123456789JP"
+                  className="w-full h-10 px-3 border border-[#e5e5e5] rounded-lg text-[13px] font-mono focus:outline-none focus:border-[#333]"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => setShippingModal(null)}
+                className="flex-1 h-10 border border-[#e5e5e5] rounded-lg text-[13px] text-[#666] hover:bg-[#f8f8fa]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!shippingForm.trackingNumber.trim()) {
+                    showToast('Please enter a tracking number', 'error');
+                    return;
+                  }
+                  await updateOrderShipping(shippingModal.orderId, shippingForm.carrier, shippingForm.trackingNumber.trim());
+                  showToast('Shipping info saved', 'success');
+                  setShippingModal(null);
+                }}
+                className="flex-1 h-10 bg-[#333] text-white rounded-lg text-[13px] font-semibold hover:bg-[#555]"
+              >
+                Confirm Shipped
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

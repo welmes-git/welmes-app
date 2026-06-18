@@ -165,6 +165,20 @@ export async function updateOrderStatusById(id: string, status: Order['status'])
   return supabase.from('orders').update({ status }).eq('id', id);
 }
 
+export async function updateOrderShippingById(
+  id: string,
+  carrier: string,
+  trackingNumber: string,
+  shippedAt: string,
+) {
+  return supabase.from('orders').update({
+    status: 'shipped',
+    tracking_carrier: carrier,
+    tracking_number: trackingNumber,
+    tracking_shipped_at: shippedAt,
+  }).eq('id', id);
+}
+
 // ── Type converters ──────────────────────────────────────────────
 
 function rowToMember(row: Record<string, unknown>): Member {
@@ -241,8 +255,11 @@ function rowToOrder(row: Record<string, unknown>): Order {
     total:           Number(row.total),
     status:          row.status as Order['status'],
     date:            row.date as string,
-    poNumber:        row.po_number as string | undefined,
-    notes:           row.notes as string | undefined,
-    shippingAddress: row.shipping_address as ShippingAddress | undefined,
+    poNumber:           row.po_number as string | undefined,
+    notes:              row.notes as string | undefined,
+    shippingAddress:    row.shipping_address as ShippingAddress | undefined,
+    trackingCarrier:    (row.tracking_carrier as string) || undefined,
+    trackingNumber:     (row.tracking_number as string) || undefined,
+    trackingShippedAt:  (row.tracking_shipped_at as string) || undefined,
   };
 }
