@@ -23,10 +23,13 @@ export default function ProductList() {
     brandFilter ? [brandFilter] : []
   );
   const [selectedCategory, setSelectedCategory] = useState(categoryFilter);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const itemsPerPage = 12;
+
+  const priceMin = useMemo(() => Math.floor(Math.min(...allProducts.map((p) => p.wholesalePrice))), [allProducts]);
+  const priceMax = useMemo(() => Math.ceil(Math.max(...allProducts.map((p) => p.wholesalePrice))), [allProducts]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, Infinity]);
 
   const filteredProducts = useMemo(() => {
     let result = [...allProducts];
@@ -52,8 +55,9 @@ export default function ProductList() {
     }
 
     // Price range
+    const rangeMax = priceRange[1] === Infinity ? priceMax : priceRange[1];
     result = result.filter(
-      (p) => p.wholesalePrice >= priceRange[0] && p.wholesalePrice <= priceRange[1]
+      (p) => p.wholesalePrice >= priceRange[0] && p.wholesalePrice <= rangeMax
     );
 
     // Sort
@@ -93,9 +97,14 @@ export default function ProductList() {
   const clearFilters = () => {
     setSelectedBrands([]);
     setSelectedCategory('All');
-    setPriceRange([0, 50000]);
+    setPriceRange([0, Infinity]);
     setCurrentPage(1);
   };
+
+  const rangeMin = priceRange[0];
+  const rangeMax = priceRange[1] === Infinity ? priceMax : priceRange[1];
+  const rangePercLow = priceMax > priceMin ? ((rangeMin - priceMin) / (priceMax - priceMin)) * 100 : 0;
+  const rangePercHigh = priceMax > priceMin ? ((rangeMax - priceMin) / (priceMax - priceMin)) * 100 : 100;
 
   const pageTitle = searchQuery
     ? `Search: "${searchQuery}"`
@@ -177,27 +186,60 @@ export default function ProductList() {
 
               {/* Price Range */}
               <div>
-                <h4 className="text-[13px] font-semibold mb-2">Price Range</h4>
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="number"
-                    value={priceRange[0]}
-                    onChange={(e) =>
-                      setPriceRange([Number(e.target.value), priceRange[1]])
-                    }
-                    className="w-full text-[12px] border border-[#ddd] rounded px-2 py-1"
-                    placeholder="Min"
+                <h4 className="text-[13px] font-semibold mb-3">Price Range</h4>
+                {/* Current range labels */}
+                <div className="flex justify-between text-[12px] text-[#555] mb-3">
+                  <span className="font-medium">¥{rangeMin.toLocaleString()}</span>
+                  <span className="font-medium">
+                    {priceRange[1] === Infinity ? `¥${priceMax.toLocaleString()}+` : `¥${rangeMax.toLocaleString()}`}
+                  </span>
+                </div>
+                {/* Dual range slider */}
+                <div className="relative h-5 flex items-center">
+                  {/* Track background */}
+                  <div className="absolute w-full h-1.5 bg-[#e5e5e5] rounded-full" />
+                  {/* Active track fill */}
+                  <div
+                    className="absolute h-1.5 bg-[#4a90e2] rounded-full"
+                    style={{ left: `${rangePercLow}%`, right: `${100 - rangePercHigh}%` }}
                   />
-                  <span className="text-[#999]">-</span>
+                  {/* Min handle */}
                   <input
-                    type="number"
-                    value={priceRange[1]}
-                    onChange={(e) =>
-                      setPriceRange([priceRange[0], Number(e.target.value)])
-                    }
-                    className="w-full text-[12px] border border-[#ddd] rounded px-2 py-1"
-                    placeholder="Max"
+                    type="range"
+                    min={priceMin}
+                    max={priceMax}
+                    value={rangeMin}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      if (val < rangeMax) {
+                        setPriceRange([val, priceRange[1]]);
+                        setCurrentPage(1);
+                      }
+                    }}
+                    className="absolute w-full appearance-none bg-transparent cursor-pointer range-thumb"
+                    style={{ zIndex: rangePercLow > 90 ? 5 : 3 }}
                   />
+                  {/* Max handle */}
+                  <input
+                    type="range"
+                    min={priceMin}
+                    max={priceMax}
+                    value={rangeMax}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      if (val > rangeMin) {
+                        setPriceRange([priceRange[0], val]);
+                        setCurrentPage(1);
+                      }
+                    }}
+                    className="absolute w-full appearance-none bg-transparent cursor-pointer range-thumb"
+                    style={{ zIndex: 4 }}
+                  />
+                </div>
+                {/* Min/Max bounds */}
+                <div className="flex justify-between text-[11px] text-[#bbb] mt-2">
+                  <span>¥{priceMin.toLocaleString()}</span>
+                  <span>¥{priceMax.toLocaleString()}</span>
                 </div>
               </div>
             </div>
