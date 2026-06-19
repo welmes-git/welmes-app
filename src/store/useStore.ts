@@ -121,12 +121,13 @@ interface AppState {
   toggleWishlist: (productId: number) => void;
   isWishlisted: (productId: number) => boolean;
 
-  // Cart (stays local)
+  // Cart (synced with server when logged in)
   cart: CartItem[];
   addToCart: (product: Product, quantity?: number, setOption?: SetOption) => void;
   removeFromCart: (productId: number, setOptionId?: string) => void;
   updateCartQuantity: (productId: number, quantity: number, setOptionId?: string) => void;
   clearCart: () => void;
+  syncCart: () => Promise<void>;
 
   // Orders
   orders: Order[];
@@ -169,6 +170,7 @@ export const useStore = create<AppState>()(
             isAdmin: member.isAdmin,
             authLoading: false,
           });
+          await get().syncCart();
         } else {
           set({ authLoading: false });
         }
@@ -192,6 +194,7 @@ export const useStore = create<AppState>()(
           isAuthenticated: true,
           isAdmin: member.isAdmin,
         });
+        await get().syncCart();
         return true;
       },
 
@@ -305,47 +308,97 @@ export const useStore = create<AppState>()(
 
       isWishlisted: (productId) => get().wishlist.includes(productId),
 
-      // ── Cart (local only) ─────────────────────────────────────
+      // ── Cart (synced with server when logged in) ─────────────
       cart: [],
 
-      addToCart: (product, quantity = 1, setOption) =>
+      syncCart: async () => {
+        const { currentUser, cart: localCart } = get();
+        if (!currentUser) return;
+
+        const serverCart = await db.fetchServerCart(currentUser.id);
+
+        // Merge: combine local + server, take higher quantity for duplicates
+        const merged = [...serverCart];
+        for (const localItem of localCart) {
+          const key = `${localItem.product.id}__${localItem.setOption?.id ?? ''}`;
+          const existIdx = merged.findIndex(
+            (i) => `${i.product.id}__${i.setOption?.id ?? ''}` === key
+          );
+          if (existIdx >= 0) {
+            merged[existIdx] = {
+              ...merged[existIdx],
+              quantity: Math.max(merged[existIdx].quantity, localItem.quantity),
+            };
+          } else {
+            merged.push(localItem);
+          }
+        }
+
+        set({ cart: merged });
+        await db.replaceServerCart(currentUser.id, merged);
+      },
+
+      addToCart: (product, quantity = 1, setOption) => {
         set((state) => {
           const existing = state.cart.find(
             (item) =>
               item.product.id === product.id &&
               item.setOption?.id === setOption?.id
           );
+          let newCart: CartItem[];
           if (existing) {
-            return {
-              cart: state.cart.map((item) =>
-                item.product.id === product.id &&
-                item.setOption?.id === setOption?.id
-                  ? { ...item, quantity: item.quantity + quantity }
-                  : item
-              ),
-            };
+            newCart = state.cart.map((item) =>
+              item.product.id === product.id && item.setOption?.id === setOption?.id
+                ? { ...item, quantity: item.quantity + quantity }
+                : item
+            );
+          } else {
+            newCart = [...state.cart, { product, quantity, setOption }];
           }
-          return { cart: [...state.cart, { product, quantity, setOption }] };
-        }),
+          return { cart: newCart };
+        });
+        const { currentUser, cart } = get();
+        if (currentUser) {
+          const updatedItem = cart.find(
+            (i) => i.product.id === product.id && i.setOption?.id === setOption?.id
+          );
+          if (updatedItem) db.upsertCartItem(currentUser.id, updatedItem);
+        }
+      },
 
-      removeFromCart: (productId, setOptionId) =>
+      removeFromCart: (productId, setOptionId) => {
         set((state) => ({
           cart: state.cart.filter(
             (item) =>
               !(item.product.id === productId && item.setOption?.id === setOptionId)
           ),
-        })),
+        }));
+        const { currentUser } = get();
+        if (currentUser) db.deleteCartItem(currentUser.id, productId, setOptionId);
+      },
 
-      updateCartQuantity: (productId, quantity, setOptionId) =>
+      updateCartQuantity: (productId, quantity, setOptionId) => {
         set((state) => ({
           cart: state.cart.map((item) =>
             item.product.id === productId && item.setOption?.id === setOptionId
               ? { ...item, quantity }
               : item
           ),
-        })),
+        }));
+        const { currentUser, cart } = get();
+        if (currentUser) {
+          const updatedItem = cart.find(
+            (i) => i.product.id === productId && i.setOption?.id === setOptionId
+          );
+          if (updatedItem) db.upsertCartItem(currentUser.id, updatedItem);
+        }
+      },
 
-      clearCart: () => set({ cart: [] }),
+      clearCart: () => {
+        set({ cart: [] });
+        const { currentUser } = get();
+        if (currentUser) db.clearServerCart(currentUser.id);
+      },
 
       // ── Orders ────────────────────────────────────────────────
       orders: [],

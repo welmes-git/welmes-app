@@ -179,6 +179,72 @@ export async function updateOrderShippingById(
   }).eq('id', id);
 }
 
+// ── Cart sync ────────────────────────────────────────────────────
+
+import type { CartItem } from '../store/useStore';
+
+export async function fetchServerCart(memberId: string): Promise<CartItem[]> {
+  const { data, error } = await supabase
+    .from('cart_items')
+    .select('*')
+    .eq('member_id', memberId)
+    .order('updated_at', { ascending: true });
+  if (error || !data) return [];
+  return data.map((row) => ({
+    product:   row.product_snapshot as CartItem['product'],
+    quantity:  Number(row.quantity),
+    setOption: row.set_option as CartItem['setOption'],
+  }));
+}
+
+export async function upsertCartItem(
+  memberId: string,
+  item: CartItem,
+) {
+  return supabase.from('cart_items').upsert({
+    member_id:        memberId,
+    product_id:       item.product.id,
+    set_option_id:    item.setOption?.id ?? '',
+    product_snapshot: item.product,
+    set_option:       item.setOption ?? null,
+    quantity:         item.quantity,
+    updated_at:       new Date().toISOString(),
+  }, { onConflict: 'member_id,product_id,set_option_id' });
+}
+
+export async function deleteCartItem(
+  memberId: string,
+  productId: number,
+  setOptionId?: string,
+) {
+  return supabase
+    .from('cart_items')
+    .delete()
+    .eq('member_id', memberId)
+    .eq('product_id', productId)
+    .eq('set_option_id', setOptionId ?? '');
+}
+
+export async function clearServerCart(memberId: string) {
+  return supabase.from('cart_items').delete().eq('member_id', memberId);
+}
+
+export async function replaceServerCart(memberId: string, items: CartItem[]) {
+  await clearServerCart(memberId);
+  if (items.length === 0) return;
+  return supabase.from('cart_items').insert(
+    items.map((item) => ({
+      member_id:        memberId,
+      product_id:       item.product.id,
+      set_option_id:    item.setOption?.id ?? '',
+      product_snapshot: item.product,
+      set_option:       item.setOption ?? null,
+      quantity:         item.quantity,
+      updated_at:       new Date().toISOString(),
+    }))
+  );
+}
+
 // ── Reviews ──────────────────────────────────────────────────────
 
 export interface Review {
