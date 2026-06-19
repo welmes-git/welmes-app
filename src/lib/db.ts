@@ -181,8 +181,6 @@ export async function updateOrderShippingById(
 
 // ── Cart sync ────────────────────────────────────────────────────
 
-import type { CartItem } from '../store/useStore';
-
 export async function fetchServerCart(memberId: string): Promise<CartItem[]> {
   const { data, error } = await supabase
     .from('cart_items')

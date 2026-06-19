@@ -1,15 +1,16 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-[#1a1a1a] text-[#999999] mt-auto">
-      {/* Top Info Section */}
       <div className="max-w-[1100px] mx-auto px-4 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Customer Center */}
           <div>
-            <h4 className="text-white font-semibold text-[14px] mb-4">Customer Support</h4>
+            <h4 className="text-white font-semibold text-[14px] mb-4">{t('footer.support')}</h4>
             <div className="flex items-center gap-2 mb-2">
               <Phone size={14} />
               <span className="text-[20px] font-bold text-white">1544-1234</span>
@@ -23,9 +24,8 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Company Info */}
           <div>
-            <h4 className="text-white font-semibold text-[14px] mb-4">Company Info</h4>
+            <h4 className="text-white font-semibold text-[14px] mb-4">{t('footer.company')}</h4>
             <div className="flex items-start gap-2 mb-2">
               <MapPin size={14} className="mt-0.5 shrink-0" />
               <span className="text-[12px] leading-relaxed">
@@ -40,45 +40,34 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h4 className="text-white font-semibold text-[14px] mb-4">Quick Links</h4>
             <ul className="space-y-2">
               {[
-                { label: 'About Us', to: '/' },
-                { label: 'Terms of Service', to: '/' },
-                { label: 'Privacy Policy', to: '/' },
-                { label: 'FAQ', to: '/support' },
+                { label: t('footer.about'), to: '/' },
+                { label: t('footer.terms'), to: '/' },
+                { label: t('footer.privacy'), to: '/' },
+                { label: t('footer.faq'), to: '/support' },
                 { label: 'Shipping Info', to: '/support' },
                 { label: 'Returns & Exchanges', to: '/support' },
               ].map(({ label, to }) => (
                 <li key={label}>
-                  <Link to={to} className="text-[12px] hover:text-white transition-colors">
-                    {label}
-                  </Link>
+                  <Link to={to} className="text-[12px] hover:text-white transition-colors">{label}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Wholesale Info */}
           <div>
             <h4 className="text-white font-semibold text-[14px] mb-4">Wholesale Info</h4>
-            <p className="text-[12px] leading-relaxed mb-3">
-              An exclusive wholesale platform for verified business members.
-              Access wholesale pricing and place orders after business verification.
-            </p>
-            <Link
-              to="/register"
-              className="inline-block bg-[#4a90e2] text-white text-[12px] font-medium px-4 py-2 rounded hover:bg-[#357abd] transition-colors"
-            >
-              Register as Business
+            <p className="text-[12px] leading-relaxed mb-3">{t('footer.tagline')}</p>
+            <Link to="/register" className="inline-block bg-[#4a90e2] text-white text-[12px] font-medium px-4 py-2 rounded hover:bg-[#357abd] transition-colors">
+              {t('auth.registerTitle')}
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div className="border-t border-[#333333]">
         <div className="max-w-[1100px] mx-auto px-4 py-5">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -87,7 +76,7 @@ export default function Footer() {
               E-Commerce Reg.: 2025-Seoul Gangnam-0001
             </p>
             <p className="text-[11px] text-[#777]">
-              Copyright WELMES Co., Ltd. All rights reserved.
+              Copyright WELMES Co., Ltd. {t('footer.rights')}
             </p>
           </div>
         </div>

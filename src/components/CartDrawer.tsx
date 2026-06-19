@@ -2,6 +2,7 @@ import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { X, Plus, Minus, ShoppingBag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface CartDrawerProps {
 export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { cart, removeFromCart, updateCartQuantity, clearCart } = useStore();
   const { formatPrice } = useCurrency();
+  const { t } = useTranslation();
 
   const total = cart.reduce(
     (sum, item) => sum + (item.setOption?.wholesalePrice ?? item.product.wholesalePrice) * item.quantity,
@@ -37,9 +39,9 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         <div className="flex items-center justify-between p-4 border-b border-[#e5e5e5]">
           <div className="flex items-center gap-2">
             <ShoppingBag size={20} />
-            <h2 className="text-[16px] font-bold">Cart</h2>
+            <h2 className="text-[16px] font-bold">{t('cart.title')}</h2>
             <span className="text-[13px] text-[#999]">
-              ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)
+              ({cart.reduce((sum, item) => sum + item.quantity, 0)} {t('cart.items', { count: cart.reduce((s, i) => s + i.quantity, 0) })})
             </span>
           </div>
           <button
@@ -55,10 +57,8 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <ShoppingBag size={48} className="text-[#ddd] mb-4" />
-              <p className="text-[14px] text-[#999] mb-2">Your cart is empty</p>
-              <p className="text-[12px] text-[#bbb]">
-                Add items to get started
-              </p>
+              <p className="text-[14px] text-[#999] mb-2">{t('cart.empty')}</p>
+              <p className="text-[12px] text-[#bbb]">{t('cart.emptyDesc')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -144,7 +144,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         {cart.length > 0 && (
           <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-[#e5e5e5]">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-[14px] text-[#666]">Total</span>
+              <span className="text-[14px] text-[#666]">{t('cart.total')}</span>
               <span className="text-[18px] font-bold text-[#333]">
                 {formatPrice(total)}
               </span>
@@ -154,14 +154,14 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 onClick={clearCart}
                 className="flex-1 py-3 border border-[#ddd] rounded-lg text-[13px] text-[#666] hover:bg-[#f5f5f5] transition-colors"
               >
-                Clear
+                {t('common.delete')}
               </button>
               <Link
                 to="/checkout"
                 onClick={onClose}
                 className="flex-1 py-3 bg-[#333] text-white rounded-lg text-[13px] font-medium text-center hover:bg-[#555] transition-colors"
               >
-                Checkout
+                {t('cart.checkout')}
               </Link>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { useTranslation } from 'react-i18next';
 import {
   Clock,
   XCircle,
@@ -12,6 +13,7 @@ import {
 
 export default function PendingApproval() {
   const { currentUser, logout } = useStore();
+  const { t } = useTranslation();
   const status = currentUser?.status ?? 'pending';
 
   return (
@@ -26,15 +28,14 @@ export default function PendingApproval() {
                 <Clock size={32} className="text-yellow-500" />
               </div>
               <h1 className="text-[22px] font-bold text-[#222] mb-2">
-                Application Under Review
+                {t('auth.pendingTitle')}
               </h1>
               <p className="text-[14px] text-[#666] leading-relaxed mb-4">
-                Your business registration is currently being reviewed by our team.
-                You will be notified once your account is approved.
+                {t('auth.pendingDesc')}
               </p>
               <div className="inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 text-yellow-700 text-[13px] font-semibold px-4 py-2 rounded-full">
                 <Clock size={14} />
-                Pending Verification
+                {t('status.pending')}
               </div>
             </>
           ) : (
@@ -141,13 +142,13 @@ export default function PendingApproval() {
             to="/account"
             className="flex-1 py-3 border border-[#ddd] rounded-xl text-[13px] font-medium text-[#555] text-center hover:bg-[#f5f5f5] transition-colors"
           >
-            My Account
+            {t('account.title')}
           </Link>
           <button
             onClick={logout}
             className="flex-1 py-3 bg-[#333] text-white rounded-xl text-[13px] font-semibold hover:bg-[#555] transition-colors"
           >
-            Logout
+            {t('common.logout')}
           </button>
         </div>
 

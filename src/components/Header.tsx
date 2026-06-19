@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import CartDrawer from './CartDrawer';
 import CurrencySelector from './CurrencySelector';
+import { useTranslation } from 'react-i18next';
 import {
   ShoppingBag,
   Heart,
@@ -13,16 +14,14 @@ import {
   ChevronDown,
   User,
   LogOut,
-
   LayoutDashboard,
+  Globe,
 } from 'lucide-react';
 
-const navItems = [
-  { label: 'Special Price', path: '/products?sort=discount' },
-  { label: 'Ranking', path: '/products?sort=popular' },
-  { label: 'Brand Shop', path: '/products' },
-  { label: 'Theme', path: '/products' },
-  { label: 'Event', path: '/products' },
+const LANGUAGES = [
+  { code: 'en', label: 'EN', name: 'English' },
+  { code: 'ja', label: 'JA', name: '日本語' },
+  { code: 'zh', label: 'ZH', name: '中文' },
 ];
 
 const subCategories = [
@@ -38,11 +37,23 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, isAdmin, currentUser, logout, cart, wishlist } = useStore();
+  const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
+
+  const navItems = [
+    { label: t('nav.specialPrice'), path: '/products?sort=discount' },
+    { label: t('nav.ranking'), path: '/products?sort=popular' },
+    { label: t('nav.brandShop'), path: '/products' },
+    { label: t('nav.theme'), path: '/products' },
+    { label: t('nav.event'), path: '/products' },
+  ];
+
+  const currentLang = LANGUAGES.find((l) => l.code === i18n.language) ?? LANGUAGES[0];
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -80,11 +91,11 @@ export default function Header() {
             {!isAuthenticated ? (
               <>
                 <Link to="/register" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
-                  Register
+                  {t('common.register')}
                 </Link>
                 <span className="text-[#ddd]">|</span>
                 <Link to="/login" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
-                  Login
+                  {t('common.login')}
                 </Link>
               </>
             ) : (
@@ -93,12 +104,8 @@ export default function Header() {
                   {currentUser?.companyName || currentUser?.email}
                 </span>
                 <span className="text-[#ddd]">|</span>
-                <Link
-                  to="/account"
-                  className="hover:text-[#ff4d6d] transition-colors"
-                  style={{whiteSpace: 'nowrap'}}
-                >
-                  My Account
+                <Link to="/account" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
+                  {t('common.myAccount')}
                 </Link>
                 <span className="text-[#ddd]">|</span>
                 <button
@@ -107,16 +114,44 @@ export default function Header() {
                   style={{whiteSpace: 'nowrap'}}
                 >
                   <LogOut size={12} />
-                  Logout
+                  {t('common.logout')}
                 </button>
               </>
             )}
             <span className="text-[#ddd]">|</span>
             <Link to="/support" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
-              Support
+              {t('common.support')}
             </Link>
             <span className="text-[#ddd]">|</span>
             <CurrencySelector />
+            <span className="text-[#ddd]">|</span>
+            {/* Language Switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setShowLangDropdown(!showLangDropdown)}
+                className="flex items-center gap-1 hover:text-[#ff4d6d] transition-colors"
+                style={{whiteSpace: 'nowrap'}}
+              >
+                <Globe size={12} />
+                {currentLang.label}
+                <ChevronDown size={10} />
+              </button>
+              {showLangDropdown && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-[#e5e5e5] rounded-lg shadow-lg py-1 z-50 min-w-[100px]">
+                  {LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => { i18n.changeLanguage(lang.code); setShowLangDropdown(false); }}
+                      className={`w-full text-left px-3 py-1.5 text-[12px] hover:bg-[#f8f8fa] transition-colors ${
+                        i18n.language === lang.code ? 'font-bold text-[#4a90e2]' : 'text-[#555]'
+                      }`}
+                    >
+                      {lang.label} · {lang.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -142,7 +177,7 @@ export default function Header() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products, brands..."
+                  placeholder={t('nav.searchPlaceholder')}
                   className="w-full h-[42px] pl-4 pr-12 border-2 border-[#333333] rounded-full text-[14px] focus:outline-none focus:border-[#ff4d6d] transition-colors"
                 />
                 <button
@@ -173,8 +208,8 @@ export default function Header() {
                         </p>
                         <p className="text-[11px] text-[#999]">
                           {currentUser?.status === 'approved'
-                            ? 'Verified Business'
-                            : 'Pending Verification'}
+                            ? t('account.verifiedBusiness')
+                            : t('account.pendingReview')}
                         </p>
                       </div>
                       <Link
@@ -183,7 +218,7 @@ export default function Header() {
                         onClick={() => setShowUserDropdown(false)}
                       >
                         <User size={14} />
-                        My Account
+                        {t('common.myAccount')}
                       </Link>
                       {isAdmin && (
                         <Link
@@ -200,7 +235,7 @@ export default function Header() {
                         className="flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] hover:bg-[#f8f8fa] w-full"
                       >
                         <LogOut size={14} />
-                        Logout
+                        {t('common.logout')}
                       </button>
                     </div>
                   )}

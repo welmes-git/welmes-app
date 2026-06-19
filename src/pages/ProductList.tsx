@@ -4,12 +4,14 @@ import { useStore } from '../store/useStore';
 import { initialProducts, brands, categories } from '../data/products';
 import ProductCard from '../components/ProductCard';
 import { ChevronLeft, ChevronRight, ChevronDown, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 type SortOption = 'popular' | 'price-low' | 'price-high' | 'newest' | 'discount';
 
 export default function ProductList() {
   const [searchParams] = useSearchParams();
   const { products } = useStore();
+  const { t } = useTranslation();
 
   const allProducts = products.length > 0 ? products : initialProducts;
 
@@ -107,10 +109,10 @@ export default function ProductList() {
   const rangePercHigh = priceMax > priceMin ? ((rangeMax - priceMin) / (priceMax - priceMin)) * 100 : 100;
 
   const pageTitle = searchQuery
-    ? `Search: "${searchQuery}"`
+    ? t('products.search', { query: searchQuery })
     : selectedCategory !== 'All'
     ? selectedCategory
-    : 'All Products';
+    : t('products.allProducts');
 
   return (
     <div className="min-h-screen bg-white">
@@ -131,18 +133,18 @@ export default function ProductList() {
           <aside className={`lg:w-[220px] shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
             <div className="bg-[#f8f8fa] rounded-lg p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[14px] font-bold">Filters</h3>
+                <h3 className="text-[14px] font-bold">{t('products.filters')}</h3>
                 <button
                   onClick={clearFilters}
                   className="text-[12px] text-[#4a90e2] hover:underline"
                 >
-                  Reset
+                  {t('products.reset')}
                 </button>
               </div>
 
               {/* Category */}
               <div className="mb-5">
-                <h4 className="text-[13px] font-semibold mb-2">Category</h4>
+                <h4 className="text-[13px] font-semibold mb-2">{t('products.category')}</h4>
                 <div className="space-y-1">
                   {categories.map((cat) => (
                     <button
@@ -165,7 +167,7 @@ export default function ProductList() {
 
               {/* Brand */}
               <div className="mb-5">
-                <h4 className="text-[13px] font-semibold mb-2">Brand</h4>
+                <h4 className="text-[13px] font-semibold mb-2">{t('products.brand')}</h4>
                 <div className="space-y-1 max-h-[200px] overflow-y-auto">
                   {brands.map((brand) => (
                     <label
@@ -186,7 +188,7 @@ export default function ProductList() {
 
               {/* Price Range */}
               <div>
-                <h4 className="text-[13px] font-semibold mb-3">Price Range</h4>
+                <h4 className="text-[13px] font-semibold mb-3">{t('products.priceRange')}</h4>
                 {/* Current range labels */}
                 <div className="flex justify-between text-[12px] text-[#555] mb-3">
                   <span className="font-medium">¥{rangeMin.toLocaleString()}</span>
@@ -252,7 +254,7 @@ export default function ProductList() {
               <div>
                 <h1 className="text-[20px] font-bold text-[#333]">{pageTitle}</h1>
                 <p className="text-[13px] text-[#999]">
-                  {filteredProducts.length} products
+                  {filteredProducts.length} {t('products.products')}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -260,7 +262,7 @@ export default function ProductList() {
                   onClick={() => setShowFilters(!showFilters)}
                   className="lg:hidden px-3 py-2 border border-[#ddd] rounded text-[13px] text-[#666]"
                 >
-                  Filters
+                  {t('products.filters')}
                 </button>
                 <div className="relative">
                   <select
@@ -268,11 +270,11 @@ export default function ProductList() {
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
                     className="appearance-none bg-white border border-[#ddd] rounded px-3 py-2 pr-8 text-[13px] text-[#666] focus:outline-none"
                   >
-                    <option value="popular">Popular</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="newest">Newest</option>
-                    <option value="discount">Highest Discount</option>
+                    <option value="popular">{t('products.popular')}</option>
+                    <option value="price-low">{t('products.priceLow')}</option>
+                    <option value="price-high">{t('products.priceHigh')}</option>
+                    <option value="newest">{t('products.newest')}</option>
+                    <option value="discount">{t('products.highestDiscount')}</option>
                   </select>
                   <ChevronDown
                     size={14}
@@ -286,12 +288,12 @@ export default function ProductList() {
             {paginatedProducts.length === 0 && (
               <div className="text-center py-16">
                 <Search size={48} className="mx-auto text-[#ddd] mb-4" />
-                <p className="text-[14px] text-[#999]">No products found</p>
+                <p className="text-[14px] text-[#999]">{t('products.noResults')}</p>
                 <button
                   onClick={clearFilters}
                   className="mt-3 text-[13px] text-[#4a90e2] hover:underline"
                 >
-                  Clear all filters
+                  {t('products.clearFilters')}
                 </button>
               </div>
             )}

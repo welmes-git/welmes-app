@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router'
 import { PayPalScriptProvider } from '@paypal/react-paypal-js'
 import './index.css'
+import './i18n'
 import App from './App.tsx'
 import { CurrencyProvider } from './context/CurrencyContext.tsx'
 
