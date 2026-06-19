@@ -179,6 +179,57 @@ export async function updateOrderShippingById(
   }).eq('id', id);
 }
 
+// ── Reviews ──────────────────────────────────────────────────────
+
+export interface Review {
+  id: string;
+  productId: number;
+  memberId: string;
+  memberName: string;
+  rating: number;
+  content: string;
+  createdAt: string;
+}
+
+export async function fetchReviewsByProductId(productId: number): Promise<Review[]> {
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*')
+    .eq('product_id', productId)
+    .order('created_at', { ascending: false });
+  if (error || !data) return [];
+  return data.map((row) => ({
+    id:         row.id as string,
+    productId:  Number(row.product_id),
+    memberId:   row.member_id as string,
+    memberName: row.member_name as string,
+    rating:     Number(row.rating),
+    content:    row.content as string,
+    createdAt:  row.created_at as string,
+  }));
+}
+
+export async function insertReview(review: Omit<Review, 'id' | 'createdAt'>): Promise<{ error?: string }> {
+  const { error } = await supabase.from('reviews').insert([{
+    product_id:  review.productId,
+    member_id:   review.memberId,
+    member_name: review.memberName,
+    rating:      review.rating,
+    content:     review.content,
+  }]);
+  if (error) return { error: error.message };
+  return {};
+}
+
+export async function hasReviewedProduct(memberId: string, productId: number): Promise<boolean> {
+  const { count } = await supabase
+    .from('reviews')
+    .select('id', { count: 'exact', head: true })
+    .eq('member_id', memberId)
+    .eq('product_id', productId);
+  return (count ?? 0) > 0;
+}
+
 // ── Type converters ──────────────────────────────────────────────
 
 function rowToMember(row: Record<string, unknown>): Member {

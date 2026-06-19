@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import type { SetOption } from '../store/useStore';
 import { initialProducts } from '../data/products';
 import { useCurrency } from '../context/CurrencyContext';
 import ProductCard from '../components/ProductCard';
+import * as db from '../lib/db';
+import type { Review } from '../lib/db';
 import {
   Heart,
   Share2,
@@ -14,6 +16,7 @@ import {
   MessageCircle,
   Lock,
   Star,
+  CheckCircle2,
 } from 'lucide-react';
 
 export default function ProductDetail() {
@@ -29,14 +32,68 @@ export default function ProductDetail() {
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
+  // ── Reviews ──────────────────────────────────────────────────
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewContent, setReviewContent] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth < 640);
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
 
+  const productId = Number(id);
+
+  const loadReviews = useCallback(async () => {
+    setReviewsLoading(true);
+    const data = await db.fetchReviewsByProductId(productId);
+    setReviews(data);
+    setReviewsLoading(false);
+    if (currentUser) {
+      const reviewed = await db.hasReviewedProduct(currentUser.id, productId);
+      setAlreadyReviewed(reviewed);
+    }
+  }, [productId, currentUser]);
+
+  useEffect(() => {
+    if (activeTab === 'reviews') loadReviews();
+  }, [activeTab, loadReviews]);
+
+  async function submitReview() {
+    if (!currentUser) return;
+    if (reviewContent.trim().length < 10) {
+      setReviewError('Please write at least 10 characters.');
+      return;
+    }
+    setReviewSubmitting(true);
+    setReviewError('');
+    const { error } = await db.insertReview({
+      productId,
+      memberId: currentUser.id,
+      memberName: currentUser.companyName,
+      rating: reviewRating,
+      content: reviewContent.trim(),
+    });
+    setReviewSubmitting(false);
+    if (error) {
+      setReviewError('Failed to submit review. Please try again.');
+      return;
+    }
+    setReviewContent('');
+    setReviewRating(5);
+    setAlreadyReviewed(true);
+    showToast('Review submitted!', 'success');
+    loadReviews();
+  }
+
   const allProducts = products.length > 0 ? products : initialProducts;
-  const product = allProducts.find((p) => p.id === Number(id));
+  const product = allProducts.find((p) => p.id === productId);
 
   const isVerified = currentUser?.status === 'approved';
   const canSeePrice = isAuthenticated && isVerified;
@@ -437,7 +494,7 @@ export default function ProductDetail() {
                 {tab === 'info'
                   ? 'Product Info'
                   : tab === 'reviews'
-                  ? `Reviews (${product.reviews.toLocaleString()})`
+                  ? `Reviews (${reviews.length || product.reviews})`
                   : 'Shipping'}
               </button>
             ))}
@@ -492,29 +549,170 @@ export default function ProductDetail() {
           )}
 
           {activeTab === 'reviews' && (
-            <div className="text-center py-12">
-              <div className="flex items-center justify-center gap-1 mb-3">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    size={24}
-                    className={
-                      star <= Math.round(product.rating)
-                        ? 'text-[#ffc107] fill-[#ffc107]'
-                        : 'text-[#ddd]'
-                    }
-                  />
-                ))}
+            <div className="space-y-6">
+
+              {/* ── Rating Summary ── */}
+              <div className="bg-[#f8f8fa] rounded-xl p-5 flex flex-col sm:flex-row gap-6 items-center">
+                {/* Score */}
+                <div className="text-center shrink-0">
+                  <p className="text-[52px] font-black text-[#222] leading-none">
+                    {reviews.length > 0
+                      ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
+                      : product.rating.toFixed(1)}
+                  </p>
+                  <div className="flex justify-center gap-0.5 my-1.5">
+                    {[1,2,3,4,5].map((s) => {
+                      const avg = reviews.length > 0
+                        ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length
+                        : product.rating;
+                      return (
+                        <Star key={s} size={16}
+                          className={s <= Math.round(avg) ? 'text-[#ffc107] fill-[#ffc107]' : 'text-[#ddd]'} />
+                      );
+                    })}
+                  </div>
+                  <p className="text-[13px] text-[#999]">{reviews.length} reviews</p>
+                </div>
+
+                {/* Distribution bars */}
+                <div className="flex-1 w-full space-y-1.5">
+                  {[5,4,3,2,1].map((star) => {
+                    const count = reviews.filter((r) => r.rating === star).length;
+                    const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                    return (
+                      <div key={star} className="flex items-center gap-2 text-[12px]">
+                        <span className="w-4 text-[#666] text-right">{star}</span>
+                        <Star size={11} className="text-[#ffc107] fill-[#ffc107] shrink-0" />
+                        <div className="flex-1 h-2 bg-[#e5e5e5] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#ffc107] rounded-full transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="w-6 text-[#999]">{count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <p className="text-[18px] font-bold text-[#333] mb-1">
-                {product.rating} / 5.0
-              </p>
-              <p className="text-[14px] text-[#999]">
-                Based on {product.reviews.toLocaleString()} reviews
-              </p>
-              <p className="text-[13px] text-[#999] mt-4">
-                Review system integration coming soon.
-              </p>
+
+              {/* ── Write Review Form ── */}
+              {isAuthenticated && isVerified && !alreadyReviewed && (
+                <div className="bg-white border border-[#e5e5e5] rounded-xl p-5">
+                  <h3 className="text-[15px] font-bold text-[#222] mb-4">Write a Review</h3>
+
+                  {/* Star picker */}
+                  <div className="mb-4">
+                    <p className="text-[12px] text-[#999] mb-2">Your Rating</p>
+                    <div className="flex gap-1">
+                      {[1,2,3,4,5].map((s) => (
+                        <button
+                          key={s}
+                          onMouseEnter={() => setHoverRating(s)}
+                          onMouseLeave={() => setHoverRating(0)}
+                          onClick={() => setReviewRating(s)}
+                          className="transition-transform hover:scale-110"
+                        >
+                          <Star
+                            size={28}
+                            className={
+                              s <= (hoverRating || reviewRating)
+                                ? 'text-[#ffc107] fill-[#ffc107]'
+                                : 'text-[#ddd]'
+                            }
+                          />
+                        </button>
+                      ))}
+                      <span className="ml-2 text-[13px] text-[#666] self-center">
+                        {['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][hoverRating || reviewRating]}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="mb-4">
+                    <p className="text-[12px] text-[#999] mb-2">Review</p>
+                    <textarea
+                      value={reviewContent}
+                      onChange={(e) => setReviewContent(e.target.value)}
+                      rows={4}
+                      maxLength={500}
+                      placeholder="Share your experience with this product (min. 10 characters)..."
+                      className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[13px] text-[#333] focus:outline-none focus:border-[#4a90e2] resize-none transition-colors"
+                    />
+                    <div className="flex justify-between mt-1">
+                      {reviewError
+                        ? <p className="text-[11px] text-red-500">{reviewError}</p>
+                        : <span />}
+                      <span className="text-[11px] text-[#bbb]">{reviewContent.length}/500</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={submitReview}
+                    disabled={reviewSubmitting}
+                    className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[13px] font-semibold hover:bg-[#555] transition-colors disabled:opacity-50"
+                  >
+                    {reviewSubmitting ? 'Submitting…' : 'Submit Review'}
+                  </button>
+                </div>
+              )}
+
+              {/* Already reviewed */}
+              {isAuthenticated && isVerified && alreadyReviewed && (
+                <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-lg text-[13px] text-green-700">
+                  <CheckCircle2 size={15} />
+                  You have already reviewed this product.
+                </div>
+              )}
+
+              {/* Login prompt */}
+              {!isAuthenticated && (
+                <div className="text-center py-6 border border-[#e5e5e5] rounded-xl">
+                  <Lock size={24} className="mx-auto text-[#ccc] mb-2" />
+                  <p className="text-[13px] text-[#999] mb-3">Login to write a review</p>
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="px-5 py-2 bg-[#333] text-white rounded-lg text-[13px] font-medium hover:bg-[#555] transition-colors"
+                  >
+                    Login
+                  </button>
+                </div>
+              )}
+
+              {/* ── Review List ── */}
+              {reviewsLoading ? (
+                <div className="flex justify-center py-10">
+                  <div className="w-7 h-7 border-2 border-[#4a90e2] border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : reviews.length === 0 ? (
+                <div className="text-center py-12 text-[#bbb]">
+                  <MessageCircle size={40} className="mx-auto mb-3 opacity-40" />
+                  <p className="text-[14px]">No reviews yet. Be the first!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="bg-white border border-[#e5e5e5] rounded-xl p-5">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="text-[14px] font-semibold text-[#222]">{review.memberName}</p>
+                          <div className="flex gap-0.5 mt-0.5">
+                            {[1,2,3,4,5].map((s) => (
+                              <Star key={s} size={13}
+                                className={s <= review.rating ? 'text-[#ffc107] fill-[#ffc107]' : 'text-[#ddd]'} />
+                            ))}
+                          </div>
+                        </div>
+                        <span className="text-[11px] text-[#bbb] shrink-0">
+                          {new Date(review.createdAt).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })}
+                        </span>
+                      </div>
+                      <p className="text-[13px] text-[#555] leading-relaxed">{review.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
