@@ -87,6 +87,7 @@ interface AppState {
   currentUser: Member | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  authLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   initAuth: () => Promise<void>;
@@ -151,17 +152,25 @@ export const useStore = create<AppState>()(
       currentUser: null,
       isAuthenticated: false,
       isAdmin: false,
+      authLoading: true,
 
       initAuth: async () => {
+        set({ authLoading: true });
         const { data: { session } } = await db.getSession();
-        if (!session?.user) return;
+        if (!session?.user) {
+          set({ authLoading: false });
+          return;
+        }
         const member = await db.fetchMemberByAuthId(session.user.id);
         if (member) {
           set({
             currentUser: member,
             isAuthenticated: true,
             isAdmin: member.isAdmin,
+            authLoading: false,
           });
+        } else {
+          set({ authLoading: false });
         }
       },
 

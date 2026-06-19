@@ -3,26 +3,32 @@ import { useStore } from '../store/useStore';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireApproved?: boolean; // true: approved 회원만 접근
+  requireApproved?: boolean;
 }
 
 export default function ProtectedRoute({
   children,
   requireApproved = false,
 }: ProtectedRouteProps) {
-  const { isAuthenticated, isAdmin, currentUser } = useStore();
+  const { isAuthenticated, isAdmin, currentUser, authLoading } = useStore();
 
-  // 미로그인
+  // 세션 복원 대기 중 — 빈 화면으로 대기 (로그인 리다이렉트 방지)
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f8f8fa]">
+        <div className="w-8 h-8 border-2 border-[#4a90e2] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // 관리자는 모든 제한 없음
   if (isAdmin) {
     return <>{children}</>;
   }
 
-  // approved 필요한데 pending/rejected인 경우
   if (requireApproved && currentUser?.status !== 'approved') {
     return <Navigate to="/pending" replace />;
   }
