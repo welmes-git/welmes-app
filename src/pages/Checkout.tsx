@@ -11,7 +11,38 @@ import {
   Truck,
   ClipboardList,
   ArrowLeft,
+  Building2,
+  Copy,
 } from 'lucide-react';
+
+// ── Bank account config (replace with real info) ──────────────────────────────
+const BANK_ACCOUNTS = [
+  {
+    currency: 'USD',
+    bankName: 'Airwallex / JPMorgan Chase',
+    accountName: 'WELMES Co., Ltd.',
+    accountNumber: 'XXXX-XXXX-XXXX',
+    swiftCode: 'XXXXUS33',
+    routingNumber: '021000021',
+    note: 'For USD wire transfers',
+  },
+  {
+    currency: 'JPY',
+    bankName: 'Airwallex / MUFG Bank',
+    accountName: 'WELMES Co., Ltd.',
+    accountNumber: 'XXXX-XXXXXXX',
+    swiftCode: 'BOTKJPJT',
+    note: 'For JPY wire transfers',
+  },
+  {
+    currency: 'EUR',
+    bankName: 'Airwallex / Barclays',
+    accountName: 'WELMES Co., Ltd.',
+    accountNumber: 'GB00 BARC XXXX XXXX XXXX XX',
+    swiftCode: 'BARCGB22',
+    note: 'For EUR wire transfers (IBAN)',
+  },
+];
 
 type Step = 'review' | 'shipping' | 'confirmed';
 
@@ -62,6 +93,9 @@ export default function Checkout() {
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<Partial<ShippingAddress>>({});
   const [confirmedTotals, setConfirmedTotals] = useState({ subtotal: 0, vat: 0, total: 0 });
+  const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'bank_transfer'>('bank_transfer');
+  const [selectedBankCurrency, setSelectedBankCurrency] = useState('USD');
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const [shipping, setShipping] = useState<ShippingAddress>({
     company: currentUser?.companyName ?? '',
@@ -136,7 +170,7 @@ export default function Checkout() {
   }
 
   /* ─── Place Order ─── */
-  function handlePlaceOrder(paymentMethod: 'paypal' | 'invoice' = 'invoice') {
+  function handlePlaceOrder(method: 'paypal' | 'bank_transfer' = 'bank_transfer') {
     if (!validateShipping()) return;
     const id = genOrderId();
     addOrder({
@@ -147,7 +181,7 @@ export default function Checkout() {
       subtotal,
       vat,
       total,
-      status: paymentMethod === 'paypal' ? 'processing' : 'pending',
+      status: method === 'paypal' ? 'processing' : 'pending',
       date: new Date().toISOString().split('T')[0],
       poNumber: poNumber.trim() || undefined,
       notes: notes.trim() || undefined,
@@ -157,6 +191,12 @@ export default function Checkout() {
     clearCart();
     setOrderId(id);
     setStep('confirmed');
+  }
+
+  function copyToClipboard(text: string, field: string) {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
   }
 
   /* ─── PayPal ─── */
@@ -182,6 +222,8 @@ export default function Checkout() {
       handlePlaceOrder('paypal');
     });
   }
+
+  const selectedBank = BANK_ACCOUNTS.find((b) => b.currency === selectedBankCurrency) ?? BANK_ACCOUNTS[0];
 
   /* ─── Step indicator ─── */
   const stepIndex = STEPS.findIndex((s) => s.key === step);
@@ -535,36 +577,112 @@ export default function Checkout() {
                   </div>
                 </div>
                 <div className="px-5 pb-5 space-y-3">
-                  {/* PayPal */}
-                  <div>
-                    <p className="text-[11px] text-[#999] text-center mb-2">Pay now with PayPal</p>
-                    {paypalLoading ? (
-                      <div className="w-full h-11 bg-[#f5c542] rounded-lg animate-pulse" />
-                    ) : (
-                      <PayPalButtons
-                        style={{ layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 44 }}
-                        createOrder={createPayPalOrder}
-                        onApprove={onPayPalApprove}
-                        onError={() => showToast('PayPal payment failed. Please try again.', 'error')}
-                      />
-                    )}
+                  {/* Payment method selector */}
+                  <p className="text-[11px] font-semibold text-[#999] uppercase tracking-wide">Payment Method</p>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => setPaymentMethod('bank_transfer')}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors ${
+                        paymentMethod === 'bank_transfer'
+                          ? 'border-[#4a90e2] bg-[#f0f7ff]'
+                          : 'border-[#e5e5e5] hover:border-[#bbb]'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        paymentMethod === 'bank_transfer' ? 'border-[#4a90e2]' : 'border-[#ccc]'
+                      }`}>
+                        {paymentMethod === 'bank_transfer' && (
+                          <div className="w-2 h-2 rounded-full bg-[#4a90e2]" />
+                        )}
+                      </div>
+                      <Building2 size={15} className={paymentMethod === 'bank_transfer' ? 'text-[#4a90e2]' : 'text-[#aaa]'} />
+                      <div>
+                        <p className="text-[13px] font-semibold text-[#222]">Bank Transfer</p>
+                        <p className="text-[10px] text-[#888]">Wire / TT · No transaction fee</p>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setPaymentMethod('paypal')}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors ${
+                        paymentMethod === 'paypal'
+                          ? 'border-[#4a90e2] bg-[#f0f7ff]'
+                          : 'border-[#e5e5e5] hover:border-[#bbb]'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                        paymentMethod === 'paypal' ? 'border-[#4a90e2]' : 'border-[#ccc]'
+                      }`}>
+                        {paymentMethod === 'paypal' && (
+                          <div className="w-2 h-2 rounded-full bg-[#4a90e2]" />
+                        )}
+                      </div>
+                      <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" className="w-4 h-4 object-contain" />
+                      <div>
+                        <p className="text-[13px] font-semibold text-[#222]">PayPal</p>
+                        <p className="text-[10px] text-[#888]">Pay now · Fee may apply</p>
+                      </div>
+                    </button>
                   </div>
 
-                  {/* Divider */}
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 border-t border-[#e5e5e5]" />
-                    <span className="text-[11px] text-[#bbb]">or</span>
-                    <div className="flex-1 border-t border-[#e5e5e5]" />
-                  </div>
+                  {/* Bank transfer details */}
+                  {paymentMethod === 'bank_transfer' && (
+                    <div className="bg-[#f8f8fa] rounded-lg border border-[#e5e5e5] p-3 space-y-2">
+                      <div className="flex gap-1.5">
+                        {BANK_ACCOUNTS.map((b) => (
+                          <button
+                            key={b.currency}
+                            onClick={() => setSelectedBankCurrency(b.currency)}
+                            className={`px-3 py-1 rounded text-[11px] font-bold transition-colors ${
+                              selectedBankCurrency === b.currency
+                                ? 'bg-[#333] text-white'
+                                : 'bg-white text-[#666] border border-[#ddd] hover:border-[#aaa]'
+                            }`}
+                          >
+                            {b.currency}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="space-y-1.5 text-[12px]">
+                        <BankRow label="Bank" value={selectedBank.bankName} field="bank" copiedField={copiedField} onCopy={copyToClipboard} />
+                        <BankRow label="Account Name" value={selectedBank.accountName} field="name" copiedField={copiedField} onCopy={copyToClipboard} />
+                        <BankRow label="Account No." value={selectedBank.accountNumber} field="account" copiedField={copiedField} onCopy={copyToClipboard} />
+                        <BankRow label="SWIFT / BIC" value={selectedBank.swiftCode} field="swift" copiedField={copiedField} onCopy={copyToClipboard} />
+                        {selectedBank.routingNumber && (
+                          <BankRow label="Routing No." value={selectedBank.routingNumber} field="routing" copiedField={copiedField} onCopy={copyToClipboard} />
+                        )}
+                      </div>
+                      <p className="text-[10px] text-[#aaa] pt-1">{selectedBank.note}</p>
+                    </div>
+                  )}
 
-                  {/* Invoice */}
-                  <button
-                    onClick={() => handlePlaceOrder('invoice')}
-                    className="w-full py-3 bg-[#4a90e2] text-white rounded-lg text-[14px] font-semibold hover:bg-[#357abd] transition-colors flex items-center justify-center gap-2"
-                  >
-                    Place Order (Invoice / Wire Transfer)
-                    <ChevronRight size={16} />
-                  </button>
+                  {/* PayPal buttons */}
+                  {paymentMethod === 'paypal' && (
+                    <div>
+                      {paypalLoading ? (
+                        <div className="w-full h-11 bg-[#f5c542] rounded-lg animate-pulse" />
+                      ) : (
+                        <PayPalButtons
+                          style={{ layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 44 }}
+                          createOrder={createPayPalOrder}
+                          onApprove={onPayPalApprove}
+                          onError={() => showToast('PayPal payment failed. Please try again.', 'error')}
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {/* CTA */}
+                  {paymentMethod === 'bank_transfer' && (
+                    <button
+                      onClick={() => handlePlaceOrder('bank_transfer')}
+                      className="w-full py-3 bg-[#4a90e2] text-white rounded-lg text-[14px] font-semibold hover:bg-[#357abd] transition-colors flex items-center justify-center gap-2"
+                    >
+                      Place Order
+                      <ChevronRight size={16} />
+                    </button>
+                  )}
+
                   <p className="text-[10px] text-[#bbb] text-center">
                     By placing this order you agree to our Terms &amp; Conditions.
                   </p>
@@ -632,14 +750,73 @@ export default function Checkout() {
               </div>
             </div>
 
+            {/* Bank transfer instructions */}
+            {paymentMethod === 'bank_transfer' && (
+              <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden mb-5">
+                <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
+                  <Building2 size={15} className="text-[#4a90e2]" />
+                  <h3 className="text-[14px] font-semibold text-[#222]">Bank Transfer Instructions</h3>
+                </div>
+                <div className="px-5 py-4 space-y-3">
+                  <p className="text-[13px] text-[#555]">
+                    Please transfer the exact amount to one of the accounts below. Include your order number <strong className="font-mono text-[#333]">{orderId}</strong> in the transfer reference.
+                  </p>
+                  <div className="flex gap-1.5 mb-2">
+                    {BANK_ACCOUNTS.map((b) => (
+                      <button
+                        key={b.currency}
+                        onClick={() => setSelectedBankCurrency(b.currency)}
+                        className={`px-3 py-1 rounded text-[11px] font-bold transition-colors ${
+                          selectedBankCurrency === b.currency
+                            ? 'bg-[#333] text-white'
+                            : 'bg-[#f5f5f5] text-[#666] border border-[#ddd] hover:border-[#aaa]'
+                        }`}
+                      >
+                        {b.currency}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="bg-[#f8f8fa] rounded-lg border border-[#e5e5e5] p-3 space-y-1.5 text-[12px]">
+                    <BankRow label="Bank" value={selectedBank.bankName} field="c-bank" copiedField={copiedField} onCopy={copyToClipboard} />
+                    <BankRow label="Account Name" value={selectedBank.accountName} field="c-name" copiedField={copiedField} onCopy={copyToClipboard} />
+                    <BankRow label="Account No." value={selectedBank.accountNumber} field="c-account" copiedField={copiedField} onCopy={copyToClipboard} />
+                    <BankRow label="SWIFT / BIC" value={selectedBank.swiftCode} field="c-swift" copiedField={copiedField} onCopy={copyToClipboard} />
+                    {selectedBank.routingNumber && (
+                      <BankRow label="Routing No." value={selectedBank.routingNumber} field="c-routing" copiedField={copiedField} onCopy={copyToClipboard} />
+                    )}
+                    <div className="pt-1 flex justify-between items-center border-t border-[#e5e5e5] mt-1">
+                      <span className="text-[#888] font-medium">Amount</span>
+                      <span className="font-bold text-[#222] text-[13px]">{selectedBankCurrency} {formatPrice(confirmedTotals.total)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#888] font-medium">Reference</span>
+                      <span className="font-mono font-bold text-[#4a90e2]">{orderId}</span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-[#aaa]">Payment must be received within 5 business days to confirm your order.</p>
+                </div>
+              </div>
+            )}
+
             {/* What's next */}
             <div className="bg-[#f0f7ff] border border-[#4a90e2]/20 rounded-xl px-5 py-4 mb-6 text-[13px] text-[#555] space-y-2">
               <p className="font-semibold text-[#333]">What happens next?</p>
               <ol className="list-decimal list-inside space-y-1 text-[#666]">
-                <li>Your order is now pending review by our team.</li>
-                <li>You will be contacted within 1 business day to confirm stock &amp; delivery schedule.</li>
-                <li>Once confirmed, a proforma invoice will be issued for payment.</li>
-                <li>Goods are dispatched after payment is received.</li>
+                {paymentMethod === 'bank_transfer' ? (
+                  <>
+                    <li>Transfer the amount to the account above with your order number as reference.</li>
+                    <li>Our team will verify your payment within 1–2 business days.</li>
+                    <li>Once confirmed, we will prepare and dispatch your goods.</li>
+                    <li>You will receive a shipping notification with tracking information.</li>
+                  </>
+                ) : (
+                  <>
+                    <li>Your order is now pending review by our team.</li>
+                    <li>You will be contacted within 1 business day to confirm stock &amp; delivery schedule.</li>
+                    <li>Once confirmed, a proforma invoice will be issued for payment.</li>
+                    <li>Goods are dispatched after payment is received.</li>
+                  </>
+                )}
               </ol>
             </div>
 
@@ -690,4 +867,36 @@ function input(hasError: boolean) {
       ? 'border-red-400 focus:border-red-500'
       : 'border-[#e5e5e5] focus:border-[#4a90e2]'
   }`;
+}
+
+function BankRow({
+  label,
+  value,
+  field,
+  copiedField,
+  onCopy,
+}: {
+  label: string;
+  value: string;
+  field: string;
+  copiedField: string | null;
+  onCopy: (text: string, field: string) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-[#888] shrink-0 w-[90px]">{label}</span>
+      <span className="font-semibold text-[#222] truncate flex-1">{value}</span>
+      <button
+        onClick={() => onCopy(value, field)}
+        className="shrink-0 text-[#bbb] hover:text-[#4a90e2] transition-colors"
+        title="Copy"
+      >
+        {copiedField === field ? (
+          <CheckCircle2 size={13} className="text-green-500" />
+        ) : (
+          <Copy size={13} />
+        )}
+      </button>
+    </div>
+  );
 }

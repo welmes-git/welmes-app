@@ -37,7 +37,7 @@ const subCategories = [
 export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isAdmin, currentUser, logout, cart } = useStore();
+  const { isAuthenticated, isAdmin, currentUser, logout, cart, wishlist } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -206,8 +206,16 @@ export default function Header() {
                   )}
                 </div>
               )}
-              <button className="text-[#333] hover:text-[#ff4d6d] transition-colors hidden sm:block">
-                <Heart size={22} />
+              <button
+                onClick={() => navigate('/wishlist')}
+                className="relative text-[#333] hover:text-[#ff4d6d] transition-colors hidden sm:block"
+              >
+                <Heart size={22} className={wishlist.length > 0 ? 'text-[#ff4d6d]' : ''} />
+                {wishlist.length > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] bg-[#ff4d6d] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {wishlist.length}
+                  </span>
+                )}
               </button>
               <button className="text-[#333] hover:text-[#ff4d6d] transition-colors hidden sm:block">
                 <Bell size={22} />

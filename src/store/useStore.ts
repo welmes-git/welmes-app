@@ -115,6 +115,11 @@ interface AppState {
   approveMember: (id: string) => Promise<void>;
   rejectMember: (id: string) => Promise<void>;
 
+  // Wishlist (stays local)
+  wishlist: number[];
+  toggleWishlist: (productId: number) => void;
+  isWishlisted: (productId: number) => boolean;
+
   // Cart (stays local)
   cart: CartItem[];
   addToCart: (product: Product, quantity?: number, setOption?: SetOption) => void;
@@ -279,6 +284,18 @@ export const useStore = create<AppState>()(
         if (member) emailMemberRejected(member.email, member.companyName);
       },
 
+      // ── Wishlist (local only) ────────────────────────────────
+      wishlist: [],
+
+      toggleWishlist: (productId) =>
+        set((state) => ({
+          wishlist: state.wishlist.includes(productId)
+            ? state.wishlist.filter((id) => id !== productId)
+            : [...state.wishlist, productId],
+        })),
+
+      isWishlisted: (productId) => get().wishlist.includes(productId),
+
       // ── Cart (local only) ─────────────────────────────────────
       cart: [],
 
@@ -377,6 +394,7 @@ export const useStore = create<AppState>()(
       name: 'welmes-store',
       partialize: (state) => ({
         cart: state.cart,
+        wishlist: state.wishlist,
         selectedCurrency: state.selectedCurrency,
         // Auth session is restored via initAuth() using Supabase session cookie
         // Products/members/orders are loaded from Supabase on demand

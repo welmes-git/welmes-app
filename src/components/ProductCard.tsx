@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
-import { Lock, Eye, ShoppingCart } from 'lucide-react';
+import { Lock, Eye, ShoppingCart, Heart } from 'lucide-react';
 
 interface ProductCardProps {
   product: {
@@ -26,12 +26,25 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, showQuickAdd = true }: ProductCardProps) {
   const navigate = useNavigate();
-  const { isAuthenticated, currentUser, addToCart, showToast } = useStore();
+  const { isAuthenticated, currentUser, addToCart, showToast, toggleWishlist, isWishlisted } = useStore();
   const { formatPrice } = useCurrency();
   const [isHovered, setIsHovered] = useState(false);
 
   const isVerified = currentUser?.status === 'approved';
   const canSeePrice = isAuthenticated && isVerified;
+  const wishlisted = isWishlisted(product.id);
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      showToast('Login required to save items', 'info');
+      navigate('/login');
+      return;
+    }
+    toggleWishlist(product.id);
+    showToast(wishlisted ? 'Removed from wishlist' : 'Added to wishlist', 'success');
+  };
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -82,6 +95,17 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
             </span>
           ))}
         </div>
+
+        {/* Wishlist button */}
+        <button
+          onClick={handleWishlist}
+          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+        >
+          <Heart
+            size={15}
+            className={wishlisted ? 'text-[#ff4d6d] fill-[#ff4d6d]' : 'text-[#bbb]'}
+          />
+        </button>
 
         {/* Hover Overlay */}
         {showQuickAdd && isHovered && (

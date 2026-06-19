@@ -14,6 +14,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import CustomerSupport from './pages/CustomerSupport';
 import Checkout from './pages/Checkout';
 import MyAccount from './pages/MyAccount';
+import Wishlist from './pages/Wishlist';
 import PendingApproval from './pages/PendingApproval';
 import ProtectedRoute from './components/ProtectedRoute';
 import OrderPrint from './pages/OrderPrint';
@@ -60,6 +61,9 @@ function App() {
 
                   <Route path="/account" element={
                     <ProtectedRoute><MyAccount /></ProtectedRoute>
+                  } />
+                  <Route path="/wishlist" element={
+                    <ProtectedRoute><Wishlist /></ProtectedRoute>
                   } />
                   <Route path="/order/:id/print" element={
                     <ProtectedRoute><OrderPrint /></ProtectedRoute>

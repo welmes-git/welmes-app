@@ -20,6 +20,7 @@ import {
   MapPin,
   CreditCard,
   Printer,
+  Heart,
 } from 'lucide-react';
 
 type Tab = 'orders' | 'account' | 'security';
@@ -207,6 +208,16 @@ export default function MyAccount() {
                 <ChevronRight size={14} className="text-[#ccc]" />
               </button>
             ))}
+            <button
+              onClick={() => navigate('/wishlist')}
+              className="w-full flex items-center justify-between px-4 py-3.5 text-[13px] font-medium transition-colors text-[#555] hover:bg-[#f8f8fa]"
+            >
+              <span className="flex items-center gap-2">
+                <Heart size={16} />
+                Wishlist
+              </span>
+              <ChevronRight size={14} className="text-[#ccc]" />
+            </button>
           </div>
         </aside>
 
