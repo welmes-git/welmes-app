@@ -44,6 +44,7 @@ export default function Header() {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const navItems = [
     { label: t('nav.specialPrice'), path: '/products?sort=discount' },
@@ -68,6 +69,7 @@ export default function Header() {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setShowMobileSearch(false);
     }
   };
 
@@ -178,7 +180,7 @@ export default function Header() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('nav.searchPlaceholder')}
-                  className="w-full h-[42px] pl-4 pr-12 border-2 border-[#333333] rounded-full text-[14px] focus:outline-none focus:border-[#ff4d6d] transition-colors"
+                  className="w-full h-[42px] pl-4 pr-12 border border-[#cccccc] rounded-full text-[14px] focus:outline-none focus:border-[#333333] transition-colors"
                 />
                 <button
                   type="submit"
@@ -267,7 +269,13 @@ export default function Header() {
                 )}
               </button>
               <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                onClick={() => { setShowMobileSearch(!showMobileSearch); setIsMobileMenuOpen(false); }}
+                className="md:hidden text-[#333] hover:text-[#ff4d6d] transition-colors"
+              >
+                <Search size={22} />
+              </button>
+              <button
+                onClick={() => { setIsMobileMenuOpen(!isMobileMenuOpen); setShowMobileSearch(false); }}
                 className="md:hidden text-[#333]"
               >
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -320,50 +328,108 @@ export default function Header() {
           </nav>
         </div>
 
-        {/* Mobile Search Bar */}
-        {isMobile && (
-          <div style={{padding: '8px 16px', borderTop: '1px solid #e5e5e5'}}>
-            <form onSubmit={handleSearch}>
-              <div style={{position: 'relative'}}>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products, brands..."
-                  style={{
-                    width: '100%',
-                    height: '38px',
-                    paddingLeft: '16px',
-                    paddingRight: '44px',
-                    border: '1.5px solid #333',
-                    borderRadius: '999px',
-                    fontSize: '13px',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                />
-                <button
-                  type="submit"
-                  style={{
-                    position: 'absolute',
-                    right: '4px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    width: '32px',
-                    height: '32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#333',
-                  }}
-                >
-                  <Search size={16} />
-                </button>
+        {/* Mobile Search Full-Screen Overlay */}
+        {showMobileSearch && (
+          <div className="fixed inset-0 bg-white z-[60] flex flex-col md:hidden">
+            {/* Overlay Header */}
+            <div className="flex items-center justify-between px-4 h-[56px] border-b border-[#e5e5e5] shrink-0">
+              <button
+                onClick={() => { setShowMobileSearch(false); setSearchQuery(''); }}
+                className="text-[#333] w-8"
+              >
+                <X size={22} />
+              </button>
+              <span className="text-[16px] font-bold text-[#222]">Search</span>
+              <button onClick={() => setIsCartOpen(true)} className="relative text-[#333] w-8 flex justify-end">
+                <ShoppingBag size={22} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-0 min-w-[18px] h-[18px] bg-[#ff4d6d] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="px-4 py-3 border-b border-[#e5e5e5] shrink-0">
+              <form onSubmit={handleSearch}>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search products, brands, ingredients..."
+                    autoFocus
+                    className="w-full h-[42px] pl-4 pr-10 bg-[#f4f4f4] rounded-full text-[14px] focus:outline-none"
+                  />
+                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888]">
+                    <Search size={17} />
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Overlay Content */}
+            <div className="flex-1 overflow-y-auto px-4 pt-5 pb-8">
+              {/* Keyword Recommendations */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[15px] font-bold text-[#222]">Keyword Suggestions</span>
+                  <span className="text-[12px] text-[#aaa] font-normal">beta</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    'Serum picks', 'Moisturizer TOP5', 'Sunscreen recs',
+                    'Cleansing oil', 'Vitamin C ampoule', 'Toner pad recs',
+                    'Collagen mask', 'New lip tints',
+                  ].map((kw) => (
+                    <button
+                      key={kw}
+                      onClick={() => {
+                        setSearchQuery(kw);
+                        navigate(`/products?search=${encodeURIComponent(kw)}`);
+                        setShowMobileSearch(false);
+                      }}
+                      className="px-4 py-2 bg-[#f4f4f4] rounded-full text-[13px] text-[#444] hover:bg-[#e8e8e8] transition-colors"
+                    >
+                      {kw}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </form>
+
+              {/* Trending Searches */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[15px] font-bold text-[#222]">Trending Searches</span>
+                  <span className="text-[11px] text-[#bbb]">
+                    as of {new Date().getHours()}:{String(new Date().getMinutes()).padStart(2, '0')}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-y-3">
+                  {[
+                    'Serum', 'Sunscreen', 'Toner', 'Essence',
+                    'Sheet mask', 'Cleanser', 'Eye cream', 'Foundation',
+                    'BB cream', 'Lip balm',
+                  ].map((term, idx) => (
+                    <button
+                      key={term}
+                      onClick={() => {
+                        navigate(`/products?search=${encodeURIComponent(term)}`);
+                        setShowMobileSearch(false);
+                      }}
+                      className="flex items-center gap-3 text-left"
+                    >
+                      <span className={`text-[14px] font-bold w-5 ${idx < 3 ? 'text-[#ff4d6d]' : 'text-[#aaa]'}`}>
+                        {idx + 1}
+                      </span>
+                      <span className="text-[14px] text-[#333]">{term}</span>
+                      <span className="text-[#ff4d6d]" style={{fontSize: '9px'}}>▲</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -419,20 +485,6 @@ export default function Header() {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-[#e5e5e5]">
             <div className="px-4 py-3">
-              <form onSubmit={handleSearch} className="mb-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products..."
-                    className="w-full h-10 pl-4 pr-10 border border-[#e5e5e5] rounded-full text-[14px]"
-                  />
-                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <Search size={18} />
-                  </button>
-                </div>
-              </form>
               {navItems.map((item) => (
                 <Link
                   key={item.label}
