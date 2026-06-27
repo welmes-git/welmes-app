@@ -378,3 +378,115 @@ function rowToOrder(row: Record<string, unknown>): Order {
     trackingShippedAt:  (row.tracking_shipped_at as string) || undefined,
   };
 }
+
+// ── Support Chat ────────────────────────────────────────────────────────────
+
+export interface SupportRoom {
+  id: string;
+  memberId: string;
+  memberName: string;
+  memberEmail: string;
+  status: 'open' | 'closed';
+  lastMessage: string;
+  lastMessageAt: string;
+  unreadAdmin: number;
+  createdAt: string;
+}
+
+export interface SupportMessage {
+  id: string;
+  roomId: string;
+  senderId: string;
+  senderName: string;
+  role: 'member' | 'admin';
+  content: string;
+  createdAt: string;
+}
+
+export async function getOrCreateRoom(memberId: string, memberName: string, memberEmail: string): Promise<SupportRoom | null> {
+  const { data: existing } = await supabase
+    .from('support_rooms')
+    .select('*')
+    .eq('member_id', memberId)
+    .eq('status', 'open')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+  if (existing) return rowToRoom(existing);
+
+  const { data, error } = await supabase
+    .from('support_rooms')
+    .insert([{ member_id: memberId, member_name: memberName, member_email: memberEmail }])
+    .select()
+    .single();
+  if (error || !data) { console.error(error); return null; }
+  return rowToRoom(data);
+}
+
+export async function fetchMessages(roomId: string): Promise<SupportMessage[]> {
+  const { data, error } = await supabase
+    .from('support_messages')
+    .select('*')
+    .eq('room_id', roomId)
+    .order('created_at', { ascending: true });
+  if (error || !data) return [];
+  return data.map(rowToMessage);
+}
+
+export async function sendMessage(roomId: string, senderId: string, senderName: string, role: 'member' | 'admin', content: string): Promise<SupportMessage | null> {
+  const { data, error } = await supabase
+    .from('support_messages')
+    .insert([{ room_id: roomId, sender_id: senderId, sender_name: senderName, role, content }])
+    .select()
+    .single();
+  if (error || !data) { console.error(error); return null; }
+  await supabase.from('support_rooms').update({
+    last_message: content,
+    last_message_at: new Date().toISOString(),
+    unread_admin: role === 'member' ? supabase.rpc('increment_unread', { room: roomId }) : 0,
+  }).eq('id', roomId);
+  return rowToMessage(data);
+}
+
+export async function fetchAllRooms(): Promise<SupportRoom[]> {
+  const { data, error } = await supabase
+    .from('support_rooms')
+    .select('*')
+    .order('last_message_at', { ascending: false });
+  if (error || !data) return [];
+  return data.map(rowToRoom);
+}
+
+export async function closeRoom(roomId: string) {
+  return supabase.from('support_rooms').update({ status: 'closed' }).eq('id', roomId);
+}
+
+export async function markRoomRead(roomId: string) {
+  return supabase.from('support_rooms').update({ unread_admin: 0 }).eq('id', roomId);
+}
+
+function rowToRoom(r: Record<string, unknown>): SupportRoom {
+  return {
+    id: r.id as string,
+    memberId: r.member_id as string,
+    memberName: (r.member_name as string) || '',
+    memberEmail: (r.member_email as string) || '',
+    status: (r.status as 'open' | 'closed') || 'open',
+    lastMessage: (r.last_message as string) || '',
+    lastMessageAt: (r.last_message_at as string) || (r.created_at as string),
+    unreadAdmin: Number(r.unread_admin) || 0,
+    createdAt: r.created_at as string,
+  };
+}
+
+function rowToMessage(r: Record<string, unknown>): SupportMessage {
+  return {
+    id: r.id as string,
+    roomId: r.room_id as string,
+    senderId: r.sender_id as string,
+    senderName: (r.sender_name as string) || '',
+    role: (r.role as 'member' | 'admin') || 'member',
+    content: r.content as string,
+    createdAt: r.created_at as string,
+  };
+}

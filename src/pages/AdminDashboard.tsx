@@ -26,16 +26,22 @@ import {
   X as XIcon,
   Upload,
   ImageIcon,
+  MessageCircle,
+  Send,
+  Loader2,
 } from 'lucide-react';
+import * as db from '../lib/db';
+import type { SupportRoom, SupportMessage } from '../lib/db';
 
-type AdminTab = 'dashboard' | 'members' | 'products' | 'orders';
+type AdminTab = 'dashboard' | 'members' | 'products' | 'orders' | 'support';
 type MemberStatus = 'all' | 'pending' | 'approved' | 'rejected';
 
 const menuItems: { id: AdminTab; label: string; icon: React.ElementType }[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'members', label: 'Members', icon: Users },
-  { id: 'products', label: 'Products', icon: Package },
-  { id: 'orders', label: 'Orders', icon: ClipboardList },
+  { id: 'dashboard', label: 'Dashboard',   icon: LayoutDashboard },
+  { id: 'members',   label: 'Members',     icon: Users },
+  { id: 'products',  label: 'Products',    icon: Package },
+  { id: 'orders',    label: 'Orders',      icon: ClipboardList },
+  { id: 'support',   label: 'Support Chat', icon: MessageCircle },
 ];
 
 export default function AdminDashboard() {
@@ -95,6 +101,62 @@ export default function AdminDashboard() {
 
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [uploadingImages, setUploadingImages] = useState(false);
+
+  // Support Chat state
+  const [supportRooms, setSupportRooms] = useState<SupportRoom[]>([]);
+  const [activeRoom, setActiveRoom] = useState<SupportRoom | null>(null);
+  const [chatMessages, setChatMessages] = useState<SupportMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatSending, setChatSending] = useState(false);
+  const [supportUnread, setSupportUnread] = useState(0);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (activeTab !== 'support') return;
+    db.fetchAllRooms().then((rooms) => {
+      setSupportRooms(rooms);
+      setSupportUnread(rooms.reduce((s, r) => s + r.unreadAdmin, 0));
+    });
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!activeRoom) return;
+    db.fetchMessages(activeRoom.id).then(setChatMessages);
+    db.markRoomRead(activeRoom.id);
+    setSupportRooms((prev) => prev.map((r) => r.id === activeRoom.id ? { ...r, unreadAdmin: 0 } : r));
+    setSupportUnread((prev) => Math.max(0, prev - activeRoom.unreadAdmin));
+
+    const channel = supabase
+      .channel(`admin:room:${activeRoom.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'support_messages',
+        filter: `room_id=eq.${activeRoom.id}`,
+      }, (payload) => {
+        const r = payload.new as Record<string, unknown>;
+        const msg: SupportMessage = {
+          id: r.id as string, roomId: r.room_id as string,
+          senderId: r.sender_id as string, senderName: (r.sender_name as string) || '',
+          role: r.role as 'member' | 'admin', content: r.content as string,
+          createdAt: r.created_at as string,
+        };
+        setChatMessages((prev) => prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [activeRoom]);
+
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages]);
+
+  const handleAdminSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || !activeRoom || !currentUser || chatSending) return;
+    setChatSending(true);
+    const content = chatInput.trim();
+    setChatInput('');
+    await db.sendMessage(activeRoom.id, currentUser.authId ?? currentUser.id, 'WELMES Support', 'admin', content);
+    setSupportRooms((prev) => prev.map((r) => r.id === activeRoom.id ? { ...r, lastMessage: content, lastMessageAt: new Date().toISOString() } : r));
+    setChatSending(false);
+  };
 
   // Shipping modal state
   const [shippingModal, setShippingModal] = useState<{ orderId: string } | null>(null);
@@ -388,8 +450,18 @@ export default function AdminDashboard() {
                     : 'hover:bg-white/5 border-l-[3px] border-transparent'
                 }`}
               >
-                <Icon size={18} />
-                {sidebarOpen && <span>{item.label}</span>}
+                <div className="relative">
+                  <Icon size={18} />
+                  {item.id === 'support' && supportUnread > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#ff4d6d] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {supportUnread}
+                    </span>
+                  )}
+                </div>
+                {sidebarOpen && <span className="flex-1 text-left">{item.label}</span>}
+                {sidebarOpen && item.id === 'support' && supportUnread > 0 && (
+                  <span className="bg-[#ff4d6d] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{supportUnread}</span>
+                )}
               </button>
             );
           })}
@@ -1475,6 +1547,132 @@ export default function AdminDashboard() {
                 Confirm Shipped
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Support Chat Tab ── */}
+      {activeTab === 'support' && (
+        <div className="fixed inset-0 flex" style={{ left: sidebarOpen ? 240 : 60, top: 57 }}>
+          {/* Room list */}
+          <div className="w-[300px] bg-white border-r border-[#e5e5e5] flex flex-col shrink-0 overflow-y-auto">
+            <div className="p-4 border-b border-[#e5e5e5]">
+              <h2 className="text-[15px] font-bold text-[#333]">Support Inbox</h2>
+              <p className="text-[12px] text-[#999] mt-0.5">{supportRooms.length} conversation{supportRooms.length !== 1 ? 's' : ''}</p>
+            </div>
+            {supportRooms.length === 0 ? (
+              <div className="flex flex-col items-center justify-center flex-1 text-center p-8">
+                <MessageCircle size={36} className="text-[#ddd] mb-3" />
+                <p className="text-[13px] text-[#999]">No conversations yet</p>
+              </div>
+            ) : (
+              supportRooms.map((room) => (
+                <button
+                  key={room.id}
+                  onClick={() => setActiveRoom(room)}
+                  className={`w-full text-left px-4 py-3.5 border-b border-[#f5f5f5] transition-colors ${activeRoom?.id === room.id ? 'bg-[#f0f7ff]' : 'hover:bg-[#f8f8fa]'}`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[13px] font-semibold text-[#333] truncate flex-1">{room.memberName}</span>
+                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      {room.unreadAdmin > 0 && (
+                        <span className="w-5 h-5 bg-[#ff4d6d] text-white text-[10px] font-bold rounded-full flex items-center justify-center">{room.unreadAdmin}</span>
+                      )}
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${room.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-[#f0f0f0] text-[#999]'}`}>
+                        {room.status}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-[12px] text-[#999] truncate">{room.lastMessage || 'No messages yet'}</p>
+                  <p className="text-[11px] text-[#bbb] mt-0.5">
+                    {new Date(room.lastMessageAt).toLocaleDateString()} {new Date(room.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </button>
+              ))
+            )}
+          </div>
+
+          {/* Chat window */}
+          <div className="flex-1 flex flex-col bg-[#f8f8fa]">
+            {!activeRoom ? (
+              <div className="flex flex-col items-center justify-center flex-1 text-center">
+                <MessageCircle size={48} className="text-[#ddd] mb-4" />
+                <p className="text-[15px] font-semibold text-[#999]">Select a conversation</p>
+                <p className="text-[13px] text-[#bbb] mt-1">Choose a conversation from the left to start replying.</p>
+              </div>
+            ) : (
+              <>
+                {/* Chat header */}
+                <div className="bg-white border-b border-[#e5e5e5] px-5 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-[14px] font-bold text-[#333]">{activeRoom.memberName}</p>
+                    <p className="text-[12px] text-[#999]">{activeRoom.memberEmail}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {activeRoom.status === 'open' && (
+                      <button
+                        onClick={async () => {
+                          await db.closeRoom(activeRoom.id);
+                          setActiveRoom({ ...activeRoom, status: 'closed' });
+                          setSupportRooms((prev) => prev.map((r) => r.id === activeRoom.id ? { ...r, status: 'closed' } : r));
+                          showToast('Conversation closed', 'success');
+                        }}
+                        className="px-3 py-1.5 border border-[#e5e5e5] rounded-lg text-[12px] text-[#666] hover:bg-[#f5f5f5] transition-colors"
+                      >
+                        Close Chat
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
+                  {chatMessages.map((msg) => {
+                    const isAdmin = msg.role === 'admin';
+                    return (
+                      <div key={msg.id} className={`flex gap-3 ${isAdmin ? 'flex-row-reverse' : 'flex-row'}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-auto text-white text-[11px] font-bold ${isAdmin ? 'bg-[#4a90e2]' : 'bg-[#2c3e50]'}`}>
+                          {isAdmin ? 'W' : msg.senderName.charAt(0).toUpperCase()}
+                        </div>
+                        <div className={`max-w-[70%] flex flex-col gap-1 ${isAdmin ? 'items-end' : 'items-start'}`}>
+                          <span className="text-[11px] text-[#999] px-1">{isAdmin ? 'Support Team' : msg.senderName}</span>
+                          <div className={`px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed ${isAdmin ? 'bg-[#4a90e2] text-white rounded-br-sm' : 'bg-white text-[#333] rounded-bl-sm shadow-sm'}`}>
+                            {msg.content}
+                          </div>
+                          <span className="text-[11px] text-[#bbb] px-1">
+                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={chatEndRef} />
+                </div>
+
+                {/* Input */}
+                <div className="bg-white border-t border-[#e5e5e5] px-4 py-3">
+                  {activeRoom.status === 'closed' ? (
+                    <p className="text-center text-[13px] text-[#999] py-2">This conversation has been closed.</p>
+                  ) : (
+                    <form onSubmit={handleAdminSend} className="flex gap-2">
+                      <input
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        placeholder="Type a reply…"
+                        className="flex-1 h-[42px] px-4 bg-[#f4f4f4] rounded-full text-[14px] focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!chatInput.trim() || chatSending}
+                        className="w-[42px] h-[42px] bg-[#4a90e2] rounded-full flex items-center justify-center text-white hover:bg-[#357abd] transition-colors disabled:opacity-40"
+                      >
+                        {chatSending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

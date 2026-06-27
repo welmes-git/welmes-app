@@ -156,3 +156,47 @@ $$;
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+-- ── Support Chat ──────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS support_rooms (
+  id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  member_id       UUID NOT NULL,
+  member_name     TEXT NOT NULL DEFAULT '',
+  member_email    TEXT NOT NULL DEFAULT '',
+  status          TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed')),
+  last_message    TEXT DEFAULT '',
+  last_message_at TIMESTAMPTZ DEFAULT NOW(),
+  unread_admin    INTEGER DEFAULT 0,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS support_messages (
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  room_id     UUID NOT NULL REFERENCES support_rooms(id) ON DELETE CASCADE,
+  sender_id   UUID NOT NULL,
+  sender_name TEXT NOT NULL DEFAULT '',
+  role        TEXT NOT NULL CHECK (role IN ('member', 'admin')),
+  content     TEXT NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE support_rooms  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE support_messages ENABLE ROW LEVEL SECURITY;
+
+-- Members see only their own room
+CREATE POLICY "support_rooms_member" ON support_rooms FOR ALL
+  USING (member_id = auth.uid() OR is_admin());
+
+-- Members see messages in their own room; admins see all
+CREATE POLICY "support_messages_member" ON support_messages FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM support_rooms
+      WHERE id = room_id AND (member_id = auth.uid() OR is_admin())
+    )
+  );
+
+-- Enable Realtime for support tables
+ALTER PUBLICATION supabase_realtime ADD TABLE support_messages;
+ALTER PUBLICATION supabase_realtime ADD TABLE support_rooms;
