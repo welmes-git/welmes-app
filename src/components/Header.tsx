@@ -360,7 +360,8 @@ export default function Header() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search products, brands, ingredients..."
                     autoFocus
-                    className="w-full h-[42px] pl-4 pr-10 bg-[#f4f4f4] rounded-full text-[14px] focus:outline-none"
+                    className="w-full h-[42px] pl-4 pr-10 bg-[#f4f4f4] rounded-full focus:outline-none"
+                    style={{ fontSize: '16px' }}
                   />
                   <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888]">
                     <Search size={17} />
