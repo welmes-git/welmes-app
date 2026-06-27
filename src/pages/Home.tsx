@@ -90,7 +90,7 @@ export default function Home() {
             to="/products?sort=popular"
             className="flex items-center gap-1 text-[13px] text-[#999] hover:text-[#ff4d6d] transition-colors"
           >
-            더보기
+            View All
             <ChevronRightIcon size={14} />
           </Link>
         </div>
@@ -134,7 +134,7 @@ export default function Home() {
               to="/products?sort=newest"
               className="flex items-center gap-1 text-[13px] text-[#999] hover:text-[#ff4d6d] transition-colors"
             >
-              더보기
+              View All
               <ChevronRightIcon size={14} />
             </Link>
           </div>
