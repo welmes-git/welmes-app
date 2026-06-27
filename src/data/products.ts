@@ -235,6 +235,7 @@ export const initialProducts: Product[] = [
 ];
 
 export const brands = [
+  'SK-II',
   'COSRX',
   'Beauty of Joseon',
   'Anua',
