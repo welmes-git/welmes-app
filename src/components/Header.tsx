@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import CartDrawer from './CartDrawer';
 import CurrencySelector from './CurrencySelector';
 import { useTranslation } from 'react-i18next';
+import { brands } from '../data/products';
 import {
   ShoppingBag,
   Heart,
@@ -43,13 +44,13 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showBrandDropdown, setShowBrandDropdown] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const navItems = [
     { label: t('nav.specialPrice'), path: '/products?sort=discount' },
     { label: t('nav.ranking'), path: '/products?sort=popular' },
-    { label: t('nav.brandShop'), path: '/products' },
     { label: t('nav.theme'), path: '/products' },
     { label: t('nav.event'), path: '/products' },
   ];
@@ -307,6 +308,34 @@ export default function Header() {
                       {cat}
                     </Link>
                   ))}
+                </div>
+              )}
+            </div>
+
+            {/* Brand Shop with dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setShowBrandDropdown(true)}
+              onMouseLeave={() => setShowBrandDropdown(false)}
+            >
+              <button className="flex items-center gap-1 py-3.5 px-5 text-[14px] font-semibold text-[#333] hover:text-[#ff4d6d]">
+                {t('nav.brandShop')}
+                <ChevronDown size={14} />
+              </button>
+              {showBrandDropdown && (
+                <div className="absolute top-full left-0 w-[360px] bg-white border border-[#e5e5e5] shadow-lg py-3 z-50">
+                  <div className="grid grid-cols-2">
+                    {brands.map((brand) => (
+                      <Link
+                        key={brand}
+                        to={`/products?brand=${encodeURIComponent(brand)}`}
+                        className="px-5 py-2 text-[13px] text-[#555] hover:bg-[#f8f8fa] hover:text-[#ff4d6d]"
+                        onClick={() => setShowBrandDropdown(false)}
+                      >
+                        {brand}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
