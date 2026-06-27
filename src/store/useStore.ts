@@ -95,8 +95,8 @@ interface AppState {
   // Products
   products: Product[];
   loadProducts: () => Promise<void>;
-  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
-  updateProduct: (id: number, updates: Partial<Product>) => Promise<void>;
+  addProduct: (product: Omit<Product, 'id'>) => Promise<Product | null>;
+  updateProduct: (id: number, updates: Partial<Product>) => Promise<{ error: any } | void>;
   deleteProduct: (id: number) => Promise<void>;
 
   // Members
@@ -216,10 +216,12 @@ export const useStore = create<AppState>()(
         if (created) {
           set((state) => ({ products: [created, ...state.products] }));
         }
+        return created;
       },
 
       updateProduct: async (id, updates) => {
-        await db.updateProductById(id, updates);
+        const result = await db.updateProductById(id, updates);
+        if (result?.error) return { error: result.error };
         set((state) => ({
           products: state.products.map((p) =>
             p.id === id ? { ...p, ...updates } : p

@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS products (
   brand           TEXT NOT NULL DEFAULT '',
   category        TEXT NOT NULL DEFAULT 'Skincare',
   image           TEXT DEFAULT '',
+  images          TEXT[] DEFAULT '{}',
   original_price  INTEGER NOT NULL DEFAULT 0,
   wholesale_price INTEGER NOT NULL DEFAULT 0,
   discount        INTEGER DEFAULT 0,

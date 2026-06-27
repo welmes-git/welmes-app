@@ -317,10 +317,14 @@ export default function AdminDashboard() {
     };
 
     if (editingProduct) {
-      await updateProduct(editingProduct, productData);
+      const result = await updateProduct(editingProduct, productData);
+      if (result && 'error' in result && result.error) {
+        showToast(`Update failed: ${result.error.message}`, 'error'); return;
+      }
       showToast('Product updated', 'success');
     } else {
-      await addProduct(productData);
+      const created = await addProduct(productData);
+      if (!created) { showToast('Failed to add product. Check console for details.', 'error'); return; }
       showToast('Product added', 'success');
     }
     setShowProductModal(false);
