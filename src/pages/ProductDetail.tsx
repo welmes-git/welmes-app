@@ -505,11 +505,16 @@ export default function ProductDetail() {
         <div className="mb-16">
           {activeTab === 'info' && (
             <div className="prose max-w-none">
-              <div className="text-[14px] text-[#555] leading-relaxed">
-                {product.description.split('\n').map((line, i) => (
-                  <p key={i} className="mb-2 last:mb-0">{line || <br />}</p>
-                ))}
-              </div>
+              <div
+                className="text-[14px] text-[#555] leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: (product.description || '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/\r?\n/g, '<br />'),
+                }}
+              />
               <div className="mt-6 bg-[#f8f8fa] rounded-lg p-6">
                 <h3 className="text-[16px] font-bold text-[#333] mb-4">
                   Product Details
