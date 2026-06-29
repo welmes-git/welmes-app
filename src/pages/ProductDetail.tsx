@@ -505,7 +505,7 @@ export default function ProductDetail() {
         <div className="mb-16">
           {activeTab === 'info' && (
             <div className="prose max-w-none">
-              <p className="text-[14px] text-[#555] leading-relaxed whitespace-pre-wrap">
+              <p className="text-[14px] text-[#555] leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
                 {product.description}
               </p>
               <div className="mt-6 bg-[#f8f8fa] rounded-lg p-6">
