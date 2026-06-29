@@ -47,6 +47,9 @@ export default function Header() {
   const [showBrandDropdown, setShowBrandDropdown] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [showMobileBrands, setShowMobileBrands] = useState(false);
+  const [mobileCategoryOpen, setMobileCategoryOpen] = useState(false);
+  const [mobileBrandOpen, setMobileBrandOpen] = useState(false);
 
   const navItems = [
     { label: t('nav.specialPrice'), path: '/products?sort=discount' },
@@ -465,49 +468,101 @@ export default function Header() {
 
         {/* Mobile Navigation Tab Bar */}
         {isMobile && (
-          <div style={{
-            borderTop: '1px solid #e5e5e5',
-            overflowX: 'auto',
-            display: 'flex',
-            scrollbarWidth: 'none',
-            WebkitOverflowScrolling: 'touch',
-          }}>
-            <Link
-              to="/products"
-              onClick={() => setShowCategoryDropdown(false)}
-              style={{
-                flexShrink: 0,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '10px 14px',
-                fontSize: '13px',
-                fontWeight: 600,
-                color: '#333',
-                whiteSpace: 'nowrap',
-                textDecoration: 'none',
-              }}
-            >
-              <Menu size={14} />
-              CATEGORY
-            </Link>
-            {navItems.map((item) => (
+          <div>
+            <div style={{
+              borderTop: '1px solid #e5e5e5',
+              overflowX: 'auto',
+              display: 'flex',
+              scrollbarWidth: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}>
               <Link
-                key={item.label}
-                to={item.path}
+                to="/products"
+                onClick={() => { setShowMobileBrands(false); }}
                 style={{
                   flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
                   padding: '10px 14px',
                   fontSize: '13px',
                   fontWeight: 600,
-                  color: isActive(item.path) ? '#ff4d6d' : '#333',
+                  color: '#333',
                   whiteSpace: 'nowrap',
                   textDecoration: 'none',
                 }}
               >
-                {item.label}
+                <Menu size={14} />
+                CATEGORY
               </Link>
-            ))}
+              <button
+                onClick={() => setShowMobileBrands((v) => !v)}
+                style={{
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '10px 14px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: showMobileBrands ? '#ff4d6d' : '#333',
+                  whiteSpace: 'nowrap',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                {t('nav.brandShop')}
+                <ChevronDown size={13} style={{ transform: showMobileBrands ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              </button>
+              {navItems.map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.path}
+                  onClick={() => setShowMobileBrands(false)}
+                  style={{
+                    flexShrink: 0,
+                    padding: '10px 14px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: isActive(item.path) ? '#ff4d6d' : '#333',
+                    whiteSpace: 'nowrap',
+                    textDecoration: 'none',
+                  }}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            {/* Brand panel */}
+            {showMobileBrands && (
+              <div style={{ borderTop: '1px solid #e5e5e5', background: '#fafafa', padding: '12px 16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+                  {brands.map((brand) => (
+                    <Link
+                      key={brand}
+                      to={`/products?brand=${encodeURIComponent(brand)}`}
+                      onClick={() => setShowMobileBrands(false)}
+                      style={{
+                        padding: '8px 10px',
+                        fontSize: '12px',
+                        color: '#444',
+                        textDecoration: 'none',
+                        background: '#fff',
+                        border: '1px solid #e5e5e5',
+                        borderRadius: '4px',
+                        textAlign: 'center',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {brand}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -515,6 +570,53 @@ export default function Header() {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-[#e5e5e5]">
             <div className="px-4 py-3">
+              {/* CATEGORY accordion */}
+              <button
+                className="flex items-center justify-between w-full py-3 text-[14px] font-semibold text-[#333] border-b border-[#f5f5f5]"
+                onClick={() => setMobileCategoryOpen((v) => !v)}
+              >
+                <span className="flex items-center gap-2"><Menu size={14} /> CATEGORY</span>
+                <ChevronDown size={14} style={{ transform: mobileCategoryOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              </button>
+              {mobileCategoryOpen && (
+                <div className="pl-4 pb-1">
+                  {subCategories.map((cat) => (
+                    <Link
+                      key={cat}
+                      to={`/products?category=${cat}`}
+                      className="block py-2.5 text-[13px] text-[#555] border-b border-[#f9f9f9]"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {cat}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* Brand Shop accordion */}
+              <button
+                className="flex items-center justify-between w-full py-3 text-[14px] font-semibold text-[#333] border-b border-[#f5f5f5]"
+                onClick={() => setMobileBrandOpen((v) => !v)}
+              >
+                <span>{t('nav.brandShop')}</span>
+                <ChevronDown size={14} style={{ transform: mobileBrandOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+              </button>
+              {mobileBrandOpen && (
+                <div className="pl-4 pb-1 grid grid-cols-2">
+                  {brands.map((brand) => (
+                    <Link
+                      key={brand}
+                      to={`/products?brand=${encodeURIComponent(brand)}`}
+                      className="py-2.5 text-[13px] text-[#555] border-b border-[#f9f9f9]"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {brand}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {/* Other nav items */}
               {navItems.map((item) => (
                 <Link
                   key={item.label}
@@ -523,16 +625,6 @@ export default function Header() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.label}
-                </Link>
-              ))}
-              {subCategories.map((cat) => (
-                <Link
-                  key={cat}
-                  to={`/products?category=${cat}`}
-                  className="block py-3 text-[14px] text-[#666] border-b border-[#f5f5f5]"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {cat}
                 </Link>
               ))}
             </div>
