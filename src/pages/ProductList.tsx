@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { initialProducts, brands, categories } from '../data/products';
@@ -26,6 +26,13 @@ export default function ProductList() {
   );
   const [selectedCategory, setSelectedCategory] = useState(categoryFilter);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setSelectedBrands(brandFilter ? [brandFilter] : []);
+    setSelectedCategory(categoryFilter);
+    setSortBy(sortParam as SortOption);
+    setCurrentPage(1);
+  }, [brandFilter, categoryFilter, sortParam]);
   const [showFilters, setShowFilters] = useState(false);
   const itemsPerPage = 12;
 
