@@ -41,15 +41,12 @@ export default function Header() {
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showBrandDropdown, setShowBrandDropdown] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showMobileBrands, setShowMobileBrands] = useState(false);
-  const [mobileCategoryOpen, setMobileCategoryOpen] = useState(false);
-  const [mobileBrandOpen, setMobileBrandOpen] = useState(false);
 
   const navItems = [
     { label: t('nav.specialPrice'), path: '/products?sort=discount' },
@@ -273,7 +270,7 @@ export default function Header() {
                 )}
               </button>
               <button
-                onClick={() => { setShowMobileSearch(!showMobileSearch); setIsMobileMenuOpen(false); }}
+                onClick={() => { setShowMobileSearch(!showMobileSearch); }}
                 className="md:hidden text-[#333] hover:text-[#ff4d6d] transition-colors"
               >
                 <Search size={22} />
