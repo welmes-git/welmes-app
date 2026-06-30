@@ -1,5 +1,11 @@
 export const heroBanners = [
   {
+    image: '/banners/banner5.jpg',
+    title: 'Wholesale Japanese Cosmetics',
+    subtitle: 'for Global Retailers',
+    link: '/products',
+  },
+  {
     image: '/banners/banner1.jpg',
     title: '올영세일',
     subtitle: '지금 바로 쇼핑하기',
