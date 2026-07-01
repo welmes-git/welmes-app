@@ -51,7 +51,6 @@ export default function Header() {
   const navItems = [
     { label: t('nav.specialPrice'), path: '/products?sort=discount' },
     { label: t('nav.ranking'), path: '/products?sort=popular' },
-    { label: t('nav.theme'), path: '/products' },
     { label: t('nav.event'), path: '/products' },
   ];
 
