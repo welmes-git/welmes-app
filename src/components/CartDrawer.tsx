@@ -41,7 +41,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <ShoppingBag size={20} />
             <h2 className="text-[16px] font-bold">{t('cart.title')}</h2>
             <span className="text-[13px] text-[#999]">
-              ({cart.reduce((sum, item) => sum + item.quantity, 0)} {t('cart.items', { count: cart.reduce((s, i) => s + i.quantity, 0) })})
+              ({t('cart.items', { count: cart.reduce((s, i) => s + i.quantity, 0) })})
             </span>
           </div>
           <button

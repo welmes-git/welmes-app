@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
+import { useTranslation } from 'react-i18next';
 import { Lock, Eye, ShoppingCart, Heart } from 'lucide-react';
 
 interface ProductCardProps {
@@ -26,6 +27,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, showQuickAdd = true }: ProductCardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { isAuthenticated, currentUser, addToCart, showToast, toggleWishlist, isWishlisted } = useStore();
   const { formatPrice } = useCurrency();
   const [isHovered, setIsHovered] = useState(false);
@@ -38,28 +40,28 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
     e.preventDefault();
     e.stopPropagation();
     if (!isAuthenticated) {
-      showToast('Login required to save items', 'info');
+      showToast(t('wishlist.loginRequired'), 'info');
       navigate('/login');
       return;
     }
     toggleWishlist(product.id);
-    showToast(wishlisted ? 'Removed from wishlist' : 'Added to wishlist', 'success');
+    showToast(wishlisted ? t('wishlist.removedFromWishlist') : t('wishlist.addedToWishlist'), 'success');
   };
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!isAuthenticated) {
-      showToast('Login required to add items to cart', 'info');
+      showToast(t('productDetail.loginToAddCart'), 'info');
       navigate('/login');
       return;
     }
     if (!isVerified) {
-      showToast('Business verification required', 'info');
+      showToast(t('productDetail.verifyToOrder'), 'info');
       return;
     }
     addToCart(product);
-    showToast('Added to cart', 'success');
+    showToast(t('productDetail.addedToCart'), 'success');
   };
 
   const tagColors: Record<string, string> = {
@@ -116,7 +118,7 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
                 className="bg-white text-[#333] px-4 py-2 rounded-full text-[13px] font-medium flex items-center gap-2 hover:bg-[#ff4d6d] hover:text-white transition-colors shadow-lg"
               >
                 <ShoppingCart size={14} />
-                Add to Cart
+                {t('common.addToCart')}
               </button>
             ) : (
               <button
@@ -128,7 +130,7 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
                 className="bg-white text-[#333] px-4 py-2 rounded-full text-[13px] font-medium flex items-center gap-2 hover:bg-[#4a90e2] hover:text-white transition-colors shadow-lg"
               >
                 <Eye size={14} />
-                {isAuthenticated ? 'Verify Business' : 'Login to View'}
+                {isAuthenticated ? t('products.verifyBusiness') : t('products.loginToView')}
               </button>
             )}
           </div>
@@ -169,8 +171,8 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
             <Lock size={14} className="text-[#999]" />
             <span className="text-[13px] text-[#999]">
               {isAuthenticated
-                ? 'Business verification required'
-                : 'Login to view price'}
+                ? t('products.verifyBusiness')
+                : t('products.loginToView')}
             </span>
           </div>
         )}

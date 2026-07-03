@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import type { Order, SetOption } from '../store/useStore';
+import type { Order, SetOption, Member } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { initialProducts, brands, categories } from '../data/products';
 import { supabase } from '../lib/supabase';
@@ -21,8 +21,6 @@ import {
   Plus,
   Bell,
   LogOut,
-  TrendingUp,
-  TrendingDown,
   X as XIcon,
   Upload,
   ImageIcon,
@@ -75,6 +73,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
   const [memberFilter, setMemberFilter] = useState<MemberStatus>('all');
   const [memberSearch, setMemberSearch] = useState('');
+  const [viewMember, setViewMember] = useState<Member | null>(null);
   const [productSearch, setProductSearch] = useState('');
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<number | null>(null);
@@ -270,11 +269,14 @@ export default function AdminDashboard() {
 
   const allProducts = products.length > 0 ? products : initialProducts;
 
-  // Stats
+  // Stats — all derived from live data
   const totalMembers = members.length;
   const pendingMembers = members.filter((m) => m.status === 'pending').length;
+  const approvedMembers = members.filter((m) => m.status === 'approved').length;
   const totalProducts = allProducts.length;
-  const todayOrders = orders.length;
+  const activeProducts = allProducts.filter((p) => p.status === 'active').length;
+  const totalOrders = orders.length;
+  const pendingOrders = orders.filter((o) => o.status === 'pending').length;
 
   // Filtered members
   const filteredMembers = members.filter((m) => {
@@ -524,29 +526,25 @@ export default function AdminDashboard() {
                   {
                     label: 'Total Members',
                     value: totalMembers,
-                    trend: '+2',
-                    up: true,
+                    chip: `${approvedMembers} approved`,
                     color: 'bg-blue-50 text-blue-600',
                   },
                   {
                     label: 'Pending Verifications',
                     value: pendingMembers,
-                    trend: 'New',
-                    up: true,
-                    color: 'bg-yellow-50 text-yellow-600',
+                    chip: pendingMembers > 0 ? 'Needs review' : 'All clear',
+                    color: pendingMembers > 0 ? 'bg-yellow-50 text-yellow-600' : 'bg-green-50 text-green-600',
                   },
                   {
                     label: 'Total Products',
                     value: totalProducts,
-                    trend: '+5',
-                    up: true,
+                    chip: `${activeProducts} active`,
                     color: 'bg-green-50 text-green-600',
                   },
                   {
                     label: 'Total Orders',
-                    value: todayOrders,
-                    trend: '+12%',
-                    up: true,
+                    value: totalOrders,
+                    chip: `${pendingOrders} pending`,
                     color: 'bg-purple-50 text-purple-600',
                   },
                 ].map((stat) => (
@@ -560,14 +558,9 @@ export default function AdminDashboard() {
                         {stat.value}
                       </span>
                       <span
-                        className={`flex items-center gap-0.5 text-[12px] font-medium px-2 py-0.5 rounded ${stat.color}`}
+                        className={`text-[12px] font-medium px-2 py-0.5 rounded ${stat.color}`}
                       >
-                        {stat.up ? (
-                          <TrendingUp size={12} />
-                        ) : (
-                          <TrendingDown size={12} />
-                        )}
-                        {stat.trend}
+                        {stat.chip}
                       </span>
                     </div>
                   </div>
@@ -780,12 +773,7 @@ export default function AdminDashboard() {
                               <button
                                 className="w-7 h-7 flex items-center justify-center bg-[#f5f5f5] text-[#666] rounded hover:bg-[#eee]"
                                 title="View"
-                                onClick={() =>
-                                  showToast(
-                                    `View: ${member.companyName}`,
-                                    'info'
-                                  )
-                                }
+                                onClick={() => setViewMember(member)}
                               >
                                 <Eye size={14} />
                               </button>
@@ -1546,6 +1534,89 @@ export default function AdminDashboard() {
               >
                 Confirm Shipped
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Member Detail Modal */}
+      {viewMember && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-5 border-b border-[#e5e5e5]">
+              <h3 className="text-[16px] font-bold text-[#222]">Member Details</h3>
+              <button
+                onClick={() => setViewMember(null)}
+                className="w-8 h-8 flex items-center justify-center hover:bg-[#f5f5f5] rounded"
+              >
+                <XIcon size={18} />
+              </button>
+            </div>
+
+            <div className="p-5">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 bg-[#4a90e2] rounded-full flex items-center justify-center text-white text-[16px] font-bold shrink-0">
+                  {viewMember.companyName?.[0] || '?'}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[15px] font-bold text-[#222] truncate">{viewMember.companyName}</p>
+                  <span className={`inline-block text-[11px] px-2 py-0.5 rounded capitalize ${statusColors[viewMember.status]}`}>
+                    {viewMember.status}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2.5 text-[13px]">
+                {[
+                  { label: 'Email', value: viewMember.email },
+                  { label: 'Business Reg. No.', value: viewMember.businessNumber },
+                  { label: 'Representative', value: viewMember.representative },
+                  { label: 'Phone', value: viewMember.phone },
+                  { label: 'Address', value: viewMember.address },
+                  { label: 'Registered', value: viewMember.registeredDate },
+                ].map((row) => (
+                  <div key={row.label} className="flex gap-3 py-1.5 border-b border-[#f5f5f5] last:border-0">
+                    <span className="w-[130px] shrink-0 text-[#999]">{row.label}</span>
+                    <span className="text-[#333] font-medium break-all">{row.value || '—'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-2 p-5 border-t border-[#e5e5e5]">
+              {viewMember.status === 'pending' ? (
+                <>
+                  <button
+                    onClick={() => {
+                      approveMember(viewMember.id);
+                      showToast(`${viewMember.companyName} approved`, 'success');
+                      setViewMember(null);
+                    }}
+                    className="flex-1 h-10 bg-green-600 text-white rounded-lg text-[13px] font-semibold hover:bg-green-700 flex items-center justify-center gap-1.5"
+                  >
+                    <Check size={14} />
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => {
+                      rejectMember(viewMember.id);
+                      showToast(`${viewMember.companyName} rejected`, 'info');
+                      setViewMember(null);
+                    }}
+                    className="flex-1 h-10 bg-red-50 text-red-600 border border-red-200 rounded-lg text-[13px] font-semibold hover:bg-red-100 flex items-center justify-center gap-1.5"
+                  >
+                    <X size={14} />
+                    Reject
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setViewMember(null)}
+                  className="flex-1 h-10 border border-[#ddd] rounded-lg text-[13px] text-[#666] hover:bg-[#f5f5f5]"
+                >
+                  Close
+                </button>
+              )}
             </div>
           </div>
         </div>

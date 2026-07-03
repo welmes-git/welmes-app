@@ -44,15 +44,14 @@ export default function PendingApproval() {
                 <XCircle size={32} className="text-red-500" />
               </div>
               <h1 className="text-[22px] font-bold text-[#222] mb-2">
-                Application Not Approved
+                {t('auth.notApproved')}
               </h1>
               <p className="text-[14px] text-[#666] leading-relaxed mb-4">
-                Unfortunately, your business registration was not approved at this time.
-                Please contact our support team for more information or to reapply.
+                {t('auth.notApprovedDesc')}
               </p>
               <div className="inline-flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-[13px] font-semibold px-4 py-2 rounded-full">
                 <XCircle size={14} />
-                Not Approved
+                {t('account.notApproved')}
               </div>
             </>
           )}
@@ -61,23 +60,23 @@ export default function PendingApproval() {
         {/* Account info */}
         <div className="bg-white rounded-2xl border border-[#e5e5e5] p-5 mb-5">
           <h2 className="text-[13px] font-semibold text-[#aaa] uppercase tracking-wide mb-3">
-            Your Application
+            {t('auth.yourApplication')}
           </h2>
           <div className="space-y-2 text-[13px]">
             <div className="flex justify-between">
-              <span className="text-[#888]">Company</span>
+              <span className="text-[#888]">{t('auth.company')}</span>
               <span className="font-medium text-[#333]">{currentUser?.companyName}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#888]">Email</span>
+              <span className="text-[#888]">{t('auth.email')}</span>
               <span className="font-medium text-[#333]">{currentUser?.email}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#888]">Business Reg. No.</span>
+              <span className="text-[#888]">{t('auth.businessRegNo')}</span>
               <span className="font-medium text-[#333]">{currentUser?.businessNumber}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#888]">Applied On</span>
+              <span className="text-[#888]">{t('auth.appliedOn')}</span>
               <span className="font-medium text-[#333]">
                 {(currentUser as any)?.registeredDate ?? '—'}
               </span>
@@ -89,13 +88,13 @@ export default function PendingApproval() {
         {status === 'pending' && (
           <div className="bg-white rounded-2xl border border-[#e5e5e5] p-5 mb-5">
             <h2 className="text-[13px] font-semibold text-[#aaa] uppercase tracking-wide mb-3">
-              What Happens Next?
+              {t('auth.whatsNext')}
             </h2>
             <div className="space-y-3">
               {[
-                { icon: <FileText size={15} className="text-[#4a90e2]" />, text: 'Our team reviews your business registration documents.' },
-                { icon: <CheckCircle2 size={15} className="text-[#4a90e2]" />, text: 'Verification is typically completed within 1–2 business days.' },
-                { icon: <Mail size={15} className="text-[#4a90e2]" />, text: 'You\'ll be able to access wholesale pricing immediately upon approval.' },
+                { icon: <FileText size={15} className="text-[#4a90e2]" />, text: t('auth.step1') },
+                { icon: <CheckCircle2 size={15} className="text-[#4a90e2]" />, text: t('auth.step2') },
+                { icon: <Mail size={15} className="text-[#4a90e2]" />, text: t('auth.step3') },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="shrink-0 mt-0.5">{item.icon}</div>
@@ -109,7 +108,7 @@ export default function PendingApproval() {
         {/* Contact support */}
         <div className="bg-[#f0f7ff] border border-[#4a90e2]/20 rounded-2xl p-5 mb-6">
           <h2 className="text-[13px] font-semibold text-[#4a90e2] uppercase tracking-wide mb-3">
-            Need Help?
+            {t('auth.needHelp')}
           </h2>
           <div className="space-y-2">
             <a
@@ -131,7 +130,7 @@ export default function PendingApproval() {
               className="flex items-center gap-3 text-[13px] text-[#555] hover:text-[#4a90e2] transition-colors"
             >
               <MessageCircle size={14} className="text-[#4a90e2]" />
-              Visit Customer Support Center
+              {t('auth.visitSupport')}
             </Link>
           </div>
         </div>

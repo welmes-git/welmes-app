@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '../store/useStore';
 import type { ShippingAddress } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
+import { convert, getCurrencyInfo } from '../lib/currency';
+import type { CurrencyCode } from '../lib/currency';
 import {
   ChevronRight,
   CheckCircle2,
@@ -46,10 +49,10 @@ const BANK_ACCOUNTS = [
 
 type Step = 'review' | 'shipping' | 'confirmed';
 
-const STEPS: { key: Step; label: string }[] = [
-  { key: 'review', label: 'Review Order' },
-  { key: 'shipping', label: 'Shipping Info' },
-  { key: 'confirmed', label: 'Confirmed' },
+const STEPS: { key: Step; labelKey: string }[] = [
+  { key: 'review', labelKey: 'checkout.reviewOrder' },
+  { key: 'shipping', labelKey: 'checkout.shippingInfo' },
+  { key: 'confirmed', labelKey: 'checkout.confirmed' },
 ];
 
 const COUNTRIES = [
@@ -75,6 +78,9 @@ const COUNTRIES = [
 
 const VAT_RATE = 0.1;
 
+// Currencies PayPal accepts; KRW/CNY are unsupported so those fall back to JPY
+const PAYPAL_CURRENCIES: CurrencyCode[] = ['JPY', 'USD', 'EUR', 'GBP', 'SGD', 'AUD'];
+
 
 function genOrderId() {
   const d = new Date();
@@ -85,8 +91,9 @@ function genOrderId() {
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { cart, currentUser, addOrder, clearCart, isAuthenticated, showToast } = useStore();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, currency, rates } = useCurrency();
   const [step, setStep] = useState<Step>('review');
   const [orderId, setOrderId] = useState('');
   const [poNumber, setPoNumber] = useState('');
@@ -124,15 +131,15 @@ export default function Checkout() {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-20 text-center">
         <Package size={48} className="mx-auto text-[#ddd] mb-4" />
-        <h2 className="text-[20px] font-bold mb-2">Login Required</h2>
+        <h2 className="text-[20px] font-bold mb-2">{t('checkout.loginRequired')}</h2>
         <p className="text-[14px] text-[#999] mb-6">
-          Please log in to proceed with checkout.
+          {t('checkout.loginRequiredDesc')}
         </p>
         <button
           onClick={() => navigate('/login')}
           className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[14px] hover:bg-[#555] transition-colors"
         >
-          Go to Login
+          {t('checkout.goToLogin')}
         </button>
       </div>
     );
@@ -142,15 +149,15 @@ export default function Checkout() {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-20 text-center">
         <Package size={48} className="mx-auto text-[#ddd] mb-4" />
-        <h2 className="text-[20px] font-bold mb-2">Your cart is empty</h2>
+        <h2 className="text-[20px] font-bold mb-2">{t('checkout.cartEmpty')}</h2>
         <p className="text-[14px] text-[#999] mb-6">
-          Add products before proceeding to checkout.
+          {t('checkout.cartEmptyDesc')}
         </p>
         <button
           onClick={() => navigate('/products')}
           className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[14px] hover:bg-[#555] transition-colors"
         >
-          Browse Products
+          {t('checkout.browseProducts')}
         </button>
       </div>
     );
@@ -159,12 +166,12 @@ export default function Checkout() {
   /* ─── Validation ─── */
   function validateShipping(): boolean {
     const e: Partial<ShippingAddress> = {};
-    if (!shipping.company.trim()) e.company = 'Company name is required';
-    if (!shipping.recipient.trim()) e.recipient = 'Recipient name is required';
-    if (!shipping.phone.trim()) e.phone = 'Phone number is required';
-    if (!shipping.addressLine1.trim()) e.addressLine1 = 'Address is required';
-    if (!shipping.city.trim()) e.city = 'City is required';
-    if (!shipping.zipCode.trim()) e.zipCode = 'ZIP / Postal code is required';
+    if (!shipping.company.trim()) e.company = t('checkout.errCompany');
+    if (!shipping.recipient.trim()) e.recipient = t('checkout.errRecipient');
+    if (!shipping.phone.trim()) e.phone = t('checkout.errPhone');
+    if (!shipping.addressLine1.trim()) e.addressLine1 = t('checkout.errAddress');
+    if (!shipping.city.trim()) e.city = t('checkout.errCity');
+    if (!shipping.zipCode.trim()) e.zipCode = t('checkout.errZip');
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -205,12 +212,15 @@ export default function Checkout() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function createPayPalOrder(_data: unknown, actions: any) {
     if (!validateShipping()) return Promise.reject('invalid');
+    const paypalCurrency: CurrencyCode = PAYPAL_CURRENCIES.includes(currency) ? currency : 'JPY';
+    const decimals = getCurrencyInfo(paypalCurrency).decimals;
+    const amount = convert(total, paypalCurrency, rates);
     return actions.order.create({
       intent: 'CAPTURE',
       purchase_units: [{
         amount: {
-          currency_code: 'JPY',
-          value: String(total),
+          currency_code: paypalCurrency,
+          value: amount.toFixed(decimals),
         },
         description: `WELMES Order — ${cart.length} item(s)`,
       }],
@@ -224,6 +234,18 @@ export default function Checkout() {
   }
 
   const selectedBank = BANK_ACCOUNTS.find((b) => b.currency === selectedBankCurrency) ?? BANK_ACCOUNTS[0];
+
+  // Wire transfers must be made in the bank account's currency, so convert the
+  // JPY-based total into that currency instead of the display currency
+  const formatBankAmount = (amountJPY: number) => {
+    const code = selectedBankCurrency as CurrencyCode;
+    const info = getCurrencyInfo(code);
+    const value = convert(amountJPY, code, rates);
+    return `${code} ${new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: info.decimals,
+      maximumFractionDigits: info.decimals,
+    }).format(value)}`;
+  };
 
   /* ─── Step indicator ─── */
   const stepIndex = STEPS.findIndex((s) => s.key === step);
@@ -243,7 +265,7 @@ export default function Checkout() {
               <ArrowLeft size={18} />
             </button>
           )}
-          <h1 className="text-[20px] font-bold text-[#222]">Checkout</h1>
+          <h1 className="text-[20px] font-bold text-[#222]">{t('checkout.title')}</h1>
         </div>
 
         {/* Step progress */}
@@ -268,7 +290,7 @@ export default function Checkout() {
                       i === stepIndex ? 'text-[#222]' : 'text-[#aaa]'
                     }`}
                   >
-                    {s.label}
+                    {t(s.labelKey)}
                   </span>
                 </div>
                 {i < STEPS.length - 1 && (
@@ -292,16 +314,16 @@ export default function Checkout() {
               <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
                 <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
                   <ClipboardList size={16} className="text-[#4a90e2]" />
-                  <h2 className="text-[15px] font-semibold text-[#222]">Order Items</h2>
-                  <span className="text-[12px] text-[#aaa] ml-1">({cart.length} line{cart.length !== 1 ? 's' : ''})</span>
+                  <h2 className="text-[15px] font-semibold text-[#222]">{t('checkout.orderItems')}</h2>
+                  <span className="text-[12px] text-[#aaa] ml-1">({t('checkout.lines', { count: cart.length })})</span>
                 </div>
 
                 {/* Header row */}
                 <div className="hidden md:grid grid-cols-[2fr_1fr_80px_90px] gap-2 px-5 py-2.5 bg-[#f8f8fa] border-b border-[#f0f0f0] text-[11px] font-semibold text-[#aaa] uppercase tracking-wide">
-                  <span>Product</span>
-                  <span>Set Option</span>
-                  <span className="text-center">Qty (sets)</span>
-                  <span className="text-right">Subtotal</span>
+                  <span>{t('checkout.product')}</span>
+                  <span>{t('checkout.setOption')}</span>
+                  <span className="text-center">{t('checkout.qty')}</span>
+                  <span className="text-right">{t('checkout.subtotalCol')}</span>
                 </div>
 
                 {cart.map((item) => {
@@ -326,7 +348,7 @@ export default function Checkout() {
                           <p className="text-[11px] text-[#aaa] uppercase font-medium">{item.product.brand}</p>
                           <p className="text-[13px] text-[#222] font-medium leading-tight">{item.product.name}</p>
                           <p className="text-[12px] text-[#4a90e2] font-semibold mt-0.5">
-                            {formatPrice(item.product.wholesalePrice)} / set
+                            {formatPrice(item.product.wholesalePrice)} {t('products.perSet')}
                           </p>
                         </div>
                       </div>
@@ -339,7 +361,7 @@ export default function Checkout() {
                               {item.setOption.id}
                             </span>
                             <p className="text-[11px] text-[#999] mt-0.5">{item.setOption.description}</p>
-                            <p className="text-[11px] text-[#bbb]">{item.setOption.unitsPerSet} units/set</p>
+                            <p className="text-[11px] text-[#bbb]">{item.setOption.unitsPerSet} {t('productDetail.unitsPerSet')}</p>
                           </div>
                         ) : (
                           <span className="text-[12px] text-[#bbb]">—</span>
@@ -351,7 +373,7 @@ export default function Checkout() {
                         <span className="text-[15px] font-semibold text-[#333]">{item.quantity}</span>
                         {item.setOption && (
                           <p className="text-[10px] text-[#bbb]">
-                            {item.quantity * item.setOption.unitsPerSet} units
+                            {item.quantity * item.setOption.unitsPerSet} {t('cart.units')}
                           </p>
                         )}
                       </div>
@@ -370,31 +392,31 @@ export default function Checkout() {
             <div className="lg:w-[280px] shrink-0">
               <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden sticky top-4">
                 <div className="px-5 py-4 border-b border-[#f0f0f0]">
-                  <h2 className="text-[15px] font-semibold text-[#222]">Order Summary</h2>
+                  <h2 className="text-[15px] font-semibold text-[#222]">{t('checkout.orderSummary')}</h2>
                 </div>
                 <div className="px-5 py-4 space-y-3">
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-[#666]">Total Sets</span>
+                    <span className="text-[#666]">{t('checkout.totalSets')}</span>
                     <span className="font-medium">{cart.reduce((s, i) => s + i.quantity, 0)}</span>
                   </div>
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-[#666]">Total Units</span>
+                    <span className="text-[#666]">{t('checkout.totalUnits')}</span>
                     <span className="font-medium">{totalUnits.toLocaleString()}</span>
                   </div>
                   <div className="border-t border-[#f0f0f0] pt-3 flex justify-between text-[13px]">
-                    <span className="text-[#666]">Subtotal (excl. VAT)</span>
+                    <span className="text-[#666]">{t('checkout.subtotal')}</span>
                     <span className="font-medium">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-[#666]">VAT (10%)</span>
+                    <span className="text-[#666]">{t('checkout.vat')}</span>
                     <span className="font-medium">{formatPrice(vat)}</span>
                   </div>
                   <div className="border-t border-[#e5e5e5] pt-3 flex justify-between">
-                    <span className="text-[14px] font-bold text-[#222]">Grand Total</span>
+                    <span className="text-[14px] font-bold text-[#222]">{t('checkout.grandTotal')}</span>
                     <span className="text-[18px] font-bold text-[#333]">{formatPrice(total)}</span>
                   </div>
                   <p className="text-[10px] text-[#bbb] leading-relaxed">
-                    VAT included. Shipping costs will be confirmed by your account manager after the order is placed.
+                    {t('checkout.vatNote')}
                   </p>
                 </div>
                 <div className="px-5 pb-5">
@@ -402,7 +424,7 @@ export default function Checkout() {
                     onClick={() => setStep('shipping')}
                     className="w-full py-3 bg-[#333] text-white rounded-lg text-[14px] font-semibold hover:bg-[#555] transition-colors flex items-center justify-center gap-2"
                   >
-                    Proceed to Shipping
+                    {t('checkout.proceedToShipping')}
                     <ChevronRight size={16} />
                   </button>
                 </div>
@@ -423,10 +445,10 @@ export default function Checkout() {
               <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
                 <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
                   <Truck size={16} className="text-[#4a90e2]" />
-                  <h2 className="text-[15px] font-semibold text-[#222]">Delivery Address</h2>
+                  <h2 className="text-[15px] font-semibold text-[#222]">{t('checkout.deliveryAddress')}</h2>
                 </div>
                 <div className="px-5 py-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="Company Name *" error={errors.company}>
+                  <Field label={`${t('checkout.companyName')} *`} error={errors.company}>
                     <input
                       value={shipping.company}
                       onChange={(e) => setShipping({ ...shipping, company: e.target.value })}
@@ -435,7 +457,7 @@ export default function Checkout() {
                     />
                   </Field>
 
-                  <Field label="Recipient Name *" error={errors.recipient}>
+                  <Field label={`${t('checkout.recipientName')} *`} error={errors.recipient}>
                     <input
                       value={shipping.recipient}
                       onChange={(e) => setShipping({ ...shipping, recipient: e.target.value })}
@@ -444,7 +466,7 @@ export default function Checkout() {
                     />
                   </Field>
 
-                  <Field label="Phone Number *" error={errors.phone}>
+                  <Field label={`${t('checkout.phoneNumber')} *`} error={errors.phone}>
                     <input
                       value={shipping.phone}
                       onChange={(e) => setShipping({ ...shipping, phone: e.target.value })}
@@ -453,7 +475,7 @@ export default function Checkout() {
                     />
                   </Field>
 
-                  <Field label="Country *">
+                  <Field label={`${t('checkout.country')} *`}>
                     <select
                       value={shipping.country}
                       onChange={(e) => setShipping({ ...shipping, country: e.target.value })}
@@ -466,7 +488,7 @@ export default function Checkout() {
                   </Field>
 
                   <div className="md:col-span-2">
-                    <Field label="Address Line 1 *" error={errors.addressLine1}>
+                    <Field label={`${t('checkout.addressLine1')} *`} error={errors.addressLine1}>
                       <input
                         value={shipping.addressLine1}
                         onChange={(e) => setShipping({ ...shipping, addressLine1: e.target.value })}
@@ -477,17 +499,17 @@ export default function Checkout() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <Field label="Address Line 2">
+                    <Field label={t('checkout.addressLine2')}>
                       <input
                         value={shipping.addressLine2}
                         onChange={(e) => setShipping({ ...shipping, addressLine2: e.target.value })}
-                        placeholder="Suite / Floor / Building (optional)"
+                        placeholder={t('checkout.addr2Placeholder')}
                         className={input(false)}
                       />
                     </Field>
                   </div>
 
-                  <Field label="City *" error={errors.city}>
+                  <Field label={`${t('checkout.city')} *`} error={errors.city}>
                     <input
                       value={shipping.city}
                       onChange={(e) => setShipping({ ...shipping, city: e.target.value })}
@@ -496,16 +518,16 @@ export default function Checkout() {
                     />
                   </Field>
 
-                  <Field label="State / Province">
+                  <Field label={t('checkout.stateProvince')}>
                     <input
                       value={shipping.state}
                       onChange={(e) => setShipping({ ...shipping, state: e.target.value })}
-                      placeholder="Gyeonggi-do (optional)"
+                      placeholder={t('checkout.statePlaceholder')}
                       className={input(false)}
                     />
                   </Field>
 
-                  <Field label="ZIP / Postal Code *" error={errors.zipCode}>
+                  <Field label={`${t('checkout.zipCode')} *`} error={errors.zipCode}>
                     <input
                       value={shipping.zipCode}
                       onChange={(e) => setShipping({ ...shipping, zipCode: e.target.value })}
@@ -520,24 +542,24 @@ export default function Checkout() {
               <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
                 <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
                   <ClipboardList size={16} className="text-[#4a90e2]" />
-                  <h2 className="text-[15px] font-semibold text-[#222]">Order Details</h2>
-                  <span className="text-[11px] text-[#bbb]">(optional)</span>
+                  <h2 className="text-[15px] font-semibold text-[#222]">{t('checkout.orderDetails')}</h2>
+                  <span className="text-[11px] text-[#bbb]">({t('common.optional')})</span>
                 </div>
                 <div className="px-5 py-5 space-y-4">
-                  <Field label="Purchase Order (PO) Number">
+                  <Field label={t('checkout.poNumber')}>
                     <input
                       value={poNumber}
                       onChange={(e) => setPoNumber(e.target.value)}
-                      placeholder="e.g. PO-2026-0042"
+                      placeholder={t('checkout.poPlaceholder')}
                       className={input(false)}
                     />
                   </Field>
-                  <Field label="Delivery Notes">
+                  <Field label={t('checkout.deliveryNotes')}>
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows={3}
-                      placeholder="Special delivery instructions, fragile goods notice, etc."
+                      placeholder={t('checkout.notesPlaceholder')}
                       className={`${input(false)} resize-none`}
                     />
                   </Field>
@@ -549,7 +571,7 @@ export default function Checkout() {
             <div className="lg:w-[280px] shrink-0">
               <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden sticky top-4">
                 <div className="px-5 py-4 border-b border-[#f0f0f0]">
-                  <h2 className="text-[15px] font-semibold text-[#222]">Order Summary</h2>
+                  <h2 className="text-[15px] font-semibold text-[#222]">{t('checkout.orderSummary')}</h2>
                 </div>
                 <div className="px-5 py-4 space-y-2 max-h-[240px] overflow-y-auto">
                   {cart.map((item) => (
@@ -564,21 +586,21 @@ export default function Checkout() {
                 </div>
                 <div className="px-5 py-4 border-t border-[#f0f0f0] space-y-2">
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-[#666]">Subtotal</span>
+                    <span className="text-[#666]">{t('cart.subtotal')}</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-[#666]">VAT (10%)</span>
+                    <span className="text-[#666]">{t('checkout.vat')}</span>
                     <span>{formatPrice(vat)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-[15px] pt-2 border-t border-[#e5e5e5]">
-                    <span>Total</span>
+                    <span>{t('cart.total')}</span>
                     <span>{formatPrice(total)}</span>
                   </div>
                 </div>
                 <div className="px-5 pb-5 space-y-3">
                   {/* Payment method selector */}
-                  <p className="text-[11px] font-semibold text-[#999] uppercase tracking-wide">Payment Method</p>
+                  <p className="text-[11px] font-semibold text-[#999] uppercase tracking-wide">{t('checkout.paymentMethod')}</p>
                   <div className="space-y-2">
                     <button
                       onClick={() => setPaymentMethod('bank_transfer')}
@@ -597,8 +619,8 @@ export default function Checkout() {
                       </div>
                       <Building2 size={15} className={paymentMethod === 'bank_transfer' ? 'text-[#4a90e2]' : 'text-[#aaa]'} />
                       <div>
-                        <p className="text-[13px] font-semibold text-[#222]">Bank Transfer</p>
-                        <p className="text-[10px] text-[#888]">Wire / TT · No transaction fee</p>
+                        <p className="text-[13px] font-semibold text-[#222]">{t('checkout.bankTransfer')}</p>
+                        <p className="text-[10px] text-[#888]">{t('checkout.bankTransferDesc')}</p>
                       </div>
                     </button>
 
@@ -620,7 +642,7 @@ export default function Checkout() {
                       <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" className="w-4 h-4 object-contain" />
                       <div>
                         <p className="text-[13px] font-semibold text-[#222]">PayPal</p>
-                        <p className="text-[10px] text-[#888]">Pay now · Fee may apply</p>
+                        <p className="text-[10px] text-[#888]">{t('checkout.paypalDesc')}</p>
                       </div>
                     </button>
                   </div>
@@ -644,12 +666,12 @@ export default function Checkout() {
                         ))}
                       </div>
                       <div className="space-y-1.5 text-[12px]">
-                        <BankRow label="Bank" value={selectedBank.bankName} field="bank" copiedField={copiedField} onCopy={copyToClipboard} />
-                        <BankRow label="Account Name" value={selectedBank.accountName} field="name" copiedField={copiedField} onCopy={copyToClipboard} />
-                        <BankRow label="Account No." value={selectedBank.accountNumber} field="account" copiedField={copiedField} onCopy={copyToClipboard} />
-                        <BankRow label="SWIFT / BIC" value={selectedBank.swiftCode} field="swift" copiedField={copiedField} onCopy={copyToClipboard} />
+                        <BankRow label={t('checkout.bankLabel')} value={selectedBank.bankName} field="bank" copiedField={copiedField} onCopy={copyToClipboard} />
+                        <BankRow label={t('checkout.accountNameLabel')} value={selectedBank.accountName} field="name" copiedField={copiedField} onCopy={copyToClipboard} />
+                        <BankRow label={t('checkout.accountNoLabel')} value={selectedBank.accountNumber} field="account" copiedField={copiedField} onCopy={copyToClipboard} />
+                        <BankRow label={t('checkout.swiftLabel')} value={selectedBank.swiftCode} field="swift" copiedField={copiedField} onCopy={copyToClipboard} />
                         {selectedBank.routingNumber && (
-                          <BankRow label="Routing No." value={selectedBank.routingNumber} field="routing" copiedField={copiedField} onCopy={copyToClipboard} />
+                          <BankRow label={t('checkout.routingLabel')} value={selectedBank.routingNumber} field="routing" copiedField={copiedField} onCopy={copyToClipboard} />
                         )}
                       </div>
                       <p className="text-[10px] text-[#aaa] pt-1">{selectedBank.note}</p>
@@ -666,7 +688,7 @@ export default function Checkout() {
                           style={{ layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 44 }}
                           createOrder={createPayPalOrder}
                           onApprove={onPayPalApprove}
-                          onError={() => showToast('PayPal payment failed. Please try again.', 'error')}
+                          onError={() => showToast(t('checkout.paypalFailed'), 'error')}
                         />
                       )}
                     </div>
@@ -678,13 +700,13 @@ export default function Checkout() {
                       onClick={() => handlePlaceOrder('bank_transfer')}
                       className="w-full py-3 bg-[#4a90e2] text-white rounded-lg text-[14px] font-semibold hover:bg-[#357abd] transition-colors flex items-center justify-center gap-2"
                     >
-                      Place Order
+                      {t('checkout.placeOrder')}
                       <ChevronRight size={16} />
                     </button>
                   )}
 
                   <p className="text-[10px] text-[#bbb] text-center">
-                    By placing this order you agree to our Terms &amp; Conditions.
+                    {t('checkout.terms')}
                   </p>
                 </div>
               </div>
@@ -702,12 +724,12 @@ export default function Checkout() {
               <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 size={36} className="text-green-500" />
               </div>
-              <h2 className="text-[22px] font-bold text-[#222] mb-1">Order Placed Successfully!</h2>
+              <h2 className="text-[22px] font-bold text-[#222] mb-1">{t('checkout.orderPlaced')}</h2>
               <p className="text-[14px] text-[#666] mb-4">
-                Thank you for your order. Your account manager will review and confirm your order shortly.
+                {t('checkout.thankYou')}
               </p>
               <div className="inline-block bg-[#f8f8fa] border border-[#e5e5e5] rounded-lg px-6 py-3">
-                <p className="text-[11px] text-[#aaa] uppercase tracking-wide mb-0.5">Order Number</p>
+                <p className="text-[11px] text-[#aaa] uppercase tracking-wide mb-0.5">{t('checkout.orderNumber')}</p>
                 <p className="text-[20px] font-bold text-[#333] font-mono">{orderId}</p>
               </div>
             </div>
@@ -716,15 +738,15 @@ export default function Checkout() {
             <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden mb-5">
               <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
                 <Truck size={15} className="text-[#4a90e2]" />
-                <h3 className="text-[14px] font-semibold text-[#222]">Shipping To</h3>
+                <h3 className="text-[14px] font-semibold text-[#222]">{t('checkout.shippingTo')}</h3>
               </div>
               <div className="px-5 py-4 text-[13px] text-[#555] space-y-1">
                 <p className="font-semibold text-[#222]">{shipping.company}</p>
-                <p>Attn: {shipping.recipient} · {shipping.phone}</p>
+                <p>{t('checkout.attn')}: {shipping.recipient} · {shipping.phone}</p>
                 <p>{shipping.addressLine1}{shipping.addressLine2 ? `, ${shipping.addressLine2}` : ''}</p>
                 <p>{[shipping.city, shipping.state, shipping.zipCode].filter(Boolean).join(', ')}, {shipping.country}</p>
-                {poNumber && <p className="pt-1 text-[#888]">PO Number: <span className="font-medium text-[#555]">{poNumber}</span></p>}
-                {notes && <p className="text-[#888]">Notes: <span className="font-medium text-[#555]">{notes}</span></p>}
+                {poNumber && <p className="pt-1 text-[#888]">{t('account.po')}: <span className="font-medium text-[#555]">{poNumber}</span></p>}
+                {notes && <p className="text-[#888]">{t('account.notes')}: <span className="font-medium text-[#555]">{notes}</span></p>}
               </div>
             </div>
 
@@ -732,19 +754,19 @@ export default function Checkout() {
             <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden mb-6">
               <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
                 <ClipboardList size={15} className="text-[#4a90e2]" />
-                <h3 className="text-[14px] font-semibold text-[#222]">Payment Summary</h3>
+                <h3 className="text-[14px] font-semibold text-[#222]">{t('checkout.paymentSummary')}</h3>
               </div>
               <div className="px-5 py-4 space-y-2 text-[13px]">
                 <div className="flex justify-between">
-                  <span className="text-[#666]">Subtotal (excl. VAT)</span>
+                  <span className="text-[#666]">{t('checkout.subtotal')}</span>
                   <span>{formatPrice(confirmedTotals.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#666]">VAT (10%)</span>
+                  <span className="text-[#666]">{t('checkout.vat')}</span>
                   <span>{formatPrice(confirmedTotals.vat)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-[15px] pt-3 border-t border-[#e5e5e5]">
-                  <span>Grand Total</span>
+                  <span>{t('checkout.grandTotal')}</span>
                   <span>{formatPrice(confirmedTotals.total)}</span>
                 </div>
               </div>
@@ -755,11 +777,11 @@ export default function Checkout() {
               <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden mb-5">
                 <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
                   <Building2 size={15} className="text-[#4a90e2]" />
-                  <h3 className="text-[14px] font-semibold text-[#222]">Bank Transfer Instructions</h3>
+                  <h3 className="text-[14px] font-semibold text-[#222]">{t('checkout.bankInstructions')}</h3>
                 </div>
                 <div className="px-5 py-4 space-y-3">
                   <p className="text-[13px] text-[#555]">
-                    Please transfer the exact amount to one of the accounts below. Include your order number <strong className="font-mono text-[#333]">{orderId}</strong> in the transfer reference.
+                    {t('checkout.bankInstructionsDesc', { orderId })}
                   </p>
                   <div className="flex gap-1.5 mb-2">
                     {BANK_ACCOUNTS.map((b) => (
@@ -777,44 +799,44 @@ export default function Checkout() {
                     ))}
                   </div>
                   <div className="bg-[#f8f8fa] rounded-lg border border-[#e5e5e5] p-3 space-y-1.5 text-[12px]">
-                    <BankRow label="Bank" value={selectedBank.bankName} field="c-bank" copiedField={copiedField} onCopy={copyToClipboard} />
-                    <BankRow label="Account Name" value={selectedBank.accountName} field="c-name" copiedField={copiedField} onCopy={copyToClipboard} />
-                    <BankRow label="Account No." value={selectedBank.accountNumber} field="c-account" copiedField={copiedField} onCopy={copyToClipboard} />
-                    <BankRow label="SWIFT / BIC" value={selectedBank.swiftCode} field="c-swift" copiedField={copiedField} onCopy={copyToClipboard} />
+                    <BankRow label={t('checkout.bankLabel')} value={selectedBank.bankName} field="c-bank" copiedField={copiedField} onCopy={copyToClipboard} />
+                    <BankRow label={t('checkout.accountNameLabel')} value={selectedBank.accountName} field="c-name" copiedField={copiedField} onCopy={copyToClipboard} />
+                    <BankRow label={t('checkout.accountNoLabel')} value={selectedBank.accountNumber} field="c-account" copiedField={copiedField} onCopy={copyToClipboard} />
+                    <BankRow label={t('checkout.swiftLabel')} value={selectedBank.swiftCode} field="c-swift" copiedField={copiedField} onCopy={copyToClipboard} />
                     {selectedBank.routingNumber && (
-                      <BankRow label="Routing No." value={selectedBank.routingNumber} field="c-routing" copiedField={copiedField} onCopy={copyToClipboard} />
+                      <BankRow label={t('checkout.routingLabel')} value={selectedBank.routingNumber} field="c-routing" copiedField={copiedField} onCopy={copyToClipboard} />
                     )}
                     <div className="pt-1 flex justify-between items-center border-t border-[#e5e5e5] mt-1">
-                      <span className="text-[#888] font-medium">Amount</span>
-                      <span className="font-bold text-[#222] text-[13px]">{selectedBankCurrency} {formatPrice(confirmedTotals.total)}</span>
+                      <span className="text-[#888] font-medium">{t('checkout.amount')}</span>
+                      <span className="font-bold text-[#222] text-[13px]">{formatBankAmount(confirmedTotals.total)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[#888] font-medium">Reference</span>
+                      <span className="text-[#888] font-medium">{t('checkout.reference')}</span>
                       <span className="font-mono font-bold text-[#4a90e2]">{orderId}</span>
                     </div>
                   </div>
-                  <p className="text-[11px] text-[#aaa]">Payment must be received within 5 business days to confirm your order.</p>
+                  <p className="text-[11px] text-[#aaa]">{t('checkout.bankPaymentNote')}</p>
                 </div>
               </div>
             )}
 
             {/* What's next */}
             <div className="bg-[#f0f7ff] border border-[#4a90e2]/20 rounded-xl px-5 py-4 mb-6 text-[13px] text-[#555] space-y-2">
-              <p className="font-semibold text-[#333]">What happens next?</p>
+              <p className="font-semibold text-[#333]">{t('checkout.whatsNext')}</p>
               <ol className="list-decimal list-inside space-y-1 text-[#666]">
                 {paymentMethod === 'bank_transfer' ? (
                   <>
-                    <li>Transfer the amount to the account above with your order number as reference.</li>
-                    <li>Our team will verify your payment within 1–2 business days.</li>
-                    <li>Once confirmed, we will prepare and dispatch your goods.</li>
-                    <li>You will receive a shipping notification with tracking information.</li>
+                    <li>{t('checkout.bankStep1')}</li>
+                    <li>{t('checkout.bankStep2')}</li>
+                    <li>{t('checkout.bankStep3')}</li>
+                    <li>{t('checkout.bankStep4')}</li>
                   </>
                 ) : (
                   <>
-                    <li>Your order is now pending review by our team.</li>
-                    <li>You will be contacted within 1 business day to confirm stock &amp; delivery schedule.</li>
-                    <li>Once confirmed, a proforma invoice will be issued for payment.</li>
-                    <li>Goods are dispatched after payment is received.</li>
+                    <li>{t('checkout.invoiceStep1')}</li>
+                    <li>{t('checkout.invoiceStep2')}</li>
+                    <li>{t('checkout.invoiceStep3')}</li>
+                    <li>{t('checkout.invoiceStep4')}</li>
                   </>
                 )}
               </ol>
@@ -826,13 +848,13 @@ export default function Checkout() {
                 onClick={() => navigate('/products')}
                 className="flex-1 py-3 border border-[#ddd] rounded-lg text-[14px] text-[#555] hover:bg-[#f5f5f5] transition-colors font-medium"
               >
-                Continue Shopping
+                {t('checkout.continueShopping')}
               </button>
               <button
                 onClick={() => navigate('/')}
                 className="flex-1 py-3 bg-[#333] text-white rounded-lg text-[14px] font-semibold hover:bg-[#555] transition-colors"
               >
-                Back to Home
+                {t('common.backToHome')}
               </button>
             </div>
           </div>
@@ -882,6 +904,7 @@ function BankRow({
   copiedField: string | null;
   onCopy: (text: string, field: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="text-[#888] shrink-0 w-[90px]">{label}</span>
@@ -889,7 +912,7 @@ function BankRow({
       <button
         onClick={() => onCopy(value, field)}
         className="shrink-0 text-[#bbb] hover:text-[#4a90e2] transition-colors"
-        title="Copy"
+        title={t('common.copy')}
       >
         {copiedField === field ? (
           <CheckCircle2 size={13} className="text-green-500" />

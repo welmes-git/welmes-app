@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useCurrency } from '../context/CurrencyContext';
 import {
@@ -25,20 +26,9 @@ import {
 
 type Tab = 'orders' | 'account' | 'security';
 
-const STATUS_CONFIG: Record<
-  string,
-  { label: string; color: string; icon: React.ReactNode }
-> = {
-  pending:    { label: 'Pending',    color: 'bg-yellow-50 text-yellow-700 border-yellow-200',  icon: <Clock size={13} /> },
-  processing: { label: 'Processing', color: 'bg-blue-50 text-blue-700 border-blue-200',         icon: <Package size={13} /> },
-  shipped:    { label: 'Shipped',    color: 'bg-indigo-50 text-indigo-700 border-indigo-200',   icon: <Truck size={13} /> },
-  completed:  { label: 'Completed',  color: 'bg-green-50 text-green-700 border-green-200',      icon: <CheckCircle2 size={13} /> },
-  cancelled:  { label: 'Cancelled',  color: 'bg-red-50 text-red-700 border-red-200',            icon: <XCircle size={13} /> },
-};
-
-
 export default function MyAccount() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { formatPrice } = useCurrency();
   const {
     isAuthenticated,
@@ -76,13 +66,13 @@ export default function MyAccount() {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-20 text-center">
         <User size={48} className="mx-auto text-[#ddd] mb-4" />
-        <h2 className="text-[20px] font-bold mb-2">Login Required</h2>
-        <p className="text-[14px] text-[#999] mb-6">Please log in to view your account.</p>
+        <h2 className="text-[20px] font-bold mb-2">{t('account.loginRequired')}</h2>
+        <p className="text-[14px] text-[#999] mb-6">{t('account.loginRequiredDesc')}</p>
         <button
           onClick={() => navigate('/login')}
           className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[14px] hover:bg-[#555] transition-colors"
         >
-          Go to Login
+          {t('account.goToLogin')}
         </button>
       </div>
     );
@@ -100,64 +90,70 @@ export default function MyAccount() {
   async function handleSaveAccount(e: React.FormEvent) {
     e.preventDefault();
     if (!accountForm.companyName.trim() || !accountForm.representative.trim()) {
-      showToast('Company name and representative are required.', 'error');
+      showToast(t('common.required'), 'error');
       return;
     }
     setAccountSaving(true);
     updateMember(currentUser!.id, accountForm);
     setAccountSaving(false);
-    showToast('Account information updated successfully.', 'success');
+    showToast(t('account.infoUpdated'), 'success');
   }
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
     if (!pwForm.current || !pwForm.next || !pwForm.confirm) {
-      showToast('Please fill in all password fields.', 'error');
+      showToast(t('common.required'), 'error');
       return;
     }
     if (pwForm.next.length < 8) {
-      showToast('New password must be at least 8 characters.', 'error');
+      showToast(t('account.passwordHint'), 'error');
       return;
     }
     if (pwForm.next !== pwForm.confirm) {
-      showToast('New passwords do not match.', 'error');
+      showToast(t('auth.passwordMismatch'), 'error');
       return;
     }
     setPwSaving(true);
-    // Verify current password via Supabase re-auth
     const { error: signInErr } = await supabase.auth.signInWithPassword({
       email: currentUser!.email,
       password: pwForm.current,
     });
     if (signInErr) {
-      showToast('Current password is incorrect.', 'error');
+      showToast(t('auth.loginFailed'), 'error');
       setPwSaving(false);
       return;
     }
-    // Update to new password
     const { error: updateErr } = await supabase.auth.updateUser({ password: pwForm.next });
     if (updateErr) {
-      showToast('Failed to change password. Please try again.', 'error');
+      showToast(t('common.error'), 'error');
       setPwSaving(false);
       return;
     }
     setPwForm({ current: '', next: '', confirm: '' });
     setPwSaving(false);
-    showToast('Password changed successfully.', 'success');
+    showToast(t('account.passwordUpdated'), 'success');
   }
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
-    { key: 'orders',   label: 'My Orders',    icon: <Package size={16} /> },
-    { key: 'account',  label: 'Account Info', icon: <User size={16} /> },
-    { key: 'security', label: 'Security',     icon: <Lock size={16} /> },
+    { key: 'orders',   label: t('account.myOrders'),    icon: <Package size={16} /> },
+    { key: 'account',  label: t('account.accountInfo'), icon: <User size={16} /> },
+    { key: 'security', label: t('account.security'),    icon: <Lock size={16} /> },
   ];
+
+  const statusConfig: Record<string, { color: string; icon: React.ReactNode }> = {
+    pending:    { color: 'bg-yellow-50 text-yellow-700 border-yellow-200',  icon: <Clock size={13} /> },
+    processing: { color: 'bg-blue-50 text-blue-700 border-blue-200',        icon: <Package size={13} /> },
+    shipped:    { color: 'bg-indigo-50 text-indigo-700 border-indigo-200',  icon: <Truck size={13} /> },
+    completed:  { color: 'bg-green-50 text-green-700 border-green-200',     icon: <CheckCircle2 size={13} /> },
+    cancelled:  { color: 'bg-red-50 text-red-700 border-red-200',           icon: <XCircle size={13} /> },
+  };
 
   return (
     <div className="bg-[#f8f8fa] min-h-screen pb-16">
       {/* Page header */}
       <div className="bg-white border-b border-[#e5e5e5]">
         <div className="max-w-[960px] mx-auto px-4 py-5">
-          <h1 className="text-[20px] font-bold text-[#222]">My Account</h1>
+          <h1 className="text-[20px] font-bold text-[#222]">{t('account.title')}</h1>
         </div>
       </div>
 
@@ -175,15 +171,15 @@ export default function MyAccount() {
             <div className="mt-3">
               {approvalStatus === 'approved' ? (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 rounded-full px-2.5 py-0.5">
-                  <CheckCircle2 size={11} /> Verified Business
+                  <CheckCircle2 size={11} /> {t('account.verifiedBusiness')}
                 </span>
               ) : approvalStatus === 'pending' ? (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-full px-2.5 py-0.5">
-                  <Clock size={11} /> Pending Review
+                  <Clock size={11} /> {t('account.pendingReview')}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-700 bg-red-50 border border-red-200 rounded-full px-2.5 py-0.5">
-                  <XCircle size={11} /> Not Approved
+                  <XCircle size={11} /> {t('account.notApproved')}
                 </span>
               )}
             </div>
@@ -191,19 +187,19 @@ export default function MyAccount() {
 
           {/* Nav */}
           <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
-            {tabs.map((t) => (
+            {tabs.map((tabItem) => (
               <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
+                key={tabItem.key}
+                onClick={() => setTab(tabItem.key)}
                 className={`w-full flex items-center justify-between px-4 py-3.5 text-[13px] font-medium transition-colors border-b border-[#f5f5f5] last:border-0 ${
-                  tab === t.key
+                  tab === tabItem.key
                     ? 'bg-[#f0f7ff] text-[#4a90e2]'
                     : 'text-[#555] hover:bg-[#f8f8fa]'
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  {t.icon}
-                  {t.label}
+                  {tabItem.icon}
+                  {tabItem.label}
                 </span>
                 <ChevronRight size={14} className="text-[#ccc]" />
               </button>
@@ -214,7 +210,7 @@ export default function MyAccount() {
             >
               <span className="flex items-center gap-2">
                 <Heart size={16} />
-                Wishlist
+                {t('account.wishlist')}
               </span>
               <ChevronRight size={14} className="text-[#ccc]" />
             </button>
@@ -224,31 +220,29 @@ export default function MyAccount() {
         {/* ── Main Content ── */}
         <div className="flex-1 min-w-0">
 
-          {/* ══════════════════════════════
-              TAB: MY ORDERS
-          ══════════════════════════════ */}
+          {/* ══ TAB: MY ORDERS ══ */}
           {tab === 'orders' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-[16px] font-bold text-[#222]">Order History</h2>
-                <span className="text-[13px] text-[#999]">{myOrders.length} order{myOrders.length !== 1 ? 's' : ''}</span>
+                <h2 className="text-[16px] font-bold text-[#222]">{t('account.orderHistory')}</h2>
+                <span className="text-[13px] text-[#999]">{myOrders.length} {t('account.orders')}</span>
               </div>
 
               {myOrders.length === 0 ? (
                 <div className="bg-white rounded-xl border border-[#e5e5e5] py-16 text-center">
                   <Package size={44} className="mx-auto text-[#ddd] mb-3" />
-                  <p className="text-[14px] text-[#999] mb-1">No orders yet</p>
-                  <p className="text-[12px] text-[#bbb] mb-5">Your orders will appear here once you place them.</p>
+                  <p className="text-[14px] text-[#999] mb-1">{t('account.noOrders')}</p>
+                  <p className="text-[12px] text-[#bbb] mb-5">{t('account.noOrdersDesc')}</p>
                   <Link
                     to="/products"
                     className="inline-block px-5 py-2 bg-[#333] text-white text-[13px] rounded-lg hover:bg-[#555] transition-colors"
                   >
-                    Start Shopping
+                    {t('account.startShopping')}
                   </Link>
                 </div>
               ) : (
                 myOrders.map((order) => {
-                  const sc = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending;
+                  const sc = statusConfig[order.status] ?? statusConfig.pending;
                   const isExpanded = expandedOrder === order.id;
                   return (
                     <div key={order.id} className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
@@ -263,7 +257,7 @@ export default function MyAccount() {
                             <p className="text-[12px] text-[#aaa] mt-0.5">{order.date}</p>
                           </div>
                           <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold border rounded-full px-2.5 py-0.5 w-fit ${sc.color}`}>
-                            {sc.icon} {sc.label}
+                            {sc.icon} {t(`status.${order.status}`)}
                           </span>
                         </div>
                         <div className="flex items-center gap-3">
@@ -277,7 +271,7 @@ export default function MyAccount() {
                             to={`/order/${order.id}/print`}
                             onClick={(e) => e.stopPropagation()}
                             className="shrink-0 w-8 h-8 flex items-center justify-center text-[#aaa] hover:text-[#4a90e2] hover:bg-[#f0f7ff] rounded-lg transition-colors border border-[#e5e5e5]"
-                            title="Print / Save as PDF"
+                            title={t('account.printOrder')}
                           >
                             <Printer size={14} />
                           </Link>
@@ -294,7 +288,7 @@ export default function MyAccount() {
                           {/* Items */}
                           {order.items.length > 0 ? (
                             <div>
-                              <p className="text-[12px] font-semibold text-[#aaa] uppercase tracking-wide mb-3">Items Ordered</p>
+                              <p className="text-[12px] font-semibold text-[#aaa] uppercase tracking-wide mb-3">{t('account.itemsOrdered')}</p>
                               <div className="space-y-3">
                                 {order.items.map((item, idx) => (
                                   <div key={idx} className="flex items-center gap-3">
@@ -328,9 +322,9 @@ export default function MyAccount() {
                           {/* Shipping */}
                           {order.shippingAddress && (
                             <div className="bg-[#f8f8fa] rounded-lg p-3">
-                              <p className="text-[12px] font-semibold text-[#aaa] uppercase tracking-wide mb-1.5">Shipping Address</p>
+                              <p className="text-[12px] font-semibold text-[#aaa] uppercase tracking-wide mb-1.5">{t('account.shippingAddress')}</p>
                               <p className="text-[13px] text-[#555]">
-                                {order.shippingAddress.company} · Attn: {order.shippingAddress.recipient}
+                                {order.shippingAddress.company} · {t('checkout.attn')}: {order.shippingAddress.recipient}
                               </p>
                               <p className="text-[12px] text-[#888]">
                                 {order.shippingAddress.addressLine1}, {order.shippingAddress.city} {order.shippingAddress.zipCode}, {order.shippingAddress.country}
@@ -343,14 +337,14 @@ export default function MyAccount() {
                             <div className="bg-[#f0f7ff] border border-[#c8e0f8] rounded-lg p-3">
                               <p className="text-[12px] font-semibold text-[#4a90e2] uppercase tracking-wide mb-2 flex items-center gap-1.5">
                                 <Truck size={13} />
-                                Shipment Tracking
+                                {t('account.shipmentTracking')}
                               </p>
                               <div className="flex items-center justify-between gap-3 flex-wrap">
                                 <div>
                                   <p className="text-[13px] text-[#333] font-medium">{order.trackingCarrier}</p>
                                   <p className="text-[13px] font-mono text-[#555]">{order.trackingNumber}</p>
                                   {order.trackingShippedAt && (
-                                    <p className="text-[11px] text-[#aaa] mt-0.5">Shipped on {order.trackingShippedAt}</p>
+                                    <p className="text-[11px] text-[#aaa] mt-0.5">{t('account.shippedOn')} {order.trackingShippedAt}</p>
                                   )}
                                 </div>
                                 <a
@@ -360,7 +354,7 @@ export default function MyAccount() {
                                   className="shrink-0 h-8 px-4 bg-[#4a90e2] text-white text-[12px] font-semibold rounded-lg flex items-center gap-1.5 hover:bg-[#3a7bc8] transition-colors"
                                 >
                                   <Truck size={12} />
-                                  Track Package
+                                  {t('account.trackPackage')}
                                 </a>
                               </div>
                             </div>
@@ -369,8 +363,8 @@ export default function MyAccount() {
                           {/* PO / Notes */}
                           {(order.poNumber || order.notes) && (
                             <div className="flex gap-4 text-[12px] text-[#888]">
-                              {order.poNumber && <p>PO: <span className="font-medium text-[#555]">{order.poNumber}</span></p>}
-                              {order.notes && <p>Notes: <span className="font-medium text-[#555]">{order.notes}</span></p>}
+                              {order.poNumber && <p>{t('account.po')}: <span className="font-medium text-[#555]">{order.poNumber}</span></p>}
+                              {order.notes && <p>{t('account.notes')}: <span className="font-medium text-[#555]">{order.notes}</span></p>}
                             </div>
                           )}
 
@@ -378,18 +372,18 @@ export default function MyAccount() {
                           <div className="border-t border-[#f0f0f0] pt-3 space-y-1 text-[13px]">
                             {order.subtotal !== undefined && (
                               <div className="flex justify-between text-[#666]">
-                                <span>Subtotal (excl. VAT)</span>
+                                <span>{t('checkout.subtotal')}</span>
                                 <span>{formatPrice(order.subtotal)}</span>
                               </div>
                             )}
                             {order.vat !== undefined && (
                               <div className="flex justify-between text-[#666]">
-                                <span>VAT (10%)</span>
+                                <span>{t('checkout.vat')}</span>
                                 <span>{formatPrice(order.vat)}</span>
                               </div>
                             )}
                             <div className="flex justify-between font-bold text-[#222] pt-1 border-t border-[#f0f0f0]">
-                              <span>Total</span>
+                              <span>{t('account.total')}</span>
                               <span>{formatPrice(order.total)}</span>
                             </div>
                           </div>
@@ -402,30 +396,28 @@ export default function MyAccount() {
             </div>
           )}
 
-          {/* ══════════════════════════════
-              TAB: ACCOUNT INFO
-          ══════════════════════════════ */}
+          {/* ══ TAB: ACCOUNT INFO ══ */}
           {tab === 'account' && (
             <div className="space-y-5">
-              <h2 className="text-[16px] font-bold text-[#222]">Account Information</h2>
+              <h2 className="text-[16px] font-bold text-[#222]">{t('account.accountInfo')}</h2>
 
               {/* Read-only info */}
               <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
                 <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
                   <CreditCard size={15} className="text-[#4a90e2]" />
-                  <h3 className="text-[14px] font-semibold text-[#222]">Business Registration</h3>
-                  <span className="text-[11px] text-[#bbb] ml-1">(read-only)</span>
+                  <h3 className="text-[14px] font-semibold text-[#222]">{t('account.businessReg')}</h3>
+                  <span className="text-[11px] text-[#bbb] ml-1">({t('account.readOnly')})</span>
                 </div>
                 <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <InfoRow label="Email" value={currentUser.email} />
-                  <InfoRow label="Business Reg. No." value={currentUser.businessNumber} />
+                  <InfoRow label={t('auth.email')} value={currentUser.email} />
+                  <InfoRow label={t('auth.businessRegNo')} value={currentUser.businessNumber} />
                   <InfoRow label="Member Since" value={memberRecord?.registeredDate ?? '—'} />
                   <InfoRow
-                    label="Account Status"
+                    label={t('account.status')}
                     value={
-                      approvalStatus === 'approved' ? '✅ Verified Business'
-                      : approvalStatus === 'pending' ? '⏳ Pending Review'
-                      : '❌ Not Approved'
+                      approvalStatus === 'approved' ? `✅ ${t('account.verifiedBusiness')}`
+                      : approvalStatus === 'pending' ? `⏳ ${t('account.pendingReview')}`
+                      : `❌ ${t('account.notApproved')}`
                     }
                   />
                 </div>
@@ -435,18 +427,18 @@ export default function MyAccount() {
               <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
                 <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
                   <Building2 size={15} className="text-[#4a90e2]" />
-                  <h3 className="text-[14px] font-semibold text-[#222]">Company Details</h3>
+                  <h3 className="text-[14px] font-semibold text-[#222]">{t('account.companyDetails')}</h3>
                 </div>
                 <form onSubmit={handleSaveAccount} className="px-5 py-5 space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <AField label="Company Name *">
+                    <AField label={`${t('auth.companyName')} *`}>
                       <input
                         value={accountForm.companyName}
                         onChange={(e) => setAccountForm({ ...accountForm, companyName: e.target.value })}
                         className={inputCls}
                       />
                     </AField>
-                    <AField label="Representative Name *">
+                    <AField label={`${t('auth.representative')} *`}>
                       <input
                         value={accountForm.representative}
                         onChange={(e) => setAccountForm({ ...accountForm, representative: e.target.value })}
@@ -454,7 +446,7 @@ export default function MyAccount() {
                       />
                     </AField>
                   </div>
-                  <AField label="Phone Number">
+                  <AField label={t('auth.phone')}>
                     <div className="relative">
                       <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bbb]" />
                       <input
@@ -465,7 +457,7 @@ export default function MyAccount() {
                       />
                     </div>
                   </AField>
-                  <AField label="Business Address">
+                  <AField label={t('auth.address')}>
                     <div className="relative">
                       <MapPin size={14} className="absolute left-3 top-3.5 text-[#bbb]" />
                       <textarea
@@ -482,7 +474,7 @@ export default function MyAccount() {
                       disabled={accountSaving}
                       className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[13px] font-semibold hover:bg-[#555] transition-colors disabled:opacity-50"
                     >
-                      {accountSaving ? 'Saving…' : 'Save Changes'}
+                      {accountSaving ? t('account.saving') : t('account.saveChanges')}
                     </button>
                   </div>
                 </form>
@@ -490,24 +482,22 @@ export default function MyAccount() {
             </div>
           )}
 
-          {/* ══════════════════════════════
-              TAB: SECURITY
-          ══════════════════════════════ */}
+          {/* ══ TAB: SECURITY ══ */}
           {tab === 'security' && (
             <div className="space-y-5">
-              <h2 className="text-[16px] font-bold text-[#222]">Security Settings</h2>
+              <h2 className="text-[16px] font-bold text-[#222]">{t('account.securitySettings')}</h2>
 
               <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
                 <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
                   <Lock size={15} className="text-[#4a90e2]" />
-                  <h3 className="text-[14px] font-semibold text-[#222]">Change Password</h3>
+                  <h3 className="text-[14px] font-semibold text-[#222]">{t('account.changePassword')}</h3>
                 </div>
 
                 <form onSubmit={handleChangePassword} className="px-5 py-5 space-y-4 max-w-[400px]">
                   {[
-                    { key: 'current' as const, label: 'Current Password' },
-                    { key: 'next'    as const, label: 'New Password' },
-                    { key: 'confirm' as const, label: 'Confirm New Password' },
+                    { key: 'current' as const, label: t('account.currentPassword') },
+                    { key: 'next'    as const, label: t('account.newPassword') },
+                    { key: 'confirm' as const, label: t('account.confirmNewPassword') },
                   ].map(({ key, label }) => (
                     <AField key={key} label={label}>
                       <div className="relative">
@@ -531,7 +521,7 @@ export default function MyAccount() {
 
                   <div className="bg-[#f8f8fa] rounded-lg p-3 flex gap-2 text-[12px] text-[#888]">
                     <AlertCircle size={14} className="text-[#aaa] shrink-0 mt-0.5" />
-                    <span>Password must be at least 8 characters. Use a mix of letters, numbers, and symbols for better security.</span>
+                    <span>{t('account.passwordHint')}</span>
                   </div>
 
                   <div className="flex justify-end pt-1">
@@ -540,7 +530,7 @@ export default function MyAccount() {
                       disabled={pwSaving}
                       className="px-6 py-2.5 bg-[#4a90e2] text-white rounded-lg text-[13px] font-semibold hover:bg-[#357abd] transition-colors disabled:opacity-50"
                     >
-                      {pwSaving ? 'Updating…' : 'Update Password'}
+                      {pwSaving ? t('account.updating') : t('account.updatePassword')}
                     </button>
                   </div>
                 </form>
@@ -550,11 +540,11 @@ export default function MyAccount() {
               <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
                 <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
                   <User size={15} className="text-[#4a90e2]" />
-                  <h3 className="text-[14px] font-semibold text-[#222]">Login Information</h3>
+                  <h3 className="text-[14px] font-semibold text-[#222]">{t('account.loginInfo')}</h3>
                 </div>
                 <div className="px-5 py-4 space-y-3">
-                  <InfoRow label="Login Email" value={currentUser.email} />
-                  <InfoRow label="Account Type" value={currentUser.isAdmin ? 'Administrator' : 'Business Member'} />
+                  <InfoRow label={t('account.loginEmail')} value={currentUser.email} />
+                  <InfoRow label={t('account.accountType')} value={currentUser.isAdmin ? t('account.administrator') : t('account.businessMember')} />
                 </div>
               </div>
             </div>

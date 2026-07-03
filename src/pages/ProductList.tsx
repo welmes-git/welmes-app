@@ -1,39 +1,55 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { useCurrency } from '../context/CurrencyContext';
 import { initialProducts, brands, categories } from '../data/products';
 import ProductCard from '../components/ProductCard';
-import { ChevronLeft, ChevronRight, ChevronDown, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Search, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 type SortOption = 'popular' | 'price-low' | 'price-high' | 'newest' | 'discount';
 
 export default function ProductList() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { products } = useStore();
+  const { formatPrice } = useCurrency();
   const { t } = useTranslation();
 
   const allProducts = products.length > 0 ? products : initialProducts;
 
   const categoryFilter = searchParams.get('category') || 'All';
-  const brandFilter = searchParams.get('brand') || '';
-  const searchQuery = searchParams.get('search') || '';
-  const sortParam = searchParams.get('sort') || 'popular';
+  const brandFilter    = searchParams.get('brand')    || '';
+  const searchQuery    = searchParams.get('search')   || '';
+  const sortParam      = searchParams.get('sort')     || 'popular';
 
-  const [sortBy, setSortBy] = useState<SortOption>(sortParam as SortOption);
-  const [selectedBrands, setSelectedBrands] = useState<string[]>(
-    brandFilter ? [brandFilter] : []
-  );
+  const [sortBy, setSortBy]               = useState<SortOption>(sortParam as SortOption);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(brandFilter ? [brandFilter] : []);
   const [selectedCategory, setSelectedCategory] = useState(categoryFilter);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage]     = useState(1);
+  const [showFilters, setShowFilters]     = useState(false);
+  const [inlineSearch, setInlineSearch]   = useState(searchQuery);
 
+  // Sync URL → local state; reset page whenever any URL param changes
   useEffect(() => {
     setSelectedBrands(brandFilter ? [brandFilter] : []);
     setSelectedCategory(categoryFilter);
     setSortBy(sortParam as SortOption);
     setCurrentPage(1);
   }, [brandFilter, categoryFilter, sortParam]);
-  const [showFilters, setShowFilters] = useState(false);
+
+  // Separate effect for searchQuery so page resets when search changes
+  useEffect(() => {
+    setInlineSearch(searchQuery);
+    setCurrentPage(1);
+    // Clear sidebar brand/category filter when user performs a new text search
+    // so results aren't accidentally empty from stale sidebar state
+    if (searchQuery) {
+      setSelectedBrands([]);
+      setSelectedCategory('All');
+    }
+  }, [searchQuery]);
+
   const itemsPerPage = 12;
 
   const priceMin = useMemo(() => Math.floor(Math.min(...allProducts.map((p) => p.wholesalePrice))), [allProducts]);
@@ -43,27 +59,28 @@ export default function ProductList() {
   const filteredProducts = useMemo(() => {
     let result = [...allProducts];
 
-    // Category filter
-    if (selectedCategory !== 'All') {
-      result = result.filter((p) => p.category === selectedCategory);
-    }
-
-    // Brand filter
-    if (selectedBrands.length > 0) {
-      result = result.filter((p) => selectedBrands.includes(p.brand));
-    }
-
-    // Search filter
+    // Text search — name, brand, category, tags, description (first 200 chars)
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q)
+          p.brand.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          p.tags.some((tag) => tag.toLowerCase().includes(q)) ||
+          p.description.slice(0, 200).toLowerCase().includes(q)
       );
+    } else {
+      // Only apply sidebar filters when NOT in search mode
+      if (selectedCategory !== 'All') {
+        result = result.filter((p) => p.category === selectedCategory);
+      }
+      if (selectedBrands.length > 0) {
+        result = result.filter((p) => selectedBrands.includes(p.brand));
+      }
     }
 
-    // Price range
+    // Price range (always applied)
     const rangeMax = priceRange[1] === Infinity ? priceMax : priceRange[1];
     result = result.filter(
       (p) => p.wholesalePrice >= priceRange[0] && p.wholesalePrice <= rangeMax
@@ -88,7 +105,7 @@ export default function ProductList() {
     }
 
     return result;
-  }, [allProducts, selectedCategory, selectedBrands, searchQuery, priceRange, sortBy]);
+  }, [allProducts, selectedCategory, selectedBrands, searchQuery, priceRange, sortBy, priceMax]);
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const paginatedProducts = filteredProducts.slice(
@@ -110,9 +127,29 @@ export default function ProductList() {
     setCurrentPage(1);
   };
 
+  const handleInlineSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = inlineSearch.trim();
+    if (q) {
+      navigate(`/products?search=${encodeURIComponent(q)}`);
+    } else {
+      // Clear search → back to all products
+      const p = new URLSearchParams(searchParams);
+      p.delete('search');
+      setSearchParams(p);
+    }
+  };
+
+  const clearSearch = () => {
+    setInlineSearch('');
+    const p = new URLSearchParams(searchParams);
+    p.delete('search');
+    setSearchParams(p);
+  };
+
   const rangeMin = priceRange[0];
   const rangeMax = priceRange[1] === Infinity ? priceMax : priceRange[1];
-  const rangePercLow = priceMax > priceMin ? ((rangeMin - priceMin) / (priceMax - priceMin)) * 100 : 0;
+  const rangePercLow  = priceMax > priceMin ? ((rangeMin - priceMin) / (priceMax - priceMin)) * 100 : 0;
   const rangePercHigh = priceMax > priceMin ? ((rangeMax - priceMin) / (priceMax - priceMin)) * 100 : 100;
 
   const pageTitle = searchQuery
@@ -124,15 +161,62 @@ export default function ProductList() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-[1100px] mx-auto px-4 py-8">
+
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-[13px] text-[#999] mb-6">
-          <Link to="/" className="hover:text-[#333]">
-            Home
-          </Link>
+          <Link to="/" className="hover:text-[#333]">{t('common.home')}</Link>
           <span>&gt;</span>
           <span className="text-[#333]">
-            {selectedCategory !== 'All' ? selectedCategory : 'Products'}
+            {searchQuery
+              ? t('common.search')
+              : selectedCategory !== 'All'
+              ? selectedCategory
+              : t('products.allProducts')}
           </span>
+        </div>
+
+        {/* Inline Search Bar — shown when in search mode or always on mobile */}
+        <div className="mb-6">
+          <form onSubmit={handleInlineSearch}>
+            <div className="relative max-w-[560px]">
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#aaa]" />
+              <input
+                type="text"
+                value={inlineSearch}
+                onChange={(e) => setInlineSearch(e.target.value)}
+                placeholder={t('nav.searchPlaceholderFull')}
+                className="w-full h-[44px] pl-10 pr-24 border border-[#ddd] rounded-full text-[14px] focus:outline-none focus:border-[#333] transition-colors"
+              />
+              {inlineSearch && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute right-16 top-1/2 -translate-y-1/2 text-[#bbb] hover:text-[#666] p-1"
+                >
+                  <X size={15} />
+                </button>
+              )}
+              <button
+                type="submit"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-[36px] px-4 bg-[#333] text-white text-[13px] font-medium rounded-full hover:bg-[#555] transition-colors"
+              >
+                {t('common.search')}
+              </button>
+            </div>
+          </form>
+
+          {/* Active search tag */}
+          {searchQuery && (
+            <div className="flex items-center gap-2 mt-3">
+              <span className="text-[12px] text-[#999]">{t('common.search')}:</span>
+              <span className="inline-flex items-center gap-1.5 bg-[#333] text-white text-[12px] font-medium px-3 py-1 rounded-full">
+                "{searchQuery}"
+                <button onClick={clearSearch} className="hover:opacity-70">
+                  <X size={12} />
+                </button>
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
@@ -141,10 +225,7 @@ export default function ProductList() {
             <div className="bg-[#f8f8fa] rounded-lg p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[14px] font-bold">{t('products.filters')}</h3>
-                <button
-                  onClick={clearFilters}
-                  className="text-[12px] text-[#4a90e2] hover:underline"
-                >
+                <button onClick={clearFilters} className="text-[12px] text-[#4a90e2] hover:underline">
                   {t('products.reset')}
                 </button>
               </div>
@@ -159,6 +240,8 @@ export default function ProductList() {
                       onClick={() => {
                         setSelectedCategory(cat);
                         setCurrentPage(1);
+                        // If in search mode, exit search mode and apply category filter
+                        if (searchQuery) clearSearch();
                       }}
                       className={`block w-full text-left text-[13px] py-1 px-2 rounded ${
                         selectedCategory === cat
@@ -184,7 +267,10 @@ export default function ProductList() {
                       <input
                         type="checkbox"
                         checked={selectedBrands.includes(brand)}
-                        onChange={() => toggleBrand(brand)}
+                        onChange={() => {
+                          toggleBrand(brand);
+                          if (searchQuery) clearSearch();
+                        }}
                         className="w-3.5 h-3.5 rounded border-[#ccc]"
                       />
                       {brand}
@@ -196,23 +282,18 @@ export default function ProductList() {
               {/* Price Range */}
               <div>
                 <h4 className="text-[13px] font-semibold mb-3">{t('products.priceRange')}</h4>
-                {/* Current range labels */}
                 <div className="flex justify-between text-[12px] text-[#555] mb-3">
-                  <span className="font-medium">¥{rangeMin.toLocaleString()}</span>
+                  <span className="font-medium">{formatPrice(rangeMin)}</span>
                   <span className="font-medium">
-                    {priceRange[1] === Infinity ? `¥${priceMax.toLocaleString()}+` : `¥${rangeMax.toLocaleString()}`}
+                    {priceRange[1] === Infinity ? `${formatPrice(priceMax)}+` : formatPrice(rangeMax)}
                   </span>
                 </div>
-                {/* Dual range slider */}
                 <div className="relative h-5 flex items-center">
-                  {/* Track background */}
                   <div className="absolute w-full h-1.5 bg-[#e5e5e5] rounded-full" />
-                  {/* Active track fill */}
                   <div
                     className="absolute h-1.5 bg-[#4a90e2] rounded-full"
                     style={{ left: `${rangePercLow}%`, right: `${100 - rangePercHigh}%` }}
                   />
-                  {/* Min handle */}
                   <input
                     type="range"
                     min={priceMin}
@@ -220,15 +301,11 @@ export default function ProductList() {
                     value={rangeMin}
                     onChange={(e) => {
                       const val = Number(e.target.value);
-                      if (val < rangeMax) {
-                        setPriceRange([val, priceRange[1]]);
-                        setCurrentPage(1);
-                      }
+                      if (val < rangeMax) { setPriceRange([val, priceRange[1]]); setCurrentPage(1); }
                     }}
                     className="absolute w-full appearance-none bg-transparent cursor-pointer range-thumb"
                     style={{ zIndex: rangePercLow > 90 ? 5 : 3 }}
                   />
-                  {/* Max handle */}
                   <input
                     type="range"
                     min={priceMin}
@@ -236,19 +313,15 @@ export default function ProductList() {
                     value={rangeMax}
                     onChange={(e) => {
                       const val = Number(e.target.value);
-                      if (val > rangeMin) {
-                        setPriceRange([priceRange[0], val]);
-                        setCurrentPage(1);
-                      }
+                      if (val > rangeMin) { setPriceRange([priceRange[0], val]); setCurrentPage(1); }
                     }}
                     className="absolute w-full appearance-none bg-transparent cursor-pointer range-thumb"
                     style={{ zIndex: 4 }}
                   />
                 </div>
-                {/* Min/Max bounds */}
                 <div className="flex justify-between text-[11px] text-[#bbb] mt-2">
-                  <span>¥{priceMin.toLocaleString()}</span>
-                  <span>¥{priceMax.toLocaleString()}</span>
+                  <span>{formatPrice(priceMin)}</span>
+                  <span>{formatPrice(priceMax)}</span>
                 </div>
               </div>
             </div>
@@ -292,13 +365,18 @@ export default function ProductList() {
             </div>
 
             {/* No Results */}
-            {paginatedProducts.length === 0 && (
+            {filteredProducts.length === 0 && (
               <div className="text-center py-16">
                 <Search size={48} className="mx-auto text-[#ddd] mb-4" />
-                <p className="text-[14px] text-[#999]">{t('products.noResults')}</p>
+                <p className="text-[15px] font-medium text-[#666] mb-1">{t('products.noResults')}</p>
+                {searchQuery && (
+                  <p className="text-[13px] text-[#aaa] mb-4">
+                    "{searchQuery}"
+                  </p>
+                )}
                 <button
-                  onClick={clearFilters}
-                  className="mt-3 text-[13px] text-[#4a90e2] hover:underline"
+                  onClick={() => { clearFilters(); clearSearch(); }}
+                  className="mt-2 px-5 py-2 bg-[#333] text-white text-[13px] rounded-lg hover:bg-[#555] transition-colors"
                 >
                   {t('products.clearFilters')}
                 </button>
@@ -322,25 +400,35 @@ export default function ProductList() {
                 >
                   <ChevronLeft size={14} />
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-8 h-8 flex items-center justify-center rounded text-[13px] ${
-                        page === currentPage
-                          ? 'bg-[#333] text-white'
-                          : 'border border-[#ddd] hover:bg-[#f5f5f5]'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  )
-                )}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((page) => {
+                    // Show first, last, current ±1, and ellipsis
+                    return page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1;
+                  })
+                  .reduce<(number | 'ellipsis')[]>((acc, page, idx, arr) => {
+                    if (idx > 0 && (arr[idx - 1] as number) + 1 < page) acc.push('ellipsis');
+                    acc.push(page);
+                    return acc;
+                  }, [])
+                  .map((item, idx) =>
+                    item === 'ellipsis' ? (
+                      <span key={`e-${idx}`} className="w-8 text-center text-[#bbb] text-[13px]">…</span>
+                    ) : (
+                      <button
+                        key={item}
+                        onClick={() => setCurrentPage(item as number)}
+                        className={`w-8 h-8 flex items-center justify-center rounded text-[13px] ${
+                          item === currentPage
+                            ? 'bg-[#333] text-white'
+                            : 'border border-[#ddd] hover:bg-[#f5f5f5]'
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    )
+                  )}
                 <button
-                  onClick={() =>
-                    setCurrentPage((p) => Math.min(totalPages, p + 1))
-                  }
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                   className="w-8 h-8 flex items-center justify-center border border-[#ddd] rounded hover:bg-[#f5f5f5] disabled:opacity-30"
                 >

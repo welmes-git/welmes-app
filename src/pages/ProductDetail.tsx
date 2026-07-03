@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import type { SetOption } from '../store/useStore';
 import { initialProducts } from '../data/products';
 import { useCurrency } from '../context/CurrencyContext';
+import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/ProductCard';
 import * as db from '../lib/db';
 import type { Review } from '../lib/db';
@@ -22,17 +23,16 @@ import {
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { products, addToCart, isAuthenticated, currentUser, showToast } =
     useStore();
   const { formatPrice } = useCurrency();
-  // setQty: { S1: 0, S2: 2, S3: 0 } — quantity per set option
   const [setQty, setSetQty] = useState<Record<string, number>>({});
   const [activeTab, setActiveTab] = useState<'info' | 'reviews' | 'shipping'>('info');
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
-  // ── Reviews ──────────────────────────────────────────────────
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
@@ -68,7 +68,7 @@ export default function ProductDetail() {
   async function submitReview() {
     if (!currentUser) return;
     if (reviewContent.trim().length < 10) {
-      setReviewError('Please write at least 10 characters.');
+      setReviewError(t('review.placeholder'));
       return;
     }
     setReviewSubmitting(true);
@@ -82,13 +82,13 @@ export default function ProductDetail() {
     });
     setReviewSubmitting(false);
     if (error) {
-      setReviewError('Failed to submit review. Please try again.');
+      setReviewError(t('common.error'));
       return;
     }
     setReviewContent('');
     setReviewRating(5);
     setAlreadyReviewed(true);
-    showToast('Review submitted!', 'success');
+    showToast(t('review.submitted'), 'success');
     loadReviews();
   }
 
@@ -117,37 +117,39 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!isAuthenticated) {
-      showToast('Please login to add items to cart', 'info');
+      showToast(t('productDetail.loginToAddCart'), 'info');
       navigate('/login');
       return;
     }
     if (!isVerified) {
-      showToast('Business verification required', 'info');
+      showToast(t('productDetail.verifyToOrder'), 'info');
       return;
     }
     if (!product) return;
     if (selectedSets.length === 0) {
-      showToast('Please select at least one set', 'info');
+      showToast(t('productDetail.selectAtLeastOne'), 'info');
       return;
     }
     selectedSets.forEach((opt) => {
       addToCart(product, setQty[opt.id], opt);
     });
-    showToast(`${selectedSets.length} set(s) added to cart`, 'success');
+    showToast(`${selectedSets.length} set(s) ${t('productDetail.addedToCart')}`, 'success');
     setSetQty({});
   };
 
   const handleOrderInquiry = () => {
-    showToast('Order inquiry feature coming soon', 'info');
+    showToast(t('productDetail.orderInquiryComingSoon'), 'info');
   };
+
+  const ratingLabels = ['', t('review.poor'), t('review.fair'), t('review.good'), t('review.veryGood'), t('review.excellent')];
 
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-[18px] text-[#999] mb-4">Product not found</p>
+          <p className="text-[18px] text-[#999] mb-4">{t('productDetail.notFound')}</p>
           <Link to="/" className="text-[#4a90e2] hover:underline">
-            Back to Home
+            {t('common.backToHome')}
           </Link>
         </div>
       </div>
@@ -164,7 +166,7 @@ export default function ProductDetail() {
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-[13px] text-[#999] mb-6">
           <Link to="/" className="hover:text-[#333]">
-            Home
+            {t('common.home')}
           </Link>
           <span>&gt;</span>
           <Link to={`/products?category=${product.category}`} className="hover:text-[#333]">
@@ -258,7 +260,7 @@ export default function ProductDetail() {
                 {product.rating}
               </span>
               <span className="text-[13px] text-[#999]">
-                ({product.reviews.toLocaleString()} reviews)
+                ({product.reviews.toLocaleString()} {t('review.basedOn')})
               </span>
             </div>
 
@@ -281,7 +283,7 @@ export default function ProductDetail() {
                 </span>
               ))}
               <span className="bg-[#f8f8fa] text-[#666] text-[11px] px-2.5 py-1 rounded">
-                Stock: {product.stock}
+                {t('productDetail.stock')}: {product.stock}
               </span>
             </div>
 
@@ -309,22 +311,22 @@ export default function ProductDetail() {
                             <span style={{fontSize:'11px', fontWeight:700, color:'#4a90e2', background:'#eef4ff', padding:'2px 7px', borderRadius:'4px'}}>{opt.id}</span>
                             <span style={{fontSize:'13px', fontWeight:600, color:'#333'}}>{opt.description}</span>
                           </div>
-                          <p style={{fontSize:'11px', color:'#999', marginBottom:'8px'}}>{opt.unitsPerSet} units / set</p>
+                          <p style={{fontSize:'11px', color:'#999', marginBottom:'8px'}}>{opt.unitsPerSet} {t('productDetail.units')} / {t('productDetail.setOptions').toLowerCase()}</p>
                           <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'10px'}}>
                             <div>
                               {canSeePrice ? (
                                 <>
-                                  <p style={{fontSize:'10px', color:'#999'}}>Unit price</p>
+                                  <p style={{fontSize:'10px', color:'#999'}}>{t('productDetail.unitPrice')}</p>
                                   <p style={{fontSize:'11px', color:'#bbb', textDecoration:'line-through'}}>{formatPrice(unitOriginal)}</p>
-                                  <p style={{fontSize:'13px', fontWeight:600, color:'#333'}}>{formatPrice(unitWholesale)} <span style={{fontSize:'10px', fontWeight:400, color:'#999'}}>/ unit</span></p>
+                                  <p style={{fontSize:'13px', fontWeight:600, color:'#333'}}>{formatPrice(unitWholesale)} <span style={{fontSize:'10px', fontWeight:400, color:'#999'}}>/ {t('productDetail.units')}</span></p>
                                 </>
                               ) : (
-                                <span style={{fontSize:'12px', color:'#999'}}>Login to view price</span>
+                                <span style={{fontSize:'12px', color:'#999'}}>{t('products.loginToView')}</span>
                               )}
                             </div>
                             {canSeePrice && (
                               <div style={{textAlign:'right'}}>
-                                <p style={{fontSize:'10px', color:'#999'}}>Set total</p>
+                                <p style={{fontSize:'10px', color:'#999'}}>{t('productDetail.setTotal')}</p>
                                 <p style={{fontSize:'11px', color:'#bbb', textDecoration:'line-through'}}>{formatPrice(opt.originalPrice)}</p>
                                 <p style={{fontSize:'15px', fontWeight:700, color:'#e53e3e'}}>{formatPrice(opt.wholesalePrice)}</p>
                                 <p style={{fontSize:'10px', color:'#999'}}>1 set ({opt.unitsPerSet}pcs)</p>
@@ -332,7 +334,7 @@ export default function ProductDetail() {
                             )}
                           </div>
                           <div style={{display:'flex', alignItems:'center', borderTop:'1px solid #f0f0f0', paddingTop:'8px'}}>
-                            <span style={{fontSize:'12px', color:'#666', flex:1}}>Qty</span>
+                            <span style={{fontSize:'12px', color:'#666', flex:1}}>{t('productDetail.qty')}</span>
                             <button onClick={() => changeQty(opt.id, -1)} disabled={!canSeePrice} style={{width:'32px', height:'32px', border:'1px solid #ddd', background:'#fff', borderRadius:'6px 0 0 6px', display:'flex', alignItems:'center', justifyContent:'center', opacity: !canSeePrice ? 0.3 : 1}}><Minus size={12} /></button>
                             <span style={{width:'40px', height:'32px', border:'1px solid #ddd', borderLeft:'none', borderRight:'none', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'14px', fontWeight:500}}>{qty}</span>
                             <button onClick={() => changeQty(opt.id, 1)} disabled={!canSeePrice} style={{width:'32px', height:'32px', border:'1px solid #ddd', background:'#fff', borderRadius:'0 6px 6px 0', display:'flex', alignItems:'center', justifyContent:'center', opacity: !canSeePrice ? 0.3 : 1}}><Plus size={12} /></button>
@@ -347,9 +349,9 @@ export default function ProductDetail() {
                     <div className="grid grid-cols-[48px_1fr_120px_140px_110px] text-[11px] font-semibold text-[#999] uppercase tracking-wide bg-[#f8f8fa] border border-[#e5e5e5] rounded-t-lg px-3 py-2.5">
                       <span>Set</span>
                       <span>Description</span>
-                      <span className="text-right">Unit Price</span>
-                      <span className="text-right">Set Total</span>
-                      <span className="text-right">Qty</span>
+                      <span className="text-right">{t('productDetail.unitPrice')}</span>
+                      <span className="text-right">{t('productDetail.setTotal')}</span>
+                      <span className="text-right">{t('productDetail.qty')}</span>
                     </div>
                     <div className="border-x border-b border-[#e5e5e5] rounded-b-lg divide-y divide-[#f0f0f0]">
                       {product.setOptions.map((opt: SetOption) => {
@@ -362,17 +364,17 @@ export default function ProductDetail() {
                             <span className="text-[13px] font-bold text-[#333]">{opt.id}</span>
                             <div>
                               <p className="text-[13px] text-[#333] font-medium">{opt.description}</p>
-                              <p className="text-[11px] text-[#999] mt-0.5">{opt.unitsPerSet} units / set</p>
+                              <p className="text-[11px] text-[#999] mt-0.5">{opt.unitsPerSet} {t('productDetail.units')} / set</p>
                             </div>
                             <div className="text-right">
                               {canSeePrice ? (
                                 <>
                                   <p className="text-[11px] text-[#bbb] line-through">{formatPrice(unitOriginal)}</p>
                                   <p className="text-[13px] font-semibold text-[#333]">{formatPrice(unitWholesale)}</p>
-                                  <p className="text-[10px] text-[#999]">/ unit</p>
+                                  <p className="text-[10px] text-[#999]">/ {t('productDetail.units')}</p>
                                 </>
                               ) : (
-                                <div className="flex items-center justify-end gap-1 text-[#999]"><Lock size={12} /><span className="text-[12px]">Login</span></div>
+                                <div className="flex items-center justify-end gap-1 text-[#999]"><Lock size={12} /><span className="text-[12px]">{t('common.login')}</span></div>
                               )}
                             </div>
                             <div className="text-right">
@@ -404,14 +406,14 @@ export default function ProductDetail() {
                     <Lock size={14} className="text-[#999]" />
                     <p className="text-[13px] text-[#999]">
                       {isAuthenticated
-                        ? 'Business verification required to view wholesale prices'
-                        : 'Login to view wholesale prices'}
+                        ? t('productDetail.verifyToViewPrices')
+                        : t('productDetail.loginToOrder')}
                     </p>
                     <button
                       onClick={() => navigate(isAuthenticated ? '/register' : '/login')}
                       className="text-[13px] text-[#4a90e2] hover:underline"
                     >
-                      {isAuthenticated ? 'Verify now →' : 'Login →'}
+                      {isAuthenticated ? t('productDetail.verifyNow') : t('productDetail.loginArrow')}
                     </button>
                   </div>
                 )}
@@ -427,7 +429,7 @@ export default function ProductDetail() {
                       ))}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[13px] text-[#999]">Total</span>
+                      <span className="text-[13px] text-[#999]">{t('productDetail.grandTotal')}</span>
                       <span className="text-[22px] font-bold text-[#333]">
                         {formatPrice(grandTotal)}
                       </span>
@@ -438,7 +440,7 @@ export default function ProductDetail() {
             ) : (
               /* Fallback: no set options */
               <div className="bg-[#f8f8fa] rounded-lg p-4 mb-5 text-[14px] text-[#999]">
-                Set options not available for this product.
+                {t('productDetail.setOptionsNA')}
               </div>
             )}
 
@@ -455,7 +457,7 @@ export default function ProductDetail() {
                 <Heart size={20} className={isWishlisted ? 'fill-[#ff4d6d]' : ''} />
               </button>
               <button
-                onClick={() => showToast('Share link copied!', 'success')}
+                onClick={() => showToast(t('productDetail.shareLink'), 'success')}
                 className="w-12 h-12 flex items-center justify-center border border-[#ddd] rounded-lg text-[#999] hover:border-[#4a90e2] hover:text-[#4a90e2] transition-colors"
               >
                 <Share2 size={20} />
@@ -465,14 +467,14 @@ export default function ProductDetail() {
                 className="flex-1 h-12 border-2 border-[#333] text-[#333] rounded-lg font-medium text-[14px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center gap-2"
               >
                 <ShoppingCart size={16} />
-                Add to Cart
+                {t('productDetail.addToCart')}
               </button>
               <button
                 onClick={handleOrderInquiry}
                 className="flex-1 h-12 bg-[#333] text-white rounded-lg font-medium text-[14px] hover:bg-[#555] transition-colors flex items-center justify-center gap-2"
               >
                 <MessageCircle size={16} />
-                Inquiry
+                {t('productDetail.orderInquiry')}
               </button>
             </div>
           </div>
@@ -492,10 +494,10 @@ export default function ProductDetail() {
                 }`}
               >
                 {tab === 'info'
-                  ? 'Product Info'
+                  ? t('productDetail.productInfo')
                   : tab === 'reviews'
-                  ? `Reviews (${reviews.length || product.reviews})`
-                  : 'Shipping'}
+                  ? `${t('productDetail.reviews')} (${reviews.length || product.reviews})`
+                  : t('productDetail.shipping')}
               </button>
             ))}
           </div>
@@ -517,26 +519,26 @@ export default function ProductDetail() {
               />
               <div className="mt-6 bg-[#f8f8fa] rounded-lg p-6">
                 <h3 className="text-[16px] font-bold text-[#333] mb-4">
-                  Product Details
+                  {t('productDetail.productDetails')}
                 </h3>
                 <table className="w-full text-[13px]">
                   <tbody>
                     <tr className="border-b border-[#e5e5e5]">
-                      <td className="py-2.5 text-[#999] w-[120px]">Brand</td>
+                      <td className="py-2.5 text-[#999] w-[120px]">{t('productDetail.brand')}</td>
                       <td className="py-2.5 text-[#333]">{product.brand}</td>
                     </tr>
                     <tr className="border-b border-[#e5e5e5]">
-                      <td className="py-2.5 text-[#999]">Category</td>
+                      <td className="py-2.5 text-[#999]">{t('products.category')}</td>
                       <td className="py-2.5 text-[#333]">{product.category}</td>
                     </tr>
                     <tr className="border-b border-[#e5e5e5]">
-                      <td className="py-2.5 text-[#999]">Stock</td>
+                      <td className="py-2.5 text-[#999]">{t('productDetail.stock')}</td>
                       <td className="py-2.5 text-[#333]">
-                        {product.stock} units
+                        {product.stock} {t('productDetail.units')}
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2.5 text-[#999]">Status</td>
+                      <td className="py-2.5 text-[#999]">{t('productDetail.status')}</td>
                       <td className="py-2.5">
                         <span
                           className={`text-[12px] px-2 py-0.5 rounded ${
@@ -545,7 +547,7 @@ export default function ProductDetail() {
                               : 'bg-red-100 text-red-700'
                           }`}
                         >
-                          {product.status === 'active' ? 'In Stock' : 'Out of Stock'}
+                          {product.status === 'active' ? t('productDetail.inStock') : t('productDetail.outOfStock')}
                         </span>
                       </td>
                     </tr>
@@ -560,7 +562,6 @@ export default function ProductDetail() {
 
               {/* ── Rating Summary ── */}
               <div className="bg-[#f8f8fa] rounded-xl p-5 flex flex-col sm:flex-row gap-6 items-center">
-                {/* Score */}
                 <div className="text-center shrink-0">
                   <p className="text-[52px] font-black text-[#222] leading-none">
                     {reviews.length > 0
@@ -578,10 +579,9 @@ export default function ProductDetail() {
                       );
                     })}
                   </div>
-                  <p className="text-[13px] text-[#999]">{reviews.length} reviews</p>
+                  <p className="text-[13px] text-[#999]">{reviews.length} {t('review.basedOn')}</p>
                 </div>
 
-                {/* Distribution bars */}
                 <div className="flex-1 w-full space-y-1.5">
                   {[5,4,3,2,1].map((star) => {
                     const count = reviews.filter((r) => r.rating === star).length;
@@ -606,11 +606,10 @@ export default function ProductDetail() {
               {/* ── Write Review Form ── */}
               {isAuthenticated && isVerified && !alreadyReviewed && (
                 <div className="bg-white border border-[#e5e5e5] rounded-xl p-5">
-                  <h3 className="text-[15px] font-bold text-[#222] mb-4">Write a Review</h3>
+                  <h3 className="text-[15px] font-bold text-[#222] mb-4">{t('review.writeReview')}</h3>
 
-                  {/* Star picker */}
                   <div className="mb-4">
-                    <p className="text-[12px] text-[#999] mb-2">Your Rating</p>
+                    <p className="text-[12px] text-[#999] mb-2">{t('review.yourRating')}</p>
                     <div className="flex gap-1">
                       {[1,2,3,4,5].map((s) => (
                         <button
@@ -631,20 +630,19 @@ export default function ProductDetail() {
                         </button>
                       ))}
                       <span className="ml-2 text-[13px] text-[#666] self-center">
-                        {['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][hoverRating || reviewRating]}
+                        {ratingLabels[hoverRating || reviewRating]}
                       </span>
                     </div>
                   </div>
 
-                  {/* Content */}
                   <div className="mb-4">
-                    <p className="text-[12px] text-[#999] mb-2">Review</p>
+                    <p className="text-[12px] text-[#999] mb-2">{t('review.review')}</p>
                     <textarea
                       value={reviewContent}
                       onChange={(e) => setReviewContent(e.target.value)}
                       rows={4}
                       maxLength={500}
-                      placeholder="Share your experience with this product (min. 10 characters)..."
+                      placeholder={t('review.placeholder')}
                       className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[13px] text-[#333] focus:outline-none focus:border-[#4a90e2] resize-none transition-colors"
                     />
                     <div className="flex justify-between mt-1">
@@ -660,7 +658,7 @@ export default function ProductDetail() {
                     disabled={reviewSubmitting}
                     className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[13px] font-semibold hover:bg-[#555] transition-colors disabled:opacity-50"
                   >
-                    {reviewSubmitting ? 'Submitting…' : 'Submit Review'}
+                    {reviewSubmitting ? t('review.submitting') : t('review.submit')}
                   </button>
                 </div>
               )}
@@ -669,7 +667,7 @@ export default function ProductDetail() {
               {isAuthenticated && isVerified && alreadyReviewed && (
                 <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-lg text-[13px] text-green-700">
                   <CheckCircle2 size={15} />
-                  You have already reviewed this product.
+                  {t('review.alreadyReviewed')}
                 </div>
               )}
 
@@ -677,12 +675,12 @@ export default function ProductDetail() {
               {!isAuthenticated && (
                 <div className="text-center py-6 border border-[#e5e5e5] rounded-xl">
                   <Lock size={24} className="mx-auto text-[#ccc] mb-2" />
-                  <p className="text-[13px] text-[#999] mb-3">Login to write a review</p>
+                  <p className="text-[13px] text-[#999] mb-3">{t('review.loginToReview')}</p>
                   <button
                     onClick={() => navigate('/login')}
                     className="px-5 py-2 bg-[#333] text-white rounded-lg text-[13px] font-medium hover:bg-[#555] transition-colors"
                   >
-                    Login
+                    {t('common.login')}
                   </button>
                 </div>
               )}
@@ -695,7 +693,7 @@ export default function ProductDetail() {
               ) : reviews.length === 0 ? (
                 <div className="text-center py-12 text-[#bbb]">
                   <MessageCircle size={40} className="mx-auto mb-3 opacity-40" />
-                  <p className="text-[14px]">No reviews yet. Be the first!</p>
+                  <p className="text-[14px]">{t('review.noReviews')}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -726,23 +724,23 @@ export default function ProductDetail() {
           {activeTab === 'shipping' && (
             <div className="bg-[#f8f8fa] rounded-lg p-6">
               <h3 className="text-[16px] font-bold text-[#333] mb-4">
-                Shipping Information
+                {t('productDetail.shippingInfo')}
               </h3>
               <div className="space-y-4 text-[13px] text-[#555]">
                 <div>
-                  <p className="font-medium text-[#333] mb-1">Standard Shipping</p>
-                  <p>2,500원 (Free for orders over 100,000원)</p>
-                  <p>Estimated delivery: 2-3 business days</p>
+                  <p className="font-medium text-[#333] mb-1">{t('productDetail.standardShipping')}</p>
+                  <p>{t('productDetail.standardShippingDesc1')}</p>
+                  <p>{t('productDetail.standardShippingDesc2')}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-[#333] mb-1">Bulk Orders</p>
-                  <p>Free shipping for orders over 500,000원</p>
-                  <p>Estimated delivery: 3-5 business days</p>
+                  <p className="font-medium text-[#333] mb-1">{t('productDetail.bulkOrders')}</p>
+                  <p>{t('productDetail.bulkOrdersDesc1')}</p>
+                  <p>{t('productDetail.bulkOrdersDesc2')}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-[#333] mb-1">Return Policy</p>
-                  <p>Returns accepted within 7 days of delivery</p>
-                  <p>Items must be unopened and in original packaging</p>
+                  <p className="font-medium text-[#333] mb-1">{t('productDetail.returnPolicy')}</p>
+                  <p>{t('productDetail.returnPolicyDesc1')}</p>
+                  <p>{t('productDetail.returnPolicyDesc2')}</p>
                 </div>
               </div>
             </div>
@@ -753,7 +751,7 @@ export default function ProductDetail() {
         {relatedProducts.length > 0 && (
           <div>
             <h2 className="text-[20px] font-bold text-[#333] mb-6">
-              Related Products
+              {t('productDetail.relatedProducts')}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
               {relatedProducts.map((p) => (

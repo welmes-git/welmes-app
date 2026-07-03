@@ -15,12 +15,8 @@ export default function Footer() {
               <Phone size={14} />
               <span className="text-[20px] font-bold text-white">1544-1234</span>
             </div>
-            <p className="text-[12px] leading-relaxed">
-              Mon – Fri  09:00 – 18:00
-              <br />
-              Lunch  12:00 – 13:00
-              <br />
-              Closed on weekends &amp; holidays
+            <p className="text-[12px] leading-relaxed whitespace-pre-line">
+              {t('footer.businessHours')}
             </p>
           </div>
 
@@ -41,15 +37,15 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-white font-semibold text-[14px] mb-4">Quick Links</h4>
+            <h4 className="text-white font-semibold text-[14px] mb-4">{t('footer.quickLinks')}</h4>
             <ul className="space-y-2">
               {[
                 { label: t('footer.about'), to: '/' },
                 { label: t('footer.terms'), to: '/' },
                 { label: t('footer.privacy'), to: '/' },
                 { label: t('footer.faq'), to: '/support' },
-                { label: 'Shipping Info', to: '/support' },
-                { label: 'Returns & Exchanges', to: '/support' },
+                { label: t('footer.shippingInfo'), to: '/support' },
+                { label: t('footer.returnsExchanges'), to: '/support' },
               ].map(({ label, to }) => (
                 <li key={label}>
                   <Link to={to} className="text-[12px] hover:text-white transition-colors">{label}</Link>
@@ -59,7 +55,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-white font-semibold text-[14px] mb-4">Wholesale Info</h4>
+            <h4 className="text-white font-semibold text-[14px] mb-4">{t('footer.wholesaleInfo')}</h4>
             <p className="text-[12px] leading-relaxed mb-3">{t('footer.tagline')}</p>
             <Link to="/register" className="inline-block bg-[#4a90e2] text-white text-[12px] font-medium px-4 py-2 rounded hover:bg-[#357abd] transition-colors">
               {t('auth.registerTitle')}
@@ -72,8 +68,7 @@ export default function Footer() {
         <div className="max-w-[1100px] mx-auto px-4 py-5">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-[11px] text-[#777]">
-              Company: WELMES Co., Ltd. | CEO: Kim Daepyo | Business Reg. No.: 123-45-67890 |
-              E-Commerce Reg.: 2025-Seoul Gangnam-0001
+              {t('footer.companyInfo')}
             </p>
             <p className="text-[11px] text-[#777]">
               Copyright WELMES Co., Ltd. {t('footer.rights')}

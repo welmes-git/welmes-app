@@ -5,6 +5,7 @@ import { initialProducts } from '../data/products';
 import ProductCard from '../components/ProductCard';
 import { ChevronLeft, ChevronRight, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { heroBanners as banners, eventBanners } from '../config/banners';
+import { useTranslation } from 'react-i18next';
 
 const brandLogos = [
   { name: 'COSRX', color: '#333' },
@@ -20,6 +21,7 @@ const brandLogos = [
 ];
 
 export default function Home() {
+  const { t } = useTranslation();
   const { products } = useStore();
   const [currentBanner, setCurrentBanner] = useState(0);
   const allProducts = products.length > 0 ? products : initialProducts;
@@ -43,14 +45,40 @@ export default function Home() {
           <div
             key={index}
             className={`absolute inset-0 transition-opacity duration-700 ${
-              index === currentBanner ? 'opacity-100' : 'opacity-0'
+              index === currentBanner ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
           >
-            <img
-              src={banner.image}
-              alt={banner.title}
-              className="w-full h-full object-cover"
-            />
+            <Link to={banner.link} className="block w-full h-full">
+              <img
+                src={banner.image}
+                alt={banner.textKey ? t(`banners.${banner.textKey}Title`).replace(/\n/g, ' ') : 'WELMES'}
+                className="w-full h-full object-cover"
+                style={banner.focus ? { objectPosition: banner.focus } : undefined}
+              />
+              {banner.textKey && (
+                <div
+                  className={`absolute inset-0 flex items-center px-14 md:px-[7%] ${
+                    banner.textSide === 'right' ? 'justify-end text-right' : 'justify-start text-left'
+                  }`}
+                >
+                  <div className="max-w-[85%] md:max-w-[44%]">
+                    <p className="text-[10px] md:text-[13px] font-semibold tracking-[2.5px] uppercase text-[#4a90e2] mb-2 md:mb-3">
+                      {t(`banners.${banner.textKey}Eyebrow`)}
+                    </p>
+                    <h2 className="text-[26px] md:text-[46px] font-extrabold leading-[1.08] text-[#26221c] whitespace-pre-line">
+                      {t(`banners.${banner.textKey}Title`)}
+                    </h2>
+                    <p className="text-[12px] md:text-[15px] text-[#6b665e] mt-2 md:mt-3 leading-relaxed">
+                      {t(`banners.${banner.textKey}Subtitle`)}
+                    </p>
+                    <span className="inline-flex items-center gap-2 mt-3 md:mt-5 bg-[#2f2b26] text-white text-[12px] md:text-[14px] font-semibold px-4 py-2 md:px-6 md:py-3 rounded-lg">
+                      {t(`banners.${banner.textKey}Cta`)}
+                      <ChevronRightIcon size={14} />
+                    </span>
+                  </div>
+                </div>
+              )}
+            </Link>
           </div>
         ))}
 
@@ -85,12 +113,12 @@ export default function Home() {
       {/* Weekly Best Sellers */}
       <section className="max-w-[1100px] mx-auto px-4 py-16">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-[22px] font-bold text-[#333]">Weekly Best Sellers</h2>
+          <h2 className="text-[22px] font-bold text-[#333]">{t('home.weeklySellers')}</h2>
           <Link
             to="/products?sort=popular"
             className="flex items-center gap-1 text-[13px] text-[#999] hover:text-[#ff4d6d] transition-colors"
           >
-            View All
+            {t('common.viewAll')}
             <ChevronRightIcon size={14} />
           </Link>
         </div>
@@ -129,12 +157,12 @@ export default function Home() {
       <section className="bg-[#f8f8fa] py-16">
         <div className="max-w-[1100px] mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-[22px] font-bold text-[#333]">New Arrivals</h2>
+            <h2 className="text-[22px] font-bold text-[#333]">{t('home.newArrivals')}</h2>
             <Link
               to="/products?sort=newest"
               className="flex items-center gap-1 text-[13px] text-[#999] hover:text-[#ff4d6d] transition-colors"
             >
-              View All
+              {t('common.viewAll')}
               <ChevronRightIcon size={14} />
             </Link>
           </div>
@@ -149,7 +177,7 @@ export default function Home() {
       {/* Brand Showcase */}
       <section className="max-w-[1100px] mx-auto px-4 py-16">
         <h2 className="text-[22px] font-bold text-[#333] mb-8 text-center">
-          Popular Brands
+          {t('home.popularBrands')}
         </h2>
         <div className="flex flex-wrap justify-center gap-6 md:gap-10">
           {brandLogos.map((brand) => (
@@ -176,24 +204,23 @@ export default function Home() {
       <section className="bg-[#2c3e50] py-16">
         <div className="max-w-[1100px] mx-auto px-4 text-center">
           <h2 className="text-[24px] md:text-[28px] font-bold text-white mb-4">
-            Business Member Exclusive
+            {t('home.businessExclusive')}
           </h2>
           <p className="text-[#bdc3c7] text-[14px] md:text-[16px] max-w-[600px] mx-auto mb-8 leading-relaxed">
-            WELMES is a wholesale platform exclusively for verified business owners.
-            Register your business to access wholesale prices and place bulk orders.
+            {t('home.businessDesc')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/register"
               className="bg-[#4a90e2] text-white px-8 py-3 rounded-lg text-[14px] font-semibold hover:bg-[#357abd] transition-colors"
             >
-              Register as Business
+              {t('home.registerBusiness')}
             </Link>
             <Link
               to="/login"
               className="bg-transparent border border-white/30 text-white px-8 py-3 rounded-lg text-[14px] font-semibold hover:bg-white/10 transition-colors"
             >
-              Member Login
+              {t('home.memberLogin')}
             </Link>
           </div>
         </div>

@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import type { AppNotification } from '../store/useStore';
 import CartDrawer from './CartDrawer';
 import CurrencySelector from './CurrencySelector';
 import { useTranslation } from 'react-i18next';
@@ -17,12 +18,27 @@ import {
   LogOut,
   LayoutDashboard,
   Globe,
+  CheckCheck,
+  Trash2,
+  Package,
+  Truck,
+  CheckCircle2,
+  XCircle,
+  ShieldCheck,
 } from 'lucide-react';
 
 const LANGUAGES = [
   { code: 'en', label: 'EN', name: 'English' },
   { code: 'ja', label: 'JA', name: '日本語' },
   { code: 'zh', label: 'ZH', name: '中文' },
+  { code: 'ko', label: 'KO', name: '한국어' },
+  { code: 'es', label: 'ES', name: 'Español' },
+  { code: 'fr', label: 'FR', name: 'Français' },
+  { code: 'de', label: 'DE', name: 'Deutsch' },
+  { code: 'vi', label: 'VI', name: 'Tiếng Việt' },
+  { code: 'th', label: 'TH', name: 'ไทย' },
+  { code: 'id', label: 'ID', name: 'Bahasa Indonesia' },
+  { code: 'ru', label: 'RU', name: 'Русский' },
 ];
 
 const subCategories = [
@@ -37,7 +53,11 @@ const subCategories = [
 export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isAdmin, currentUser, logout, cart, wishlist } = useStore();
+  const {
+    isAuthenticated, isAdmin, currentUser, logout,
+    cart, wishlist, notifications,
+    markNotificationRead, markAllNotificationsRead, clearNotifications,
+  } = useStore();
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -47,6 +67,8 @@ export default function Header() {
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showMobileBrands, setShowMobileBrands] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   const navItems = [
     { label: t('nav.specialPrice'), path: '/products?sort=discount' },
@@ -64,6 +86,78 @@ export default function Header() {
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
+
+  // Close notification panel on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    if (showNotifications) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showNotifications]);
+
+  // My notifications (filter by current user)
+  const myNotifications = currentUser
+    ? notifications.filter((n) => n.memberId === currentUser.id)
+    : [];
+  const unreadCount = myNotifications.filter((n) => !n.read).length;
+
+  function getNotifMeta(n: AppNotification): { icon: React.ReactNode; title: string; message: string; link: string } {
+    const shortId = n.orderId ? `…${n.orderId.slice(-6)}` : '';
+    switch (n.type) {
+      case 'member_approved':
+        return {
+          icon: <ShieldCheck size={16} className="text-green-500" />,
+          title: t('notifications.member_approved_title'),
+          message: t('notifications.member_approved_message'),
+          link: '/account',
+        };
+      case 'member_rejected':
+        return {
+          icon: <XCircle size={16} className="text-red-500" />,
+          title: t('notifications.member_rejected_title'),
+          message: t('notifications.member_rejected_message'),
+          link: '/support',
+        };
+      case 'order_shipped':
+        return {
+          icon: <Truck size={16} className="text-indigo-500" />,
+          title: t('notifications.order_shipped_title'),
+          message: t('notifications.order_shipped_message', {
+            orderId: shortId,
+            carrier: n.carrier ?? '',
+            trackingNumber: n.trackingNumber ?? '',
+          }),
+          link: '/account',
+        };
+      case 'order_status': {
+        const statusIcon =
+          n.orderStatus === 'completed' ? <CheckCircle2 size={16} className="text-green-500" /> :
+          n.orderStatus === 'cancelled' ? <XCircle size={16} className="text-red-500" /> :
+          n.orderStatus === 'processing' ? <Package size={16} className="text-blue-500" /> :
+          <Package size={16} className="text-[#aaa]" />;
+        return {
+          icon: statusIcon,
+          title: t('notifications.order_status_title'),
+          message: t('notifications.order_status_message', {
+            orderId: shortId,
+            status: n.orderStatus ? t(`status.${n.orderStatus}`) : '',
+          }),
+          link: '/account',
+        };
+      }
+    }
+  }
+
+  function formatRelativeTime(iso: string): string {
+    const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+    if (diff < 60) return t('notifications.justNow');
+    if (diff < 3600) return t('notifications.minutesAgo', { count: Math.floor(diff / 60) });
+    if (diff < 86400) return t('notifications.hoursAgo', { count: Math.floor(diff / 3600) });
+    return t('notifications.daysAgo', { count: Math.floor(diff / 86400) });
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,7 +233,7 @@ export default function Header() {
                 <ChevronDown size={10} />
               </button>
               {showLangDropdown && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-[#e5e5e5] rounded-lg shadow-lg py-1 z-50 min-w-[100px]">
+                <div className="absolute right-0 top-full mt-1 bg-white border border-[#e5e5e5] rounded-lg shadow-lg py-1 z-50 min-w-[170px] max-h-[320px] overflow-y-auto">
                   {LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
@@ -254,9 +348,105 @@ export default function Header() {
                   </span>
                 )}
               </button>
-              <button className="text-[#333] hover:text-[#ff4d6d] transition-colors hidden sm:block">
-                <Bell size={22} />
-              </button>
+              {/* Bell Notification Button */}
+              {isAuthenticated && (
+                <div className="relative hidden sm:block" ref={notifRef}>
+                  <button
+                    onClick={() => setShowNotifications((v) => !v)}
+                    className="relative text-[#333] hover:text-[#ff4d6d] transition-colors"
+                    aria-label={t('notifications.title')}
+                  >
+                    <Bell size={22} />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-[#ff4d6d] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {showNotifications && (
+                    <div className="absolute right-0 top-full mt-2 w-[360px] bg-white border border-[#e5e5e5] rounded-xl shadow-xl z-50 overflow-hidden">
+                      {/* Header */}
+                      <div className="flex items-center justify-between px-4 py-3 border-b border-[#f0f0f0]">
+                        <span className="text-[14px] font-bold text-[#222]">
+                          {t('notifications.title')}
+                          {unreadCount > 0 && (
+                            <span className="ml-2 text-[11px] font-semibold bg-[#ff4d6d] text-white rounded-full px-1.5 py-0.5">
+                              {unreadCount}
+                            </span>
+                          )}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          {myNotifications.length > 0 && (
+                            <>
+                              <button
+                                onClick={() => markAllNotificationsRead()}
+                                className="p-1.5 text-[#999] hover:text-[#4a90e2] rounded-lg hover:bg-[#f0f7ff] transition-colors"
+                                title={t('notifications.markAllRead')}
+                              >
+                                <CheckCheck size={15} />
+                              </button>
+                              <button
+                                onClick={() => clearNotifications(currentUser!.id)}
+                                className="p-1.5 text-[#999] hover:text-[#ff4d6d] rounded-lg hover:bg-[#fff0f0] transition-colors"
+                                title={t('notifications.clearAll')}
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* List */}
+                      <div className="max-h-[400px] overflow-y-auto">
+                        {myNotifications.length === 0 ? (
+                          <div className="py-12 text-center">
+                            <Bell size={32} className="mx-auto text-[#ddd] mb-3" />
+                            <p className="text-[13px] font-medium text-[#999]">{t('notifications.empty')}</p>
+                            <p className="text-[12px] text-[#bbb] mt-0.5">{t('notifications.emptyDesc')}</p>
+                          </div>
+                        ) : (
+                          myNotifications.map((n) => {
+                            const { icon, title, message, link } = getNotifMeta(n);
+                            return (
+                              <button
+                                key={n.id}
+                                onClick={() => {
+                                  markNotificationRead(n.id);
+                                  setShowNotifications(false);
+                                  navigate(link);
+                                }}
+                                className={`w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-[#f8f8fa] transition-colors border-b border-[#f5f5f5] last:border-0 ${
+                                  !n.read ? 'bg-[#f0f7ff]' : ''
+                                }`}
+                              >
+                                <div className="shrink-0 w-8 h-8 rounded-full bg-white border border-[#e5e5e5] flex items-center justify-center mt-0.5 shadow-sm">
+                                  {icon}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className={`text-[13px] leading-snug ${!n.read ? 'font-semibold text-[#222]' : 'font-medium text-[#333]'}`}>
+                                    {title}
+                                  </p>
+                                  <p className="text-[12px] text-[#777] mt-0.5 leading-relaxed line-clamp-2">
+                                    {message}
+                                  </p>
+                                  <p className="text-[11px] text-[#bbb] mt-1">
+                                    {formatRelativeTime(n.createdAt)}
+                                  </p>
+                                </div>
+                                {!n.read && (
+                                  <div className="shrink-0 w-2 h-2 rounded-full bg-[#4a90e2] mt-1.5" />
+                                )}
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative text-[#333] hover:text-[#ff4d6d] transition-colors"
@@ -287,7 +477,7 @@ export default function Header() {
             >
               <button className="flex items-center gap-2 py-3.5 px-5 text-[14px] font-semibold text-[#333] hover:text-[#ff4d6d]">
                 <Menu size={16} />
-                CATEGORY
+                {t('nav.category')}
               </button>
               {showCategoryDropdown && (
                 <div className="absolute top-full left-0 w-[200px] bg-white border border-[#e5e5e5] shadow-lg py-2 z-50">
@@ -361,7 +551,7 @@ export default function Header() {
               >
                 <X size={22} />
               </button>
-              <span className="text-[16px] font-bold text-[#222]">Search</span>
+              <span className="text-[16px] font-bold text-[#222]">{t('common.search')}</span>
               <button onClick={() => setIsCartOpen(true)} className="relative text-[#333] w-8 flex justify-end">
                 <ShoppingBag size={22} />
                 {cartCount > 0 && (
@@ -380,7 +570,7 @@ export default function Header() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products, brands, ingredients..."
+                    placeholder={t('nav.searchPlaceholderFull')}
                     autoFocus
                     className="w-full h-[42px] pl-4 pr-10 bg-[#f4f4f4] rounded-full focus:outline-none"
                     style={{ fontSize: '16px' }}
@@ -397,7 +587,7 @@ export default function Header() {
               {/* Keyword Recommendations */}
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-[15px] font-bold text-[#222]">Keyword Suggestions</span>
+                  <span className="text-[15px] font-bold text-[#222]">{t('nav.keywordSuggestions')}</span>
                   <span className="text-[12px] text-[#aaa] font-normal">beta</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -424,7 +614,7 @@ export default function Header() {
               {/* Trending Searches */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[15px] font-bold text-[#222]">Trending Searches</span>
+                  <span className="text-[15px] font-bold text-[#222]">{t('nav.trendingSearches')}</span>
                   <span className="text-[11px] text-[#bbb]">
                     as of {new Date().getHours()}:{String(new Date().getMinutes()).padStart(2, '0')}
                   </span>
@@ -483,7 +673,7 @@ export default function Header() {
                 }}
               >
                 <Menu size={14} />
-                CATEGORY
+                {t('nav.category')}
               </Link>
               <button
                 onClick={() => setShowMobileBrands((v) => !v)}

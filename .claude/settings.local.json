@@ -5,7 +5,21 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(npm install *)",
       "Bash(npx tsc *)",
-      "Bash(ipconfig getifaddr *)"
+      "Bash(ipconfig getifaddr *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(curl -s https://welmes-app.vercel.app/)",
+      "Bash(curl -sL https://welmes-app.vercel.app/)",
+      "Bash(curl -sL \"https://welmes-app.vercel.app/assets/index-CBeOyUU2.js\")",
+      "Bash(curl -s \"https://api.github.com/repos/welmes-git/welmes-app/commits/main\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d['sha'][:7], d['commit']['message'][:60]\\)\")",
+      "Bash(curl -sL \"https://welmes-app.vercel.app/assets/index-DTZhDPHx.css\")",
+      "Bash(curl -s \"https://api.github.com/repos/welmes-git/welmes-app/deployments\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(x.get\\('sha','?'\\)[:7], x.get\\('created_at','?'\\), x.get\\('environment','?'\\)\\) for x in d[:5]]\")",
+      "Bash(npm run *)",
+      "mcp__visualize__show_widget",
+      "Bash(ls /Users/kimmingyu/Desktop/WELMES/ && ls /Users/kimmingyu/Desktop/WELMES/app/supabase 2>/dev/null || echo \"no supabase dir\")"
     ]
   }
 }

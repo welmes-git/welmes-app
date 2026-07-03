@@ -1,33 +1,32 @@
-export const heroBanners = [
+export interface HeroBanner {
+  image: string;
+  link: string;
+  /** i18n key prefix under `banners.` — omit when the text is baked into the image */
+  textKey?: string;
+  /** which side the overlay text sits on (desktop) */
+  textSide?: 'left' | 'right';
+  /** CSS object-position keeping the photo's subject visible when sides are cropped on mobile */
+  focus?: string;
+}
+
+export const heroBanners: HeroBanner[] = [
   {
     image: '/banners/banner5.jpg',
-    title: 'Wholesale Japanese Cosmetics',
-    subtitle: 'for Global Retailers',
     link: '/products',
   },
   {
     image: '/banners/banner1.jpg',
-    title: '올영세일',
-    subtitle: '지금 바로 쇼핑하기',
-    link: '/products?tag=sale',
+    link: '/products',
+    textKey: 'b1',
+    textSide: 'left',
+    focus: '30% center',
   },
   {
     image: '/banners/banner2.jpg',
-    title: '올영세일',
-    subtitle: '지금 바로 쇼핑하기',
-    link: '/products?tag=sale',
-  },
-  {
-    image: '/banners/banner3.jpg',
-    title: '올영세일',
-    subtitle: '지금 바로 쇼핑하기',
-    link: '/products?tag=sale',
-  },
-  {
-    image: '/banners/banner4.jpg',
-    title: '올영세일',
-    subtitle: '지금 바로 쇼핑하기',
-    link: '/products?tag=sale',
+    link: '/register',
+    textKey: 'b2',
+    textSide: 'right',
+    focus: '70% center',
   },
 ];
 

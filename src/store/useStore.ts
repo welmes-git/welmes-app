@@ -4,6 +4,19 @@ import type { CurrencyCode } from '../lib/currency';
 import * as db from '../lib/db';
 import { emailOrderPlaced, emailMemberApproved, emailMemberRejected, emailOrderShipped } from '../lib/email';
 
+export interface AppNotification {
+  id: string;
+  memberId: string;
+  type: 'order_status' | 'order_shipped' | 'member_approved' | 'member_rejected';
+  read: boolean;
+  createdAt: string;
+  // payload varies by type
+  orderId?: string;
+  orderStatus?: string;
+  carrier?: string;
+  trackingNumber?: string;
+}
+
 export interface SetOption {
   id: string;
   description: string;
@@ -135,6 +148,13 @@ interface AppState {
   addOrder: (order: Order) => Promise<void>;
   updateOrderStatus: (id: string, status: Order['status']) => Promise<void>;
   updateOrderShipping: (id: string, carrier: string, trackingNumber: string) => Promise<void>;
+
+  // Notifications
+  notifications: AppNotification[];
+  addNotification: (n: Omit<AppNotification, 'id' | 'createdAt' | 'read'>) => void;
+  markNotificationRead: (id: string) => void;
+  markAllNotificationsRead: () => void;
+  clearNotifications: (memberId: string) => void;
 
   // Currency
   selectedCurrency: CurrencyCode;
@@ -284,7 +304,10 @@ export const useStore = create<AppState>()(
           ),
         }));
         const member = get().members.find((m) => m.id === id);
-        if (member) emailMemberApproved(member.email, member.companyName);
+        if (member) {
+          emailMemberApproved(member.email, member.companyName);
+          get().addNotification({ memberId: id, type: 'member_approved' });
+        }
       },
 
       rejectMember: async (id) => {
@@ -295,7 +318,10 @@ export const useStore = create<AppState>()(
           ),
         }));
         const member = get().members.find((m) => m.id === id);
-        if (member) emailMemberRejected(member.email, member.companyName);
+        if (member) {
+          emailMemberRejected(member.email, member.companyName);
+          get().addNotification({ memberId: id, type: 'member_rejected' });
+        }
       },
 
       // ── Wishlist (local only) ────────────────────────────────
@@ -426,6 +452,15 @@ export const useStore = create<AppState>()(
             o.id === id ? { ...o, status } : o
           ),
         }));
+        const order = get().orders.find((o) => o.id === id);
+        if (order) {
+          get().addNotification({
+            memberId: order.memberId,
+            type: 'order_status',
+            orderId: id,
+            orderStatus: status,
+          });
+        }
       },
 
       updateOrderShipping: async (id, carrier, trackingNumber) => {
@@ -443,7 +478,49 @@ export const useStore = create<AppState>()(
         if (member?.email && order) {
           emailOrderShipped(member.email, id, order.memberName, carrier, trackingNumber, shippedAt);
         }
+        if (order) {
+          get().addNotification({
+            memberId: order.memberId,
+            type: 'order_shipped',
+            orderId: id,
+            carrier,
+            trackingNumber,
+          });
+        }
       },
+
+      // ── Notifications ─────────────────────────────────────────
+      notifications: [],
+
+      addNotification: (n) =>
+        set((state) => ({
+          notifications: [
+            {
+              ...n,
+              id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+              createdAt: new Date().toISOString(),
+              read: false,
+            },
+            ...state.notifications,
+          ].slice(0, 100), // cap at 100
+        })),
+
+      markNotificationRead: (id) =>
+        set((state) => ({
+          notifications: state.notifications.map((n) =>
+            n.id === id ? { ...n, read: true } : n
+          ),
+        })),
+
+      markAllNotificationsRead: () =>
+        set((state) => ({
+          notifications: state.notifications.map((n) => ({ ...n, read: true })),
+        })),
+
+      clearNotifications: (memberId) =>
+        set((state) => ({
+          notifications: state.notifications.filter((n) => n.memberId !== memberId),
+        })),
 
       // ── Currency ──────────────────────────────────────────────
       selectedCurrency: 'JPY' as CurrencyCode,
@@ -460,6 +537,7 @@ export const useStore = create<AppState>()(
         cart: state.cart,
         wishlist: state.wishlist,
         selectedCurrency: state.selectedCurrency,
+        notifications: state.notifications,
         // Auth session is restored via initAuth() using Supabase session cookie
         // Products/members/orders are loaded from Supabase on demand
       }),
