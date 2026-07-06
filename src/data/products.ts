@@ -31,6 +31,7 @@ export const initialProducts: Product[] = [
   {
     id: 1,
     name: 'Advanced Snail 96 Mucin Power Essence 100ml',
+    nameEn: 'Advanced Snail 96 Mucin Power Essence 100ml',
     brand: 'COSRX',
     category: 'Skincare',
     image: '/products/product1.jpg',
@@ -48,6 +49,7 @@ export const initialProducts: Product[] = [
   {
     id: 2,
     name: 'Glow Serum Propolis + Niacinamide 30ml',
+    nameEn: 'Glow Serum Propolis + Niacinamide 30ml',
     brand: 'Beauty of Joseon',
     category: 'Skincare',
     image: '/products/product2.jpg',
@@ -65,6 +67,7 @@ export const initialProducts: Product[] = [
   {
     id: 3,
     name: 'Heartleaf 77% Soothing Toner 250ml',
+    nameEn: 'Heartleaf 77% Soothing Toner 250ml',
     brand: 'Anua',
     category: 'Skincare',
     image: '/products/product3.jpg',
@@ -82,6 +85,7 @@ export const initialProducts: Product[] = [
   {
     id: 4,
     name: 'N.M.F Aquaring Ampoule Mask EX 10 Sheets',
+    nameEn: 'N.M.F Aquaring Ampoule Mask EX 10 Sheets',
     brand: 'Mediheal',
     category: 'Skincare',
     image: '/products/product4.jpg',
@@ -99,6 +103,7 @@ export const initialProducts: Product[] = [
   {
     id: 5,
     name: 'Ink Velvet Lip Tint #02 Celeb Deep Rose',
+    nameEn: 'Ink Velvet Lip Tint #02 Celeb Deep Rose',
     brand: 'Peripera',
     category: 'Makeup',
     image: '/products/product5.jpg',
@@ -116,6 +121,7 @@ export const initialProducts: Product[] = [
   {
     id: 6,
     name: 'AHA BHA PHA 30 Days Miracle Toner 150ml',
+    nameEn: 'AHA BHA PHA 30 Days Miracle Toner 150ml',
     brand: 'Some By Mi',
     category: 'Skincare',
     image: '/products/product6.jpg',
@@ -133,6 +139,7 @@ export const initialProducts: Product[] = [
   {
     id: 7,
     name: 'Lip Sleeping Mask Berry 20g',
+    nameEn: 'Lip Sleeping Mask Berry 20g',
     brand: 'Laneige',
     category: 'Skincare',
     image: '/products/product7.jpg',
@@ -150,6 +157,7 @@ export const initialProducts: Product[] = [
   {
     id: 8,
     name: 'Time Revolution Night Repair Probio Ampoule 50ml',
+    nameEn: 'Time Revolution Night Repair Probio Ampoule 50ml',
     brand: 'Missha',
     category: 'Skincare',
     image: '/products/product8.jpg',
@@ -167,6 +175,7 @@ export const initialProducts: Product[] = [
   {
     id: 9,
     name: 'SoonJung 2x Barrier Intensive Cream 60ml',
+    nameEn: 'SoonJung 2x Barrier Intensive Cream 60ml',
     brand: 'Etude House',
     category: 'Skincare',
     image: '/products/product9.jpg',
@@ -184,6 +193,7 @@ export const initialProducts: Product[] = [
   {
     id: 10,
     name: 'Green Tea Seed Serum 80ml',
+    nameEn: 'Green Tea Seed Serum 80ml',
     brand: 'Innisfree',
     category: 'Skincare',
     image: '/products/product10.jpg',
@@ -201,6 +211,7 @@ export const initialProducts: Product[] = [
   {
     id: 11,
     name: 'Red Blemish Clear Soothing Cream 70ml',
+    nameEn: 'Red Blemish Clear Soothing Cream 70ml',
     brand: 'Dr.G',
     category: 'Skincare',
     image: '/products/product11.jpg',
@@ -218,6 +229,7 @@ export const initialProducts: Product[] = [
   {
     id: 12,
     name: '1025 Dokdo Toner 200ml',
+    nameEn: '1025 Dokdo Toner 200ml',
     brand: 'Round Lab',
     category: 'Skincare',
     image: '/products/product12.jpg',

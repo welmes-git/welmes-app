@@ -84,6 +84,7 @@ export default function AdminDashboard() {
 
   // Product form
   const [productForm, setProductForm] = useState({
+    nameEn: '',
     name: '',
     brand: brands[0],
     category: categories[1],
@@ -307,6 +308,7 @@ export default function AdminDashboard() {
     setEditingProduct(null);
     setSetUnitPrices([]);
     setProductForm({
+      nameEn: '',
       name: '',
       brand: brands[0],
       category: categories[1],
@@ -332,6 +334,7 @@ export default function AdminDashboard() {
       opts.map((s) => (s.unitsPerSet > 0 ? Math.round(s.wholesalePrice / s.unitsPerSet) : u))
     );
     setProductForm({
+      nameEn: product.nameEn,
       name: product.name,
       brand: product.brand,
       category: product.category,
@@ -350,8 +353,8 @@ export default function AdminDashboard() {
   };
 
   const handleSaveProduct = async () => {
-    if (!productForm.name) {
-      showToast('Product name is required', 'error');
+    if (!productForm.nameEn) {
+      showToast('English product name is required', 'error');
       return;
     }
 
@@ -363,7 +366,8 @@ export default function AdminDashboard() {
       : 0;
 
     const productData = {
-      name: productForm.name,
+      nameEn: productForm.nameEn,
+      name: productForm.name.trim() || productForm.nameEn,
       brand: productForm.brand,
       category: productForm.category,
       image: productForm.images[0] || productForm.image || '',
@@ -858,14 +862,19 @@ export default function AdminDashboard() {
                           <td className="px-4 py-3">
                             <img
                               src={product.image}
-                              alt={product.name}
+                              alt={product.nameEn}
                               className="w-10 h-10 object-cover rounded"
                             />
                           </td>
                           <td className="px-4 py-3 max-w-[200px]">
                             <p className="font-medium text-[#333] truncate">
-                              {product.name}
+                              {product.nameEn}
                             </p>
+                            {product.name !== product.nameEn && (
+                              <p className="text-[11px] text-[#aaa] truncate">
+                                {product.name}
+                              </p>
+                            )}
                           </td>
                           <td className="px-4 py-3 text-[#666] hidden md:table-cell">
                             {product.brand}
@@ -942,7 +951,26 @@ export default function AdminDashboard() {
                     <div className="p-5 space-y-4">
                       <div>
                         <label className="block text-[12px] text-[#666] mb-1">
-                          Product Name *
+                          Product Name (English) *
+                          <span className="ml-1 text-[#aaa] font-normal">— shown as the main title to all buyers</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={productForm.nameEn}
+                          onChange={(e) =>
+                            setProductForm({
+                              ...productForm,
+                              nameEn: e.target.value,
+                            })
+                          }
+                          placeholder="e.g. Advanced Snail 96 Mucin Power Essence 100ml"
+                          className="w-full h-10 px-3 border border-[#e5e5e5] rounded text-[13px] focus:outline-none focus:border-[#333]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[12px] text-[#666] mb-1">
+                          원어 상품명 (선택)
+                          <span className="ml-1 text-[#aaa] font-normal">— 제조사 표기 그대로, 영문명 아래 작게 표시됩니다</span>
                         </label>
                         <input
                           type="text"
@@ -953,6 +981,7 @@ export default function AdminDashboard() {
                               name: e.target.value,
                             })
                           }
+                          placeholder="例：アドバンスドスネイル 96 ムシンパワーエッセンス 100ml"
                           className="w-full h-10 px-3 border border-[#e5e5e5] rounded text-[13px] focus:outline-none focus:border-[#333]"
                         />
                       </div>

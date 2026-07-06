@@ -294,13 +294,13 @@ export default function MyAccount() {
                                   <div key={idx} className="flex items-center gap-3">
                                     <img
                                       src={item.product.image}
-                                      alt={item.product.name}
+                                      alt={item.product.nameEn ?? item.product.name}
                                       onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/48x48/f0f0f0/999?text=IMG'; }}
                                       className="w-12 h-12 object-cover rounded-lg border border-[#f0f0f0] shrink-0"
                                     />
                                     <div className="flex-1 min-w-0">
                                       <p className="text-[12px] text-[#aaa] uppercase">{item.product.brand}</p>
-                                      <p className="text-[13px] text-[#333] truncate">{item.product.name}</p>
+                                      <p className="text-[13px] text-[#333] truncate">{item.product.nameEn ?? item.product.name}</p>
                                       {item.setOption && (
                                         <p className="text-[11px] text-[#4a90e2]">
                                           {item.setOption.id} · {item.setOption.description}

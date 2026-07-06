@@ -18,7 +18,7 @@ export function emailOrderPlaced(order: Order, buyerEmail: string, currency: str
     orderId: order.id,
     memberName: order.memberName,
     items: order.items.map((item: CartItem) => ({
-      name: item.product.name,
+      name: item.product.nameEn ?? item.product.name,
       brand: item.product.brand,
       quantity: item.quantity,
       setDescription: item.setOption?.description ?? '',

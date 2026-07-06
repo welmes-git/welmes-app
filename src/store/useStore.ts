@@ -27,7 +27,10 @@ export interface SetOption {
 
 export interface Product {
   id: number;
+  /** Original name as entered by the manufacturer/supplier (e.g. Japanese) */
   name: string;
+  /** Canonical English/romanized name — shown as the primary heading site-wide */
+  nameEn: string;
   brand: string;
   category: string;
   image: string;

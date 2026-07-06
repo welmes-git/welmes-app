@@ -192,7 +192,7 @@ export default function OrderPrint() {
                   >
                     <td className="py-2.5 px-3 text-[11px] text-[#888]">{idx + 1}</td>
                     <td className="py-2.5 px-3 text-[11px] text-[#222] font-medium" style={{ maxWidth: '180px' }}>
-                      {item.product.name}
+                      {item.product.nameEn ?? item.product.name}
                     </td>
                     <td className="py-2.5 px-3 text-[11px] text-[#888]">{item.product.brand}</td>
                     <td className="py-2.5 px-3 text-[11px]">

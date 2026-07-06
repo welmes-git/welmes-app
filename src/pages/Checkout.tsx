@@ -337,7 +337,7 @@ export default function Checkout() {
                       <div className="flex gap-3 items-center">
                         <img
                           src={item.product.image}
-                          alt={item.product.name}
+                          alt={item.product.nameEn ?? item.product.name}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src =
                               'https://placehold.co/60x60/f0f0f0/999?text=IMG';
@@ -346,7 +346,10 @@ export default function Checkout() {
                         />
                         <div>
                           <p className="text-[11px] text-[#aaa] uppercase font-medium">{item.product.brand}</p>
-                          <p className="text-[13px] text-[#222] font-medium leading-tight">{item.product.name}</p>
+                          <p className="text-[13px] text-[#222] font-medium leading-tight">{item.product.nameEn ?? item.product.name}</p>
+                          {item.product.nameEn && item.product.name !== item.product.nameEn && (
+                            <p className="text-[11px] text-[#bbb] leading-tight">{item.product.name}</p>
+                          )}
                           <p className="text-[12px] text-[#4a90e2] font-semibold mt-0.5">
                             {formatPrice(item.product.wholesalePrice)} {t('products.perSet')}
                           </p>
@@ -578,7 +581,7 @@ export default function Checkout() {
                     <div key={`${item.product.id}-${item.setOption?.id}`} className="flex justify-between text-[12px] py-1 border-b border-[#f8f8f8] last:border-0">
                       <span className="text-[#555] truncate pr-2 flex-1">
                         <span className="font-medium text-[#4a90e2] mr-1">{item.setOption?.id}</span>
-                        {item.product.name}
+                        {item.product.nameEn ?? item.product.name}
                       </span>
                       <span className="shrink-0 text-[#222] font-semibold">×{item.quantity}</span>
                     </div>

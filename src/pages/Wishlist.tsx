@@ -81,7 +81,7 @@ export default function Wishlist() {
               <div className="relative aspect-square overflow-hidden cursor-pointer bg-[#f8f8fa]" onClick={() => navigate(`/product/${product.id}`)}>
                 <img
                   src={product.image}
-                  alt={product.name}
+                  alt={product.nameEn}
                   onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/300x300/f0f0f0/999?text=IMG'; }}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
@@ -103,7 +103,7 @@ export default function Wishlist() {
               <div className="p-3">
                 <p className="text-[11px] text-[#aaa] uppercase tracking-wide mb-0.5">{product.brand}</p>
                 <p className="text-[13px] text-[#222] font-medium line-clamp-2 leading-snug mb-2 cursor-pointer hover:text-[#4a90e2] transition-colors min-h-[36px]" onClick={() => navigate(`/product/${product.id}`)}>
-                  {product.name}
+                  {product.nameEn}
                 </p>
 
                 {isVerified ? (

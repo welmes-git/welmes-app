@@ -173,7 +173,7 @@ export default function ProductDetail() {
             {product.category}
           </Link>
           <span>&gt;</span>
-          <span className="text-[#333] truncate max-w-[200px]">{product.name}</span>
+          <span className="text-[#333] truncate max-w-[200px]">{product.nameEn}</span>
         </div>
 
         {/* Product Info */}
@@ -190,7 +190,7 @@ export default function ProductDetail() {
                   <div className="aspect-square bg-[#f8f8fa] rounded-lg overflow-hidden mb-3 relative">
                     <img
                       src={current}
-                      alt={product.name}
+                      alt={product.nameEn}
                       className="w-full h-full object-cover"
                     />
                     {imgs.length > 1 && (
@@ -237,9 +237,15 @@ export default function ProductDetail() {
             </Link>
 
             {/* Name */}
-            <h1 className="text-[22px] font-bold text-[#333] mt-1 mb-3">
-              {product.name}
+            <h1 className="text-[22px] font-bold text-[#333] mt-1">
+              {product.nameEn}
             </h1>
+            {product.name !== product.nameEn && (
+              <p className="text-[13px] text-[#aaa] mb-3">
+                {product.name}
+              </p>
+            )}
+            {product.name === product.nameEn && <div className="mb-3" />}
 
             {/* Rating */}
             <div className="flex items-center gap-2 mb-4">

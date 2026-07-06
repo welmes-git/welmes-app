@@ -69,7 +69,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 >
                   <img
                     src={item.product.image}
-                    alt={item.product.name}
+                    alt={item.product.nameEn ?? item.product.name}
                     onError={(e) => {
                       (e.target as HTMLImageElement).src =
                         'https://placehold.co/70x70/f0f0f0/999?text=IMG';
@@ -81,7 +81,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       {item.product.brand}
                     </p>
                     <p className="text-[13px] text-[#333] truncate">
-                      {item.product.name}
+                      {item.product.nameEn ?? item.product.name}
                     </p>
                     {item.setOption && (
                       <p className="text-[11px] text-[#4a90e2] font-medium">

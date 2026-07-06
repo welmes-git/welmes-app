@@ -9,6 +9,7 @@ interface ProductCardProps {
   product: {
     id: number;
     name: string;
+    nameEn: string;
     brand: string;
     category: string;
     image: string;
@@ -82,7 +83,7 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
       <div className="relative aspect-square overflow-hidden rounded-lg bg-[#f8f8fa] mb-3">
         <img
           src={product.image}
-          alt={product.name}
+          alt={product.nameEn}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
 
@@ -145,9 +146,16 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
         </p>
 
         {/* Name */}
-        <h3 className="text-[14px] text-[#333] leading-[1.4] line-clamp-2 mb-2 min-h-[40px]">
-          {product.name}
-        </h3>
+        <div className="mb-2 min-h-[52px]">
+          <h3 className="text-[14px] text-[#333] leading-[1.4] line-clamp-2">
+            {product.nameEn}
+          </h3>
+          {product.name !== product.nameEn && (
+            <p className="text-[11px] text-[#aaa] truncate mt-0.5">
+              {product.name}
+            </p>
+          )}
+        </div>
 
         {/* Price Section - B2B Masked */}
         {canSeePrice ? (

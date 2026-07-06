@@ -64,6 +64,7 @@ export default function ProductList() {
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (p) =>
+          p.nameEn.toLowerCase().includes(q) ||
           p.name.toLowerCase().includes(q) ||
           p.brand.toLowerCase().includes(q) ||
           p.category.toLowerCase().includes(q) ||
