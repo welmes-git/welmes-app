@@ -36,15 +36,130 @@
     "keywordSuggestions": "Sugerencias de búsqueda",
     "trendingSearches": "Búsquedas populares"
   },
+  "categoryMenu": {
+    "skincare": "Cuidado facial",
+    "toner": "Tónico",
+    "serum": "Esencia · Sérum · Ampolla",
+    "cream": "Crema",
+    "lotion": "Loción",
+    "mistOil": "Bruma · Aceite",
+    "skincareSet": "Sets de cuidado facial",
+    "maskPack": "Mascarillas",
+    "sheetMask": "Mascarillas de tela",
+    "padMask": "Discos",
+    "facialPack": "Mascarillas faciales",
+    "patchMask": "Parches",
+    "cleansing": "Limpieza",
+    "foamGel": "Espuma · Gel",
+    "oilBalm": "Aceite · Bálsamo",
+    "waterMilk": "Agua · Leche",
+    "scrub": "Peeling y exfoliante",
+    "sunCare": "Protección solar",
+    "sunCream": "Crema solar",
+    "sunStick": "Stick solar",
+    "sunSpray": "Spray · Parche solar",
+    "makeup": "Maquillaje",
+    "lipMakeup": "Labios",
+    "baseMakeup": "Base",
+    "eyeMakeup": "Ojos",
+    "beautyTools": "Accesorios de belleza",
+    "makeupTools": "Herramientas de maquillaje",
+    "faceTools": "Herramientas faciales",
+    "hairBodyTools": "Herramientas de pelo y cuerpo",
+    "hairCare": "Cuidado capilar",
+    "shampoo": "Champú",
+    "treatment": "Tratamiento · Mascarilla",
+    "scalpCare": "Cuero cabelludo",
+    "styling": "Peinado",
+    "bodyCare": "Cuidado corporal",
+    "showerBath": "Ducha · Baño",
+    "bodyLotion": "Loción · Crema corporal",
+    "handCare": "Cuidado de manos",
+    "footCare": "Cuidado de pies",
+    "deodorant": "Desodorante",
+    "fragrance": "Fragancias",
+    "perfume": "Perfume",
+    "miniPerfume": "Perfume mini · sólido",
+    "homeFragrance": "Fragancia para el hogar",
+    "healthFood": "Alimentos saludables",
+    "vitamin": "Vitaminas",
+    "supplement": "Suplementos",
+    "probiotics": "Probióticos",
+    "innerBeauty": "Adelgazamiento · Belleza interior",
+    "skincareDevice": "Dispositivos faciales",
+    "nosePack": "Parches nasales",
+    "cleansingTissue": "Toallitas · Discos",
+    "lipEyeRemover": "Desmaquillante de ojos y labios",
+    "cleansingDevice": "Dispositivos de limpieza",
+    "sunCushion": "Cushion solar",
+    "tanningAfterSun": "Bronceado · After sun",
+    "eyelashTools": "Herramientas de pestañas",
+    "dailyTools": "Herramientas diarias",
+    "dermoCosmetic": "Dermocosmética",
+    "nail": "Uñas",
+    "basicNail": "Esmalte de uñas",
+    "gelNail": "Uñas de gel",
+    "nailTip": "Tips · Pegatinas",
+    "nailCare": "Cuidado · Quitaesmalte",
+    "hairEssence": "Esencia capilar",
+    "hairColor": "Tinte · Permanente",
+    "hairTools": "Aparatos · Cepillos",
+    "hairRemoval": "Depilación",
+    "babyMom": "Bebé · Maternidad",
+    "food": "Alimentación",
+    "dietFood": "Dieta · Belleza interior",
+    "snacks": "Snacks · Chocolate · Postres",
+    "drinks": "Agua · Bebidas · Café",
+    "instantFood": "Comida instantánea",
+    "babyFood": "Comida para bebé",
+    "healthGoods": "Salud · Bienestar",
+    "patchCare": "Parches · Cuidado localizado",
+    "relaxGoods": "Relajación",
+    "medicalSupplies": "Suministros médicos",
+    "massageSupport": "Masaje · Soportes",
+    "fitnessGoods": "Artículos deportivos",
+    "oralCare": "Cuidado bucal",
+    "toothbrush": "Cepillos de dientes",
+    "toothpaste": "Pasta de dientes",
+    "afterOralCare": "Enjuague bucal",
+    "portableOralSet": "Sets portátiles",
+    "oralAppliance": "Dispositivos bucales",
+    "hygiene": "Higiene",
+    "femCare": "Higiene femenina",
+    "intimateCare": "Cuidado íntimo",
+    "adultGoods": "Productos para adultos",
+    "massageGel": "Gel · Aceite de masaje",
+    "testKit": "Kits de prueba",
+    "diapers": "Pañales",
+    "tissuePaper": "Papel · Pañuelos",
+    "fashion": "Moda",
+    "underwear": "Ropa interior",
+    "fashionAccessories": "Accesorios de moda",
+    "sportswear": "Ropa deportiva",
+    "homewear": "Ropa de casa",
+    "homeLiving": "Hogar · Electrodomésticos",
+    "appliances": "Electrodomésticos",
+    "kitchen": "Cocina",
+    "interior": "Interiorismo",
+    "bathroom": "Baño",
+    "cleaning": "Detergente · Limpieza",
+    "petSupplies": "Mascotas",
+    "babyGoods": "Bebés · Niños",
+    "hobby": "Hobby · Papelería",
+    "characterGoods": "Merchandising",
+    "stationery": "Papelería",
+    "digital": "Digital · Dispositivos",
+    "albums": "Álbumes"
+  },
   "banners": {
-    "b1Eyebrow": "Para compradores de empresa",
-    "b1Title": "Hasta un 70%\npor debajo del retail",
+    "b1Eyebrow": "Para compradores B2B",
+    "b1Title": "Hasta 70% menos\nque el retail",
     "b1Subtitle": "Belleza japonesa y coreana auténtica — pedido mínimo desde 1 set",
     "b1Cta": "Ver precios mayoristas",
     "b2Eyebrow": "Logística global",
-    "b2Title": "Enviamos a más\nde 50 países",
+    "b2Title": "Enviamos a\nmás de 50 países",
     "b2Subtitle": "EMS · DHL · FedEx — puerta a puerta, 3–7 días laborables",
-    "b2Cta": "Registra tu empresa"
+    "b2Cta": "Registrar mi empresa"
   },
   "home": {
     "heroTitle": "Plataforma mayorista premium\nde K-Beauty",
@@ -393,39 +508,113 @@
       "payment": "Pagos",
       "products": "Productos"
     },
-    "formCategories": ["Consulta general", "Membresía y verificación", "Pedidos y envíos", "Devoluciones y cambios", "Pagos y facturas", "Consulta de producto", "Otro"],
+    "formCategories": [
+      "Consulta general",
+      "Membresía y verificación",
+      "Pedidos y envíos",
+      "Devoluciones y cambios",
+      "Pagos y facturas",
+      "Consulta de producto",
+      "Otro"
+    ],
     "faqs": {
       "membership": [
-        { "q": "¿Quién puede registrarse como miembro?", "a": "WELMES es una plataforma mayorista exclusiva para empresas verificadas. Debes tener un número de registro mercantil válido para registrarte. Los particulares sin empresa registrada no pueden acceder a precios mayoristas." },
-        { "q": "¿Cuánto tarda la verificación de la empresa?", "a": "La verificación suele completarse en 1–2 días laborables tras enviar tu certificado de registro mercantil. Recibirás una notificación por correo electrónico cuando sea aprobada." },
-        { "q": "¿Puedo ver los productos antes de completar la verificación?", "a": "Puedes ver el catálogo de productos, pero los precios mayoristas y la posibilidad de añadir artículos al carrito solo están disponibles después de que nuestro equipo apruebe tu cuenta." },
-        { "q": "¿Qué documentos se requieren para el registro?", "a": "Deberás proporcionar tu certificado de registro mercantil. Asegúrate de que el documento sea claro y legible. En casos especiales podrían solicitarse documentos adicionales." },
-        { "q": "¿Puedo cambiar los datos registrados de mi empresa?", "a": "Para actualizar los datos de tu empresa, contacta con nuestro equipo de soporte por correo electrónico o teléfono. Los cambios en el número de registro mercantil requieren una nueva verificación." }
+        {
+          "q": "¿Quién puede registrarse como miembro?",
+          "a": "WELMES es una plataforma mayorista exclusiva para empresas verificadas. Debes tener un número de registro mercantil válido para registrarte. Los particulares sin empresa registrada no pueden acceder a precios mayoristas."
+        },
+        {
+          "q": "¿Cuánto tarda la verificación de la empresa?",
+          "a": "La verificación suele completarse en 1–2 días laborables tras enviar tu certificado de registro mercantil. Recibirás una notificación por correo electrónico cuando sea aprobada."
+        },
+        {
+          "q": "¿Puedo ver los productos antes de completar la verificación?",
+          "a": "Puedes ver el catálogo de productos, pero los precios mayoristas y la posibilidad de añadir artículos al carrito solo están disponibles después de que nuestro equipo apruebe tu cuenta."
+        },
+        {
+          "q": "¿Qué documentos se requieren para el registro?",
+          "a": "Deberás proporcionar tu certificado de registro mercantil. Asegúrate de que el documento sea claro y legible. En casos especiales podrían solicitarse documentos adicionales."
+        },
+        {
+          "q": "¿Puedo cambiar los datos registrados de mi empresa?",
+          "a": "Para actualizar los datos de tu empresa, contacta con nuestro equipo de soporte por correo electrónico o teléfono. Los cambios en el número de registro mercantil requieren una nueva verificación."
+        }
       ],
       "orders": [
-        { "q": "¿Cuál es la cantidad mínima de pedido (MOQ)?", "a": "Las cantidades mínimas de pedido varían según el producto y la marca. El MOQ se muestra en cada página de producto. Algunos productos pueden requerir un valor mínimo de pedido de ₩100.000 o más." },
-        { "q": "¿Cuánto tarda la entrega?", "a": "Los tiempos de entrega varían según el destino. Los servicios exprés como DHL, FedEx y EMS suelen entregar en 3–7 días laborables tras el envío. La entrega puede demorarse en temporada alta o durante el despacho aduanero." },
-        { "q": "¿Puedo rastrear mi pedido?", "a": "Sí. Cuando tu pedido sea enviado, se enviará un número de seguimiento a tu correo registrado. También puedes consultar el estado en la sección Mis pedidos de tu cuenta." },
-        { "q": "¿Puedo modificar o cancelar un pedido después de realizarlo?", "a": "Los pedidos pueden modificarse o cancelarse dentro de la primera hora. Después, una vez iniciado el procesamiento, es posible que no se puedan cancelar. Contáctanos de inmediato si necesitas hacer cambios." },
-        { "q": "¿Ofrecen envío internacional?", "a": "Sí. Enviamos a más de 50 países de todo el mundo mediante EMS, DHL, FedEx y otros transportistas principales. Los gastos de envío se calculan según el destino y el volumen del pedido, y serán confirmados por tu gestor de cuenta tras realizar el pedido. El envío consolidado está disponible para reducir los costes logísticos." }
+        {
+          "q": "¿Cuál es la cantidad mínima de pedido (MOQ)?",
+          "a": "Las cantidades mínimas de pedido varían según el producto y la marca. El MOQ se muestra en cada página de producto. Algunos productos pueden requerir un valor mínimo de pedido de ₩100.000 o más."
+        },
+        {
+          "q": "¿Cuánto tarda la entrega?",
+          "a": "Los tiempos de entrega varían según el destino. Los servicios exprés como DHL, FedEx y EMS suelen entregar en 3–7 días laborables tras el envío. La entrega puede demorarse en temporada alta o durante el despacho aduanero."
+        },
+        {
+          "q": "¿Puedo rastrear mi pedido?",
+          "a": "Sí. Cuando tu pedido sea enviado, se enviará un número de seguimiento a tu correo registrado. También puedes consultar el estado en la sección Mis pedidos de tu cuenta."
+        },
+        {
+          "q": "¿Puedo modificar o cancelar un pedido después de realizarlo?",
+          "a": "Los pedidos pueden modificarse o cancelarse dentro de la primera hora. Después, una vez iniciado el procesamiento, es posible que no se puedan cancelar. Contáctanos de inmediato si necesitas hacer cambios."
+        },
+        {
+          "q": "¿Ofrecen envío internacional?",
+          "a": "Sí. Enviamos a más de 50 países de todo el mundo mediante EMS, DHL, FedEx y otros transportistas principales. Los gastos de envío se calculan según el destino y el volumen del pedido, y serán confirmados por tu gestor de cuenta tras realizar el pedido. El envío consolidado está disponible para reducir los costes logísticos."
+        }
       ],
       "returns": [
-        { "q": "¿Cuál es su política de devoluciones?", "a": "Se aceptan devoluciones dentro de los 7 días posteriores a la entrega para artículos defectuosos, dañados o enviados incorrectamente. Debido a la naturaleza mayorista, generalmente no se aceptan devoluciones por cambio de opinión." },
-        { "q": "¿Cómo inicio una devolución o cambio?", "a": "Contacta con nuestro equipo de soporte dentro de los 7 días posteriores a recibir tu pedido. Proporciona tu número de pedido, una descripción del problema y fotos si el artículo está dañado. Nuestro equipo te guiará en el proceso." },
-        { "q": "¿Quién cubre los gastos de envío de la devolución?", "a": "Si la devolución se debe a un defecto o a un error nuestro, cubrimos los gastos de envío. Si la devolución es por cualquier otro motivo, el comprador es responsable de los gastos de envío." },
-        { "q": "¿Cuánto tarda en procesarse un reembolso?", "a": "Los reembolsos se procesan en 3–5 días laborables después de recibir e inspeccionar los artículos devueltos. El tiempo hasta que los fondos aparezcan en tu cuenta depende de tu método de pago y banco." }
+        {
+          "q": "¿Cuál es su política de devoluciones?",
+          "a": "Se aceptan devoluciones dentro de los 7 días posteriores a la entrega para artículos defectuosos, dañados o enviados incorrectamente. Debido a la naturaleza mayorista, generalmente no se aceptan devoluciones por cambio de opinión."
+        },
+        {
+          "q": "¿Cómo inicio una devolución o cambio?",
+          "a": "Contacta con nuestro equipo de soporte dentro de los 7 días posteriores a recibir tu pedido. Proporciona tu número de pedido, una descripción del problema y fotos si el artículo está dañado. Nuestro equipo te guiará en el proceso."
+        },
+        {
+          "q": "¿Quién cubre los gastos de envío de la devolución?",
+          "a": "Si la devolución se debe a un defecto o a un error nuestro, cubrimos los gastos de envío. Si la devolución es por cualquier otro motivo, el comprador es responsable de los gastos de envío."
+        },
+        {
+          "q": "¿Cuánto tarda en procesarse un reembolso?",
+          "a": "Los reembolsos se procesan en 3–5 días laborables después de recibir e inspeccionar los artículos devueltos. El tiempo hasta que los fondos aparezcan en tu cuenta depende de tu método de pago y banco."
+        }
       ],
       "payment": [
-        { "q": "¿Qué métodos de pago se aceptan?", "a": "Aceptamos transferencia bancaria, tarjeta de crédito (Visa, MasterCard, Amex) y los principales métodos de pago coreanos como KakaoPay y NaverPay. Los pedidos por transferencia se procesan tras la confirmación del pago." },
-        { "q": "¿Los precios incluyen IVA?", "a": "Todos los precios mayoristas mostrados no incluyen IVA (10%). El IVA se añade al tramitar el pedido. Se emitirá una factura fiscal a los miembros empresariales que la soliciten." },
-        { "q": "¿Puedo solicitar una factura fiscal?", "a": "Sí. Como miembro empresarial registrado, tienes derecho a una factura fiscal por todas tus compras. Puedes solicitarla desde la página de detalles del pedido o contactando con soporte." },
-        { "q": "¿Existe límite de crédito o pago a plazos?", "a": "Las condiciones de crédito (p. ej. Net 30) están disponibles para miembros con antigüedad y buen historial de pedidos. Contacta directamente con nuestro equipo comercial para acordar condiciones de crédito." }
+        {
+          "q": "¿Qué métodos de pago se aceptan?",
+          "a": "Aceptamos transferencia bancaria, tarjeta de crédito (Visa, MasterCard, Amex) y los principales métodos de pago coreanos como KakaoPay y NaverPay. Los pedidos por transferencia se procesan tras la confirmación del pago."
+        },
+        {
+          "q": "¿Los precios incluyen IVA?",
+          "a": "Todos los precios mayoristas mostrados no incluyen IVA (10%). El IVA se añade al tramitar el pedido. Se emitirá una factura fiscal a los miembros empresariales que la soliciten."
+        },
+        {
+          "q": "¿Puedo solicitar una factura fiscal?",
+          "a": "Sí. Como miembro empresarial registrado, tienes derecho a una factura fiscal por todas tus compras. Puedes solicitarla desde la página de detalles del pedido o contactando con soporte."
+        },
+        {
+          "q": "¿Existe límite de crédito o pago a plazos?",
+          "a": "Las condiciones de crédito (p. ej. Net 30) están disponibles para miembros con antigüedad y buen historial de pedidos. Contacta directamente con nuestro equipo comercial para acordar condiciones de crédito."
+        }
       ],
       "products": [
-        { "q": "¿Todos los productos son auténticos?", "a": "Sí. WELMES trabaja directamente con distribuidores autorizados y socios de marca. Todos los productos son 100% auténticos y provienen de cadenas de suministro oficiales." },
-        { "q": "¿Puedo solicitar productos que no están en el catálogo?", "a": "Sí. Si buscas un producto o marca específica que no aparece en el catálogo, contáctanos. Ampliamos regularmente nuestro catálogo según la demanda de los miembros." },
-        { "q": "¿Los productos tienen garantía de fecha de caducidad?", "a": "Todos los productos tienen garantizada una vida útil mínima de 12 meses en el momento del envío, salvo que se indique lo contrario en la página del producto." },
-        { "q": "¿Puedo obtener muestras antes de hacer un pedido grande?", "a": "Las solicitudes de muestras están disponibles para productos seleccionados para miembros aprobados. Contacta con soporte con los datos de tu cuenta y los productos que te interesan." }
+        {
+          "q": "¿Todos los productos son auténticos?",
+          "a": "Sí. WELMES trabaja directamente con distribuidores autorizados y socios de marca. Todos los productos son 100% auténticos y provienen de cadenas de suministro oficiales."
+        },
+        {
+          "q": "¿Puedo solicitar productos que no están en el catálogo?",
+          "a": "Sí. Si buscas un producto o marca específica que no aparece en el catálogo, contáctanos. Ampliamos regularmente nuestro catálogo según la demanda de los miembros."
+        },
+        {
+          "q": "¿Los productos tienen garantía de fecha de caducidad?",
+          "a": "Todos los productos tienen garantizada una vida útil mínima de 12 meses en el momento del envío, salvo que se indique lo contrario en la página del producto."
+        },
+        {
+          "q": "¿Puedo obtener muestras antes de hacer un pedido grande?",
+          "a": "Las solicitudes de muestras están disponibles para productos seleccionados para miembros aprobados. Contacta con soporte con los datos de tu cuenta y los productos que te interesan."
+        }
       ]
     }
   },
@@ -472,16 +661,6 @@
     "veryGood": "Muy bueno",
     "excellent": "Excelente",
     "submitted": "¡Reseña enviada!"
-  },
-  "banners": {
-    "b1Eyebrow": "Para compradores B2B",
-    "b1Title": "Hasta 70% menos\nque el retail",
-    "b1Subtitle": "Belleza japonesa y coreana auténtica — pedido mínimo desde 1 set",
-    "b1Cta": "Ver precios mayoristas",
-    "b2Eyebrow": "Logística global",
-    "b2Title": "Enviamos a\nmás de 50 países",
-    "b2Subtitle": "EMS · DHL · FedEx — puerta a puerta, 3–7 días laborables",
-    "b2Cta": "Registrar mi empresa"
   },
   "footer": {
     "tagline": "Plataforma mayorista premium de K-Beauty",

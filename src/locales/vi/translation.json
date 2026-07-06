@@ -36,13 +36,128 @@
     "keywordSuggestions": "Gợi ý từ khóa",
     "trendingSearches": "Tìm kiếm thịnh hành"
   },
+  "categoryMenu": {
+    "skincare": "Chăm sóc da",
+    "toner": "Nước hoa hồng",
+    "serum": "Tinh chất · Serum · Ống",
+    "cream": "Kem dưỡng",
+    "lotion": "Sữa dưỡng",
+    "mistOil": "Xịt khoáng · Dầu dưỡng",
+    "skincareSet": "Bộ chăm sóc da",
+    "maskPack": "Mặt nạ",
+    "sheetMask": "Mặt nạ giấy",
+    "padMask": "Miếng pad",
+    "facialPack": "Mặt nạ rửa",
+    "patchMask": "Miếng dán",
+    "cleansing": "Làm sạch",
+    "foamGel": "Sữa rửa mặt · Gel",
+    "oilBalm": "Dầu · Sáp tẩy trang",
+    "waterMilk": "Nước · Sữa tẩy trang",
+    "scrub": "Tẩy tế bào chết",
+    "sunCare": "Chống nắng",
+    "sunCream": "Kem chống nắng",
+    "sunStick": "Thỏi chống nắng",
+    "sunSpray": "Xịt · Miếng dán chống nắng",
+    "makeup": "Trang điểm",
+    "lipMakeup": "Trang điểm môi",
+    "baseMakeup": "Trang điểm nền",
+    "eyeMakeup": "Trang điểm mắt",
+    "beautyTools": "Dụng cụ làm đẹp",
+    "makeupTools": "Dụng cụ trang điểm",
+    "faceTools": "Dụng cụ chăm sóc mặt",
+    "hairBodyTools": "Dụng cụ tóc · cơ thể",
+    "hairCare": "Chăm sóc tóc",
+    "shampoo": "Dầu gội",
+    "treatment": "Dầu xả · Ủ tóc",
+    "scalpCare": "Chăm sóc da đầu",
+    "styling": "Tạo kiểu",
+    "bodyCare": "Chăm sóc cơ thể",
+    "showerBath": "Tắm · Ngâm",
+    "bodyLotion": "Sữa dưỡng thể · Kem",
+    "handCare": "Chăm sóc tay",
+    "footCare": "Chăm sóc chân",
+    "deodorant": "Khử mùi",
+    "fragrance": "Nước hoa",
+    "perfume": "Nước hoa",
+    "miniPerfume": "Nước hoa mini · khô",
+    "homeFragrance": "Hương thơm nhà cửa",
+    "healthFood": "Thực phẩm sức khỏe",
+    "vitamin": "Vitamin",
+    "supplement": "Thực phẩm bổ sung",
+    "probiotics": "Men vi sinh",
+    "innerBeauty": "Giảm cân · Đẹp từ bên trong",
+    "skincareDevice": "Thiết bị chăm sóc da",
+    "nosePack": "Miếng dán mũi",
+    "cleansingTissue": "Khăn · Bông tẩy trang",
+    "lipEyeRemover": "Tẩy trang mắt môi",
+    "cleansingDevice": "Máy rửa mặt",
+    "sunCushion": "Cushion chống nắng",
+    "tanningAfterSun": "Nhuộm nâu · Sau nắng",
+    "eyelashTools": "Dụng cụ mi",
+    "dailyTools": "Dụng cụ hằng ngày",
+    "dermoCosmetic": "Dược mỹ phẩm",
+    "nail": "Móng",
+    "basicNail": "Sơn móng",
+    "gelNail": "Móng gel",
+    "nailTip": "Móng úp · Sticker",
+    "nailCare": "Chăm sóc · Tẩy móng",
+    "hairEssence": "Tinh chất dưỡng tóc",
+    "hairColor": "Nhuộm · Uốn tóc",
+    "hairTools": "Máy tạo kiểu · Lược",
+    "hairRemoval": "Tẩy lông · Wax",
+    "babyMom": "Trẻ em · Mẹ bầu",
+    "food": "Thực phẩm",
+    "dietFood": "Ăn kiêng · Đẹp từ bên trong",
+    "snacks": "Bánh kẹo · Sô-cô-la",
+    "drinks": "Nước · Đồ uống · Cà phê",
+    "instantFood": "Đồ ăn liền",
+    "babyFood": "Đồ ăn dặm",
+    "healthGoods": "Đồ dùng sức khỏe",
+    "patchCare": "Miếng dán · Chăm sóc điểm",
+    "relaxGoods": "Đồ thư giãn",
+    "medicalSupplies": "Đồ dùng y tế",
+    "massageSupport": "Massage · Đai bảo vệ",
+    "fitnessGoods": "Dụng cụ thể thao",
+    "oralCare": "Chăm sóc răng miệng",
+    "toothbrush": "Bàn chải",
+    "toothpaste": "Kem đánh răng",
+    "afterOralCare": "Nước súc miệng",
+    "portableOralSet": "Bộ du lịch",
+    "oralAppliance": "Máy chăm sóc răng",
+    "hygiene": "Đồ vệ sinh",
+    "femCare": "Băng vệ sinh",
+    "intimateCare": "Chăm sóc vùng kín",
+    "adultGoods": "Sản phẩm người lớn",
+    "massageGel": "Gel · Dầu massage",
+    "testKit": "Que thử",
+    "diapers": "Tã",
+    "tissuePaper": "Khăn giấy",
+    "fashion": "Thời trang",
+    "underwear": "Đồ lót",
+    "fashionAccessories": "Phụ kiện thời trang",
+    "sportswear": "Đồ thể thao",
+    "homewear": "Đồ mặc nhà",
+    "homeLiving": "Đồ gia dụng · Điện máy",
+    "appliances": "Điện gia dụng",
+    "kitchen": "Nhà bếp",
+    "interior": "Nội thất",
+    "bathroom": "Phòng tắm",
+    "cleaning": "Chất tẩy · Vệ sinh",
+    "petSupplies": "Đồ thú cưng",
+    "babyGoods": "Đồ mẹ và bé",
+    "hobby": "Sở thích · Đồ xinh",
+    "characterGoods": "Đồ nhân vật",
+    "stationery": "Văn phòng phẩm",
+    "digital": "Kỹ thuật số · Thiết bị",
+    "albums": "Album nhạc"
+  },
   "banners": {
-    "b1Eyebrow": "Dành cho nhà mua sỉ",
-    "b1Title": "Giảm đến 70%\nso với giá lẻ",
-    "b1Subtitle": "Mỹ phẩm chính hãng Nhật - Hàn — đặt hàng tối thiểu từ 1 set",
+    "b1Eyebrow": "Dành cho khách doanh nghiệp",
+    "b1Title": "Rẻ hơn giá lẻ\nđến 70%",
+    "b1Subtitle": "Mỹ phẩm Nhật & Hàn chính hãng — đặt tối thiểu từ 1 set",
     "b1Cta": "Xem giá sỉ",
-    "b2Eyebrow": "Vận chuyển toàn cầu",
-    "b2Title": "Giao hàng hơn\n50 quốc gia",
+    "b2Eyebrow": "Logistics toàn cầu",
+    "b2Title": "Giao hàng đến\nhơn 50 quốc gia",
     "b2Subtitle": "EMS · DHL · FedEx — tận nơi, 3–7 ngày làm việc",
     "b2Cta": "Đăng ký doanh nghiệp"
   },
@@ -391,39 +506,113 @@
       "payment": "Thanh toán",
       "products": "Sản phẩm"
     },
-    "formCategories": ["Câu hỏi chung", "Thành viên & Xác minh", "Đặt hàng & Vận chuyển", "Đổi trả", "Thanh toán & Hóa đơn", "Hỏi về sản phẩm", "Khác"],
+    "formCategories": [
+      "Câu hỏi chung",
+      "Thành viên & Xác minh",
+      "Đặt hàng & Vận chuyển",
+      "Đổi trả",
+      "Thanh toán & Hóa đơn",
+      "Hỏi về sản phẩm",
+      "Khác"
+    ],
     "faqs": {
       "membership": [
-        { "q": "Ai có thể đăng ký thành viên?", "a": "WELMES là nền tảng bán sỉ dành riêng cho doanh nghiệp đã xác minh. Bạn cần có mã số đăng ký kinh doanh hợp lệ để đăng ký. Cá nhân không có doanh nghiệp đăng ký không thể xem giá sỉ." },
-        { "q": "Xác minh doanh nghiệp mất bao lâu?", "a": "Việc xác minh thường hoàn tất trong 1–2 ngày làm việc sau khi bạn nộp giấy chứng nhận đăng ký kinh doanh. Bạn sẽ nhận được email thông báo khi được duyệt." },
-        { "q": "Tôi có thể xem sản phẩm trước khi xác minh xong không?", "a": "Bạn có thể xem danh sách sản phẩm, nhưng giá sỉ và chức năng thêm vào giỏ hàng chỉ khả dụng sau khi tài khoản được đội quản trị duyệt." },
-        { "q": "Cần giấy tờ gì để đăng ký?", "a": "Bạn cần cung cấp giấy chứng nhận đăng ký kinh doanh. Vui lòng đảm bảo tài liệu rõ ràng, dễ đọc. Trường hợp đặc biệt có thể yêu cầu thêm giấy tờ." },
-        { "q": "Tôi có thể thay đổi thông tin doanh nghiệp đã đăng ký không?", "a": "Để cập nhật thông tin doanh nghiệp, vui lòng liên hệ đội hỗ trợ qua email hoặc điện thoại. Thay đổi mã số đăng ký kinh doanh cần xác minh lại." }
+        {
+          "q": "Ai có thể đăng ký thành viên?",
+          "a": "WELMES là nền tảng bán sỉ dành riêng cho doanh nghiệp đã xác minh. Bạn cần có mã số đăng ký kinh doanh hợp lệ để đăng ký. Cá nhân không có doanh nghiệp đăng ký không thể xem giá sỉ."
+        },
+        {
+          "q": "Xác minh doanh nghiệp mất bao lâu?",
+          "a": "Việc xác minh thường hoàn tất trong 1–2 ngày làm việc sau khi bạn nộp giấy chứng nhận đăng ký kinh doanh. Bạn sẽ nhận được email thông báo khi được duyệt."
+        },
+        {
+          "q": "Tôi có thể xem sản phẩm trước khi xác minh xong không?",
+          "a": "Bạn có thể xem danh sách sản phẩm, nhưng giá sỉ và chức năng thêm vào giỏ hàng chỉ khả dụng sau khi tài khoản được đội quản trị duyệt."
+        },
+        {
+          "q": "Cần giấy tờ gì để đăng ký?",
+          "a": "Bạn cần cung cấp giấy chứng nhận đăng ký kinh doanh. Vui lòng đảm bảo tài liệu rõ ràng, dễ đọc. Trường hợp đặc biệt có thể yêu cầu thêm giấy tờ."
+        },
+        {
+          "q": "Tôi có thể thay đổi thông tin doanh nghiệp đã đăng ký không?",
+          "a": "Để cập nhật thông tin doanh nghiệp, vui lòng liên hệ đội hỗ trợ qua email hoặc điện thoại. Thay đổi mã số đăng ký kinh doanh cần xác minh lại."
+        }
       ],
       "orders": [
-        { "q": "Số lượng đặt hàng tối thiểu (MOQ) là bao nhiêu?", "a": "Số lượng đặt hàng tối thiểu khác nhau theo sản phẩm và thương hiệu. MOQ được hiển thị trên trang chi tiết mỗi sản phẩm. Một số sản phẩm có thể yêu cầu giá trị đơn hàng tối thiểu ₩100.000 trở lên." },
-        { "q": "Giao hàng mất bao lâu?", "a": "Thời gian giao hàng tùy theo điểm đến. Các dịch vụ chuyển phát nhanh như DHL, FedEx và EMS thường giao trong 3–7 ngày làm việc sau khi gửi. Giao hàng có thể lâu hơn vào mùa cao điểm hoặc khi thông quan." },
-        { "q": "Tôi có thể theo dõi đơn hàng không?", "a": "Có. Khi đơn hàng được gửi đi, mã vận đơn sẽ được gửi tới email đã đăng ký. Bạn cũng có thể kiểm tra trạng thái đơn hàng trong mục Đơn hàng của tôi." },
-        { "q": "Tôi có thể sửa hoặc hủy đơn sau khi đặt không?", "a": "Đơn hàng có thể sửa hoặc hủy trong vòng 1 giờ sau khi đặt. Sau đó, khi đã bắt đầu xử lý, việc hủy có thể không thực hiện được. Vui lòng liên hệ ngay nếu cần thay đổi." },
-        { "q": "Có giao hàng quốc tế không?", "a": "Có. Chúng tôi giao hàng tới hơn 50 quốc gia trên thế giới qua EMS, DHL, FedEx và các hãng vận chuyển lớn khác. Phí vận chuyển được tính theo điểm đến và khối lượng đơn hàng, sẽ được quản lý tài khoản xác nhận sau khi bạn đặt hàng. Có dịch vụ gộp đơn để giảm chi phí logistics." }
+        {
+          "q": "Số lượng đặt hàng tối thiểu (MOQ) là bao nhiêu?",
+          "a": "Số lượng đặt hàng tối thiểu khác nhau theo sản phẩm và thương hiệu. MOQ được hiển thị trên trang chi tiết mỗi sản phẩm. Một số sản phẩm có thể yêu cầu giá trị đơn hàng tối thiểu ₩100.000 trở lên."
+        },
+        {
+          "q": "Giao hàng mất bao lâu?",
+          "a": "Thời gian giao hàng tùy theo điểm đến. Các dịch vụ chuyển phát nhanh như DHL, FedEx và EMS thường giao trong 3–7 ngày làm việc sau khi gửi. Giao hàng có thể lâu hơn vào mùa cao điểm hoặc khi thông quan."
+        },
+        {
+          "q": "Tôi có thể theo dõi đơn hàng không?",
+          "a": "Có. Khi đơn hàng được gửi đi, mã vận đơn sẽ được gửi tới email đã đăng ký. Bạn cũng có thể kiểm tra trạng thái đơn hàng trong mục Đơn hàng của tôi."
+        },
+        {
+          "q": "Tôi có thể sửa hoặc hủy đơn sau khi đặt không?",
+          "a": "Đơn hàng có thể sửa hoặc hủy trong vòng 1 giờ sau khi đặt. Sau đó, khi đã bắt đầu xử lý, việc hủy có thể không thực hiện được. Vui lòng liên hệ ngay nếu cần thay đổi."
+        },
+        {
+          "q": "Có giao hàng quốc tế không?",
+          "a": "Có. Chúng tôi giao hàng tới hơn 50 quốc gia trên thế giới qua EMS, DHL, FedEx và các hãng vận chuyển lớn khác. Phí vận chuyển được tính theo điểm đến và khối lượng đơn hàng, sẽ được quản lý tài khoản xác nhận sau khi bạn đặt hàng. Có dịch vụ gộp đơn để giảm chi phí logistics."
+        }
       ],
       "returns": [
-        { "q": "Chính sách đổi trả như thế nào?", "a": "Chấp nhận đổi trả trong vòng 7 ngày kể từ khi giao hàng đối với sản phẩm lỗi, hư hỏng hoặc giao sai. Do tính chất bán sỉ, đổi trả vì đổi ý thường không được chấp nhận." },
-        { "q": "Làm sao để yêu cầu đổi trả?", "a": "Liên hệ đội hỗ trợ trong vòng 7 ngày kể từ khi nhận hàng. Cung cấp số đơn hàng, mô tả vấn đề và ảnh nếu sản phẩm bị hư hỏng. Đội ngũ sẽ hướng dẫn bạn quy trình." },
-        { "q": "Ai chịu phí vận chuyển đổi trả?", "a": "Nếu đổi trả do lỗi sản phẩm hoặc lỗi của chúng tôi, chúng tôi chịu phí vận chuyển. Nếu đổi trả vì lý do khác, người mua chịu phí gửi trả." },
-        { "q": "Hoàn tiền mất bao lâu?", "a": "Hoàn tiền được xử lý trong 3–5 ngày làm việc sau khi chúng tôi nhận và kiểm tra hàng trả lại. Thời gian tiền về tài khoản tùy thuộc phương thức thanh toán và ngân hàng của bạn." }
+        {
+          "q": "Chính sách đổi trả như thế nào?",
+          "a": "Chấp nhận đổi trả trong vòng 7 ngày kể từ khi giao hàng đối với sản phẩm lỗi, hư hỏng hoặc giao sai. Do tính chất bán sỉ, đổi trả vì đổi ý thường không được chấp nhận."
+        },
+        {
+          "q": "Làm sao để yêu cầu đổi trả?",
+          "a": "Liên hệ đội hỗ trợ trong vòng 7 ngày kể từ khi nhận hàng. Cung cấp số đơn hàng, mô tả vấn đề và ảnh nếu sản phẩm bị hư hỏng. Đội ngũ sẽ hướng dẫn bạn quy trình."
+        },
+        {
+          "q": "Ai chịu phí vận chuyển đổi trả?",
+          "a": "Nếu đổi trả do lỗi sản phẩm hoặc lỗi của chúng tôi, chúng tôi chịu phí vận chuyển. Nếu đổi trả vì lý do khác, người mua chịu phí gửi trả."
+        },
+        {
+          "q": "Hoàn tiền mất bao lâu?",
+          "a": "Hoàn tiền được xử lý trong 3–5 ngày làm việc sau khi chúng tôi nhận và kiểm tra hàng trả lại. Thời gian tiền về tài khoản tùy thuộc phương thức thanh toán và ngân hàng của bạn."
+        }
       ],
       "payment": [
-        { "q": "Chấp nhận những phương thức thanh toán nào?", "a": "Chúng tôi chấp nhận chuyển khoản ngân hàng, thẻ tín dụng (Visa, MasterCard, Amex) và các phương thức thanh toán phổ biến của Hàn Quốc như KakaoPay và NaverPay. Đơn hàng chuyển khoản được xử lý sau khi xác nhận thanh toán." },
-        { "q": "Giá đã bao gồm VAT chưa?", "a": "Tất cả giá sỉ hiển thị chưa bao gồm VAT (10%). VAT sẽ được cộng khi thanh toán. Hóa đơn thuế sẽ được phát hành theo yêu cầu cho thành viên doanh nghiệp." },
-        { "q": "Tôi có thể yêu cầu hóa đơn thuế không?", "a": "Có. Là thành viên doanh nghiệp đã đăng ký, bạn được cấp hóa đơn thuế cho mọi giao dịch. Có thể yêu cầu từ trang chi tiết đơn hàng hoặc liên hệ đội hỗ trợ." },
-        { "q": "Có hạn mức tín dụng hoặc thanh toán trả sau không?", "a": "Điều khoản tín dụng (VD: Net 30) áp dụng cho thành viên lâu năm có lịch sử đặt hàng tốt. Vui lòng liên hệ trực tiếp đội kinh doanh để thảo luận." }
+        {
+          "q": "Chấp nhận những phương thức thanh toán nào?",
+          "a": "Chúng tôi chấp nhận chuyển khoản ngân hàng, thẻ tín dụng (Visa, MasterCard, Amex) và các phương thức thanh toán phổ biến của Hàn Quốc như KakaoPay và NaverPay. Đơn hàng chuyển khoản được xử lý sau khi xác nhận thanh toán."
+        },
+        {
+          "q": "Giá đã bao gồm VAT chưa?",
+          "a": "Tất cả giá sỉ hiển thị chưa bao gồm VAT (10%). VAT sẽ được cộng khi thanh toán. Hóa đơn thuế sẽ được phát hành theo yêu cầu cho thành viên doanh nghiệp."
+        },
+        {
+          "q": "Tôi có thể yêu cầu hóa đơn thuế không?",
+          "a": "Có. Là thành viên doanh nghiệp đã đăng ký, bạn được cấp hóa đơn thuế cho mọi giao dịch. Có thể yêu cầu từ trang chi tiết đơn hàng hoặc liên hệ đội hỗ trợ."
+        },
+        {
+          "q": "Có hạn mức tín dụng hoặc thanh toán trả sau không?",
+          "a": "Điều khoản tín dụng (VD: Net 30) áp dụng cho thành viên lâu năm có lịch sử đặt hàng tốt. Vui lòng liên hệ trực tiếp đội kinh doanh để thảo luận."
+        }
       ],
       "products": [
-        { "q": "Tất cả sản phẩm có phải hàng chính hãng không?", "a": "Có. WELMES làm việc trực tiếp với nhà phân phối ủy quyền và đối tác thương hiệu. Tất cả sản phẩm đều 100% chính hãng và có nguồn gốc từ chuỗi cung ứng chính thức." },
-        { "q": "Tôi có thể yêu cầu sản phẩm chưa có trong danh mục không?", "a": "Có. Nếu bạn tìm sản phẩm hoặc thương hiệu cụ thể chưa được niêm yết, hãy liên hệ chúng tôi. Chúng tôi thường xuyên mở rộng danh mục theo nhu cầu thành viên." },
-        { "q": "Sản phẩm có bảo đảm hạn sử dụng không?", "a": "Tất cả sản phẩm được bảo đảm còn hạn sử dụng tối thiểu 12 tháng tại thời điểm gửi hàng, trừ khi có ghi chú khác trên trang sản phẩm." },
-        { "q": "Tôi có thể nhận hàng mẫu trước khi đặt số lượng lớn không?", "a": "Yêu cầu hàng mẫu áp dụng cho một số sản phẩm nhất định dành cho thành viên đã duyệt. Vui lòng liên hệ đội hỗ trợ kèm thông tin tài khoản và sản phẩm bạn quan tâm." }
+        {
+          "q": "Tất cả sản phẩm có phải hàng chính hãng không?",
+          "a": "Có. WELMES làm việc trực tiếp với nhà phân phối ủy quyền và đối tác thương hiệu. Tất cả sản phẩm đều 100% chính hãng và có nguồn gốc từ chuỗi cung ứng chính thức."
+        },
+        {
+          "q": "Tôi có thể yêu cầu sản phẩm chưa có trong danh mục không?",
+          "a": "Có. Nếu bạn tìm sản phẩm hoặc thương hiệu cụ thể chưa được niêm yết, hãy liên hệ chúng tôi. Chúng tôi thường xuyên mở rộng danh mục theo nhu cầu thành viên."
+        },
+        {
+          "q": "Sản phẩm có bảo đảm hạn sử dụng không?",
+          "a": "Tất cả sản phẩm được bảo đảm còn hạn sử dụng tối thiểu 12 tháng tại thời điểm gửi hàng, trừ khi có ghi chú khác trên trang sản phẩm."
+        },
+        {
+          "q": "Tôi có thể nhận hàng mẫu trước khi đặt số lượng lớn không?",
+          "a": "Yêu cầu hàng mẫu áp dụng cho một số sản phẩm nhất định dành cho thành viên đã duyệt. Vui lòng liên hệ đội hỗ trợ kèm thông tin tài khoản và sản phẩm bạn quan tâm."
+        }
       ]
     }
   },
@@ -470,16 +659,6 @@
     "veryGood": "Rất tốt",
     "excellent": "Xuất sắc",
     "submitted": "Đã gửi đánh giá!"
-  },
-  "banners": {
-    "b1Eyebrow": "Dành cho khách doanh nghiệp",
-    "b1Title": "Rẻ hơn giá lẻ\nđến 70%",
-    "b1Subtitle": "Mỹ phẩm Nhật & Hàn chính hãng — đặt tối thiểu từ 1 set",
-    "b1Cta": "Xem giá sỉ",
-    "b2Eyebrow": "Logistics toàn cầu",
-    "b2Title": "Giao hàng đến\nhơn 50 quốc gia",
-    "b2Subtitle": "EMS · DHL · FedEx — tận nơi, 3–7 ngày làm việc",
-    "b2Cta": "Đăng ký doanh nghiệp"
   },
   "footer": {
     "tagline": "Nền tảng bán sỉ K-Beauty cao cấp",

@@ -36,15 +36,130 @@
     "keywordSuggestions": "Saran Kata Kunci",
     "trendingSearches": "Pencarian Populer"
   },
+  "categoryMenu": {
+    "skincare": "Perawatan kulit",
+    "toner": "Toner",
+    "serum": "Esens · Serum · Ampul",
+    "cream": "Krim",
+    "lotion": "Losion",
+    "mistOil": "Mist · Minyak",
+    "skincareSet": "Set perawatan kulit",
+    "maskPack": "Masker",
+    "sheetMask": "Masker lembar",
+    "padMask": "Pad",
+    "facialPack": "Masker wajah",
+    "patchMask": "Plester",
+    "cleansing": "Pembersih",
+    "foamGel": "Busa · Gel",
+    "oilBalm": "Minyak · Balsem",
+    "waterMilk": "Air · Susu pembersih",
+    "scrub": "Peeling · Scrub",
+    "sunCare": "Tabir surya",
+    "sunCream": "Krim tabir surya",
+    "sunStick": "Stik tabir surya",
+    "sunSpray": "Semprotan · Plester tabir surya",
+    "makeup": "Riasan",
+    "lipMakeup": "Riasan bibir",
+    "baseMakeup": "Riasan dasar",
+    "eyeMakeup": "Riasan mata",
+    "beautyTools": "Alat kecantikan",
+    "makeupTools": "Alat rias",
+    "faceTools": "Alat perawatan wajah",
+    "hairBodyTools": "Alat rambut · tubuh",
+    "hairCare": "Perawatan rambut",
+    "shampoo": "Sampo",
+    "treatment": "Perawatan · Masker rambut",
+    "scalpCare": "Perawatan kulit kepala",
+    "styling": "Penataan",
+    "bodyCare": "Perawatan tubuh",
+    "showerBath": "Mandi",
+    "bodyLotion": "Losion · Krim tubuh",
+    "handCare": "Perawatan tangan",
+    "footCare": "Perawatan kaki",
+    "deodorant": "Deodoran",
+    "fragrance": "Parfum",
+    "perfume": "Parfum",
+    "miniPerfume": "Parfum mini · padat",
+    "homeFragrance": "Pengharum ruangan",
+    "healthFood": "Makanan kesehatan",
+    "vitamin": "Vitamin",
+    "supplement": "Suplemen",
+    "probiotics": "Probiotik",
+    "innerBeauty": "Pelangsing · Inner beauty",
+    "skincareDevice": "Alat perawatan kulit",
+    "nosePack": "Plester hidung",
+    "cleansingTissue": "Tisu · Pad",
+    "lipEyeRemover": "Pembersih mata & bibir",
+    "cleansingDevice": "Alat pembersih wajah",
+    "sunCushion": "Cushion tabir surya",
+    "tanningAfterSun": "Tanning · After sun",
+    "eyelashTools": "Alat bulu mata",
+    "dailyTools": "Alat harian",
+    "dermoCosmetic": "Dermokosmetik",
+    "nail": "Kuku",
+    "basicNail": "Cat kuku",
+    "gelNail": "Kuku gel",
+    "nailTip": "Kuku palsu · Stiker",
+    "nailCare": "Perawatan · Penghapus kuteks",
+    "hairEssence": "Esens rambut",
+    "hairColor": "Pewarna · Pengeriting rambut",
+    "hairTools": "Alat rambut · Sisir",
+    "hairRemoval": "Penghilang bulu · Waxing",
+    "babyMom": "Bayi · Ibu hamil",
+    "food": "Makanan",
+    "dietFood": "Diet · Inner beauty",
+    "snacks": "Camilan · Cokelat · Dessert",
+    "drinks": "Air · Minuman · Kopi",
+    "instantFood": "Makanan instan",
+    "babyFood": "Makanan bayi",
+    "healthGoods": "Peralatan kesehatan",
+    "patchCare": "Plester · Perawatan titik",
+    "relaxGoods": "Peralatan relaksasi",
+    "medicalSupplies": "Perlengkapan medis",
+    "massageSupport": "Pijat · Penyangga",
+    "fitnessGoods": "Peralatan olahraga",
+    "oralCare": "Perawatan mulut",
+    "toothbrush": "Sikat gigi",
+    "toothpaste": "Pasta gigi",
+    "afterOralCare": "Obat kumur",
+    "portableOralSet": "Set portabel",
+    "oralAppliance": "Alat perawatan mulut",
+    "hygiene": "Produk kebersihan",
+    "femCare": "Pembalut",
+    "intimateCare": "Perawatan area intim",
+    "adultGoods": "Produk dewasa",
+    "massageGel": "Gel · Minyak pijat",
+    "testKit": "Alat tes",
+    "diapers": "Popok",
+    "tissuePaper": "Tisu",
+    "fashion": "Fesyen",
+    "underwear": "Pakaian dalam",
+    "fashionAccessories": "Aksesori fesyen",
+    "sportswear": "Pakaian olahraga",
+    "homewear": "Baju rumah",
+    "homeLiving": "Rumah tangga · Elektronik",
+    "appliances": "Elektronik rumah",
+    "kitchen": "Dapur",
+    "interior": "Interior",
+    "bathroom": "Kamar mandi",
+    "cleaning": "Deterjen · Pembersih",
+    "petSupplies": "Perlengkapan hewan",
+    "babyGoods": "Perlengkapan bayi",
+    "hobby": "Hobi · Fancy",
+    "characterGoods": "Merchandise karakter",
+    "stationery": "Alat tulis",
+    "digital": "Digital · Perangkat",
+    "albums": "Album"
+  },
   "banners": {
     "b1Eyebrow": "Untuk pembeli bisnis",
-    "b1Title": "Diskon hingga 70%\ndari harga ritel",
-    "b1Subtitle": "Kecantikan asli Jepang & Korea — pesanan minimum dari 1 set",
-    "b1Cta": "Lihat harga grosir",
+    "b1Title": "Hingga 70% di bawah\nharga ritel",
+    "b1Subtitle": "Kosmetik Jepang & Korea asli — pesanan minimum dari 1 set",
+    "b1Cta": "Lihat Harga Grosir",
     "b2Eyebrow": "Logistik global",
-    "b2Title": "Kirim ke lebih dari\n50 negara",
+    "b2Title": "Kirim ke\n50+ negara",
     "b2Subtitle": "EMS · DHL · FedEx — sampai tujuan, 3–7 hari kerja",
-    "b2Cta": "Daftarkan bisnis Anda"
+    "b2Cta": "Daftarkan Bisnis Anda"
   },
   "home": {
     "heroTitle": "Platform Grosir K-Beauty\nPremium",
@@ -391,39 +506,113 @@
       "payment": "Pembayaran",
       "products": "Produk"
     },
-    "formCategories": ["Pertanyaan Umum", "Keanggotaan & Verifikasi", "Pesanan & Pengiriman", "Pengembalian & Penukaran", "Pembayaran & Invoice", "Pertanyaan Produk", "Lainnya"],
+    "formCategories": [
+      "Pertanyaan Umum",
+      "Keanggotaan & Verifikasi",
+      "Pesanan & Pengiriman",
+      "Pengembalian & Penukaran",
+      "Pembayaran & Invoice",
+      "Pertanyaan Produk",
+      "Lainnya"
+    ],
     "faqs": {
       "membership": [
-        { "q": "Siapa yang dapat mendaftar sebagai anggota?", "a": "WELMES adalah platform grosir eksklusif untuk pelaku usaha terverifikasi. Anda harus memiliki nomor registrasi usaha yang valid untuk mendaftar. Perorangan tanpa usaha terdaftar tidak dapat mengakses harga grosir." },
-        { "q": "Berapa lama verifikasi bisnis berlangsung?", "a": "Verifikasi bisnis biasanya selesai dalam 1–2 hari kerja setelah Anda mengirimkan sertifikat registrasi usaha. Anda akan menerima notifikasi email setelah disetujui." },
-        { "q": "Bisakah saya melihat produk sebelum verifikasi selesai?", "a": "Anda dapat melihat daftar produk, tetapi harga grosir dan kemampuan menambahkan item ke keranjang hanya tersedia setelah akun Anda disetujui oleh tim admin kami." },
-        { "q": "Dokumen apa yang diperlukan untuk pendaftaran?", "a": "Anda perlu menyediakan sertifikat registrasi usaha Anda. Pastikan dokumen jelas dan terbaca. Dokumen tambahan mungkin diminta dalam kasus khusus." },
-        { "q": "Bisakah saya mengubah informasi bisnis yang terdaftar?", "a": "Untuk memperbarui informasi bisnis Anda, silakan hubungi tim dukungan kami melalui email atau telepon. Perubahan nomor registrasi usaha memerlukan verifikasi ulang." }
+        {
+          "q": "Siapa yang dapat mendaftar sebagai anggota?",
+          "a": "WELMES adalah platform grosir eksklusif untuk pelaku usaha terverifikasi. Anda harus memiliki nomor registrasi usaha yang valid untuk mendaftar. Perorangan tanpa usaha terdaftar tidak dapat mengakses harga grosir."
+        },
+        {
+          "q": "Berapa lama verifikasi bisnis berlangsung?",
+          "a": "Verifikasi bisnis biasanya selesai dalam 1–2 hari kerja setelah Anda mengirimkan sertifikat registrasi usaha. Anda akan menerima notifikasi email setelah disetujui."
+        },
+        {
+          "q": "Bisakah saya melihat produk sebelum verifikasi selesai?",
+          "a": "Anda dapat melihat daftar produk, tetapi harga grosir dan kemampuan menambahkan item ke keranjang hanya tersedia setelah akun Anda disetujui oleh tim admin kami."
+        },
+        {
+          "q": "Dokumen apa yang diperlukan untuk pendaftaran?",
+          "a": "Anda perlu menyediakan sertifikat registrasi usaha Anda. Pastikan dokumen jelas dan terbaca. Dokumen tambahan mungkin diminta dalam kasus khusus."
+        },
+        {
+          "q": "Bisakah saya mengubah informasi bisnis yang terdaftar?",
+          "a": "Untuk memperbarui informasi bisnis Anda, silakan hubungi tim dukungan kami melalui email atau telepon. Perubahan nomor registrasi usaha memerlukan verifikasi ulang."
+        }
       ],
       "orders": [
-        { "q": "Berapa jumlah pemesanan minimum (MOQ)?", "a": "Jumlah pemesanan minimum bervariasi menurut produk dan merek. MOQ ditampilkan di setiap halaman detail produk. Beberapa produk mungkin memerlukan nilai pesanan minimum ₩100.000 atau lebih." },
-        { "q": "Berapa lama pengiriman berlangsung?", "a": "Waktu pengiriman bervariasi menurut tujuan. Kurir ekspres seperti DHL, FedEx, dan EMS biasanya mengirim dalam 3–7 hari kerja setelah pengiriman. Pengiriman dapat lebih lama pada musim ramai atau saat bea cukai." },
-        { "q": "Bisakah saya melacak pesanan saya?", "a": "Ya. Setelah pesanan dikirim, nomor resi akan dikirim ke email terdaftar Anda. Anda juga dapat memeriksa status pesanan di bagian Pesanan Saya di akun Anda." },
-        { "q": "Bisakah saya mengubah atau membatalkan pesanan setelah dibuat?", "a": "Pesanan dapat diubah atau dibatalkan dalam 1 jam setelah dibuat. Setelah itu, jika pemrosesan telah dimulai, pembatalan mungkin tidak dapat dilakukan. Segera hubungi kami jika Anda perlu melakukan perubahan." },
-        { "q": "Apakah tersedia pengiriman internasional?", "a": "Ya. Kami mengirim ke lebih dari 50 negara di seluruh dunia melalui EMS, DHL, FedEx, dan kurir besar lainnya. Biaya pengiriman dihitung berdasarkan tujuan dan volume pesanan, dan akan dikonfirmasi oleh manajer akun Anda setelah pemesanan. Pengiriman gabungan tersedia untuk mengurangi biaya logistik." }
+        {
+          "q": "Berapa jumlah pemesanan minimum (MOQ)?",
+          "a": "Jumlah pemesanan minimum bervariasi menurut produk dan merek. MOQ ditampilkan di setiap halaman detail produk. Beberapa produk mungkin memerlukan nilai pesanan minimum ₩100.000 atau lebih."
+        },
+        {
+          "q": "Berapa lama pengiriman berlangsung?",
+          "a": "Waktu pengiriman bervariasi menurut tujuan. Kurir ekspres seperti DHL, FedEx, dan EMS biasanya mengirim dalam 3–7 hari kerja setelah pengiriman. Pengiriman dapat lebih lama pada musim ramai atau saat bea cukai."
+        },
+        {
+          "q": "Bisakah saya melacak pesanan saya?",
+          "a": "Ya. Setelah pesanan dikirim, nomor resi akan dikirim ke email terdaftar Anda. Anda juga dapat memeriksa status pesanan di bagian Pesanan Saya di akun Anda."
+        },
+        {
+          "q": "Bisakah saya mengubah atau membatalkan pesanan setelah dibuat?",
+          "a": "Pesanan dapat diubah atau dibatalkan dalam 1 jam setelah dibuat. Setelah itu, jika pemrosesan telah dimulai, pembatalan mungkin tidak dapat dilakukan. Segera hubungi kami jika Anda perlu melakukan perubahan."
+        },
+        {
+          "q": "Apakah tersedia pengiriman internasional?",
+          "a": "Ya. Kami mengirim ke lebih dari 50 negara di seluruh dunia melalui EMS, DHL, FedEx, dan kurir besar lainnya. Biaya pengiriman dihitung berdasarkan tujuan dan volume pesanan, dan akan dikonfirmasi oleh manajer akun Anda setelah pemesanan. Pengiriman gabungan tersedia untuk mengurangi biaya logistik."
+        }
       ],
       "returns": [
-        { "q": "Bagaimana kebijakan pengembalian Anda?", "a": "Pengembalian diterima dalam 7 hari setelah pengiriman untuk barang cacat, rusak, atau salah kirim. Karena sifat grosir, pengembalian karena berubah pikiran umumnya tidak diterima." },
-        { "q": "Bagaimana cara memulai pengembalian atau penukaran?", "a": "Hubungi tim dukungan kami dalam 7 hari setelah menerima pesanan. Berikan nomor pesanan, deskripsi masalah, dan foto jika barang rusak. Tim kami akan memandu Anda melalui prosesnya." },
-        { "q": "Siapa yang menanggung biaya pengiriman pengembalian?", "a": "Jika pengembalian disebabkan cacat atau kesalahan kami, kami menanggung biaya pengiriman pengembalian. Jika pengembalian karena alasan lain, pembeli bertanggung jawab atas biaya pengiriman." },
-        { "q": "Berapa lama proses pengembalian dana?", "a": "Pengembalian dana diproses dalam 3–5 hari kerja setelah kami menerima dan memeriksa barang yang dikembalikan. Waktu dana masuk ke rekening Anda tergantung metode pembayaran dan bank Anda." }
+        {
+          "q": "Bagaimana kebijakan pengembalian Anda?",
+          "a": "Pengembalian diterima dalam 7 hari setelah pengiriman untuk barang cacat, rusak, atau salah kirim. Karena sifat grosir, pengembalian karena berubah pikiran umumnya tidak diterima."
+        },
+        {
+          "q": "Bagaimana cara memulai pengembalian atau penukaran?",
+          "a": "Hubungi tim dukungan kami dalam 7 hari setelah menerima pesanan. Berikan nomor pesanan, deskripsi masalah, dan foto jika barang rusak. Tim kami akan memandu Anda melalui prosesnya."
+        },
+        {
+          "q": "Siapa yang menanggung biaya pengiriman pengembalian?",
+          "a": "Jika pengembalian disebabkan cacat atau kesalahan kami, kami menanggung biaya pengiriman pengembalian. Jika pengembalian karena alasan lain, pembeli bertanggung jawab atas biaya pengiriman."
+        },
+        {
+          "q": "Berapa lama proses pengembalian dana?",
+          "a": "Pengembalian dana diproses dalam 3–5 hari kerja setelah kami menerima dan memeriksa barang yang dikembalikan. Waktu dana masuk ke rekening Anda tergantung metode pembayaran dan bank Anda."
+        }
       ],
       "payment": [
-        { "q": "Metode pembayaran apa yang diterima?", "a": "Kami menerima transfer bank, kartu kredit (Visa, MasterCard, Amex), dan metode pembayaran utama Korea termasuk KakaoPay dan NaverPay. Pesanan transfer bank diproses setelah konfirmasi pembayaran." },
-        { "q": "Apakah harga sudah termasuk PPN?", "a": "Semua harga grosir yang tercantum belum termasuk PPN (10%). PPN akan ditambahkan saat checkout. Faktur pajak akan diterbitkan atas permintaan untuk anggota bisnis." },
-        { "q": "Bisakah saya meminta faktur pajak?", "a": "Ya. Sebagai anggota bisnis terdaftar, Anda berhak atas faktur pajak untuk semua pembelian. Faktur dapat diminta dari halaman detail pesanan atau dengan menghubungi tim dukungan kami." },
-        { "q": "Apakah ada limit kredit atau opsi tempo pembayaran?", "a": "Ketentuan kredit (mis. Net 30) tersedia untuk anggota lama dengan riwayat pesanan yang baik. Silakan hubungi tim penjualan kami langsung untuk membahas pengaturan kredit." }
+        {
+          "q": "Metode pembayaran apa yang diterima?",
+          "a": "Kami menerima transfer bank, kartu kredit (Visa, MasterCard, Amex), dan metode pembayaran utama Korea termasuk KakaoPay dan NaverPay. Pesanan transfer bank diproses setelah konfirmasi pembayaran."
+        },
+        {
+          "q": "Apakah harga sudah termasuk PPN?",
+          "a": "Semua harga grosir yang tercantum belum termasuk PPN (10%). PPN akan ditambahkan saat checkout. Faktur pajak akan diterbitkan atas permintaan untuk anggota bisnis."
+        },
+        {
+          "q": "Bisakah saya meminta faktur pajak?",
+          "a": "Ya. Sebagai anggota bisnis terdaftar, Anda berhak atas faktur pajak untuk semua pembelian. Faktur dapat diminta dari halaman detail pesanan atau dengan menghubungi tim dukungan kami."
+        },
+        {
+          "q": "Apakah ada limit kredit atau opsi tempo pembayaran?",
+          "a": "Ketentuan kredit (mis. Net 30) tersedia untuk anggota lama dengan riwayat pesanan yang baik. Silakan hubungi tim penjualan kami langsung untuk membahas pengaturan kredit."
+        }
       ],
       "products": [
-        { "q": "Apakah semua produk asli?", "a": "Ya. WELMES bekerja langsung dengan distributor resmi dan mitra merek. Semua produk 100% asli dan bersumber dari rantai pasokan resmi." },
-        { "q": "Bisakah saya meminta produk yang tidak tercantum?", "a": "Ya. Jika Anda mencari produk atau merek tertentu yang belum tercantum, silakan hubungi kami. Kami secara rutin memperluas katalog berdasarkan permintaan anggota." },
-        { "q": "Apakah produk memiliki jaminan tanggal kedaluwarsa?", "a": "Semua produk dijamin memiliki sisa masa simpan minimal 12 bulan pada saat pengiriman, kecuali dinyatakan lain di halaman produk." },
-        { "q": "Bisakah saya mendapatkan sampel produk sebelum memesan dalam jumlah besar?", "a": "Permintaan sampel tersedia untuk produk tertentu bagi anggota yang disetujui. Silakan hubungi tim dukungan kami dengan detail akun dan produk yang Anda minati." }
+        {
+          "q": "Apakah semua produk asli?",
+          "a": "Ya. WELMES bekerja langsung dengan distributor resmi dan mitra merek. Semua produk 100% asli dan bersumber dari rantai pasokan resmi."
+        },
+        {
+          "q": "Bisakah saya meminta produk yang tidak tercantum?",
+          "a": "Ya. Jika Anda mencari produk atau merek tertentu yang belum tercantum, silakan hubungi kami. Kami secara rutin memperluas katalog berdasarkan permintaan anggota."
+        },
+        {
+          "q": "Apakah produk memiliki jaminan tanggal kedaluwarsa?",
+          "a": "Semua produk dijamin memiliki sisa masa simpan minimal 12 bulan pada saat pengiriman, kecuali dinyatakan lain di halaman produk."
+        },
+        {
+          "q": "Bisakah saya mendapatkan sampel produk sebelum memesan dalam jumlah besar?",
+          "a": "Permintaan sampel tersedia untuk produk tertentu bagi anggota yang disetujui. Silakan hubungi tim dukungan kami dengan detail akun dan produk yang Anda minati."
+        }
       ]
     }
   },
@@ -470,16 +659,6 @@
     "veryGood": "Sangat Baik",
     "excellent": "Luar Biasa",
     "submitted": "Ulasan terkirim!"
-  },
-  "banners": {
-    "b1Eyebrow": "Untuk pembeli bisnis",
-    "b1Title": "Hingga 70% di bawah\nharga ritel",
-    "b1Subtitle": "Kosmetik Jepang & Korea asli — pesanan minimum dari 1 set",
-    "b1Cta": "Lihat Harga Grosir",
-    "b2Eyebrow": "Logistik global",
-    "b2Title": "Kirim ke\n50+ negara",
-    "b2Subtitle": "EMS · DHL · FedEx — sampai tujuan, 3–7 hari kerja",
-    "b2Cta": "Daftarkan Bisnis Anda"
   },
   "footer": {
     "tagline": "Platform Grosir K-Beauty Premium",

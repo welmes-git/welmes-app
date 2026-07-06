@@ -36,13 +36,128 @@
     "keywordSuggestions": "Suchvorschläge",
     "trendingSearches": "Beliebte Suchen"
   },
+  "categoryMenu": {
+    "skincare": "Hautpflege",
+    "toner": "Toner",
+    "serum": "Essenz · Serum · Ampulle",
+    "cream": "Creme",
+    "lotion": "Lotion",
+    "mistOil": "Spray · Öl",
+    "skincareSet": "Pflegesets",
+    "maskPack": "Masken",
+    "sheetMask": "Tuchmasken",
+    "padMask": "Pads",
+    "facialPack": "Gesichtsmasken",
+    "patchMask": "Patches",
+    "cleansing": "Reinigung",
+    "foamGel": "Schaum · Gel",
+    "oilBalm": "Öl · Balsam",
+    "waterMilk": "Wasser · Milch",
+    "scrub": "Peeling",
+    "sunCare": "Sonnenschutz",
+    "sunCream": "Sonnencreme",
+    "sunStick": "Sonnenstick",
+    "sunSpray": "Sonnenspray · Patch",
+    "makeup": "Make-up",
+    "lipMakeup": "Lippen",
+    "baseMakeup": "Grundierung",
+    "eyeMakeup": "Augen",
+    "beautyTools": "Beauty-Tools",
+    "makeupTools": "Make-up-Tools",
+    "faceTools": "Gesichts-Tools",
+    "hairBodyTools": "Haar- & Körper-Tools",
+    "hairCare": "Haarpflege",
+    "shampoo": "Shampoo",
+    "treatment": "Kur · Maske",
+    "scalpCare": "Kopfhautpflege",
+    "styling": "Styling",
+    "bodyCare": "Körperpflege",
+    "showerBath": "Dusche · Bad",
+    "bodyLotion": "Bodylotion · Creme",
+    "handCare": "Handpflege",
+    "footCare": "Fußpflege",
+    "deodorant": "Deodorant",
+    "fragrance": "Düfte",
+    "perfume": "Parfüm",
+    "miniPerfume": "Mini- & Festparfüm",
+    "homeFragrance": "Raumduft",
+    "healthFood": "Gesundheitsprodukte",
+    "vitamin": "Vitamine",
+    "supplement": "Nahrungsergänzung",
+    "probiotics": "Probiotika",
+    "innerBeauty": "Slimming · Inner Beauty",
+    "skincareDevice": "Pflegegeräte",
+    "nosePack": "Nasenstrips",
+    "cleansingTissue": "Tücher · Pads",
+    "lipEyeRemover": "Lippen- & Augen-Entferner",
+    "cleansingDevice": "Reinigungsgeräte",
+    "sunCushion": "Sonnen-Cushion",
+    "tanningAfterSun": "Bräunung · After Sun",
+    "eyelashTools": "Wimpern-Tools",
+    "dailyTools": "Alltags-Tools",
+    "dermoCosmetic": "Dermokosmetik",
+    "nail": "Nägel",
+    "basicNail": "Nagellack",
+    "gelNail": "Gel-Nägel",
+    "nailTip": "Tips · Sticker",
+    "nailCare": "Pflege · Entferner",
+    "hairEssence": "Haaressenz",
+    "hairColor": "Färbung · Dauerwelle",
+    "hairTools": "Haargeräte · Bürsten",
+    "hairRemoval": "Haarentfernung",
+    "babyMom": "Baby · Schwangerschaft",
+    "food": "Lebensmittel",
+    "dietFood": "Diät · Inner Beauty",
+    "snacks": "Snacks · Schokolade · Dessert",
+    "drinks": "Wasser · Getränke · Kaffee",
+    "instantFood": "Fertiggerichte",
+    "babyFood": "Babynahrung",
+    "healthGoods": "Gesundheitsartikel",
+    "patchCare": "Pflaster · Punktuelle Pflege",
+    "relaxGoods": "Entspannung",
+    "medicalSupplies": "Medizinbedarf",
+    "massageSupport": "Massage · Bandagen",
+    "fitnessGoods": "Sportartikel",
+    "oralCare": "Mundpflege",
+    "toothbrush": "Zahnbürsten",
+    "toothpaste": "Zahnpasta",
+    "afterOralCare": "Mundspülung",
+    "portableOralSet": "Reisesets",
+    "oralAppliance": "Mundpflegegeräte",
+    "hygiene": "Hygieneartikel",
+    "femCare": "Damenhygiene",
+    "intimateCare": "Intimpflege",
+    "adultGoods": "Erwachsenenprodukte",
+    "massageGel": "Massagegel · Öl",
+    "testKit": "Testkits",
+    "diapers": "Windeln",
+    "tissuePaper": "Taschentücher · Papier",
+    "fashion": "Mode",
+    "underwear": "Unterwäsche",
+    "fashionAccessories": "Modeaccessoires",
+    "sportswear": "Sportbekleidung",
+    "homewear": "Homewear",
+    "homeLiving": "Wohnen · Haushaltsgeräte",
+    "appliances": "Haushaltsgeräte",
+    "kitchen": "Küche",
+    "interior": "Einrichtung",
+    "bathroom": "Bad",
+    "cleaning": "Waschmittel · Reinigung",
+    "petSupplies": "Haustierbedarf",
+    "babyGoods": "Baby · Kinder",
+    "hobby": "Hobby · Fancy",
+    "characterGoods": "Charakter-Goods",
+    "stationery": "Schreibwaren",
+    "digital": "Digital · Geräte",
+    "albums": "Alben"
+  },
   "banners": {
     "b1Eyebrow": "Für Geschäftskunden",
-    "b1Title": "Bis zu 70 %\nunter Einzelhandelspreis",
-    "b1Subtitle": "Echte japanische und koreanische Beauty-Produkte — Mindestbestellung ab 1 Set",
+    "b1Title": "Bis zu 70% unter\ndem Einzelhandel",
+    "b1Subtitle": "Original japanische & koreanische Kosmetik — Mindestbestellung ab 1 Set",
     "b1Cta": "Großhandelspreise ansehen",
-    "b2Eyebrow": "Weltweite Logistik",
-    "b2Title": "Versand in über\n50 Länder",
+    "b2Eyebrow": "Globale Logistik",
+    "b2Title": "Versand in\nüber 50 Länder",
     "b2Subtitle": "EMS · DHL · FedEx — Tür zu Tür, 3–7 Werktage",
     "b2Cta": "Unternehmen registrieren"
   },
@@ -393,39 +508,113 @@
       "payment": "Zahlung",
       "products": "Produkte"
     },
-    "formCategories": ["Allgemeine Anfrage", "Mitgliedschaft & Verifizierung", "Bestellung & Versand", "Rückgabe & Umtausch", "Zahlung & Rechnung", "Produktanfrage", "Sonstiges"],
+    "formCategories": [
+      "Allgemeine Anfrage",
+      "Mitgliedschaft & Verifizierung",
+      "Bestellung & Versand",
+      "Rückgabe & Umtausch",
+      "Zahlung & Rechnung",
+      "Produktanfrage",
+      "Sonstiges"
+    ],
     "faqs": {
       "membership": [
-        { "q": "Wer kann sich als Mitglied registrieren?", "a": "WELMES ist eine exklusive Großhandelsplattform für verifizierte Unternehmen. Für die Registrierung benötigen Sie eine gültige Handelsregisternummer. Privatpersonen ohne eingetragenes Unternehmen erhalten keinen Zugang zu Großhandelspreisen." },
-        { "q": "Wie lange dauert die Unternehmensverifizierung?", "a": "Die Verifizierung ist in der Regel innerhalb von 1–2 Werktagen nach Einreichung Ihrer Handelsregisterbescheinigung abgeschlossen. Sie erhalten eine E-Mail-Benachrichtigung, sobald sie genehmigt wurde." },
-        { "q": "Kann ich Produkte vor Abschluss der Verifizierung ansehen?", "a": "Sie können die Produktlisten durchsuchen, aber Großhandelspreise und das Hinzufügen von Artikeln zum Warenkorb sind erst verfügbar, nachdem Ihr Konto von unserem Team genehmigt wurde." },
-        { "q": "Welche Unterlagen sind für die Registrierung erforderlich?", "a": "Sie müssen Ihre Handelsregisterbescheinigung vorlegen. Bitte stellen Sie sicher, dass das Dokument klar und lesbar ist. In Sonderfällen können zusätzliche Unterlagen angefordert werden." },
-        { "q": "Kann ich meine registrierten Unternehmensdaten ändern?", "a": "Um Ihre Unternehmensdaten zu aktualisieren, kontaktieren Sie bitte unser Support-Team per E-Mail oder Telefon. Änderungen der Handelsregisternummer erfordern eine erneute Verifizierung." }
+        {
+          "q": "Wer kann sich als Mitglied registrieren?",
+          "a": "WELMES ist eine exklusive Großhandelsplattform für verifizierte Unternehmen. Für die Registrierung benötigen Sie eine gültige Handelsregisternummer. Privatpersonen ohne eingetragenes Unternehmen erhalten keinen Zugang zu Großhandelspreisen."
+        },
+        {
+          "q": "Wie lange dauert die Unternehmensverifizierung?",
+          "a": "Die Verifizierung ist in der Regel innerhalb von 1–2 Werktagen nach Einreichung Ihrer Handelsregisterbescheinigung abgeschlossen. Sie erhalten eine E-Mail-Benachrichtigung, sobald sie genehmigt wurde."
+        },
+        {
+          "q": "Kann ich Produkte vor Abschluss der Verifizierung ansehen?",
+          "a": "Sie können die Produktlisten durchsuchen, aber Großhandelspreise und das Hinzufügen von Artikeln zum Warenkorb sind erst verfügbar, nachdem Ihr Konto von unserem Team genehmigt wurde."
+        },
+        {
+          "q": "Welche Unterlagen sind für die Registrierung erforderlich?",
+          "a": "Sie müssen Ihre Handelsregisterbescheinigung vorlegen. Bitte stellen Sie sicher, dass das Dokument klar und lesbar ist. In Sonderfällen können zusätzliche Unterlagen angefordert werden."
+        },
+        {
+          "q": "Kann ich meine registrierten Unternehmensdaten ändern?",
+          "a": "Um Ihre Unternehmensdaten zu aktualisieren, kontaktieren Sie bitte unser Support-Team per E-Mail oder Telefon. Änderungen der Handelsregisternummer erfordern eine erneute Verifizierung."
+        }
       ],
       "orders": [
-        { "q": "Was ist die Mindestbestellmenge (MOQ)?", "a": "Die Mindestbestellmengen variieren je nach Produkt und Marke. Die MOQ wird auf jeder Produktseite angezeigt. Einige Produkte können einen Mindestbestellwert von ₩100.000 oder mehr erfordern." },
-        { "q": "Wie lange dauert die Lieferung?", "a": "Die Lieferzeiten variieren je nach Zielort. Expressdienste wie DHL, FedEx und EMS liefern in der Regel innerhalb von 3–7 Werktagen nach Versand. In der Hochsaison oder bei der Zollabfertigung kann es länger dauern." },
-        { "q": "Kann ich meine Bestellung verfolgen?", "a": "Ja. Sobald Ihre Bestellung versandt wurde, erhalten Sie eine Sendungsnummer an Ihre registrierte E-Mail-Adresse. Sie können den Bestellstatus auch im Bereich Meine Bestellungen Ihres Kontos einsehen." },
-        { "q": "Kann ich eine Bestellung nachträglich ändern oder stornieren?", "a": "Bestellungen können innerhalb 1 Stunde nach Aufgabe geändert oder storniert werden. Danach ist eine Stornierung nach Bearbeitungsbeginn möglicherweise nicht mehr möglich. Kontaktieren Sie uns umgehend, wenn Sie Änderungen benötigen." },
-        { "q": "Bieten Sie internationalen Versand an?", "a": "Ja. Wir versenden in über 50 Länder weltweit über EMS, DHL, FedEx und andere große Versanddienstleister. Die Versandkosten werden nach Zielort und Bestellvolumen berechnet und nach der Bestellung von Ihrem Account Manager bestätigt. Sammellieferungen zur Senkung der Logistikkosten sind verfügbar." }
+        {
+          "q": "Was ist die Mindestbestellmenge (MOQ)?",
+          "a": "Die Mindestbestellmengen variieren je nach Produkt und Marke. Die MOQ wird auf jeder Produktseite angezeigt. Einige Produkte können einen Mindestbestellwert von ₩100.000 oder mehr erfordern."
+        },
+        {
+          "q": "Wie lange dauert die Lieferung?",
+          "a": "Die Lieferzeiten variieren je nach Zielort. Expressdienste wie DHL, FedEx und EMS liefern in der Regel innerhalb von 3–7 Werktagen nach Versand. In der Hochsaison oder bei der Zollabfertigung kann es länger dauern."
+        },
+        {
+          "q": "Kann ich meine Bestellung verfolgen?",
+          "a": "Ja. Sobald Ihre Bestellung versandt wurde, erhalten Sie eine Sendungsnummer an Ihre registrierte E-Mail-Adresse. Sie können den Bestellstatus auch im Bereich Meine Bestellungen Ihres Kontos einsehen."
+        },
+        {
+          "q": "Kann ich eine Bestellung nachträglich ändern oder stornieren?",
+          "a": "Bestellungen können innerhalb 1 Stunde nach Aufgabe geändert oder storniert werden. Danach ist eine Stornierung nach Bearbeitungsbeginn möglicherweise nicht mehr möglich. Kontaktieren Sie uns umgehend, wenn Sie Änderungen benötigen."
+        },
+        {
+          "q": "Bieten Sie internationalen Versand an?",
+          "a": "Ja. Wir versenden in über 50 Länder weltweit über EMS, DHL, FedEx und andere große Versanddienstleister. Die Versandkosten werden nach Zielort und Bestellvolumen berechnet und nach der Bestellung von Ihrem Account Manager bestätigt. Sammellieferungen zur Senkung der Logistikkosten sind verfügbar."
+        }
       ],
       "returns": [
-        { "q": "Wie lautet Ihre Rückgaberichtlinie?", "a": "Rückgaben werden innerhalb von 7 Tagen nach Lieferung für defekte, beschädigte oder falsch gelieferte Artikel akzeptiert. Aufgrund des Großhandelscharakters werden Rückgaben wegen Nichtgefallens in der Regel nicht akzeptiert." },
-        { "q": "Wie leite ich eine Rückgabe oder einen Umtausch ein?", "a": "Kontaktieren Sie unser Support-Team innerhalb von 7 Tagen nach Erhalt Ihrer Bestellung. Geben Sie Ihre Bestellnummer, eine Problembeschreibung und Fotos an, falls der Artikel beschädigt ist. Unser Team führt Sie durch den Prozess." },
-        { "q": "Wer trägt die Rücksendekosten?", "a": "Wenn die Rücksendung auf einen Defekt oder unseren Fehler zurückzuführen ist, übernehmen wir die Rücksendekosten. Bei Rücksendungen aus anderen Gründen trägt der Käufer die Versandkosten." },
-        { "q": "Wie lange dauert die Rückerstattung?", "a": "Rückerstattungen werden innerhalb von 3–5 Werktagen nach Erhalt und Prüfung der zurückgesandten Artikel bearbeitet. Wann das Geld auf Ihrem Konto erscheint, hängt von Ihrer Zahlungsmethode und Bank ab." }
+        {
+          "q": "Wie lautet Ihre Rückgaberichtlinie?",
+          "a": "Rückgaben werden innerhalb von 7 Tagen nach Lieferung für defekte, beschädigte oder falsch gelieferte Artikel akzeptiert. Aufgrund des Großhandelscharakters werden Rückgaben wegen Nichtgefallens in der Regel nicht akzeptiert."
+        },
+        {
+          "q": "Wie leite ich eine Rückgabe oder einen Umtausch ein?",
+          "a": "Kontaktieren Sie unser Support-Team innerhalb von 7 Tagen nach Erhalt Ihrer Bestellung. Geben Sie Ihre Bestellnummer, eine Problembeschreibung und Fotos an, falls der Artikel beschädigt ist. Unser Team führt Sie durch den Prozess."
+        },
+        {
+          "q": "Wer trägt die Rücksendekosten?",
+          "a": "Wenn die Rücksendung auf einen Defekt oder unseren Fehler zurückzuführen ist, übernehmen wir die Rücksendekosten. Bei Rücksendungen aus anderen Gründen trägt der Käufer die Versandkosten."
+        },
+        {
+          "q": "Wie lange dauert die Rückerstattung?",
+          "a": "Rückerstattungen werden innerhalb von 3–5 Werktagen nach Erhalt und Prüfung der zurückgesandten Artikel bearbeitet. Wann das Geld auf Ihrem Konto erscheint, hängt von Ihrer Zahlungsmethode und Bank ab."
+        }
       ],
       "payment": [
-        { "q": "Welche Zahlungsmethoden werden akzeptiert?", "a": "Wir akzeptieren Banküberweisung, Kreditkarte (Visa, MasterCard, Amex) und wichtige koreanische Zahlungsmethoden wie KakaoPay und NaverPay. Bestellungen per Überweisung werden nach Zahlungsbestätigung bearbeitet." },
-        { "q": "Sind die Preise inklusive MwSt.?", "a": "Alle angezeigten Großhandelspreise verstehen sich zuzüglich MwSt. (10 %). Die MwSt. wird an der Kasse hinzugefügt. Geschäftsmitglieder erhalten auf Anfrage eine Steuerrechnung." },
-        { "q": "Kann ich eine Steuerrechnung anfordern?", "a": "Ja. Als registriertes Geschäftsmitglied haben Sie Anspruch auf eine Steuerrechnung für alle Einkäufe. Rechnungen können über die Bestelldetailseite oder unser Support-Team angefordert werden." },
-        { "q": "Gibt es Kreditlimits oder Zahlungsziele?", "a": "Kreditkonditionen (z. B. Netto 30) sind für langjährige Mitglieder mit guter Bestellhistorie verfügbar. Bitte kontaktieren Sie unser Vertriebsteam direkt, um Kreditvereinbarungen zu besprechen." }
+        {
+          "q": "Welche Zahlungsmethoden werden akzeptiert?",
+          "a": "Wir akzeptieren Banküberweisung, Kreditkarte (Visa, MasterCard, Amex) und wichtige koreanische Zahlungsmethoden wie KakaoPay und NaverPay. Bestellungen per Überweisung werden nach Zahlungsbestätigung bearbeitet."
+        },
+        {
+          "q": "Sind die Preise inklusive MwSt.?",
+          "a": "Alle angezeigten Großhandelspreise verstehen sich zuzüglich MwSt. (10 %). Die MwSt. wird an der Kasse hinzugefügt. Geschäftsmitglieder erhalten auf Anfrage eine Steuerrechnung."
+        },
+        {
+          "q": "Kann ich eine Steuerrechnung anfordern?",
+          "a": "Ja. Als registriertes Geschäftsmitglied haben Sie Anspruch auf eine Steuerrechnung für alle Einkäufe. Rechnungen können über die Bestelldetailseite oder unser Support-Team angefordert werden."
+        },
+        {
+          "q": "Gibt es Kreditlimits oder Zahlungsziele?",
+          "a": "Kreditkonditionen (z. B. Netto 30) sind für langjährige Mitglieder mit guter Bestellhistorie verfügbar. Bitte kontaktieren Sie unser Vertriebsteam direkt, um Kreditvereinbarungen zu besprechen."
+        }
       ],
       "products": [
-        { "q": "Sind alle Produkte authentisch?", "a": "Ja. WELMES arbeitet direkt mit autorisierten Distributoren und Markenpartnern zusammen. Alle Produkte sind 100 % authentisch und stammen aus offiziellen Lieferketten." },
-        { "q": "Kann ich nicht gelistete Produkte anfragen?", "a": "Ja. Wenn Sie ein bestimmtes Produkt oder eine Marke suchen, die derzeit nicht gelistet ist, kontaktieren Sie uns. Wir erweitern unseren Katalog regelmäßig auf Basis der Mitgliedernachfrage." },
-        { "q": "Gibt es eine Haltbarkeitsgarantie für Produkte?", "a": "Alle Produkte haben zum Zeitpunkt des Versands garantiert eine Resthaltbarkeit von mindestens 12 Monaten, sofern auf der Produktseite nicht anders angegeben." },
-        { "q": "Kann ich vor einer Großbestellung Produktmuster erhalten?", "a": "Musteranfragen sind für ausgewählte Produkte für freigegebene Mitglieder möglich. Kontaktieren Sie unser Support-Team mit Ihren Kontodaten und den Produkten, die Sie interessieren." }
+        {
+          "q": "Sind alle Produkte authentisch?",
+          "a": "Ja. WELMES arbeitet direkt mit autorisierten Distributoren und Markenpartnern zusammen. Alle Produkte sind 100 % authentisch und stammen aus offiziellen Lieferketten."
+        },
+        {
+          "q": "Kann ich nicht gelistete Produkte anfragen?",
+          "a": "Ja. Wenn Sie ein bestimmtes Produkt oder eine Marke suchen, die derzeit nicht gelistet ist, kontaktieren Sie uns. Wir erweitern unseren Katalog regelmäßig auf Basis der Mitgliedernachfrage."
+        },
+        {
+          "q": "Gibt es eine Haltbarkeitsgarantie für Produkte?",
+          "a": "Alle Produkte haben zum Zeitpunkt des Versands garantiert eine Resthaltbarkeit von mindestens 12 Monaten, sofern auf der Produktseite nicht anders angegeben."
+        },
+        {
+          "q": "Kann ich vor einer Großbestellung Produktmuster erhalten?",
+          "a": "Musteranfragen sind für ausgewählte Produkte für freigegebene Mitglieder möglich. Kontaktieren Sie unser Support-Team mit Ihren Kontodaten und den Produkten, die Sie interessieren."
+        }
       ]
     }
   },
@@ -472,16 +661,6 @@
     "veryGood": "Sehr gut",
     "excellent": "Ausgezeichnet",
     "submitted": "Bewertung abgesendet!"
-  },
-  "banners": {
-    "b1Eyebrow": "Für Geschäftskunden",
-    "b1Title": "Bis zu 70% unter\ndem Einzelhandel",
-    "b1Subtitle": "Original japanische & koreanische Kosmetik — Mindestbestellung ab 1 Set",
-    "b1Cta": "Großhandelspreise ansehen",
-    "b2Eyebrow": "Globale Logistik",
-    "b2Title": "Versand in\nüber 50 Länder",
-    "b2Subtitle": "EMS · DHL · FedEx — Tür zu Tür, 3–7 Werktage",
-    "b2Cta": "Unternehmen registrieren"
   },
   "footer": {
     "tagline": "Premium K-Beauty Großhandelsplattform",

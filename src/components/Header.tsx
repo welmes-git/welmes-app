@@ -6,6 +6,7 @@ import CartDrawer from './CartDrawer';
 import CurrencySelector from './CurrencySelector';
 import { useTranslation } from 'react-i18next';
 import { brands } from '../data/products';
+import { categoryMenuColumns } from '../config/categoryMenu';
 import {
   ShoppingBag,
   Heart,
@@ -14,6 +15,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  ChevronRight,
   User,
   LogOut,
   LayoutDashboard,
@@ -41,14 +43,6 @@ const LANGUAGES = [
   { code: 'ru', label: 'RU', name: 'Русский' },
 ];
 
-const subCategories = [
-  'Skincare',
-  'Makeup',
-  'Body/Hair',
-  'Health Food',
-  'Beauty Tools',
-  'Fragrance',
-];
 
 export default function Header() {
   const navigate = useNavigate();
@@ -69,6 +63,18 @@ export default function Header() {
   const [showMobileBrands, setShowMobileBrands] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const megaMenuRef = useRef<HTMLElement>(null);
+
+  // Close category mega menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (megaMenuRef.current && !megaMenuRef.current.contains(e.target as Node)) {
+        setShowCategoryDropdown(false);
+      }
+    };
+    if (showCategoryDropdown) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showCategoryDropdown]);
 
   const navItems = [
     { label: t('nav.specialPrice'), path: '/products?sort=discount' },
@@ -468,32 +474,59 @@ export default function Header() {
           </div>
 
           {/* Navigation Bar — desktop only */}
-          <nav className="hidden md:flex items-center border-t border-[#e5e5e5]">
-            {/* Category with dropdown */}
-            <div
-              className="relative"
-              onMouseEnter={() => setShowCategoryDropdown(true)}
-              onMouseLeave={() => setShowCategoryDropdown(false)}
+          <nav ref={megaMenuRef} className="hidden md:flex items-center border-t border-[#e5e5e5] relative">
+            {/* Category — Olive Young style mega menu */}
+            <button
+              onClick={() => setShowCategoryDropdown((v) => !v)}
+              className={`flex items-center gap-2 py-3.5 px-5 text-[14px] font-semibold transition-colors ${
+                showCategoryDropdown ? 'bg-[#222] text-white' : 'text-[#333] hover:text-[#ff4d6d]'
+              }`}
             >
-              <button className="flex items-center gap-2 py-3.5 px-5 text-[14px] font-semibold text-[#333] hover:text-[#ff4d6d]">
-                <Menu size={16} />
-                {t('nav.category')}
-              </button>
-              {showCategoryDropdown && (
-                <div className="absolute top-full left-0 w-[200px] bg-white border border-[#e5e5e5] shadow-lg py-2 z-50">
-                  {subCategories.map((cat) => (
-                    <Link
-                      key={cat}
-                      to={`/products?category=${cat}`}
-                      className="block px-5 py-2.5 text-[13px] text-[#555] hover:bg-[#f8f8fa] hover:text-[#ff4d6d]"
-                      onClick={() => setShowCategoryDropdown(false)}
-                    >
-                      {cat}
-                    </Link>
+              <Menu size={16} />
+              {t('nav.category')}
+            </button>
+            {showCategoryDropdown && (
+              <div className="absolute top-full left-0 right-0 bg-white border border-[#e5e5e5] shadow-[0_16px_32px_rgba(0,0,0,0.12)] z-50">
+                <div className="grid grid-cols-6 divide-x divide-[#f0f0f0] px-1 py-7">
+                  {categoryMenuColumns.map((column, colIdx) => (
+                    <div key={colIdx} className="px-5 space-y-7">
+                      {column.map((group) => (
+                        <div key={group.key}>
+                          <Link
+                            to={group.link}
+                            onClick={() => setShowCategoryDropdown(false)}
+                            className="inline-flex items-center gap-1 text-[15px] font-bold text-[#222] hover:text-[#ff4d6d] mb-3 transition-colors"
+                          >
+                            {t(`categoryMenu.${group.key}`)}
+                            <ChevronRight size={14} className="text-[#999]" />
+                          </Link>
+                          <ul className="space-y-1">
+                            {group.subs.map((sub) => (
+                              <li key={sub.key}>
+                                <Link
+                                  to={sub.link}
+                                  onClick={() => setShowCategoryDropdown(false)}
+                                  className="block py-[4px] text-[13px] text-[#666] hover:text-[#ff4d6d] hover:underline transition-colors"
+                                >
+                                  {t(`categoryMenu.${sub.key}`)}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
                   ))}
                 </div>
-              )}
-            </div>
+                <button
+                  onClick={() => setShowCategoryDropdown(false)}
+                  className="absolute bottom-0 right-0 w-9 h-9 bg-[#222] text-white flex items-center justify-center hover:bg-[#444] transition-colors"
+                  aria-label="Close category menu"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
 
             {/* Brand Shop with dropdown */}
             <div

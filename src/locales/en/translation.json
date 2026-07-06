@@ -36,12 +36,127 @@
     "keywordSuggestions": "Keyword Suggestions",
     "trendingSearches": "Trending Searches"
   },
+  "categoryMenu": {
+    "skincare": "Skincare",
+    "toner": "Toner",
+    "serum": "Essence · Serum · Ampoule",
+    "cream": "Cream",
+    "lotion": "Lotion",
+    "mistOil": "Mist · Oil",
+    "skincareSet": "Skincare Sets",
+    "maskPack": "Mask Pack",
+    "sheetMask": "Sheet Masks",
+    "padMask": "Pads",
+    "facialPack": "Facial Packs",
+    "patchMask": "Patches",
+    "cleansing": "Cleansing",
+    "foamGel": "Foam · Gel",
+    "oilBalm": "Oil · Balm",
+    "waterMilk": "Water · Milk",
+    "scrub": "Peeling & Scrub",
+    "sunCare": "Sun Care",
+    "sunCream": "Sun Cream",
+    "sunStick": "Sun Stick",
+    "sunSpray": "Sun Spray · Patch",
+    "makeup": "Makeup",
+    "lipMakeup": "Lip Makeup",
+    "baseMakeup": "Base Makeup",
+    "eyeMakeup": "Eye Makeup",
+    "beautyTools": "Beauty Tools",
+    "makeupTools": "Makeup Tools",
+    "faceTools": "Face Tools",
+    "hairBodyTools": "Hair · Body Tools",
+    "hairCare": "Hair Care",
+    "shampoo": "Shampoo · Scaler",
+    "treatment": "Treatment · Pack",
+    "scalpCare": "Scalp Care",
+    "styling": "Styling",
+    "bodyCare": "Body Care",
+    "showerBath": "Shower · Bath",
+    "bodyLotion": "Body Lotion · Cream",
+    "handCare": "Hand Care",
+    "footCare": "Foot Care",
+    "deodorant": "Deodorant",
+    "fragrance": "Fragrance",
+    "perfume": "Perfume",
+    "miniPerfume": "Mini · Solid Perfume",
+    "homeFragrance": "Home Fragrance",
+    "healthFood": "Health Food",
+    "vitamin": "Vitamins",
+    "supplement": "Supplements",
+    "probiotics": "Probiotics",
+    "innerBeauty": "Slimming · Inner Beauty",
+    "skincareDevice": "Skincare Devices",
+    "nosePack": "Nose Packs",
+    "cleansingTissue": "Tissues · Pads",
+    "lipEyeRemover": "Lip & Eye Remover",
+    "cleansingDevice": "Cleansing Devices",
+    "sunCushion": "Sun Cushion",
+    "tanningAfterSun": "Tanning · After Sun",
+    "eyelashTools": "Eyelash Tools",
+    "dailyTools": "Daily Tools",
+    "dermoCosmetic": "Derma Cosmetics",
+    "nail": "Nail",
+    "basicNail": "Nail Polish",
+    "gelNail": "Gel Nail",
+    "nailTip": "Nail Tips · Stickers",
+    "nailCare": "Nail Care · Remover",
+    "hairEssence": "Hair Essence",
+    "hairColor": "Hair Color · Perm",
+    "hairTools": "Hair Devices · Brushes",
+    "hairRemoval": "Hair Removal · Waxing",
+    "babyMom": "Baby · Maternity",
+    "food": "Food",
+    "dietFood": "Diet · Inner Beauty",
+    "snacks": "Snacks · Chocolate · Dessert",
+    "drinks": "Water · Drinks · Coffee",
+    "instantFood": "Instant Food · Cooking",
+    "babyFood": "Baby Food",
+    "healthGoods": "Health · Wellness Goods",
+    "patchCare": "Patches · Spot Care",
+    "relaxGoods": "Relaxation Goods",
+    "medicalSupplies": "Daily · Medical Supplies",
+    "massageSupport": "Massage · Supports",
+    "fitnessGoods": "Fitness Goods",
+    "oralCare": "Oral Care",
+    "toothbrush": "Toothbrushes",
+    "toothpaste": "Toothpaste",
+    "afterOralCare": "Mouthwash · After Care",
+    "portableOralSet": "Portable Sets",
+    "oralAppliance": "Oral Care Devices",
+    "hygiene": "Hygiene Goods",
+    "femCare": "Feminine Care",
+    "intimateCare": "Intimate Care",
+    "adultGoods": "Adult Products",
+    "massageGel": "Massage Gel · Oil",
+    "testKit": "Test Kits",
+    "diapers": "Diapers",
+    "tissuePaper": "Tissue · Paper",
+    "fashion": "Fashion",
+    "underwear": "Underwear",
+    "fashionAccessories": "Fashion Accessories",
+    "sportswear": "Sportswear",
+    "homewear": "Homewear",
+    "homeLiving": "Home Living · Appliances",
+    "appliances": "Appliances",
+    "kitchen": "Kitchen",
+    "interior": "Interior",
+    "bathroom": "Bathroom",
+    "cleaning": "Detergent · Cleaning",
+    "petSupplies": "Pet Supplies",
+    "babyGoods": "Baby · Kids Goods",
+    "hobby": "Hobby · Fancy",
+    "characterGoods": "Character Goods",
+    "stationery": "Fancy · Stationery",
+    "digital": "Digital · Devices",
+    "albums": "Albums"
+  },
   "banners": {
-    "b1Eyebrow": "For Business Buyers",
+    "b1Eyebrow": "For business buyers",
     "b1Title": "Up to 70%\nBelow Retail",
-    "b1Subtitle": "Genuine Japanese & Korean beauty — MOQ from just 1 set",
+    "b1Subtitle": "Genuine Japanese & Korean beauty — minimum order from just 1 set",
     "b1Cta": "Browse Wholesale Prices",
-    "b2Eyebrow": "Global Logistics",
+    "b2Eyebrow": "Global logistics",
     "b2Title": "We Ship to\n50+ Countries",
     "b2Subtitle": "EMS · DHL · FedEx — door to door, 3–7 business days",
     "b2Cta": "Register Your Business"
@@ -393,39 +508,113 @@
       "payment": "Payment",
       "products": "Products"
     },
-    "formCategories": ["General Inquiry", "Membership & Verification", "Order & Shipping", "Returns & Exchanges", "Payment & Invoice", "Product Inquiry", "Other"],
+    "formCategories": [
+      "General Inquiry",
+      "Membership & Verification",
+      "Order & Shipping",
+      "Returns & Exchanges",
+      "Payment & Invoice",
+      "Product Inquiry",
+      "Other"
+    ],
     "faqs": {
       "membership": [
-        { "q": "Who can register as a member?", "a": "WELMES is an exclusive wholesale platform for verified business owners. You must have a valid business registration number to sign up. Individuals without a registered business cannot access wholesale pricing." },
-        { "q": "How long does business verification take?", "a": "Business verification is typically completed within 1–2 business days after you submit your business registration certificate. You will receive an email notification once approved." },
-        { "q": "Can I browse products before verification is complete?", "a": "You can browse product listings, but wholesale prices and the ability to add items to your cart are only available after your account has been approved by our admin team." },
-        { "q": "What documents are required for registration?", "a": "You will need to provide your business registration certificate. Please ensure the document is clear and legible. Additional documents may be requested in special cases." },
-        { "q": "Can I change my registered business information?", "a": "To update your business information, please contact our support team via email or phone. Changes to your business registration number require re-verification." }
+        {
+          "q": "Who can register as a member?",
+          "a": "WELMES is an exclusive wholesale platform for verified business owners. You must have a valid business registration number to sign up. Individuals without a registered business cannot access wholesale pricing."
+        },
+        {
+          "q": "How long does business verification take?",
+          "a": "Business verification is typically completed within 1–2 business days after you submit your business registration certificate. You will receive an email notification once approved."
+        },
+        {
+          "q": "Can I browse products before verification is complete?",
+          "a": "You can browse product listings, but wholesale prices and the ability to add items to your cart are only available after your account has been approved by our admin team."
+        },
+        {
+          "q": "What documents are required for registration?",
+          "a": "You will need to provide your business registration certificate. Please ensure the document is clear and legible. Additional documents may be requested in special cases."
+        },
+        {
+          "q": "Can I change my registered business information?",
+          "a": "To update your business information, please contact our support team via email or phone. Changes to your business registration number require re-verification."
+        }
       ],
       "orders": [
-        { "q": "What is the minimum order quantity (MOQ)?", "a": "Minimum order quantities vary by product and brand. The MOQ is displayed on each product detail page. Some products may require a minimum order value of ₩100,000 or more." },
-        { "q": "How long does delivery take?", "a": "Delivery times vary by destination. Express couriers such as DHL, FedEx, and EMS typically deliver within 3–7 business days after dispatch. Delivery may take longer during peak seasons or customs clearance." },
-        { "q": "Can I track my order?", "a": "Yes. Once your order is shipped, a tracking number will be sent to your registered email. You can also check order status in the My Orders section of your account." },
-        { "q": "Can I modify or cancel an order after placing it?", "a": "Orders can be modified or cancelled within 1 hour of placement. After that, once processing has begun, cancellations may not be possible. Please contact us immediately if you need to make changes." },
-        { "q": "Do you offer international shipping?", "a": "Yes. We ship to over 50 countries worldwide via EMS, DHL, FedEx, and other major carriers. Shipping costs are calculated based on destination and order volume, and will be confirmed by your account manager after you place an order. Consolidated shipping is available to reduce logistics costs." }
+        {
+          "q": "What is the minimum order quantity (MOQ)?",
+          "a": "Minimum order quantities vary by product and brand. The MOQ is displayed on each product detail page. Some products may require a minimum order value of ₩100,000 or more."
+        },
+        {
+          "q": "How long does delivery take?",
+          "a": "Delivery times vary by destination. Express couriers such as DHL, FedEx, and EMS typically deliver within 3–7 business days after dispatch. Delivery may take longer during peak seasons or customs clearance."
+        },
+        {
+          "q": "Can I track my order?",
+          "a": "Yes. Once your order is shipped, a tracking number will be sent to your registered email. You can also check order status in the My Orders section of your account."
+        },
+        {
+          "q": "Can I modify or cancel an order after placing it?",
+          "a": "Orders can be modified or cancelled within 1 hour of placement. After that, once processing has begun, cancellations may not be possible. Please contact us immediately if you need to make changes."
+        },
+        {
+          "q": "Do you offer international shipping?",
+          "a": "Yes. We ship to over 50 countries worldwide via EMS, DHL, FedEx, and other major carriers. Shipping costs are calculated based on destination and order volume, and will be confirmed by your account manager after you place an order. Consolidated shipping is available to reduce logistics costs."
+        }
       ],
       "returns": [
-        { "q": "What is your return policy?", "a": "Returns are accepted within 7 days of delivery for items that are defective, damaged, or incorrectly shipped. Due to the nature of wholesale, returns for change-of-mind are generally not accepted." },
-        { "q": "How do I initiate a return or exchange?", "a": "Contact our support team within 7 days of receiving your order. Provide your order number, a description of the issue, and photos if the item is damaged. Our team will guide you through the process." },
-        { "q": "Who covers the return shipping cost?", "a": "If the return is due to a defect or our error, we cover the return shipping cost. If the return is for any other reason, the buyer is responsible for return shipping fees." },
-        { "q": "How long does a refund take to process?", "a": "Refunds are processed within 3–5 business days after we receive and inspect the returned items. The time for funds to appear in your account depends on your payment method and bank." }
+        {
+          "q": "What is your return policy?",
+          "a": "Returns are accepted within 7 days of delivery for items that are defective, damaged, or incorrectly shipped. Due to the nature of wholesale, returns for change-of-mind are generally not accepted."
+        },
+        {
+          "q": "How do I initiate a return or exchange?",
+          "a": "Contact our support team within 7 days of receiving your order. Provide your order number, a description of the issue, and photos if the item is damaged. Our team will guide you through the process."
+        },
+        {
+          "q": "Who covers the return shipping cost?",
+          "a": "If the return is due to a defect or our error, we cover the return shipping cost. If the return is for any other reason, the buyer is responsible for return shipping fees."
+        },
+        {
+          "q": "How long does a refund take to process?",
+          "a": "Refunds are processed within 3–5 business days after we receive and inspect the returned items. The time for funds to appear in your account depends on your payment method and bank."
+        }
       ],
       "payment": [
-        { "q": "What payment methods are accepted?", "a": "We accept bank transfer, credit card (Visa, MasterCard, Amex), and major Korean payment methods including KakaoPay and NaverPay. Bank transfer orders are processed after payment confirmation." },
-        { "q": "Are prices inclusive of VAT?", "a": "All listed wholesale prices are exclusive of VAT (10%). VAT will be added at checkout. A tax invoice will be issued upon request for business members." },
-        { "q": "Can I request a tax invoice?", "a": "Yes. As a registered business member, you are entitled to a tax invoice for all purchases. Invoices can be requested from the order detail page or by contacting our support team." },
-        { "q": "Is there a credit limit or payment term option?", "a": "Credit terms (e.g., Net 30) are available for long-standing members with a strong order history. Please contact our sales team directly to discuss credit arrangements." }
+        {
+          "q": "What payment methods are accepted?",
+          "a": "We accept bank transfer, credit card (Visa, MasterCard, Amex), and major Korean payment methods including KakaoPay and NaverPay. Bank transfer orders are processed after payment confirmation."
+        },
+        {
+          "q": "Are prices inclusive of VAT?",
+          "a": "All listed wholesale prices are exclusive of VAT (10%). VAT will be added at checkout. A tax invoice will be issued upon request for business members."
+        },
+        {
+          "q": "Can I request a tax invoice?",
+          "a": "Yes. As a registered business member, you are entitled to a tax invoice for all purchases. Invoices can be requested from the order detail page or by contacting our support team."
+        },
+        {
+          "q": "Is there a credit limit or payment term option?",
+          "a": "Credit terms (e.g., Net 30) are available for long-standing members with a strong order history. Please contact our sales team directly to discuss credit arrangements."
+        }
       ],
       "products": [
-        { "q": "Are all products authentic?", "a": "Yes. WELMES works directly with authorized distributors and brand partners. All products are 100% authentic and sourced through official supply chains." },
-        { "q": "Can I request products that are not listed?", "a": "Yes. If you are looking for a specific product or brand not currently listed, please contact us. We regularly expand our catalogue based on member demand." },
-        { "q": "Do products have an expiry date guarantee?", "a": "All products are guaranteed to have a minimum of 12 months remaining shelf life at the time of shipment, unless otherwise stated on the product page." },
-        { "q": "Can I get product samples before placing a bulk order?", "a": "Sample requests are available for select products for approved members. Please contact our support team with your account details and the products you are interested in." }
+        {
+          "q": "Are all products authentic?",
+          "a": "Yes. WELMES works directly with authorized distributors and brand partners. All products are 100% authentic and sourced through official supply chains."
+        },
+        {
+          "q": "Can I request products that are not listed?",
+          "a": "Yes. If you are looking for a specific product or brand not currently listed, please contact us. We regularly expand our catalogue based on member demand."
+        },
+        {
+          "q": "Do products have an expiry date guarantee?",
+          "a": "All products are guaranteed to have a minimum of 12 months remaining shelf life at the time of shipment, unless otherwise stated on the product page."
+        },
+        {
+          "q": "Can I get product samples before placing a bulk order?",
+          "a": "Sample requests are available for select products for approved members. Please contact our support team with your account details and the products you are interested in."
+        }
       ]
     }
   },
@@ -472,16 +661,6 @@
     "veryGood": "Very Good",
     "excellent": "Excellent",
     "submitted": "Review submitted!"
-  },
-  "banners": {
-    "b1Eyebrow": "For business buyers",
-    "b1Title": "Up to 70%\nBelow Retail",
-    "b1Subtitle": "Genuine Japanese & Korean beauty — minimum order from just 1 set",
-    "b1Cta": "Browse Wholesale Prices",
-    "b2Eyebrow": "Global logistics",
-    "b2Title": "We Ship to\n50+ Countries",
-    "b2Subtitle": "EMS · DHL · FedEx — door to door, 3–7 business days",
-    "b2Cta": "Register Your Business"
   },
   "footer": {
     "tagline": "Premium K-Beauty Wholesale Platform",
