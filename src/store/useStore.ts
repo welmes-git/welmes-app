@@ -130,10 +130,10 @@ interface AppState {
     address: string;
     certificateFile?: File | null;
   }) => Promise<{ error?: string }>;
-  updateMember: (id: string, updates: Partial<Member>) => Promise<void>;
+  updateMember: (id: string, updates: Partial<Member>) => Promise<{ error?: string }>;
   changePassword: (id: string, newPassword: string) => Promise<void>;
-  approveMember: (id: string) => Promise<void>;
-  rejectMember: (id: string) => Promise<void>;
+  approveMember: (id: string) => Promise<{ error?: string }>;
+  rejectMember: (id: string) => Promise<{ error?: string }>;
 
   // Wishlist (stays local)
   wishlist: number[];
@@ -300,15 +300,25 @@ export const useStore = create<AppState>()(
           certificatePath = (await db.uploadCertificate(data.user.id, certificateFile)) ?? undefined;
         }
 
-        // Upsert full member record (trigger creates minimal row; we update with full details)
-        await db.upsertMember(data.user.id, {
+        // Upsert full member record (trigger creates minimal row; we update with full details).
+        // Surface a failure here — otherwise the auth user exists but their
+        // business details were silently dropped (e.g. blocked by RLS).
+        const { error: memberErr } = await db.upsertMember(data.user.id, {
           email, companyName, businessNumber, representative, phone, address, certificatePath,
         });
+        if (memberErr) {
+          console.error('[registerMember] upsertMember failed:', memberErr.message);
+          return { error: memberErr.message };
+        }
         return {};
       },
 
       updateMember: async (id, updates) => {
-        await db.updateMemberById(id, updates);
+        const { error } = await db.updateMemberById(id, updates);
+        if (error) {
+          console.error('[updateMember]', error.message);
+          return { error: error.message };
+        }
         set((state) => {
           const updatedMembers = state.members.map((m) =>
             m.id === id ? { ...m, ...updates } : m
@@ -319,6 +329,7 @@ export const useStore = create<AppState>()(
               : state.currentUser;
           return { members: updatedMembers, currentUser: updatedCurrent };
         });
+        return {};
       },
 
       changePassword: async (_id, newPassword) => {
@@ -326,7 +337,13 @@ export const useStore = create<AppState>()(
       },
 
       approveMember: async (id) => {
-        await db.updateMemberById(id, { status: 'approved' });
+        // Only announce the decision once the database actually accepted it —
+        // otherwise a failed update still emailed the member "approved".
+        const { error } = await db.updateMemberById(id, { status: 'approved' });
+        if (error) {
+          console.error('[approveMember]', error.message);
+          return { error: error.message };
+        }
         set((state) => ({
           members: state.members.map((m) =>
             m.id === id ? { ...m, status: 'approved' as const } : m
@@ -337,10 +354,15 @@ export const useStore = create<AppState>()(
           emailMemberApproved(member.email, member.companyName);
           get().addNotification({ memberId: id, type: 'member_approved' });
         }
+        return {};
       },
 
       rejectMember: async (id) => {
-        await db.updateMemberById(id, { status: 'rejected' });
+        const { error } = await db.updateMemberById(id, { status: 'rejected' });
+        if (error) {
+          console.error('[rejectMember]', error.message);
+          return { error: error.message };
+        }
         set((state) => ({
           members: state.members.map((m) =>
             m.id === id ? { ...m, status: 'rejected' as const } : m
@@ -351,6 +373,7 @@ export const useStore = create<AppState>()(
           emailMemberRejected(member.email, member.companyName);
           get().addNotification({ memberId: id, type: 'member_rejected' });
         }
+        return {};
       },
 
       // ── Wishlist (local only) ────────────────────────────────
@@ -475,9 +498,25 @@ export const useStore = create<AppState>()(
       },
 
       addOrder: async (order) => {
+        // `products.stock` counts pieces, so a set contributes qty × unitsPerSet
+        const stockLines: db.StockLine[] = order.items.map((item) => ({
+          product_id: item.product.id,
+          units: item.quantity * (item.setOption?.unitsPerSet ?? 1),
+        }));
+
+        // Take stock first (atomic check + decrement) so two concurrent
+        // checkouts can't oversell the same units.
+        const stockRes = await db.decrementStock(stockLines);
+        if (stockRes.error) return { error: stockRes.error };
+
         const { error } = await db.insertOrder(order);
-        if (error) return { error };
+        if (error) {
+          await db.restoreStock(stockLines); // compensate — we already took stock
+          return { error };
+        }
+
         set((state) => ({ orders: [order, ...state.orders] }));
+        get().loadProducts(); // refresh the catalogue so stock counts are current
         const user = get().currentUser;
         if (user?.email) {
           emailOrderPlaced(order, user.email);

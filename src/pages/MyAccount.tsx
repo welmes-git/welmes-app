@@ -101,8 +101,12 @@ export default function MyAccount() {
       return;
     }
     setAccountSaving(true);
-    updateMember(currentUser!.id, accountForm);
+    const { error } = await updateMember(currentUser!.id, accountForm);
     setAccountSaving(false);
+    if (error) {
+      showToast(t('common.error'), 'error');
+      return;
+    }
     showToast(t('account.infoUpdated'), 'success');
   }
 
@@ -418,7 +422,9 @@ export default function MyAccount() {
                 <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <InfoRow label={t('auth.email')} value={currentUser.email} />
                   <InfoRow label={t('auth.businessRegNo')} value={currentUser.businessNumber} />
-                  <InfoRow label="Member Since" value={memberRecord?.registeredDate ?? '—'} />
+                  {/* `members` is only loaded for admins — fall back to the
+                      signed-in user's own record so this isn't always "—" */}
+                  <InfoRow label="Member Since" value={memberRecord?.registeredDate ?? currentUser.registeredDate ?? '—'} />
                   <InfoRow
                     label={t('account.status')}
                     value={

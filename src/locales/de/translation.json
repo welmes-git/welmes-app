@@ -255,7 +255,9 @@
     "bulkOrdersDesc2": "Versandkosten werden nach der Bestellung vom Account Manager bestätigt",
     "returnPolicy": "Rückgaberichtlinie",
     "returnPolicyDesc1": "Rückgaben innerhalb von 7 Tagen nach Lieferung möglich",
-    "returnPolicyDesc2": "Artikel müssen ungeöffnet und in Originalverpackung sein"
+    "returnPolicyDesc2": "Artikel müssen ungeöffnet und in Originalverpackung sein",
+    "chooseSet": "Optionen wählen",
+    "notEnoughStock": "Nur noch {{stock}} Stück auf Lager"
   },
   "cart": {
     "title": "Warenkorb",
@@ -355,14 +357,14 @@
     "swiftLabel": "SWIFT / BIC",
     "routingLabel": "Routing-Nummer",
     "orderFailed": "Ihre Bestellung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut. Falls Sie bereits per PayPal gezahlt haben, kontaktieren Sie zuerst den Support.",
-    "bankNotConfigured": "Banküberweisung ist noch nicht verfügbar — diese Kontodaten sind Platzhalter. Bitte nutzen Sie PayPal oder kontaktieren Sie den Support."
+    "bankNotConfigured": "Banküberweisung ist noch nicht verfügbar — diese Kontodaten sind Platzhalter. Bitte nutzen Sie PayPal oder kontaktieren Sie den Support.",
+    "insufficientStock": "Einige Artikel sind nicht mehr vorrätig. Bitte prüfen Sie Ihren Warenkorb und versuchen Sie es erneut."
   },
   "auth": {
     "loginTitle": "Login für Geschäftskunden",
     "loginSubtitle": "Melden Sie sich an, um Großhandelspreise zu sehen",
     "email": "E-Mail",
     "password": "Passwort",
-    "rememberMe": "Angemeldet bleiben",
     "forgotPassword": "Passwort vergessen",
     "loginButton": "Anmelden",
     "demoLogin": "Demo-Login (Schnellzugriff)",
@@ -403,7 +405,14 @@
     "certHint": "PNG, JPG oder PDF · max. 5 MB",
     "certRequired": "Bitte laden Sie Ihre Gewerbeanmeldung hoch",
     "certTooLarge": "Datei ist zu groß (max. 5 MB)",
-    "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein"
+    "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein",
+    "resetTitle": "Neues Passwort festlegen",
+    "resetDesc": "Wählen Sie ein neues Passwort für Ihr WELMES-Konto.",
+    "resetSubmit": "Passwort aktualisieren",
+    "resetSuccess": "Passwort aktualisiert. Bitte melden Sie sich an.",
+    "resetEmailRequired": "Bitte geben Sie zuerst Ihre E-Mail-Adresse ein",
+    "resetSent": "Link zum Zurücksetzen an {{email}} gesendet",
+    "loginAsPending": "Als ausstehendes Mitglied anmelden"
   },
   "account": {
     "title": "Mein Konto",
@@ -591,7 +600,7 @@
       "payment": [
         {
           "q": "Welche Zahlungsmethoden werden akzeptiert?",
-          "a": "Wir akzeptieren Banküberweisung, Kreditkarte (Visa, MasterCard, Amex) und wichtige koreanische Zahlungsmethoden wie KakaoPay und NaverPay. Bestellungen per Überweisung werden nach Zahlungsbestätigung bearbeitet."
+          "a": "Wir akzeptieren internationale Banküberweisung (Wire/TT) und PayPal. Überweisungsbestellungen werden nach Zahlungseingang bestätigt; PayPal-Zahlungen werden sofort beim Checkout eingezogen."
         },
         {
           "q": "Sind die Preise inklusive MwSt.?",

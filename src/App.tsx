@@ -18,6 +18,7 @@ import Wishlist from './pages/Wishlist';
 import PendingApproval from './pages/PendingApproval';
 import ProtectedRoute from './components/ProtectedRoute';
 import OrderPrint from './pages/OrderPrint';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   const { initAuth, loadProducts } = useStore();
@@ -34,6 +35,11 @@ function App() {
           currentUser: null, isAuthenticated: false, isAdmin: false,
           notifications: [], cart: [], wishlist: [],
         });
+      }
+      if (event === 'PASSWORD_RECOVERY') {
+        // Supabase has consumed the recovery token from the URL and given us a
+        // session — send the user somewhere they can actually set a password.
+        window.location.hash = '#/reset-password';
       }
     });
 
@@ -61,6 +67,7 @@ function App() {
                   <Route path="/register" element={<Register />} />
                   <Route path="/support" element={<CustomerSupport />} />
                   <Route path="/pending" element={<PendingApproval />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
 
                   <Route path="/account" element={
                     <ProtectedRoute><MyAccount /></ProtectedRoute>

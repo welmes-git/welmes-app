@@ -255,7 +255,9 @@
     "bulkOrdersDesc2": "Phí vận chuyển được quản lý tài khoản xác nhận sau khi đặt hàng",
     "returnPolicy": "Chính sách đổi trả",
     "returnPolicyDesc1": "Chấp nhận đổi trả trong vòng 7 ngày kể từ khi giao hàng",
-    "returnPolicyDesc2": "Sản phẩm phải chưa mở và còn nguyên bao bì gốc"
+    "returnPolicyDesc2": "Sản phẩm phải chưa mở và còn nguyên bao bì gốc",
+    "chooseSet": "Chọn tùy chọn",
+    "notEnoughStock": "Chỉ còn {{stock}} sản phẩm trong kho"
   },
   "cart": {
     "title": "Giỏ hàng",
@@ -353,14 +355,14 @@
     "swiftLabel": "SWIFT / BIC",
     "routingLabel": "Số định tuyến",
     "orderFailed": "Không thể lưu đơn hàng. Vui lòng thử lại. Nếu bạn đã thanh toán qua PayPal, hãy liên hệ hỗ trợ trước khi thử lại.",
-    "bankNotConfigured": "Chuyển khoản ngân hàng chưa khả dụng — thông tin tài khoản là ví dụ. Vui lòng dùng PayPal hoặc liên hệ hỗ trợ."
+    "bankNotConfigured": "Chuyển khoản ngân hàng chưa khả dụng — thông tin tài khoản là ví dụ. Vui lòng dùng PayPal hoặc liên hệ hỗ trợ.",
+    "insufficientStock": "Một số sản phẩm đã hết hàng. Vui lòng kiểm tra giỏ hàng và thử lại."
   },
   "auth": {
     "loginTitle": "Đăng nhập thành viên doanh nghiệp",
     "loginSubtitle": "Đăng nhập để xem giá sỉ",
     "email": "Email",
     "password": "Mật khẩu",
-    "rememberMe": "Ghi nhớ đăng nhập",
     "forgotPassword": "Quên mật khẩu",
     "loginButton": "Đăng nhập",
     "demoLogin": "Đăng nhập demo (truy cập nhanh)",
@@ -401,7 +403,14 @@
     "certHint": "PNG, JPG hoặc PDF · tối đa 5 MB",
     "certRequired": "Vui lòng tải lên giấy phép kinh doanh",
     "certTooLarge": "Tệp quá lớn (tối đa 5 MB)",
-    "passwordTooShort": "Mật khẩu phải có ít nhất 8 ký tự"
+    "passwordTooShort": "Mật khẩu phải có ít nhất 8 ký tự",
+    "resetTitle": "Đặt mật khẩu mới",
+    "resetDesc": "Chọn mật khẩu mới cho tài khoản WELMES của bạn.",
+    "resetSubmit": "Cập nhật mật khẩu",
+    "resetSuccess": "Đã cập nhật mật khẩu. Vui lòng đăng nhập.",
+    "resetEmailRequired": "Vui lòng nhập email của bạn trước",
+    "resetSent": "Đã gửi liên kết đặt lại mật khẩu tới {{email}}",
+    "loginAsPending": "Đăng nhập với tư cách thành viên chờ duyệt"
   },
   "account": {
     "title": "Tài khoản của tôi",
@@ -589,7 +598,7 @@
       "payment": [
         {
           "q": "Chấp nhận những phương thức thanh toán nào?",
-          "a": "Chúng tôi chấp nhận chuyển khoản ngân hàng, thẻ tín dụng (Visa, MasterCard, Amex) và các phương thức thanh toán phổ biến của Hàn Quốc như KakaoPay và NaverPay. Đơn hàng chuyển khoản được xử lý sau khi xác nhận thanh toán."
+          "a": "Chúng tôi chấp nhận chuyển khoản ngân hàng quốc tế (wire/TT) và PayPal. Đơn hàng chuyển khoản được xác nhận khi nhận được thanh toán; thanh toán PayPal được xử lý ngay khi đặt hàng."
         },
         {
           "q": "Giá đã bao gồm VAT chưa?",

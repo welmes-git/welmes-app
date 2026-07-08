@@ -298,7 +298,9 @@ export default function AdminDashboard() {
     if (productSearch) {
       const q = productSearch.toLowerCase();
       return (
-        p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)
+        p.nameEn.toLowerCase().includes(q) ||
+        p.name.toLowerCase().includes(q) ||
+        p.brand.toLowerCase().includes(q)
       );
     }
     return true;
@@ -747,12 +749,10 @@ export default function AdminDashboard() {
                               {member.status === 'pending' && (
                                 <>
                                   <button
-                                    onClick={() => {
-                                      approveMember(member.id);
-                                      showToast(
-                                        `${member.companyName} approved`,
-                                        'success'
-                                      );
+                                    onClick={async () => {
+                                      const { error } = await approveMember(member.id);
+                                      if (error) { showToast(`Approve failed: ${error}`, 'error'); return; }
+                                      showToast(`${member.companyName} approved`, 'success');
                                     }}
                                     className="w-7 h-7 flex items-center justify-center bg-green-50 text-green-600 rounded hover:bg-green-100"
                                     title="Approve"
@@ -760,12 +760,10 @@ export default function AdminDashboard() {
                                     <Check size={14} />
                                   </button>
                                   <button
-                                    onClick={() => {
-                                      rejectMember(member.id);
-                                      showToast(
-                                        `${member.companyName} rejected`,
-                                        'info'
-                                      );
+                                    onClick={async () => {
+                                      const { error } = await rejectMember(member.id);
+                                      if (error) { showToast(`Reject failed: ${error}`, 'error'); return; }
+                                      showToast(`${member.companyName} rejected`, 'info');
                                     }}
                                     className="w-7 h-7 flex items-center justify-center bg-red-50 text-red-600 rounded hover:bg-red-100"
                                     title="Reject"
@@ -1616,8 +1614,9 @@ export default function AdminDashboard() {
               {viewMember.status === 'pending' ? (
                 <>
                   <button
-                    onClick={() => {
-                      approveMember(viewMember.id);
+                    onClick={async () => {
+                      const { error } = await approveMember(viewMember.id);
+                      if (error) { showToast(`Approve failed: ${error}`, 'error'); return; }
                       showToast(`${viewMember.companyName} approved`, 'success');
                       setViewMember(null);
                     }}
@@ -1627,8 +1626,9 @@ export default function AdminDashboard() {
                     Approve
                   </button>
                   <button
-                    onClick={() => {
-                      rejectMember(viewMember.id);
+                    onClick={async () => {
+                      const { error } = await rejectMember(viewMember.id);
+                      if (error) { showToast(`Reject failed: ${error}`, 'error'); return; }
                       showToast(`${viewMember.companyName} rejected`, 'info');
                       setViewMember(null);
                     }}

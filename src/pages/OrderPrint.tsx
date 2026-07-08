@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { useCurrency } from '../context/CurrencyContext';
 import { Printer, ArrowLeft, Loader2 } from 'lucide-react';
+
+/**
+ * Orders are stored in JPY. An official document must show the currency the
+ * order was actually recorded in, not whatever the viewer happens to have
+ * selected in the header, so this page never converts.
+ */
+const formatPrice = (amount: number) => `¥${Math.round(amount).toLocaleString('en-US')}`;
 
 export default function OrderPrint() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { orders, currentUser, isAuthenticated, loadMyOrders } = useStore();
-  const { formatPrice } = useCurrency();
+  const { orders, members, currentUser, isAuthenticated, loadMyOrders } = useStore();
   const [loaded, setLoaded] = useState(false);
 
   const order = orders.find((o) => o.id === id);
@@ -57,6 +62,11 @@ export default function OrderPrint() {
   }
 
   const sh = order.shippingAddress;
+  // Bill the member who placed the order — not whoever happens to be viewing
+  // (an admin printing a buyer's invoice used to see their own details here).
+  const billTo =
+    members.find((m) => m.id === order.memberId) ??
+    (currentUser?.id === order.memberId ? currentUser : null);
 
   return (
     <>
@@ -146,12 +156,12 @@ export default function OrderPrint() {
           <div className="bg-[#f8f8fa] rounded-lg p-4 border border-[#e5e5e5]">
             <p className="text-[10px] font-bold text-[#4a90e2] uppercase tracking-widest mb-2">Bill To</p>
             <p className="text-[13px] font-bold text-[#222]">{order.memberName}</p>
-            {currentUser && (
+            {billTo && (
               <>
-                <p className="text-[11px] text-[#666] mt-0.5">{currentUser.email}</p>
-                <p className="text-[11px] text-[#666]">Reg. No.: {currentUser.businessNumber}</p>
-                <p className="text-[11px] text-[#666]">Rep.: {currentUser.representative}</p>
-                <p className="text-[11px] text-[#666]">{currentUser.phone}</p>
+                <p className="text-[11px] text-[#666] mt-0.5">{billTo.email}</p>
+                <p className="text-[11px] text-[#666]">Reg. No.: {billTo.businessNumber}</p>
+                <p className="text-[11px] text-[#666]">Rep.: {billTo.representative}</p>
+                <p className="text-[11px] text-[#666]">{billTo.phone}</p>
               </>
             )}
           </div>
@@ -268,7 +278,7 @@ export default function OrderPrint() {
             <p className="text-[10px] font-bold text-[#888] uppercase tracking-wide mb-2">Terms & Conditions</p>
             <ul className="text-[10px] text-[#888] space-y-1 list-disc list-inside">
               <li>Payment due within 30 days of invoice date.</li>
-              <li>All prices are in Korean Won (KRW).</li>
+              <li>All prices are in Japanese Yen (JPY).</li>
               <li>Goods remain property of WELMES until full payment received.</li>
               <li>Returns accepted within 7 days of delivery for defective items only.</li>
               <li>This document serves as an official purchase order record.</li>

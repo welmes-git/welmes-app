@@ -255,7 +255,9 @@
     "bulkOrdersDesc2": "送料はご注文後にアカウントマネージャーがご案内",
     "returnPolicy": "返品ポリシー",
     "returnPolicyDesc1": "お届けから7日以内に返品を承ります",
-    "returnPolicyDesc2": "未開封・元の梱包状態のものに限ります"
+    "returnPolicyDesc2": "未開封・元の梱包状態のものに限ります",
+    "chooseSet": "オプションを選択",
+    "notEnoughStock": "在庫は残り{{stock}}個です"
   },
   "cart": {
     "title": "カート",
@@ -355,14 +357,14 @@
     "swiftLabel": "SWIFT / BIC",
     "routingLabel": "ルーティング番号",
     "orderFailed": "注文を保存できませんでした。もう一度お試しください。PayPalで決済済みの場合は、再試行の前にサポートへご連絡ください。",
-    "bankNotConfigured": "銀行振込は現在ご利用いただけません（口座情報は仮のものです）。PayPalをご利用いただくか、サポートへお問い合わせください。"
+    "bankNotConfigured": "銀行振込は現在ご利用いただけません（口座情報は仮のものです）。PayPalをご利用いただくか、サポートへお問い合わせください。",
+    "insufficientStock": "一部の商品の在庫が不足しています。カートをご確認のうえ、もう一度お試しください。"
   },
   "auth": {
     "loginTitle": "ビジネス会員ログイン",
     "loginSubtitle": "卸売価格にアクセスするにはサインイン",
     "email": "メールアドレス",
     "password": "パスワード",
-    "rememberMe": "ログイン状態を保持",
     "forgotPassword": "パスワードを忘れた方",
     "loginButton": "ログイン",
     "demoLogin": "デモログイン（クイックアクセス）",
@@ -403,7 +405,14 @@
     "certHint": "PNG・JPG・PDF · 最大5MB",
     "certRequired": "事業者登録証をアップロードしてください",
     "certTooLarge": "ファイルが大きすぎます（最大5MB）",
-    "passwordTooShort": "パスワードは8文字以上で入力してください"
+    "passwordTooShort": "パスワードは8文字以上で入力してください",
+    "resetTitle": "新しいパスワードを設定",
+    "resetDesc": "WELMESアカウントの新しいパスワードを入力してください。",
+    "resetSubmit": "パスワードを更新",
+    "resetSuccess": "パスワードを更新しました。再度ログインしてください。",
+    "resetEmailRequired": "先にメールアドレスを入力してください",
+    "resetSent": "{{email}} にパスワード再設定リンクを送信しました",
+    "loginAsPending": "承認待ち会員としてログイン"
   },
   "account": {
     "title": "マイアカウント",
@@ -591,7 +600,7 @@
       "payment": [
         {
           "q": "使用できる支払い方法は何ですか？",
-          "a": "銀行振込、クレジットカード（Visa、MasterCard、Amex）、およびKakaoPay、NaverPayなどの主要韓国決済サービスをご利用いただけます。銀行振込の場合は、入金確認後に注文処理となります。"
+          "a": "国際銀行送金（電信送金・TT）とPayPalをご利用いただけます。銀行振込のご注文は入金確認後に確定し、PayPalは決済時に即時処理されます。"
         },
         {
           "q": "表示価格にはVATが含まれていますか？",

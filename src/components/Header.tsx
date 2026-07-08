@@ -7,6 +7,7 @@ import CurrencySelector from './CurrencySelector';
 import { useTranslation } from 'react-i18next';
 import { brands } from '../data/products';
 import { categoryMenuColumns } from '../config/categoryMenu';
+import { useOutsideClick } from '../hooks/useOutsideClick';
 import {
   ShoppingBag,
   Heart,
@@ -64,17 +65,13 @@ export default function Header() {
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const megaMenuRef = useRef<HTMLElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
+  const userRef = useRef<HTMLDivElement>(null);
 
-  // Close category mega menu on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (megaMenuRef.current && !megaMenuRef.current.contains(e.target as Node)) {
-        setShowCategoryDropdown(false);
-      }
-    };
-    if (showCategoryDropdown) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [showCategoryDropdown]);
+  // Every popover closes on an outside click
+  useOutsideClick(megaMenuRef, showCategoryDropdown, () => setShowCategoryDropdown(false));
+  useOutsideClick(langRef, showLangDropdown, () => setShowLangDropdown(false));
+  useOutsideClick(userRef, showUserDropdown, () => setShowUserDropdown(false));
 
   const navItems = [
     { label: t('nav.specialPrice'), path: '/products?sort=discount' },
@@ -93,16 +90,7 @@ export default function Header() {
     return () => window.removeEventListener('resize', handler);
   }, []);
 
-  // Close notification panel on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setShowNotifications(false);
-      }
-    };
-    if (showNotifications) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [showNotifications]);
+  useOutsideClick(notifRef, showNotifications, () => setShowNotifications(false));
 
   // My notifications (filter by current user)
   const myNotifications = currentUser
@@ -228,7 +216,7 @@ export default function Header() {
             <CurrencySelector />
             <span className="text-[#ddd]">|</span>
             {/* Language Switcher */}
-            <div className="relative">
+            <div className="relative" ref={langRef}>
               <button
                 onClick={() => setShowLangDropdown(!showLangDropdown)}
                 className="flex items-center gap-1 hover:text-[#ff4d6d] transition-colors"
@@ -294,7 +282,7 @@ export default function Header() {
             {/* Right Icons */}
             <div className="flex items-center gap-4">
               {isAuthenticated && (
-                <div className="relative">
+                <div className="relative" ref={userRef}>
                   <button
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
                     className="flex items-center gap-1 text-[#333] hover:text-[#ff4d6d] transition-colors"

@@ -255,7 +255,9 @@
     "bulkOrdersDesc2": "Shipping costs confirmed by your account manager after ordering",
     "returnPolicy": "Return Policy",
     "returnPolicyDesc1": "Returns accepted within 7 days of delivery",
-    "returnPolicyDesc2": "Items must be unopened and in original packaging"
+    "returnPolicyDesc2": "Items must be unopened and in original packaging",
+    "chooseSet": "Select Options",
+    "notEnoughStock": "Only {{stock}} units left in stock"
   },
   "cart": {
     "title": "Cart",
@@ -355,14 +357,14 @@
     "swiftLabel": "SWIFT / BIC",
     "routingLabel": "Routing No.",
     "orderFailed": "Your order could not be saved. Please try again — if you already paid via PayPal, contact support before retrying.",
-    "bankNotConfigured": "Bank transfer is not available yet — these account details are placeholders. Please use PayPal or contact support."
+    "bankNotConfigured": "Bank transfer is not available yet — these account details are placeholders. Please use PayPal or contact support.",
+    "insufficientStock": "Some items just went out of stock. Please review your cart and try again."
   },
   "auth": {
     "loginTitle": "Business Member Login",
     "loginSubtitle": "Sign in to access wholesale prices",
     "email": "Email",
     "password": "Password",
-    "rememberMe": "Remember me",
     "forgotPassword": "Find Password",
     "loginButton": "Login",
     "demoLogin": "Demo Login (Quick Access)",
@@ -403,7 +405,14 @@
     "certHint": "PNG, JPG or PDF · max 5 MB",
     "certRequired": "Please upload your business registration certificate",
     "certTooLarge": "File is too large (max 5 MB)",
-    "passwordTooShort": "Password must be at least 8 characters"
+    "passwordTooShort": "Password must be at least 8 characters",
+    "resetTitle": "Set a new password",
+    "resetDesc": "Choose a new password for your WELMES account.",
+    "resetSubmit": "Update password",
+    "resetSuccess": "Password updated. Please sign in.",
+    "resetEmailRequired": "Enter your email address first",
+    "resetSent": "Password reset link sent to {{email}}",
+    "loginAsPending": "Login as Pending Member"
   },
   "account": {
     "title": "My Account",
@@ -591,7 +600,7 @@
       "payment": [
         {
           "q": "What payment methods are accepted?",
-          "a": "We accept bank transfer, credit card (Visa, MasterCard, Amex), and major Korean payment methods including KakaoPay and NaverPay. Bank transfer orders are processed after payment confirmation."
+          "a": "We accept international bank transfer (wire/TT) and PayPal. Bank transfer orders are confirmed once payment is received; PayPal payments are captured immediately at checkout."
         },
         {
           "q": "Are prices inclusive of VAT?",

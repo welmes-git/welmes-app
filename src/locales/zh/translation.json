@@ -255,7 +255,9 @@
     "bulkOrdersDesc2": "运费在下单后由客户经理确认",
     "returnPolicy": "退货政策",
     "returnPolicyDesc1": "收货后7天内可申请退货",
-    "returnPolicyDesc2": "商品须未开封且保持原包装"
+    "returnPolicyDesc2": "商品须未开封且保持原包装",
+    "chooseSet": "选择规格",
+    "notEnoughStock": "库存仅剩 {{stock}} 件"
   },
   "cart": {
     "title": "购物车",
@@ -355,14 +357,14 @@
     "swiftLabel": "SWIFT / BIC",
     "routingLabel": "路由号码",
     "orderFailed": "订单保存失败，请重试。如已通过PayPal付款，请先联系客服再重试。",
-    "bankNotConfigured": "银行转账暂不可用——此账户信息为占位符。请使用PayPal或联系客服。"
+    "bankNotConfigured": "银行转账暂不可用——此账户信息为占位符。请使用PayPal或联系客服。",
+    "insufficientStock": "部分商品库存不足。请检查购物车后重试。"
   },
   "auth": {
     "loginTitle": "企业会员登录",
     "loginSubtitle": "登录以访问批发价格",
     "email": "邮箱",
     "password": "密码",
-    "rememberMe": "记住我",
     "forgotPassword": "忘记密码",
     "loginButton": "登录",
     "demoLogin": "演示登录（快速访问）",
@@ -403,7 +405,14 @@
     "certHint": "PNG、JPG 或 PDF · 最大 5 MB",
     "certRequired": "请上传营业执照",
     "certTooLarge": "文件过大（最大 5 MB）",
-    "passwordTooShort": "密码至少需要8个字符"
+    "passwordTooShort": "密码至少需要8个字符",
+    "resetTitle": "设置新密码",
+    "resetDesc": "请为您的 WELMES 账户设置新密码。",
+    "resetSubmit": "更新密码",
+    "resetSuccess": "密码已更新，请重新登录。",
+    "resetEmailRequired": "请先输入您的电子邮箱",
+    "resetSent": "密码重置链接已发送至 {{email}}",
+    "loginAsPending": "以待审核会员登录"
   },
   "account": {
     "title": "我的账户",
@@ -591,7 +600,7 @@
       "payment": [
         {
           "q": "接受哪些支付方式？",
-          "a": "我们接受银行转账、信用卡（Visa、MasterCard、Amex）以及KakaoPay和NaverPay等主要韩国支付方式。银行转账订单将在付款确认后处理。"
+          "a": "我们接受国际银行电汇（TT）和PayPal。银行转账订单在收到款项后确认；PayPal付款在结算时即时处理。"
         },
         {
           "q": "价格是否含税（VAT）？",

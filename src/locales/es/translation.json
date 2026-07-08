@@ -255,7 +255,9 @@
     "bulkOrdersDesc2": "Los gastos de envío los confirma tu gestor tras el pedido",
     "returnPolicy": "Política de devoluciones",
     "returnPolicyDesc1": "Se aceptan devoluciones dentro de los 7 días posteriores a la entrega",
-    "returnPolicyDesc2": "Los artículos deben estar sin abrir y en su embalaje original"
+    "returnPolicyDesc2": "Los artículos deben estar sin abrir y en su embalaje original",
+    "chooseSet": "Elegir opciones",
+    "notEnoughStock": "Solo quedan {{stock}} unidades en stock"
   },
   "cart": {
     "title": "Carrito",
@@ -355,14 +357,14 @@
     "swiftLabel": "SWIFT / BIC",
     "routingLabel": "Número de ruta",
     "orderFailed": "No se pudo guardar el pedido. Inténtalo de nuevo. Si ya pagaste con PayPal, contacta con soporte antes de reintentar.",
-    "bankNotConfigured": "La transferencia bancaria aún no está disponible: estos datos son de ejemplo. Usa PayPal o contacta con soporte."
+    "bankNotConfigured": "La transferencia bancaria aún no está disponible: estos datos son de ejemplo. Usa PayPal o contacta con soporte.",
+    "insufficientStock": "Algunos artículos se han agotado. Revisa tu carrito e inténtalo de nuevo."
   },
   "auth": {
     "loginTitle": "Acceso para empresas",
     "loginSubtitle": "Inicia sesión para acceder a precios mayoristas",
     "email": "Correo electrónico",
     "password": "Contraseña",
-    "rememberMe": "Recordarme",
     "forgotPassword": "Recuperar contraseña",
     "loginButton": "Iniciar sesión",
     "demoLogin": "Acceso demo (acceso rápido)",
@@ -403,7 +405,14 @@
     "certHint": "PNG, JPG o PDF · máx. 5 MB",
     "certRequired": "Sube tu certificado de registro mercantil",
     "certTooLarge": "El archivo es demasiado grande (máx. 5 MB)",
-    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres"
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+    "resetTitle": "Establecer una nueva contraseña",
+    "resetDesc": "Elige una nueva contraseña para tu cuenta WELMES.",
+    "resetSubmit": "Actualizar contraseña",
+    "resetSuccess": "Contraseña actualizada. Inicia sesión.",
+    "resetEmailRequired": "Introduce primero tu correo electrónico",
+    "resetSent": "Enlace de restablecimiento enviado a {{email}}",
+    "loginAsPending": "Entrar como miembro pendiente"
   },
   "account": {
     "title": "Mi cuenta",
@@ -591,7 +600,7 @@
       "payment": [
         {
           "q": "¿Qué métodos de pago se aceptan?",
-          "a": "Aceptamos transferencia bancaria, tarjeta de crédito (Visa, MasterCard, Amex) y los principales métodos de pago coreanos como KakaoPay y NaverPay. Los pedidos por transferencia se procesan tras la confirmación del pago."
+          "a": "Aceptamos transferencia bancaria internacional (wire/TT) y PayPal. Los pedidos por transferencia se confirman al recibir el pago; los pagos con PayPal se procesan de inmediato al finalizar la compra."
         },
         {
           "q": "¿Los precios incluyen IVA?",

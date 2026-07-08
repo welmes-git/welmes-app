@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff } from 'lucide-react';
+import * as db from '../lib/db';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -11,7 +12,15 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
+
+  /** Send the signed-in user wherever their account state belongs. */
+  const routeAfterLogin = () => {
+    const user = useStore.getState().currentUser;
+    if (user?.isAdmin) return navigate('/admin');
+    if (user && user.status !== 'approved') return navigate('/pending');
+    navigate('/');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,10 +30,25 @@ export default function Login() {
     }
     const success = await login(email, password);
     if (success) {
-      navigate('/');
+      routeAfterLogin();
     } else {
       showToast(t('auth.loginFailed'), 'error');
     }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      showToast(t('auth.resetEmailRequired'), 'info');
+      return;
+    }
+    setSendingReset(true);
+    const { error } = await db.sendPasswordReset(email.trim());
+    setSendingReset(false);
+    if (error) {
+      showToast(error.message, 'error');
+      return;
+    }
+    showToast(t('auth.resetSent', { email: email.trim() }), 'success');
   };
 
   const handleDemoLogin = async (type: 'admin' | 'member' | 'pending') => {
@@ -34,7 +58,7 @@ export default function Login() {
       pending: { email: 'glamourshop@gmail.com',   password: 'demo1234' },
     }[type];
     const success = await login(credentials.email, credentials.password);
-    if (success) navigate(type === 'admin' ? '/admin' : '/');
+    if (success) routeAfterLogin();
   };
 
   return (
@@ -77,12 +101,17 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="w-4 h-4 rounded border-[#ccc]" />
-                <span className="text-[13px] text-[#666]">{t('auth.rememberMe')}</span>
-              </label>
-              <button type="button" className="text-[13px] text-[#4a90e2] hover:underline">{t('auth.forgotPassword')}</button>
+            {/* "Remember me" was a no-op — Supabase already persists the
+                session across reloads, so the checkbox only misled users. */}
+            <div className="flex items-center justify-end">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={sendingReset}
+                className="text-[13px] text-[#4a90e2] hover:underline disabled:opacity-50"
+              >
+                {sendingReset ? t('common.loading') : t('auth.forgotPassword')}
+              </button>
             </div>
 
             <button type="submit" className="w-full h-[50px] bg-[#333] text-white rounded-lg font-medium text-[15px] hover:bg-[#555] transition-colors">
@@ -109,7 +138,7 @@ export default function Login() {
                   {t('auth.loginAsBuyer')}
                 </button>
                 <button onClick={() => handleDemoLogin('pending')} className="w-full h-[42px] border border-[#ddd] text-[#666] rounded-lg text-[13px] font-medium hover:bg-[#f5f5f5] transition-colors">
-                  Login as Pending Member
+                  {t('auth.loginAsPending')}
                 </button>
               </div>
             </>

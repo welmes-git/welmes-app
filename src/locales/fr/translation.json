@@ -255,7 +255,9 @@
     "bulkOrdersDesc2": "Frais de livraison confirmés par votre gestionnaire après la commande",
     "returnPolicy": "Politique de retour",
     "returnPolicyDesc1": "Retours acceptés dans les 7 jours suivant la livraison",
-    "returnPolicyDesc2": "Les articles doivent être non ouverts et dans leur emballage d'origine"
+    "returnPolicyDesc2": "Les articles doivent être non ouverts et dans leur emballage d'origine",
+    "chooseSet": "Choisir les options",
+    "notEnoughStock": "Il ne reste que {{stock}} unités en stock"
   },
   "cart": {
     "title": "Panier",
@@ -355,14 +357,14 @@
     "swiftLabel": "SWIFT / BIC",
     "routingLabel": "Numéro de routage",
     "orderFailed": "Impossible d'enregistrer la commande. Veuillez réessayer. Si vous avez déjà payé via PayPal, contactez l'assistance avant de réessayer.",
-    "bankNotConfigured": "Le virement bancaire n'est pas encore disponible — ces coordonnées sont des exemples. Utilisez PayPal ou contactez l'assistance."
+    "bankNotConfigured": "Le virement bancaire n'est pas encore disponible — ces coordonnées sont des exemples. Utilisez PayPal ou contactez l'assistance.",
+    "insufficientStock": "Certains articles ne sont plus en stock. Vérifiez votre panier et réessayez."
   },
   "auth": {
     "loginTitle": "Connexion professionnelle",
     "loginSubtitle": "Connectez-vous pour accéder aux prix de gros",
     "email": "E-mail",
     "password": "Mot de passe",
-    "rememberMe": "Se souvenir de moi",
     "forgotPassword": "Mot de passe oublié",
     "loginButton": "Connexion",
     "demoLogin": "Connexion démo (accès rapide)",
@@ -403,7 +405,14 @@
     "certHint": "PNG, JPG ou PDF · max 5 Mo",
     "certRequired": "Veuillez téléverser votre certificat d'immatriculation",
     "certTooLarge": "Fichier trop volumineux (max 5 Mo)",
-    "passwordTooShort": "Le mot de passe doit comporter au moins 8 caractères"
+    "passwordTooShort": "Le mot de passe doit comporter au moins 8 caractères",
+    "resetTitle": "Définir un nouveau mot de passe",
+    "resetDesc": "Choisissez un nouveau mot de passe pour votre compte WELMES.",
+    "resetSubmit": "Mettre à jour le mot de passe",
+    "resetSuccess": "Mot de passe mis à jour. Veuillez vous connecter.",
+    "resetEmailRequired": "Saisissez d'abord votre adresse e-mail",
+    "resetSent": "Lien de réinitialisation envoyé à {{email}}",
+    "loginAsPending": "Connexion en tant que membre en attente"
   },
   "account": {
     "title": "Mon compte",
@@ -591,7 +600,7 @@
       "payment": [
         {
           "q": "Quels modes de paiement sont acceptés ?",
-          "a": "Nous acceptons le virement bancaire, la carte de crédit (Visa, MasterCard, Amex) et les principaux modes de paiement coréens dont KakaoPay et NaverPay. Les commandes par virement sont traitées après confirmation du paiement."
+          "a": "Nous acceptons le virement bancaire international (wire/TT) et PayPal. Les commandes par virement sont confirmées à réception du paiement ; les paiements PayPal sont capturés immédiatement au moment du paiement."
         },
         {
           "q": "Les prix incluent-ils la TVA ?",

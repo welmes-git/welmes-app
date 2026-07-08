@@ -198,7 +198,8 @@ export default function Checkout() {
     setPlacing(false);
     if (error) {
       // Keep the cart and stay on this step so the buyer can retry
-      showToast(t('checkout.orderFailed'), 'error');
+      const soldOut = error.includes('INSUFFICIENT_STOCK') || error.includes('PRODUCT_NOT_FOUND');
+      showToast(t(soldOut ? 'checkout.insufficientStock' : 'checkout.orderFailed'), 'error');
       return;
     }
     setConfirmedTotals({ subtotal, vat, total });

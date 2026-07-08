@@ -255,7 +255,9 @@
     "bulkOrdersDesc2": "Biaya kirim dikonfirmasi manajer akun setelah pemesanan",
     "returnPolicy": "Kebijakan Pengembalian",
     "returnPolicyDesc1": "Pengembalian diterima dalam 7 hari setelah pengiriman",
-    "returnPolicyDesc2": "Produk harus belum dibuka dan dalam kemasan asli"
+    "returnPolicyDesc2": "Produk harus belum dibuka dan dalam kemasan asli",
+    "chooseSet": "Pilih Opsi",
+    "notEnoughStock": "Hanya tersisa {{stock}} unit"
   },
   "cart": {
     "title": "Keranjang",
@@ -353,14 +355,14 @@
     "swiftLabel": "SWIFT / BIC",
     "routingLabel": "Nomor Routing",
     "orderFailed": "Pesanan gagal disimpan. Silakan coba lagi. Jika sudah membayar via PayPal, hubungi dukungan sebelum mencoba lagi.",
-    "bankNotConfigured": "Transfer bank belum tersedia — detail rekening ini masih contoh. Silakan gunakan PayPal atau hubungi dukungan."
+    "bankNotConfigured": "Transfer bank belum tersedia — detail rekening ini masih contoh. Silakan gunakan PayPal atau hubungi dukungan.",
+    "insufficientStock": "Beberapa produk kehabisan stok. Silakan periksa keranjang Anda dan coba lagi."
   },
   "auth": {
     "loginTitle": "Masuk Anggota Bisnis",
     "loginSubtitle": "Masuk untuk mengakses harga grosir",
     "email": "Email",
     "password": "Kata Sandi",
-    "rememberMe": "Ingat saya",
     "forgotPassword": "Lupa Kata Sandi",
     "loginButton": "Masuk",
     "demoLogin": "Login Demo (Akses Cepat)",
@@ -401,7 +403,14 @@
     "certHint": "PNG, JPG atau PDF · maks 5 MB",
     "certRequired": "Silakan unggah sertifikat pendaftaran usaha Anda",
     "certTooLarge": "File terlalu besar (maks 5 MB)",
-    "passwordTooShort": "Kata sandi minimal 8 karakter"
+    "passwordTooShort": "Kata sandi minimal 8 karakter",
+    "resetTitle": "Atur kata sandi baru",
+    "resetDesc": "Pilih kata sandi baru untuk akun WELMES Anda.",
+    "resetSubmit": "Perbarui kata sandi",
+    "resetSuccess": "Kata sandi diperbarui. Silakan masuk.",
+    "resetEmailRequired": "Masukkan alamat email Anda terlebih dahulu",
+    "resetSent": "Tautan atur ulang kata sandi dikirim ke {{email}}",
+    "loginAsPending": "Masuk sebagai anggota tertunda"
   },
   "account": {
     "title": "Akun Saya",
@@ -589,7 +598,7 @@
       "payment": [
         {
           "q": "Metode pembayaran apa yang diterima?",
-          "a": "Kami menerima transfer bank, kartu kredit (Visa, MasterCard, Amex), dan metode pembayaran utama Korea termasuk KakaoPay dan NaverPay. Pesanan transfer bank diproses setelah konfirmasi pembayaran."
+          "a": "Kami menerima transfer bank internasional (wire/TT) dan PayPal. Pesanan transfer bank dikonfirmasi setelah pembayaran diterima; pembayaran PayPal diproses langsung saat checkout."
         },
         {
           "q": "Apakah harga sudah termasuk PPN?",

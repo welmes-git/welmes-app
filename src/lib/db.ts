@@ -38,6 +38,22 @@ export async function getSession() {
   return supabase.auth.getSession();
 }
 
+/**
+ * Email a password-recovery link. Supabase strips the recovery token from the
+ * URL on load and fires a PASSWORD_RECOVERY event, which App.tsx routes to the
+ * reset page — so we point the link at the site root.
+ */
+export async function sendPasswordReset(email: string) {
+  return supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}${window.location.pathname}`,
+  });
+}
+
+/** Set a new password for the currently recovered/signed-in user. */
+export async function updatePassword(newPassword: string) {
+  return supabase.auth.updateUser({ password: newPassword });
+}
+
 // ── Members ──────────────────────────────────────────────────────
 
 export async function fetchMemberByAuthId(authId: string): Promise<Member | null> {
@@ -61,14 +77,14 @@ export async function fetchAllMembers(): Promise<Member[]> {
 
 export async function upsertMember(authId: string, fields: Partial<Member>) {
   const row: Record<string, unknown> = { auth_id: authId };
-  if (fields.email)          row.email = fields.email;
-  if (fields.companyName)    row.company_name = fields.companyName;
-  if (fields.businessNumber) row.business_number = fields.businessNumber;
-  if (fields.representative) row.representative = fields.representative;
-  if (fields.phone)          row.phone = fields.phone;
-  if (fields.address)        row.address = fields.address;
-  if (fields.status)         row.status = fields.status;
-  if (fields.certificatePath) row.certificate_url = fields.certificatePath;
+  if (fields.email           !== undefined) row.email            = fields.email;
+  if (fields.companyName     !== undefined) row.company_name     = fields.companyName;
+  if (fields.businessNumber  !== undefined) row.business_number  = fields.businessNumber;
+  if (fields.representative  !== undefined) row.representative   = fields.representative;
+  if (fields.phone           !== undefined) row.phone            = fields.phone;
+  if (fields.address         !== undefined) row.address          = fields.address;
+  if (fields.status          !== undefined) row.status           = fields.status;
+  if (fields.certificatePath !== undefined) row.certificate_url  = fields.certificatePath;
   return supabase.from('members').upsert(row, { onConflict: 'auth_id' });
 }
 
@@ -88,13 +104,15 @@ export async function uploadCertificate(authId: string, file: File): Promise<str
 }
 
 export async function updateMemberById(id: string, fields: Partial<Member>) {
+  // Compare against undefined, not falsiness — otherwise clearing a field to ""
+  // silently keeps the old value.
   const row: Record<string, unknown> = {};
-  if (fields.companyName)    row.company_name = fields.companyName;
-  if (fields.businessNumber) row.business_number = fields.businessNumber;
-  if (fields.representative) row.representative = fields.representative;
-  if (fields.phone)          row.phone = fields.phone;
-  if (fields.address)        row.address = fields.address;
-  if (fields.status !== undefined) row.status = fields.status;
+  if (fields.companyName    !== undefined) row.company_name    = fields.companyName;
+  if (fields.businessNumber !== undefined) row.business_number = fields.businessNumber;
+  if (fields.representative !== undefined) row.representative  = fields.representative;
+  if (fields.phone          !== undefined) row.phone           = fields.phone;
+  if (fields.address        !== undefined) row.address         = fields.address;
+  if (fields.status         !== undefined) row.status          = fields.status;
   return supabase.from('members').update(row).eq('id', id);
 }
 
@@ -125,6 +143,30 @@ export async function updateProductById(id: number, p: Partial<Product>) {
 
 export async function deleteProductById(id: number) {
   return supabase.from('products').delete().eq('id', id);
+}
+
+// ── Stock ────────────────────────────────────────────────────────
+
+/** Total pieces per line — `products.stock` counts pieces, not sets. */
+export interface StockLine { product_id: number; units: number }
+
+/**
+ * Atomically verify and decrement stock for every line. Fails (and changes
+ * nothing) if any product is short — the error message carries
+ * `INSUFFICIENT_STOCK:<productId>`.
+ */
+export async function decrementStock(items: StockLine[]): Promise<{ error?: string }> {
+  if (items.length === 0) return {};
+  const { error } = await supabase.rpc('decrement_product_stock', { p_items: items });
+  if (error) { console.error('[decrementStock]', error.message); return { error: error.message }; }
+  return {};
+}
+
+/** Compensating action when the order insert fails after stock was taken. */
+export async function restoreStock(items: StockLine[]): Promise<void> {
+  if (items.length === 0) return;
+  const { error } = await supabase.rpc('restore_product_stock', { p_items: items });
+  if (error) console.error('[restoreStock]', error.message);
 }
 
 // ── Orders ───────────────────────────────────────────────────────

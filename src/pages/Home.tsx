@@ -26,6 +26,12 @@ export default function Home() {
   const [currentBanner, setCurrentBanner] = useState(0);
   const allProducts = products.length > 0 ? products : initialProducts;
 
+  // Weekly best = most reviewed; New arrivals = highest id (newest first).
+  // Previously New Arrivals was `slice(4, 12)`, which rendered an empty section
+  // whenever the catalogue held 5 products or fewer.
+  const weeklyBest = [...allProducts].sort((a, b) => b.reviews - a.reviews).slice(0, 8);
+  const newArrivals = [...allProducts].sort((a, b) => b.id - a.id).slice(0, 8);
+
   // Auto-slide banners
   useEffect(() => {
     const timer = setInterval(() => {
@@ -123,7 +129,7 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-          {allProducts.slice(0, 8).map((product) => (
+          {weeklyBest.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
@@ -154,25 +160,27 @@ export default function Home() {
       </section>
 
       {/* New Arrivals */}
-      <section className="bg-[#f8f8fa] py-16">
-        <div className="max-w-[1100px] mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-[22px] font-bold text-[#333]">{t('home.newArrivals')}</h2>
-            <Link
-              to="/products?sort=newest"
-              className="flex items-center gap-1 text-[13px] text-[#999] hover:text-[#ff4d6d] transition-colors"
-            >
-              {t('common.viewAll')}
-              <ChevronRightIcon size={14} />
-            </Link>
+      {newArrivals.length > 0 && (
+        <section className="bg-[#f8f8fa] py-16">
+          <div className="max-w-[1100px] mx-auto px-4">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-[22px] font-bold text-[#333]">{t('home.newArrivals')}</h2>
+              <Link
+                to="/products?sort=newest"
+                className="flex items-center gap-1 text-[13px] text-[#999] hover:text-[#ff4d6d] transition-colors"
+              >
+                {t('common.viewAll')}
+                <ChevronRightIcon size={14} />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+              {newArrivals.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {allProducts.slice(4, 12).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Brand Showcase */}
       <section className="max-w-[1100px] mx-auto px-4 py-16">

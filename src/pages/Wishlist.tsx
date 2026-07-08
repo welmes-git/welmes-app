@@ -46,8 +46,18 @@ export default function Wishlist() {
       showToast(t('products.verifyBusiness'), 'info');
       return;
     }
+    if (product.stock <= 0) {
+      showToast(t('productDetail.outOfStock'), 'error');
+      return;
+    }
+    // Set-based products must be configured on the detail page, otherwise they
+    // land in the cart at the single-unit price.
+    if ((product.setOptions?.length ?? 0) > 0) {
+      navigate(`/product/${product.id}`);
+      return;
+    }
     addToCart(product);
-    showToast(t('common.addToCart'), 'success');
+    showToast(t('productDetail.addedToCart'), 'success');
   }
 
   return (
@@ -117,11 +127,15 @@ export default function Wishlist() {
 
                 <button
                   onClick={() => handleAddToCart(product)}
-                  disabled={!isVerified}
-                  className={`w-full py-2 rounded-lg text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-colors ${isVerified ? 'bg-[#333] text-white hover:bg-[#555]' : 'bg-[#f0f0f0] text-[#bbb] cursor-not-allowed'}`}
+                  disabled={!isVerified || product.stock <= 0}
+                  className={`w-full py-2 rounded-lg text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-colors ${isVerified && product.stock > 0 ? 'bg-[#333] text-white hover:bg-[#555]' : 'bg-[#f0f0f0] text-[#bbb] cursor-not-allowed'}`}
                 >
                   <ShoppingCart size={13} />
-                  {t('common.addToCart')}
+                  {product.stock <= 0
+                    ? t('productDetail.outOfStock')
+                    : (product.setOptions?.length ?? 0) > 0
+                    ? t('productDetail.chooseSet')
+                    : t('common.addToCart')}
                 </button>
               </div>
             </div>

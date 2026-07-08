@@ -126,8 +126,21 @@ export default function ProductDetail() {
       return;
     }
     if (!product) return;
+    if (product.stock <= 0) {
+      showToast(t('productDetail.outOfStock'), 'error');
+      return;
+    }
     if (selectedSets.length === 0) {
       showToast(t('productDetail.selectAtLeastOne'), 'info');
+      return;
+    }
+    // `stock` is in pieces, so compare against total pieces across the sets
+    const requestedUnits = selectedSets.reduce(
+      (sum, opt) => sum + (setQty[opt.id] ?? 0) * opt.unitsPerSet,
+      0,
+    );
+    if (requestedUnits > product.stock) {
+      showToast(t('productDetail.notEnoughStock', { stock: product.stock }), 'error');
       return;
     }
     selectedSets.forEach((opt) => {

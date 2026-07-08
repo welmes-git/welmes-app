@@ -1,28 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import type { Product } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
 import { Lock, Eye, ShoppingCart, Heart } from 'lucide-react';
 
 interface ProductCardProps {
-  product: {
-    id: number;
-    name: string;
-    nameEn: string;
-    brand: string;
-    category: string;
-    image: string;
-    originalPrice: number;
-    wholesalePrice: number;
-    discount: number;
-    tags: string[];
-    rating: number;
-    reviews: number;
-    description: string;
-    stock: number;
-    status: 'active' | 'inactive';
-  };
+  /** Use the shared Product type so this card can't drift from the model */
+  product: Product;
   showQuickAdd?: boolean;
 }
 
@@ -36,6 +22,8 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
   const isVerified = currentUser?.status === 'approved';
   const canSeePrice = isAuthenticated && isVerified;
   const wishlisted = isWishlisted(product.id);
+  const outOfStock = product.stock <= 0;
+  const hasSetOptions = (product.setOptions?.length ?? 0) > 0;
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -59,6 +47,16 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
     }
     if (!isVerified) {
       showToast(t('productDetail.verifyToOrder'), 'info');
+      return;
+    }
+    if (outOfStock) {
+      showToast(t('productDetail.outOfStock'), 'error');
+      return;
+    }
+    // Products sold in sets must be configured on the detail page — adding them
+    // here would silently bill the single-unit price.
+    if (hasSetOptions) {
+      navigate(`/product/${product.id}`);
       return;
     }
     addToCart(product);
@@ -89,14 +87,20 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
 
         {/* Tags */}
         <div className="absolute top-2 left-2 flex gap-1">
-          {product.tags.map((tag) => (
-            <span
-              key={tag}
-              className={`${tagColors[tag] || 'bg-[#999]'} text-white text-[11px] font-medium px-2 py-0.5 rounded`}
-            >
-              {tag}
+          {outOfStock ? (
+            <span className="bg-[#555] text-white text-[11px] font-medium px-2 py-0.5 rounded">
+              {t('productDetail.outOfStock')}
             </span>
-          ))}
+          ) : (
+            product.tags.map((tag) => (
+              <span
+                key={tag}
+                className={`${tagColors[tag] || 'bg-[#999]'} text-white text-[11px] font-medium px-2 py-0.5 rounded`}
+              >
+                {tag}
+              </span>
+            ))
+          )}
         </div>
 
         {/* Wishlist button */}
@@ -116,10 +120,15 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
             {canSeePrice ? (
               <button
                 onClick={handleQuickAdd}
-                className="bg-white text-[#333] px-4 py-2 rounded-full text-[13px] font-medium flex items-center gap-2 hover:bg-[#ff4d6d] hover:text-white transition-colors shadow-lg"
+                disabled={outOfStock}
+                className="bg-white text-[#333] px-4 py-2 rounded-full text-[13px] font-medium flex items-center gap-2 hover:bg-[#ff4d6d] hover:text-white transition-colors shadow-lg disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-[#333] disabled:cursor-not-allowed"
               >
                 <ShoppingCart size={14} />
-                {t('common.addToCart')}
+                {outOfStock
+                  ? t('productDetail.outOfStock')
+                  : hasSetOptions
+                  ? t('productDetail.chooseSet')
+                  : t('common.addToCart')}
               </button>
             ) : (
               <button
