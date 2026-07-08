@@ -80,30 +80,53 @@ export default function Header() {
   const [activeGroupKey, setActiveGroupKey] = useState(allCategoryGroups[0]?.key);
   const mobileCategoryPanelRef = useRef<HTMLDivElement>(null);
   const categorySectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const categoryNavButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   // Reset to the first group each time the overlay opens
   useEffect(() => {
     if (showMobileCategory) setActiveGroupKey(allCategoryGroups[0]?.key);
   }, [showMobileCategory, allCategoryGroups]);
 
-  // Scrollspy: highlight whichever section sits in the top band of the panel
+  // Scrollspy: walk the sections in order and take the last one whose top has
+  // passed a fixed anchor line near the top of the panel. This is computed
+  // directly from scroll position (not IntersectionObserver thresholds), so
+  // it tracks the actual scroll 1:1 instead of lagging a section behind.
   useEffect(() => {
     if (!showMobileCategory) return;
     const root = mobileCategoryPanelRef.current;
     if (!root) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        const key = visible[0]?.target.getAttribute('data-group-key');
-        if (key) setActiveGroupKey(key);
-      },
-      { root, rootMargin: '0px 0px -70% 0px', threshold: 0 }
-    );
-    Object.values(categorySectionRefs.current).forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
-  }, [showMobileCategory]);
+
+    let frame = 0;
+    const updateActive = () => {
+      const anchor = root.scrollTop + root.clientHeight * 0.25;
+      let current = allCategoryGroups[0]?.key;
+      for (const group of allCategoryGroups) {
+        const el = categorySectionRefs.current[group.key];
+        if (el && el.offsetTop <= anchor) current = group.key;
+        else break;
+      }
+      setActiveGroupKey((prev) => (prev === current ? prev : current));
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(updateActive);
+    };
+
+    updateActive();
+    root.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      root.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [showMobileCategory, allCategoryGroups]);
+
+  // Keep the left rail's highlighted item scrolled into view as the active
+  // group changes, so the left list follows the right panel instead of the
+  // highlight silently jumping off-screen.
+  useEffect(() => {
+    if (!showMobileCategory) return;
+    categoryNavButtonRefs.current[activeGroupKey]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [activeGroupKey, showMobileCategory]);
 
   const scrollToCategoryGroup = (key: string) => {
     setActiveGroupKey(key);
@@ -732,6 +755,7 @@ export default function Header() {
                 {allCategoryGroups.map((group) => (
                   <button
                     key={group.key}
+                    ref={(el) => { categoryNavButtonRefs.current[group.key] = el; }}
                     onClick={() => scrollToCategoryGroup(group.key)}
                     className={`w-full text-left px-3 py-3.5 text-[12.5px] leading-tight border-l-[3px] transition-colors ${
                       activeGroupKey === group.key
