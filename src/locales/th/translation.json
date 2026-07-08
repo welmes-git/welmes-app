@@ -34,7 +34,9 @@
     "brandShop": "แบรนด์",
     "event": "อีเวนต์",
     "keywordSuggestions": "คำค้นหาแนะนำ",
-    "trendingSearches": "คำค้นหายอดนิยม"
+    "trendingSearches": "คำค้นหายอดนิยม",
+    "brandSearchPlaceholder": "ค้นหาชื่อแบรนด์",
+    "noBrandsFound": "ไม่พบแบรนด์"
   },
   "categoryMenu": {
     "skincare": "บำรุงผิว",

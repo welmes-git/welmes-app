@@ -34,7 +34,9 @@
     "brandShop": "Thương hiệu",
     "event": "Sự kiện",
     "keywordSuggestions": "Gợi ý từ khóa",
-    "trendingSearches": "Tìm kiếm thịnh hành"
+    "trendingSearches": "Tìm kiếm thịnh hành",
+    "brandSearchPlaceholder": "Tìm kiếm tên thương hiệu",
+    "noBrandsFound": "Không tìm thấy thương hiệu"
   },
   "categoryMenu": {
     "skincare": "Chăm sóc da",

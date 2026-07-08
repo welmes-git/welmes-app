@@ -34,7 +34,9 @@
     "brandShop": "Marken",
     "event": "Events",
     "keywordSuggestions": "Suchvorschläge",
-    "trendingSearches": "Beliebte Suchen"
+    "trendingSearches": "Beliebte Suchen",
+    "brandSearchPlaceholder": "Nach Markennamen suchen",
+    "noBrandsFound": "Keine Marken gefunden"
   },
   "categoryMenu": {
     "skincare": "Hautpflege",

@@ -34,7 +34,9 @@
     "brandShop": "Merek",
     "event": "Event",
     "keywordSuggestions": "Saran Kata Kunci",
-    "trendingSearches": "Pencarian Populer"
+    "trendingSearches": "Pencarian Populer",
+    "brandSearchPlaceholder": "Cari nama merek",
+    "noBrandsFound": "Merek tidak ditemukan"
   },
   "categoryMenu": {
     "skincare": "Perawatan kulit",

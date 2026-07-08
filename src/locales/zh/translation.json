@@ -34,7 +34,9 @@
     "brandShop": "品牌馆",
     "event": "活动",
     "keywordSuggestions": "关键词推荐",
-    "trendingSearches": "热门搜索"
+    "trendingSearches": "热门搜索",
+    "brandSearchPlaceholder": "搜索品牌名称",
+    "noBrandsFound": "未找到品牌"
   },
   "categoryMenu": {
     "skincare": "护肤",

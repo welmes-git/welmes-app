@@ -34,7 +34,9 @@
     "brandShop": "Brand Shop",
     "event": "Event",
     "keywordSuggestions": "Keyword Suggestions",
-    "trendingSearches": "Trending Searches"
+    "trendingSearches": "Trending Searches",
+    "brandSearchPlaceholder": "Search for a brand name",
+    "noBrandsFound": "No brands found"
   },
   "categoryMenu": {
     "skincare": "Skincare",

@@ -34,7 +34,9 @@
     "brandShop": "Бренды",
     "event": "Акции",
     "keywordSuggestions": "Подсказки",
-    "trendingSearches": "Популярные запросы"
+    "trendingSearches": "Популярные запросы",
+    "brandSearchPlaceholder": "Поиск по названию бренда",
+    "noBrandsFound": "Бренды не найдены"
   },
   "categoryMenu": {
     "skincare": "Уход за кожей",

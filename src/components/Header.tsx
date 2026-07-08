@@ -61,8 +61,13 @@ export default function Header() {
   const [showBrandDropdown, setShowBrandDropdown] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const [showMobileBrands, setShowMobileBrands] = useState(false);
   const [showMobileCategory, setShowMobileCategory] = useState(false);
+  const [showMobileBrandShop, setShowMobileBrandShop] = useState(false);
+  const [brandSearch, setBrandSearch] = useState('');
+  const filteredBrands = useMemo(
+    () => brands.filter((b) => b.toLowerCase().includes(brandSearch.trim().toLowerCase())),
+    [brandSearch]
+  );
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const megaMenuRef = useRef<HTMLElement>(null);
@@ -786,7 +791,7 @@ export default function Header() {
               WebkitOverflowScrolling: 'touch',
             }}>
               <button
-                onClick={() => { setShowMobileBrands(false); setShowMobileCategory(true); }}
+                onClick={() => { setShowMobileBrandShop(false); setShowMobileCategory(true); }}
                 style={{
                   flexShrink: 0,
                   display: 'flex',
@@ -806,7 +811,7 @@ export default function Header() {
                 {t('nav.category')}
               </button>
               <button
-                onClick={() => setShowMobileBrands((v) => !v)}
+                onClick={() => { setShowMobileCategory(false); setShowMobileBrandShop(true); }}
                 style={{
                   flexShrink: 0,
                   display: 'flex',
@@ -815,7 +820,7 @@ export default function Header() {
                   padding: '10px 14px',
                   fontSize: '13px',
                   fontWeight: 600,
-                  color: showMobileBrands ? '#ff4d6d' : '#333',
+                  color: '#333',
                   whiteSpace: 'nowrap',
                   background: 'none',
                   border: 'none',
@@ -823,13 +828,12 @@ export default function Header() {
                 }}
               >
                 {t('nav.brandShop')}
-                <ChevronDown size={13} style={{ transform: showMobileBrands ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
               </button>
               {navItems.map((item) => (
                 <Link
                   key={item.label}
                   to={item.path}
-                  onClick={() => setShowMobileBrands(false)}
+                  onClick={() => setShowMobileBrandShop(false)}
                   style={{
                     flexShrink: 0,
                     padding: '10px 14px',
@@ -844,35 +848,58 @@ export default function Header() {
                 </Link>
               ))}
             </div>
-            {/* Brand panel */}
-            {showMobileBrands && (
-              <div style={{ borderTop: '1px solid #e5e5e5', background: '#fafafa', padding: '12px 16px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
-                  {brands.map((brand) => (
-                    <Link
-                      key={brand}
-                      to={`/products?brand=${encodeURIComponent(brand)}`}
-                      onClick={() => setShowMobileBrands(false)}
-                      style={{
-                        padding: '8px 10px',
-                        fontSize: '12px',
-                        color: '#444',
-                        textDecoration: 'none',
-                        background: '#fff',
-                        border: '1px solid #e5e5e5',
-                        borderRadius: '4px',
-                        textAlign: 'center',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {brand}
-                    </Link>
-                  ))}
-                </div>
+          </div>
+        )}
+
+        {/* Mobile Brand Shop Full-Screen Overlay — Olive Young style searchable list */}
+        {showMobileBrandShop && (
+          <div className="fixed inset-0 bg-white z-[60] flex flex-col md:hidden">
+            {/* Overlay Header */}
+            <div className="flex items-center justify-between px-4 h-[56px] border-b border-[#e5e5e5] shrink-0">
+              <button
+                onClick={() => { setShowMobileBrandShop(false); setBrandSearch(''); }}
+                className="text-[#333] w-8"
+              >
+                <X size={22} />
+              </button>
+              <span className="text-[16px] font-bold text-[#222]">{t('nav.brandShop')}</span>
+              <span className="w-8" />
+            </div>
+
+            {/* Search */}
+            <div className="px-4 py-3 border-b border-[#e5e5e5] shrink-0">
+              <div className="relative">
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#aaa]" />
+                <input
+                  type="text"
+                  value={brandSearch}
+                  onChange={(e) => setBrandSearch(e.target.value)}
+                  placeholder={t('nav.brandSearchPlaceholder')}
+                  autoFocus
+                  className="w-full h-[42px] pl-10 pr-4 bg-[#f4f4f4] rounded-full focus:outline-none"
+                  style={{ fontSize: '16px' }}
+                />
               </div>
-            )}
+            </div>
+
+            {/* Brand list */}
+            <div className="flex-1 overflow-y-auto">
+              {filteredBrands.length === 0 ? (
+                <p className="text-center text-[13px] text-[#999] py-16">{t('nav.noBrandsFound')}</p>
+              ) : (
+                filteredBrands.map((brand) => (
+                  <Link
+                    key={brand}
+                    to={`/products?brand=${encodeURIComponent(brand)}`}
+                    onClick={() => { setShowMobileBrandShop(false); setBrandSearch(''); }}
+                    className="flex items-center justify-between px-4 py-4 border-b border-[#f5f5f5] text-[15px] text-[#222] active:bg-[#fafafa]"
+                  >
+                    {brand}
+                    <ChevronRight size={16} className="text-[#ccc]" />
+                  </Link>
+                ))
+              )}
+            </div>
           </div>
         )}
 
