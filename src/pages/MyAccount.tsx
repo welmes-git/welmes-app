@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTranslation } from 'react-i18next';
@@ -36,11 +36,18 @@ export default function MyAccount() {
     orders,
     members,
     updateMember,
+    loadMyOrders,
     showToast,
   } = useStore();
 
   const [tab, setTab] = useState<Tab>('orders');
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
+  // Orders live in Supabase — pull the current user's orders on mount so the
+  // list survives a page refresh (the store only holds them in-session otherwise)
+  useEffect(() => {
+    if (isAuthenticated) loadMyOrders();
+  }, [isAuthenticated, loadMyOrders]);
 
   /* ── Account Info form ── */
   const [accountForm, setAccountForm] = useState({
@@ -309,7 +316,7 @@ export default function MyAccount() {
                                     </div>
                                     <div className="text-right shrink-0">
                                       <p className="text-[13px] font-semibold">×{item.quantity}</p>
-                                      <p className="text-[12px] text-[#999]">{formatPrice(item.product.wholesalePrice * item.quantity)}</p>
+                                      <p className="text-[12px] text-[#999]">{formatPrice((item.setOption?.wholesalePrice ?? item.product.wholesalePrice) * item.quantity)}</p>
                                     </div>
                                   </div>
                                 ))}

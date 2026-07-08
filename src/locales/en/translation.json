@@ -353,7 +353,9 @@
     "accountNameLabel": "Account Name",
     "accountNoLabel": "Account No.",
     "swiftLabel": "SWIFT / BIC",
-    "routingLabel": "Routing No."
+    "routingLabel": "Routing No.",
+    "orderFailed": "Your order could not be saved. Please try again — if you already paid via PayPal, contact support before retrying.",
+    "bankNotConfigured": "Bank transfer is not available yet — these account details are placeholders. Please use PayPal or contact support."
   },
   "auth": {
     "loginTitle": "Business Member Login",
@@ -395,7 +397,13 @@
     "step2": "Verification is typically completed within 1–2 business days.",
     "step3": "You'll be able to access wholesale pricing immediately upon approval.",
     "needHelp": "Need Help?",
-    "visitSupport": "Visit Customer Support Center"
+    "visitSupport": "Visit Customer Support Center",
+    "certLabel": "Business Registration Certificate",
+    "certUpload": "Click to upload certificate",
+    "certHint": "PNG, JPG or PDF · max 5 MB",
+    "certRequired": "Please upload your business registration certificate",
+    "certTooLarge": "File is too large (max 5 MB)",
+    "passwordTooShort": "Password must be at least 8 characters"
   },
   "account": {
     "title": "My Account",

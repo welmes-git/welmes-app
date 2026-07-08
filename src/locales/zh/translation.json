@@ -353,7 +353,9 @@
     "accountNameLabel": "账户名称",
     "accountNoLabel": "账号",
     "swiftLabel": "SWIFT / BIC",
-    "routingLabel": "路由号码"
+    "routingLabel": "路由号码",
+    "orderFailed": "订单保存失败，请重试。如已通过PayPal付款，请先联系客服再重试。",
+    "bankNotConfigured": "银行转账暂不可用——此账户信息为占位符。请使用PayPal或联系客服。"
   },
   "auth": {
     "loginTitle": "企业会员登录",
@@ -395,7 +397,13 @@
     "step2": "认证通常在1-2个工作日内完成。",
     "step3": "审核通过后，您将立即获得批发价格的访问权限。",
     "needHelp": "需要帮助？",
-    "visitSupport": "访问客户服务中心"
+    "visitSupport": "访问客户服务中心",
+    "certLabel": "营业执照",
+    "certUpload": "点击上传证件",
+    "certHint": "PNG、JPG 或 PDF · 最大 5 MB",
+    "certRequired": "请上传营业执照",
+    "certTooLarge": "文件过大（最大 5 MB）",
+    "passwordTooShort": "密码至少需要8个字符"
   },
   "account": {
     "title": "我的账户",

@@ -30,7 +30,10 @@ function App() {
     // Keep auth state in sync with Supabase session changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
-        useStore.setState({ currentUser: null, isAuthenticated: false, isAdmin: false });
+        useStore.setState({
+          currentUser: null, isAuthenticated: false, isAdmin: false,
+          notifications: [], cart: [], wishlist: [],
+        });
       }
     });
 

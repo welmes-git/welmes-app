@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTranslation } from 'react-i18next';
-import { Eye, EyeOff, Check, Upload } from 'lucide-react';
+import { Eye, EyeOff, Check, Upload, FileText, X } from 'lucide-react';
+
+const MAX_CERT_BYTES = 5 * 1024 * 1024; // 5 MB
 
 type Step = 1 | 2 | 3;
 
@@ -23,12 +25,29 @@ export default function Register() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeMarketing, setAgreeMarketing] = useState(false);
-  const [certificateUploaded, setCertificateUploaded] = useState(false);
+  const [certificateFile, setCertificateFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCertPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file
+    if (!file) return;
+    if (file.size > MAX_CERT_BYTES) {
+      showToast(t('auth.certTooLarge'), 'error');
+      return;
+    }
+    setCertificateFile(file);
+  };
 
   const handleNext = async () => {
     if (step === 1) {
       if (!email || !password || !confirmPassword) {
         showToast(t('common.required'), 'error');
+        return;
+      }
+      if (password.length < 8) {
+        showToast(t('auth.passwordTooShort'), 'error');
         return;
       }
       if (password !== confirmPassword) {
@@ -41,11 +60,18 @@ export default function Register() {
         showToast(t('common.required'), 'error');
         return;
       }
+      if (!certificateFile) {
+        showToast(t('auth.certRequired'), 'error');
+        return;
+      }
       if (!agreeTerms || !agreePrivacy) {
         showToast(t('common.required'), 'error');
         return;
       }
-      const result = await registerMember({ email, password, companyName, businessNumber, representative, phone, address });
+      if (submitting) return;
+      setSubmitting(true);
+      const result = await registerMember({ email, password, companyName, businessNumber, representative, phone, address, certificateFile });
+      setSubmitting(false);
       if (result.error) {
         showToast(result.error, 'error');
         return;
@@ -135,14 +161,38 @@ export default function Register() {
                   <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Seoul Gangnam-gu Teheran-ro 123" className="w-full h-[46px] px-4 border border-[#e5e5e5] rounded-lg text-[14px] focus:outline-none focus:border-[#333]" />
                 </div>
                 <div>
-                  <label className="block text-[13px] text-[#666] mb-1.5">Business Registration Certificate</label>
-                  <button type="button" onClick={() => setCertificateUploaded(true)} className={`w-full h-[80px] border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1 transition-colors ${certificateUploaded ? 'border-green-400 bg-green-50' : 'border-[#ddd] hover:border-[#999]'}`}>
-                    {certificateUploaded ? (
-                      <><Check size={24} className="text-green-500" /><span className="text-[12px] text-green-600">File uploaded successfully</span></>
-                    ) : (
-                      <><Upload size={20} className="text-[#999]" /><span className="text-[12px] text-[#999]">Click to upload certificate</span></>
-                    )}
-                  </button>
+                  <label className="block text-[13px] text-[#666] mb-1.5">
+                    {t('auth.certLabel')} <span className="text-[#ff4d6d]">*</span>
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,application/pdf"
+                    className="hidden"
+                    onChange={handleCertPick}
+                  />
+                  {certificateFile ? (
+                    <div className="w-full flex items-center gap-3 border-2 border-green-400 bg-green-50 rounded-lg px-4 py-3">
+                      <FileText size={20} className="text-green-600 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] text-green-700 font-medium truncate">{certificateFile.name}</p>
+                        <p className="text-[11px] text-green-600">{(certificateFile.size / 1024).toFixed(0)} KB</p>
+                      </div>
+                      <button type="button" onClick={() => setCertificateFile(null)} className="text-green-600 hover:text-green-800 shrink-0">
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full h-[80px] border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-1 transition-colors border-[#ddd] hover:border-[#999]"
+                    >
+                      <Upload size={20} className="text-[#999]" />
+                      <span className="text-[12px] text-[#999]">{t('auth.certUpload')}</span>
+                      <span className="text-[11px] text-[#bbb]">{t('auth.certHint')}</span>
+                    </button>
+                  )}
                 </div>
                 <div className="space-y-2 pt-2 border-t border-[#f0f0f0]">
                   <label className="flex items-start gap-2 cursor-pointer">
@@ -188,8 +238,12 @@ export default function Register() {
                   {t('common.back')}
                 </button>
               )}
-              <button onClick={handleNext} className="flex-1 h-[46px] bg-[#333] text-white rounded-lg text-[14px] font-medium hover:bg-[#555] transition-colors">
-                {step === 1 ? t('common.next') : t('auth.registerButton')}
+              <button
+                onClick={handleNext}
+                disabled={submitting}
+                className="flex-1 h-[46px] bg-[#333] text-white rounded-lg text-[14px] font-medium hover:bg-[#555] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {submitting ? t('common.loading') : step === 1 ? t('common.next') : t('auth.registerButton')}
               </button>
             </div>
           )}

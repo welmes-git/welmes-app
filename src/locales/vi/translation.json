@@ -351,7 +351,9 @@
     "accountNameLabel": "Tên tài khoản",
     "accountNoLabel": "Số tài khoản",
     "swiftLabel": "SWIFT / BIC",
-    "routingLabel": "Số định tuyến"
+    "routingLabel": "Số định tuyến",
+    "orderFailed": "Không thể lưu đơn hàng. Vui lòng thử lại. Nếu bạn đã thanh toán qua PayPal, hãy liên hệ hỗ trợ trước khi thử lại.",
+    "bankNotConfigured": "Chuyển khoản ngân hàng chưa khả dụng — thông tin tài khoản là ví dụ. Vui lòng dùng PayPal hoặc liên hệ hỗ trợ."
   },
   "auth": {
     "loginTitle": "Đăng nhập thành viên doanh nghiệp",
@@ -393,7 +395,13 @@
     "step2": "Việc xác minh thường hoàn tất trong 1–2 ngày làm việc.",
     "step3": "Bạn sẽ được xem giá sỉ ngay khi được duyệt.",
     "needHelp": "Cần hỗ trợ?",
-    "visitSupport": "Đến trung tâm hỗ trợ khách hàng"
+    "visitSupport": "Đến trung tâm hỗ trợ khách hàng",
+    "certLabel": "Giấy phép kinh doanh",
+    "certUpload": "Nhấn để tải lên",
+    "certHint": "PNG, JPG hoặc PDF · tối đa 5 MB",
+    "certRequired": "Vui lòng tải lên giấy phép kinh doanh",
+    "certTooLarge": "Tệp quá lớn (tối đa 5 MB)",
+    "passwordTooShort": "Mật khẩu phải có ít nhất 8 ký tự"
   },
   "account": {
     "title": "Tài khoản của tôi",

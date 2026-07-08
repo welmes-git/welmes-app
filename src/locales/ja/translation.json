@@ -353,7 +353,9 @@
     "accountNameLabel": "口座名義",
     "accountNoLabel": "口座番号",
     "swiftLabel": "SWIFT / BIC",
-    "routingLabel": "ルーティング番号"
+    "routingLabel": "ルーティング番号",
+    "orderFailed": "注文を保存できませんでした。もう一度お試しください。PayPalで決済済みの場合は、再試行の前にサポートへご連絡ください。",
+    "bankNotConfigured": "銀行振込は現在ご利用いただけません（口座情報は仮のものです）。PayPalをご利用いただくか、サポートへお問い合わせください。"
   },
   "auth": {
     "loginTitle": "ビジネス会員ログイン",
@@ -395,7 +397,13 @@
     "step2": "認証は通常1〜2営業日以内に完了します。",
     "step3": "承認後、すぐに卸売価格にアクセスできます。",
     "needHelp": "お困りですか？",
-    "visitSupport": "カスタマーサポートセンターへ"
+    "visitSupport": "カスタマーサポートセンターへ",
+    "certLabel": "事業者登録証",
+    "certUpload": "クリックしてアップロード",
+    "certHint": "PNG・JPG・PDF · 最大5MB",
+    "certRequired": "事業者登録証をアップロードしてください",
+    "certTooLarge": "ファイルが大きすぎます（最大5MB）",
+    "passwordTooShort": "パスワードは8文字以上で入力してください"
   },
   "account": {
     "title": "マイアカウント",

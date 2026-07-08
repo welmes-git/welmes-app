@@ -12,7 +12,7 @@ async function invoke(type: string, data: Record<string, unknown>) {
   }
 }
 
-export function emailOrderPlaced(order: Order, buyerEmail: string, currency: string) {
+export function emailOrderPlaced(order: Order, buyerEmail: string) {
   invoke('order_placed', {
     buyerEmail,
     orderId: order.id,
@@ -22,12 +22,16 @@ export function emailOrderPlaced(order: Order, buyerEmail: string, currency: str
       brand: item.product.brand,
       quantity: item.quantity,
       setDescription: item.setOption?.description ?? '',
-      price: Math.round(item.product.wholesalePrice * item.quantity),
+      // Line total must use the set price when a set option is chosen,
+      // otherwise sets are billed at the single-unit price.
+      price: Math.round((item.setOption?.wholesalePrice ?? item.product.wholesalePrice) * item.quantity),
     })),
     subtotal: order.subtotal,
     vat: order.vat,
     total: order.total,
-    currency,
+    // Order amounts are stored in JPY — label them JPY so the value and the
+    // currency code always agree (previously showed e.g. "USD 363,660").
+    currency: 'JPY',
     date: order.date,
   });
 }

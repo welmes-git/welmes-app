@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { PayPalButtons, usePayPalScriptReducer, DISPATCH_ACTION } from '@paypal/react-paypal-js';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '../store/useStore';
 import type { ShippingAddress } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { convert, getCurrencyInfo } from '../lib/currency';
 import type { CurrencyCode } from '../lib/currency';
+import { BANK_ACCOUNTS, isPlaceholderAccount } from '../config/bankAccounts';
 import {
   ChevronRight,
   CheckCircle2,
@@ -16,36 +17,8 @@ import {
   ArrowLeft,
   Building2,
   Copy,
+  AlertTriangle,
 } from 'lucide-react';
-
-// ── Bank account config (replace with real info) ──────────────────────────────
-const BANK_ACCOUNTS = [
-  {
-    currency: 'USD',
-    bankName: 'Airwallex / JPMorgan Chase',
-    accountName: 'WELMES Co., Ltd.',
-    accountNumber: 'XXXX-XXXX-XXXX',
-    swiftCode: 'XXXXUS33',
-    routingNumber: '021000021',
-    note: 'For USD wire transfers',
-  },
-  {
-    currency: 'JPY',
-    bankName: 'Airwallex / MUFG Bank',
-    accountName: 'WELMES Co., Ltd.',
-    accountNumber: 'XXXX-XXXXXXX',
-    swiftCode: 'BOTKJPJT',
-    note: 'For JPY wire transfers',
-  },
-  {
-    currency: 'EUR',
-    bankName: 'Airwallex / Barclays',
-    accountName: 'WELMES Co., Ltd.',
-    accountNumber: 'GB00 BARC XXXX XXXX XXXX XX',
-    swiftCode: 'BARCGB22',
-    note: 'For EUR wire transfers (IBAN)',
-  },
-];
 
 type Step = 'review' | 'shipping' | 'confirmed';
 
@@ -85,7 +58,11 @@ const PAYPAL_CURRENCIES: CurrencyCode[] = ['JPY', 'USD', 'EUR', 'GBP', 'SGD', 'A
 function genOrderId() {
   const d = new Date();
   const date = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
-  const rand = Math.floor(Math.random() * 900 + 100);
+  // 5 chars from a 31-symbol alphabet (~28.6M combinations/day) so two orders
+  // placed on the same day can't realistically collide on the primary key
+  const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(5));
+  const rand = Array.from(bytes).map((b) => alphabet[b % alphabet.length]).join('');
   return `ORD-${date}-${rand}`;
 }
 
@@ -103,6 +80,28 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'bank_transfer'>('bank_transfer');
   const [selectedBankCurrency, setSelectedBankCurrency] = useState('USD');
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [placing, setPlacing] = useState(false);
+
+  /* ─── PayPal SDK ───
+     The SDK must be (re)loaded with the same currency we charge in, otherwise
+     order creation fails with a currency mismatch. main.tsx loads it with JPY;
+     when the buyer's display currency is a PayPal-supported non-JPY currency
+     we reset the script options to match. */
+  const paypalCurrency: CurrencyCode = PAYPAL_CURRENCIES.includes(currency) ? currency : 'JPY';
+  const [{ isPending: paypalLoading }, paypalDispatch] = usePayPalScriptReducer();
+  const appliedPaypalCurrency = useRef('JPY');
+  useEffect(() => {
+    if (appliedPaypalCurrency.current === paypalCurrency) return;
+    appliedPaypalCurrency.current = paypalCurrency;
+    paypalDispatch({
+      type: DISPATCH_ACTION.RESET_OPTIONS,
+      value: {
+        clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
+        currency: paypalCurrency,
+        intent: 'capture',
+      },
+    });
+  }, [paypalCurrency, paypalDispatch]);
 
   const [shipping, setShipping] = useState<ShippingAddress>({
     company: currentUser?.companyName ?? '',
@@ -177,10 +176,12 @@ export default function Checkout() {
   }
 
   /* ─── Place Order ─── */
-  function handlePlaceOrder(method: 'paypal' | 'bank_transfer' = 'bank_transfer') {
+  async function handlePlaceOrder(method: 'paypal' | 'bank_transfer' = 'bank_transfer') {
+    if (placing) return;
     if (!validateShipping()) return;
+    setPlacing(true);
     const id = genOrderId();
-    addOrder({
+    const { error } = await addOrder({
       id,
       memberId: currentUser!.id,
       memberName: currentUser!.companyName,
@@ -194,6 +195,12 @@ export default function Checkout() {
       notes: notes.trim() || undefined,
       shippingAddress: shipping,
     });
+    setPlacing(false);
+    if (error) {
+      // Keep the cart and stay on this step so the buyer can retry
+      showToast(t('checkout.orderFailed'), 'error');
+      return;
+    }
     setConfirmedTotals({ subtotal, vat, total });
     clearCart();
     setOrderId(id);
@@ -207,12 +214,9 @@ export default function Checkout() {
   }
 
   /* ─── PayPal ─── */
-  const [{ isPending: paypalLoading }] = usePayPalScriptReducer();
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function createPayPalOrder(_data: unknown, actions: any) {
     if (!validateShipping()) return Promise.reject('invalid');
-    const paypalCurrency: CurrencyCode = PAYPAL_CURRENCIES.includes(currency) ? currency : 'JPY';
     const decimals = getCurrencyInfo(paypalCurrency).decimals;
     const amount = convert(total, paypalCurrency, rates);
     return actions.order.create({
@@ -228,12 +232,11 @@ export default function Checkout() {
   }
 
   function onPayPalApprove(_data: unknown, actions: { order?: { capture: () => Promise<unknown> } }) {
-    return actions.order!.capture().then(() => {
-      handlePlaceOrder('paypal');
-    });
+    return actions.order!.capture().then(() => handlePlaceOrder('paypal'));
   }
 
   const selectedBank = BANK_ACCOUNTS.find((b) => b.currency === selectedBankCurrency) ?? BANK_ACCOUNTS[0];
+  const bankNotConfigured = isPlaceholderAccount(selectedBank);
 
   // Wire transfers must be made in the bank account's currency, so convert the
   // JPY-based total into that currency instead of the display currency
@@ -678,6 +681,12 @@ export default function Checkout() {
                         )}
                       </div>
                       <p className="text-[10px] text-[#aaa] pt-1">{selectedBank.note}</p>
+                      {bankNotConfigured && (
+                        <div className="flex items-start gap-2 mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+                          <AlertTriangle size={13} className="text-amber-600 shrink-0 mt-0.5" />
+                          <p className="text-[10px] text-amber-700 leading-relaxed">{t('checkout.bankNotConfigured')}</p>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -701,9 +710,10 @@ export default function Checkout() {
                   {paymentMethod === 'bank_transfer' && (
                     <button
                       onClick={() => handlePlaceOrder('bank_transfer')}
-                      className="w-full py-3 bg-[#4a90e2] text-white rounded-lg text-[14px] font-semibold hover:bg-[#357abd] transition-colors flex items-center justify-center gap-2"
+                      disabled={placing || bankNotConfigured}
+                      className="w-full py-3 bg-[#4a90e2] text-white rounded-lg text-[14px] font-semibold hover:bg-[#357abd] transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      {t('checkout.placeOrder')}
+                      {placing ? t('common.loading') : t('checkout.placeOrder')}
                       <ChevronRight size={16} />
                     </button>
                   )}

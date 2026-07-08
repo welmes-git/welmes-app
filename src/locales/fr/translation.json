@@ -353,7 +353,9 @@
     "accountNameLabel": "Titulaire du compte",
     "accountNoLabel": "Numéro de compte",
     "swiftLabel": "SWIFT / BIC",
-    "routingLabel": "Numéro de routage"
+    "routingLabel": "Numéro de routage",
+    "orderFailed": "Impossible d'enregistrer la commande. Veuillez réessayer. Si vous avez déjà payé via PayPal, contactez l'assistance avant de réessayer.",
+    "bankNotConfigured": "Le virement bancaire n'est pas encore disponible — ces coordonnées sont des exemples. Utilisez PayPal ou contactez l'assistance."
   },
   "auth": {
     "loginTitle": "Connexion professionnelle",
@@ -395,7 +397,13 @@
     "step2": "La vérification est généralement terminée sous 1 à 2 jours ouvrés.",
     "step3": "Vous pourrez accéder aux prix de gros immédiatement après l'approbation.",
     "needHelp": "Besoin d'aide ?",
-    "visitSupport": "Visiter le centre d'assistance"
+    "visitSupport": "Visiter le centre d'assistance",
+    "certLabel": "Certificat d'immatriculation",
+    "certUpload": "Cliquez pour téléverser",
+    "certHint": "PNG, JPG ou PDF · max 5 Mo",
+    "certRequired": "Veuillez téléverser votre certificat d'immatriculation",
+    "certTooLarge": "Fichier trop volumineux (max 5 Mo)",
+    "passwordTooShort": "Le mot de passe doit comporter au moins 8 caractères"
   },
   "account": {
     "title": "Mon compte",

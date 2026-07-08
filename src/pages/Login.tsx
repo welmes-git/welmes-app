@@ -90,24 +90,30 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-[#e5e5e5]" />
-            <span className="text-[12px] text-[#999]">or</span>
-            <div className="flex-1 h-px bg-[#e5e5e5]" />
-          </div>
+          {/* Demo logins are for local development only — dead-code-eliminated
+              from production builds so the admin credentials never ship. */}
+          {import.meta.env.DEV && (
+            <>
+              <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-[#e5e5e5]" />
+                <span className="text-[12px] text-[#999]">or</span>
+                <div className="flex-1 h-px bg-[#e5e5e5]" />
+              </div>
 
-          <div className="space-y-2">
-            <p className="text-[12px] text-[#999] text-center mb-3">{t('auth.demoLogin')}</p>
-            <button onClick={() => handleDemoLogin('admin')} className="w-full h-[42px] bg-[#2c3e50] text-white rounded-lg text-[13px] font-medium hover:bg-[#34495e] transition-colors">
-              {t('auth.loginAsAdmin')}
-            </button>
-            <button onClick={() => handleDemoLogin('member')} className="w-full h-[42px] bg-[#4a90e2] text-white rounded-lg text-[13px] font-medium hover:bg-[#357abd] transition-colors">
-              {t('auth.loginAsBuyer')}
-            </button>
-            <button onClick={() => handleDemoLogin('pending')} className="w-full h-[42px] border border-[#ddd] text-[#666] rounded-lg text-[13px] font-medium hover:bg-[#f5f5f5] transition-colors">
-              Login as Pending Member
-            </button>
-          </div>
+              <div className="space-y-2">
+                <p className="text-[12px] text-[#999] text-center mb-3">{t('auth.demoLogin')}</p>
+                <button onClick={() => handleDemoLogin('admin')} className="w-full h-[42px] bg-[#2c3e50] text-white rounded-lg text-[13px] font-medium hover:bg-[#34495e] transition-colors">
+                  {t('auth.loginAsAdmin')}
+                </button>
+                <button onClick={() => handleDemoLogin('member')} className="w-full h-[42px] bg-[#4a90e2] text-white rounded-lg text-[13px] font-medium hover:bg-[#357abd] transition-colors">
+                  {t('auth.loginAsBuyer')}
+                </button>
+                <button onClick={() => handleDemoLogin('pending')} className="w-full h-[42px] border border-[#ddd] text-[#666] rounded-lg text-[13px] font-medium hover:bg-[#f5f5f5] transition-colors">
+                  Login as Pending Member
+                </button>
+              </div>
+            </>
+          )}
 
           <p className="text-[13px] text-[#999] text-center mt-6">
             {t('auth.noAccount')}{' '}

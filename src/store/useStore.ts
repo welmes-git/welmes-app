@@ -60,6 +60,8 @@ export interface Member {
   status: 'pending' | 'approved' | 'rejected';
   registeredDate: string;
   isAdmin: boolean;
+  /** Storage path of the uploaded business-registration certificate */
+  certificatePath?: string;
 }
 
 export interface CartItem {
@@ -126,6 +128,7 @@ interface AppState {
     representative: string;
     phone: string;
     address: string;
+    certificateFile?: File | null;
   }) => Promise<{ error?: string }>;
   updateMember: (id: string, updates: Partial<Member>) => Promise<void>;
   changePassword: (id: string, newPassword: string) => Promise<void>;
@@ -148,13 +151,16 @@ interface AppState {
   // Orders
   orders: Order[];
   loadOrders: () => Promise<void>;
-  addOrder: (order: Order) => Promise<void>;
+  /** Load orders visible to the current user (own orders, or all for admins) */
+  loadMyOrders: () => Promise<void>;
+  addOrder: (order: Order) => Promise<{ error?: string }>;
   updateOrderStatus: (id: string, status: Order['status']) => Promise<void>;
   updateOrderShipping: (id: string, carrier: string, trackingNumber: string) => Promise<void>;
 
-  // Notifications
+  // Notifications (server-backed; local state is a cache for the current user)
   notifications: AppNotification[];
-  addNotification: (n: Omit<AppNotification, 'id' | 'createdAt' | 'read'>) => void;
+  loadNotifications: () => Promise<void>;
+  addNotification: (n: Omit<AppNotification, 'id' | 'createdAt' | 'read'>) => Promise<void>;
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
   clearNotifications: (memberId: string) => void;
@@ -194,6 +200,7 @@ export const useStore = create<AppState>()(
             authLoading: false,
           });
           await get().syncCart();
+          get().loadNotifications();
         } else {
           set({ authLoading: false });
         }
@@ -218,12 +225,23 @@ export const useStore = create<AppState>()(
           isAdmin: member.isAdmin,
         });
         await get().syncCart();
+        get().loadNotifications();
         return true;
       },
 
       logout: async () => {
         await db.signOut();
-        set({ currentUser: null, isAuthenticated: false, isAdmin: false });
+        // Clear per-user state so it can't leak into the next account that logs
+        // in on a shared browser. The signed-in cart already lives on the server
+        // and is restored via syncCart() on the next login.
+        set({
+          currentUser: null,
+          isAuthenticated: false,
+          isAdmin: false,
+          notifications: [],
+          cart: [],
+          wishlist: [],
+        });
       },
 
       // ── Products ──────────────────────────────────────────────
@@ -267,16 +285,24 @@ export const useStore = create<AppState>()(
         set({ members });
       },
 
-      registerMember: async ({ email, password, companyName, businessNumber, representative, phone, address }) => {
+      registerMember: async ({ email, password, companyName, businessNumber, representative, phone, address, certificateFile }) => {
         const { data, error } = await db.signUp(email, password, {
           companyName, businessNumber, representative, phone, address,
         });
         if (error) return { error: error.message };
         if (!data.user) return { error: 'Signup failed' };
 
+        // Upload the certificate now that we (usually) have a session from signUp.
+        // Best-effort: if there's no session (email confirmation on) or storage
+        // fails, we still create the account so registration isn't blocked.
+        let certificatePath: string | undefined;
+        if (certificateFile) {
+          certificatePath = (await db.uploadCertificate(data.user.id, certificateFile)) ?? undefined;
+        }
+
         // Upsert full member record (trigger creates minimal row; we update with full details)
         await db.upsertMember(data.user.id, {
-          email, companyName, businessNumber, representative, phone, address,
+          email, companyName, businessNumber, representative, phone, address, certificatePath,
         });
         return {};
       },
@@ -439,13 +465,24 @@ export const useStore = create<AppState>()(
         set({ orders });
       },
 
+      loadMyOrders: async () => {
+        const user = get().currentUser;
+        if (!user) return;
+        const orders = user.isAdmin
+          ? await db.fetchOrders()
+          : await db.fetchOrdersByMemberId(user.id);
+        set({ orders });
+      },
+
       addOrder: async (order) => {
-        await db.insertOrder(order);
+        const { error } = await db.insertOrder(order);
+        if (error) return { error };
         set((state) => ({ orders: [order, ...state.orders] }));
         const user = get().currentUser;
         if (user?.email) {
-          emailOrderPlaced(order, user.email, get().selectedCurrency);
+          emailOrderPlaced(order, user.email);
         }
+        return {};
       },
 
       updateOrderStatus: async (id, status) => {
@@ -492,38 +529,57 @@ export const useStore = create<AppState>()(
         }
       },
 
-      // ── Notifications ─────────────────────────────────────────
+      // ── Notifications (stored in Supabase so they reach the target member) ──
       notifications: [],
 
-      addNotification: (n) =>
-        set((state) => ({
-          notifications: [
-            {
-              ...n,
-              id: `notif_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-              createdAt: new Date().toISOString(),
-              read: false,
-            },
-            ...state.notifications,
-          ].slice(0, 100), // cap at 100
-        })),
+      loadNotifications: async () => {
+        const user = get().currentUser;
+        if (!user) {
+          set({ notifications: [] });
+          return;
+        }
+        const notifications = await db.fetchNotificationsByMemberId(user.id);
+        set({ notifications });
+      },
 
-      markNotificationRead: (id) =>
+      addNotification: async (n) => {
+        const created = await db.insertNotification(n);
+        // Only mirror into local state when it's for the current user
+        // (admins create notifications for other members)
+        const user = get().currentUser;
+        if (created && user && created.memberId === user.id) {
+          set((state) => ({
+            notifications: [created, ...state.notifications].slice(0, 100),
+          }));
+        }
+      },
+
+      markNotificationRead: (id) => {
         set((state) => ({
           notifications: state.notifications.map((n) =>
             n.id === id ? { ...n, read: true } : n
           ),
-        })),
+        }));
+        db.markNotificationReadById(id);
+      },
 
-      markAllNotificationsRead: () =>
+      markAllNotificationsRead: () => {
+        const user = get().currentUser;
+        if (!user) return;
         set((state) => ({
-          notifications: state.notifications.map((n) => ({ ...n, read: true })),
-        })),
+          notifications: state.notifications.map((n) =>
+            n.memberId === user.id ? { ...n, read: true } : n
+          ),
+        }));
+        db.markAllNotificationsReadByMemberId(user.id);
+      },
 
-      clearNotifications: (memberId) =>
+      clearNotifications: (memberId) => {
         set((state) => ({
           notifications: state.notifications.filter((n) => n.memberId !== memberId),
-        })),
+        }));
+        db.deleteNotificationsByMemberId(memberId);
+      },
 
       // ── Currency ──────────────────────────────────────────────
       selectedCurrency: 'JPY' as CurrencyCode,
@@ -540,7 +596,8 @@ export const useStore = create<AppState>()(
         cart: state.cart,
         wishlist: state.wishlist,
         selectedCurrency: state.selectedCurrency,
-        notifications: state.notifications,
+        // Notifications live in Supabase and are fetched per user — persisting
+        // them locally would leak them across accounts on a shared browser
         // Auth session is restored via initAuth() using Supabase session cookie
         // Products/members/orders are loaded from Supabase on demand
       }),

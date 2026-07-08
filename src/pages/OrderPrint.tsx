@@ -1,19 +1,31 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
-import { Printer, ArrowLeft } from 'lucide-react';
+import { Printer, ArrowLeft, Loader2 } from 'lucide-react';
 
 export default function OrderPrint() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { orders, currentUser, isAuthenticated } = useStore();
+  const { orders, currentUser, isAuthenticated, loadMyOrders } = useStore();
   const { formatPrice } = useCurrency();
+  const [loaded, setLoaded] = useState(false);
 
   const order = orders.find((o) => o.id === id);
   const today = new Date().toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
+
+  // Orders are in Supabase — fetch them so a refreshed/deep-linked print page
+  // can still find its order (the store only holds them in-session otherwise)
+  useEffect(() => {
+    if (isAuthenticated) loadMyOrders().finally(() => setLoaded(true));
+    else setLoaded(true);
+  }, [isAuthenticated, loadMyOrders]);
+
+  useEffect(() => {
+    if (!isAuthenticated) navigate('/login');
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (!order) return;
@@ -21,12 +33,17 @@ export default function OrderPrint() {
     return () => { document.title = 'WELMES Business'; };
   }, [order]);
 
-  if (!isAuthenticated) {
-    navigate('/login');
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
   if (!order) {
+    // Still fetching — show a spinner rather than flashing "not found"
+    if (!loaded) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 size={28} className="animate-spin text-[#4a90e2]" />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen flex items-center justify-center text-center px-4">
         <div>
@@ -184,7 +201,9 @@ export default function OrderPrint() {
           <tbody>
             {order.items.length > 0 ? (
               order.items.map((item, idx) => {
-                const lineTotal = item.product.wholesalePrice * item.quantity;
+                // Bill at the set price when a set option is chosen
+                const unitPrice = item.setOption?.wholesalePrice ?? item.product.wholesalePrice;
+                const lineTotal = unitPrice * item.quantity;
                 return (
                   <tr
                     key={idx}
@@ -204,7 +223,7 @@ export default function OrderPrint() {
                       ) : '—'}
                     </td>
                     <td className="py-2.5 px-3 text-[11px] text-[#333] text-center font-semibold">{item.quantity}</td>
-                    <td className="py-2.5 px-3 text-[11px] text-[#333] text-right">{formatPrice(item.product.wholesalePrice)}</td>
+                    <td className="py-2.5 px-3 text-[11px] text-[#333] text-right">{formatPrice(unitPrice)}</td>
                     <td className="py-2.5 px-3 text-[11px] font-bold text-[#222] text-right">{formatPrice(lineTotal)}</td>
                   </tr>
                 );

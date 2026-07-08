@@ -4,7 +4,7 @@
  */
 import { supabase } from './supabase';
 export { supabase };
-import type { Product, Member, Order, CartItem, ShippingAddress } from '../store/useStore';
+import type { Product, Member, Order, CartItem, ShippingAddress, AppNotification } from '../store/useStore';
 
 // ── Auth ─────────────────────────────────────────────────────────
 
@@ -68,7 +68,23 @@ export async function upsertMember(authId: string, fields: Partial<Member>) {
   if (fields.phone)          row.phone = fields.phone;
   if (fields.address)        row.address = fields.address;
   if (fields.status)         row.status = fields.status;
+  if (fields.certificatePath) row.certificate_url = fields.certificatePath;
   return supabase.from('members').upsert(row, { onConflict: 'auth_id' });
+}
+
+/**
+ * Upload a business-registration certificate to the private
+ * `business-certificates` bucket. Returns the storage path (not a public URL);
+ * admins generate a signed URL to view it. Best-effort — returns null on failure.
+ */
+export async function uploadCertificate(authId: string, file: File): Promise<string | null> {
+  const ext = (file.name.split('.').pop() || 'pdf').toLowerCase();
+  const path = `${authId}/certificate-${Date.now()}.${ext}`;
+  const { error } = await supabase.storage
+    .from('business-certificates')
+    .upload(path, file, { upsert: true, contentType: file.type || undefined });
+  if (error) { console.error('[uploadCertificate]', error.message); return null; }
+  return path;
 }
 
 export async function updateMemberById(id: string, fields: Partial<Member>) {
@@ -132,7 +148,7 @@ export async function fetchOrdersByMemberId(memberId: string): Promise<Order[]> 
   return orderRows.map(rowToOrder);
 }
 
-export async function insertOrder(order: Order) {
+export async function insertOrder(order: Order): Promise<{ error?: string }> {
   // Insert order header
   const { error: orderErr } = await supabase.from('orders').insert([{
     id:               order.id,
@@ -147,7 +163,7 @@ export async function insertOrder(order: Order) {
     notes:            order.notes ?? null,
     shipping_address: order.shippingAddress ?? null,
   }]);
-  if (orderErr) { console.error(orderErr); return; }
+  if (orderErr) { console.error('[insertOrder] header failed:', orderErr); return { error: orderErr.message }; }
 
   // Insert order items
   if (order.items.length > 0) {
@@ -157,8 +173,15 @@ export async function insertOrder(order: Order) {
       quantity:         item.quantity,
       set_option:       item.setOption ?? null,
     }));
-    await supabase.from('order_items').insert(items);
+    const { error: itemsErr } = await supabase.from('order_items').insert(items);
+    if (itemsErr) {
+      console.error('[insertOrder] items failed:', itemsErr);
+      // Best-effort rollback so we don't leave a header-only order behind
+      await supabase.from('orders').delete().eq('id', order.id);
+      return { error: itemsErr.message };
+    }
   }
+  return {};
 }
 
 export async function updateOrderStatusById(id: string, status: Order['status']) {
@@ -243,6 +266,70 @@ export async function replaceServerCart(memberId: string, items: CartItem[]) {
   );
 }
 
+// ── Notifications (server-backed so they reach the target member) ─
+
+export function rowToNotification(r: Record<string, unknown>): AppNotification {
+  return {
+    id:             r.id as string,
+    memberId:       r.member_id as string,
+    type:           r.type as AppNotification['type'],
+    read:           !!r.read,
+    createdAt:      r.created_at as string,
+    orderId:        (r.order_id as string) || undefined,
+    orderStatus:    (r.order_status as string) || undefined,
+    carrier:        (r.carrier as string) || undefined,
+    trackingNumber: (r.tracking_number as string) || undefined,
+  };
+}
+
+export async function fetchNotificationsByMemberId(memberId: string): Promise<AppNotification[]> {
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('member_id', memberId)
+    .order('created_at', { ascending: false })
+    .limit(100);
+  if (error || !data) {
+    if (error) console.error('[fetchNotifications]', error.message);
+    return [];
+  }
+  return data.map(rowToNotification);
+}
+
+export async function insertNotification(
+  n: Omit<AppNotification, 'id' | 'createdAt' | 'read'>,
+): Promise<AppNotification | null> {
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert([{
+      member_id:       n.memberId,
+      type:            n.type,
+      order_id:        n.orderId ?? null,
+      order_status:    n.orderStatus ?? null,
+      carrier:         n.carrier ?? null,
+      tracking_number: n.trackingNumber ?? null,
+    }])
+    .select()
+    .single();
+  if (error || !data) {
+    if (error) console.error('[insertNotification]', error.message);
+    return null;
+  }
+  return rowToNotification(data);
+}
+
+export async function markNotificationReadById(id: string) {
+  return supabase.from('notifications').update({ read: true }).eq('id', id);
+}
+
+export async function markAllNotificationsReadByMemberId(memberId: string) {
+  return supabase.from('notifications').update({ read: true }).eq('member_id', memberId);
+}
+
+export async function deleteNotificationsByMemberId(memberId: string) {
+  return supabase.from('notifications').delete().eq('member_id', memberId);
+}
+
 // ── Reviews ──────────────────────────────────────────────────────
 
 export interface Review {
@@ -309,6 +396,7 @@ function rowToMember(row: Record<string, unknown>): Member {
     status:         row.status as Member['status'],
     isAdmin:        row.is_admin as boolean,
     registeredDate: row.registered_date as string,
+    certificatePath: (row.certificate_url as string) || undefined,
     passwordHash:   '',
   };
 }
@@ -442,11 +530,18 @@ export async function sendMessage(roomId: string, senderId: string, senderName: 
     .select()
     .single();
   if (error || !data) { console.error(error); return null; }
-  await supabase.from('support_rooms').update({
+
+  const { error: roomErr } = await supabase.from('support_rooms').update({
     last_message: content,
     last_message_at: new Date().toISOString(),
-    unread_admin: role === 'member' ? supabase.rpc('increment_unread', { room: roomId }) : 0,
+    ...(role === 'admin' ? { unread_admin: 0 } : {}),
   }).eq('id', roomId);
+  if (roomErr) console.error('[sendMessage] room update failed:', roomErr);
+
+  if (role === 'member') {
+    const { error: rpcErr } = await supabase.rpc('increment_room_unread', { room: roomId });
+    if (rpcErr) console.error('[sendMessage] unread increment failed:', rpcErr);
+  }
   return rowToMessage(data);
 }
 

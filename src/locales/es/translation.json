@@ -353,7 +353,9 @@
     "accountNameLabel": "Titular de la cuenta",
     "accountNoLabel": "Número de cuenta",
     "swiftLabel": "SWIFT / BIC",
-    "routingLabel": "Número de ruta"
+    "routingLabel": "Número de ruta",
+    "orderFailed": "No se pudo guardar el pedido. Inténtalo de nuevo. Si ya pagaste con PayPal, contacta con soporte antes de reintentar.",
+    "bankNotConfigured": "La transferencia bancaria aún no está disponible: estos datos son de ejemplo. Usa PayPal o contacta con soporte."
   },
   "auth": {
     "loginTitle": "Acceso para empresas",
@@ -395,7 +397,13 @@
     "step2": "La verificación suele completarse en 1–2 días laborables.",
     "step3": "Podrás acceder a los precios mayoristas inmediatamente tras la aprobación.",
     "needHelp": "¿Necesitas ayuda?",
-    "visitSupport": "Visitar el centro de soporte"
+    "visitSupport": "Visitar el centro de soporte",
+    "certLabel": "Certificado de registro mercantil",
+    "certUpload": "Haz clic para subir el certificado",
+    "certHint": "PNG, JPG o PDF · máx. 5 MB",
+    "certRequired": "Sube tu certificado de registro mercantil",
+    "certTooLarge": "El archivo es demasiado grande (máx. 5 MB)",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres"
   },
   "account": {
     "title": "Mi cuenta",

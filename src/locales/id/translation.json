@@ -351,7 +351,9 @@
     "accountNameLabel": "Nama Rekening",
     "accountNoLabel": "Nomor Rekening",
     "swiftLabel": "SWIFT / BIC",
-    "routingLabel": "Nomor Routing"
+    "routingLabel": "Nomor Routing",
+    "orderFailed": "Pesanan gagal disimpan. Silakan coba lagi. Jika sudah membayar via PayPal, hubungi dukungan sebelum mencoba lagi.",
+    "bankNotConfigured": "Transfer bank belum tersedia — detail rekening ini masih contoh. Silakan gunakan PayPal atau hubungi dukungan."
   },
   "auth": {
     "loginTitle": "Masuk Anggota Bisnis",
@@ -393,7 +395,13 @@
     "step2": "Verifikasi biasanya selesai dalam 1–2 hari kerja.",
     "step3": "Anda dapat langsung mengakses harga grosir setelah disetujui.",
     "needHelp": "Butuh Bantuan?",
-    "visitSupport": "Kunjungi Pusat Dukungan Pelanggan"
+    "visitSupport": "Kunjungi Pusat Dukungan Pelanggan",
+    "certLabel": "Sertifikat Pendaftaran Usaha",
+    "certUpload": "Klik untuk mengunggah",
+    "certHint": "PNG, JPG atau PDF · maks 5 MB",
+    "certRequired": "Silakan unggah sertifikat pendaftaran usaha Anda",
+    "certTooLarge": "File terlalu besar (maks 5 MB)",
+    "passwordTooShort": "Kata sandi minimal 8 karakter"
   },
   "account": {
     "title": "Akun Saya",
