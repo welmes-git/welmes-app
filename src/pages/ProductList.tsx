@@ -176,9 +176,11 @@ export default function ProductList() {
           </span>
         </div>
 
-        {/* Inline Search Bar — shown when in search mode or always on mobile */}
+        {/* Inline Search Bar — mobile only. The header already has a persistent
+            search bar on desktop (hidden below md), so showing this one too
+            duplicated it right above the "Search: X" tag. */}
         <div className="mb-6">
-          <form onSubmit={handleInlineSearch}>
+          <form onSubmit={handleInlineSearch} className="md:hidden">
             <div className="relative max-w-[560px]">
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#aaa]" />
               <input

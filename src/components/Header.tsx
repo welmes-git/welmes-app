@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import type { AppNotification } from '../store/useStore';
@@ -62,11 +62,52 @@ export default function Header() {
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showMobileBrands, setShowMobileBrands] = useState(false);
+  const [showMobileCategory, setShowMobileCategory] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const megaMenuRef = useRef<HTMLElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
+
+  // Flat, ordered list of every top-level category group (column-major, same
+  // order as the desktop mega menu) for the mobile master/detail overlay.
+  const allCategoryGroups = useMemo(() => categoryMenuColumns.flat(), []);
+  const [activeGroupKey, setActiveGroupKey] = useState(allCategoryGroups[0]?.key);
+  const mobileCategoryPanelRef = useRef<HTMLDivElement>(null);
+  const categorySectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Reset to the first group each time the overlay opens
+  useEffect(() => {
+    if (showMobileCategory) setActiveGroupKey(allCategoryGroups[0]?.key);
+  }, [showMobileCategory, allCategoryGroups]);
+
+  // Scrollspy: highlight whichever section sits in the top band of the panel
+  useEffect(() => {
+    if (!showMobileCategory) return;
+    const root = mobileCategoryPanelRef.current;
+    if (!root) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        const key = visible[0]?.target.getAttribute('data-group-key');
+        if (key) setActiveGroupKey(key);
+      },
+      { root, rootMargin: '0px 0px -70% 0px', threshold: 0 }
+    );
+    Object.values(categorySectionRefs.current).forEach((el) => el && observer.observe(el));
+    return () => observer.disconnect();
+  }, [showMobileCategory]);
+
+  const scrollToCategoryGroup = (key: string) => {
+    setActiveGroupKey(key);
+    const el = categorySectionRefs.current[key];
+    // scrollIntoView computes the target's true position within its actual
+    // scrolling ancestor — manual offsetTop math landed a section too early
+    // whenever an intervening element's offsetParent chain wasn't the panel.
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   // Every popover closes on an outside click
   useOutsideClick(megaMenuRef, showCategoryDropdown, () => setShowCategoryDropdown(false));
@@ -667,6 +708,73 @@ export default function Header() {
           </div>
         )}
 
+        {/* Mobile Category Full-Screen Overlay — Olive Young style master/detail */}
+        {showMobileCategory && (
+          <div className="fixed inset-0 bg-white z-[60] flex flex-col md:hidden">
+            {/* Overlay Header */}
+            <div className="flex items-center justify-between px-4 h-[56px] border-b border-[#e5e5e5] shrink-0">
+              <button onClick={() => setShowMobileCategory(false)} className="text-[#333] w-8">
+                <X size={22} />
+              </button>
+              <span className="text-[16px] font-bold text-[#222]">{t('nav.category')}</span>
+              <span className="w-8" />
+            </div>
+
+            {/* Master/detail body */}
+            <div className="flex-1 flex overflow-hidden">
+              {/* Left rail — every top-level group */}
+              <div className="w-[104px] shrink-0 bg-[#fafafa] overflow-y-auto border-r border-[#eee]">
+                {allCategoryGroups.map((group) => (
+                  <button
+                    key={group.key}
+                    onClick={() => scrollToCategoryGroup(group.key)}
+                    className={`w-full text-left px-3 py-3.5 text-[12.5px] leading-tight border-l-[3px] transition-colors ${
+                      activeGroupKey === group.key
+                        ? 'border-[#222] bg-white text-[#222] font-bold'
+                        : 'border-transparent text-[#999]'
+                    }`}
+                  >
+                    {t(`categoryMenu.${group.key}`)}
+                  </button>
+                ))}
+              </div>
+
+              {/* Right panel — scrollable sections, one per group */}
+              <div ref={mobileCategoryPanelRef} className="flex-1 overflow-y-auto px-4 py-4">
+                {allCategoryGroups.map((group) => (
+                  <div
+                    key={group.key}
+                    ref={(el) => { categorySectionRefs.current[group.key] = el; }}
+                    data-group-key={group.key}
+                    className="mb-7 last:mb-2"
+                  >
+                    <Link
+                      to={group.link}
+                      onClick={() => setShowMobileCategory(false)}
+                      className="inline-flex items-center gap-1 text-[16px] font-bold text-[#222] mb-2.5"
+                    >
+                      {t(`categoryMenu.${group.key}`)}
+                      <ChevronRight size={15} className="text-[#999]" />
+                    </Link>
+                    <div>
+                      {group.subs.map((sub) => (
+                        <Link
+                          key={sub.key}
+                          to={sub.link}
+                          onClick={() => setShowMobileCategory(false)}
+                          className="block py-2 text-[14px] text-[#555] active:text-[#ff4d6d]"
+                        >
+                          {t(`categoryMenu.${sub.key}`)}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Mobile Navigation Tab Bar */}
         {isMobile && (
           <div>
@@ -677,9 +785,8 @@ export default function Header() {
               scrollbarWidth: 'none',
               WebkitOverflowScrolling: 'touch',
             }}>
-              <Link
-                to="/products"
-                onClick={() => { setShowMobileBrands(false); }}
+              <button
+                onClick={() => { setShowMobileBrands(false); setShowMobileCategory(true); }}
                 style={{
                   flexShrink: 0,
                   display: 'flex',
@@ -690,12 +797,14 @@ export default function Header() {
                   fontWeight: 600,
                   color: '#333',
                   whiteSpace: 'nowrap',
-                  textDecoration: 'none',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
                 }}
               >
                 <Menu size={14} />
                 {t('nav.category')}
-              </Link>
+              </button>
               <button
                 onClick={() => setShowMobileBrands((v) => !v)}
                 style={{
