@@ -413,7 +413,7 @@ export default function Header() {
               </button>
               {/* Bell Notification Button */}
               {isAuthenticated && (
-                <div className="relative hidden sm:block" ref={notifRef}>
+                <div className="relative hidden sm:flex sm:items-center" ref={notifRef}>
                   <button
                     onClick={() => setShowNotifications((v) => !v)}
                     className="relative text-[#333] hover:text-[#ff4d6d] transition-colors"
