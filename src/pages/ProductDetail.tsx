@@ -24,7 +24,7 @@ export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { products, addToCart, isAuthenticated, currentUser, showToast } =
+  const { products, productsLoading, addToCart, isAuthenticated, currentUser, showToast } =
     useStore();
   const { formatPrice } = useCurrency();
   const [setQty, setSetQty] = useState<Record<string, number>>({});
@@ -92,7 +92,11 @@ export default function ProductDetail() {
     loadReviews();
   }
 
-  const allProducts = products.length > 0 ? products : initialProducts;
+  // Only fall back to the demo catalogue once loading has actually finished
+  // and come back empty — otherwise a real product can flash as "not found"
+  // (or briefly show an unrelated demo product at the same id) while the
+  // real Supabase fetch is still in flight.
+  const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
   const product = allProducts.find((p) => p.id === productId);
 
   const isVerified = currentUser?.status === 'approved';
@@ -157,6 +161,13 @@ export default function ProductDetail() {
   const ratingLabels = ['', t('review.poor'), t('review.fair'), t('review.good'), t('review.veryGood'), t('review.excellent')];
 
   if (!product) {
+    if (productsLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-[#e5e5e5] border-t-[#333] rounded-full animate-spin" />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

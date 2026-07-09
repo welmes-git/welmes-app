@@ -36,7 +36,9 @@
     "keywordSuggestions": "Saran Kata Kunci",
     "trendingSearches": "Pencarian Populer",
     "brandSearchPlaceholder": "Cari nama merek",
-    "noBrandsFound": "Merek tidak ditemukan"
+    "noBrandsFound": "Merek tidak ditemukan",
+    "asOf": "per pukul {{time}}",
+    "noTrendingSearches": "Belum ada pencarian populer"
   },
   "categoryMenu": {
     "skincare": "Perawatan kulit",

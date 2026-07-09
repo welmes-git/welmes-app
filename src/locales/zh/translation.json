@@ -36,7 +36,9 @@
     "keywordSuggestions": "关键词推荐",
     "trendingSearches": "热门搜索",
     "brandSearchPlaceholder": "搜索品牌名称",
-    "noBrandsFound": "未找到品牌"
+    "noBrandsFound": "未找到品牌",
+    "asOf": "截至 {{time}}",
+    "noTrendingSearches": "暂无热门搜索"
   },
   "categoryMenu": {
     "skincare": "护肤",

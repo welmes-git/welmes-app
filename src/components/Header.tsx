@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { brands } from '../data/products';
 import { categoryMenuColumns } from '../config/categoryMenu';
 import { useOutsideClick } from '../hooks/useOutsideClick';
+import * as db from '../lib/db';
 import {
   ShoppingBag,
   Heart,
@@ -61,6 +62,21 @@ export default function Header() {
   const [showBrandDropdown, setShowBrandDropdown] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [trendingSearches, setTrendingSearches] = useState<db.TrendingSearch[] | null>(null);
+  const [trendingUpdatedAt, setTrendingUpdatedAt] = useState<Date | null>(null);
+
+  // Fetch real trending searches each time the overlay opens, rather than
+  // showing a hardcoded list next to a fake "as of HH:MM" timestamp.
+  useEffect(() => {
+    if (!showMobileSearch) return;
+    let cancelled = false;
+    db.fetchTrendingSearches(10).then((rows) => {
+      if (cancelled) return;
+      setTrendingSearches(rows);
+      setTrendingUpdatedAt(new Date());
+    });
+    return () => { cancelled = true; };
+  }, [showMobileSearch]);
   const [showMobileCategory, setShowMobileCategory] = useState(false);
   const [showMobileBrandShop, setShowMobileBrandShop] = useState(false);
   const [brandSearch, setBrandSearch] = useState('');
@@ -224,8 +240,10 @@ export default function Header() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    const term = searchQuery.trim();
+    if (term) {
+      db.logSearchQuery(term, currentUser?.id);
+      navigate(`/products?search=${encodeURIComponent(term)}`);
       setShowMobileSearch(false);
     }
   };
@@ -701,23 +719,33 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* Trending Searches */}
+              {/* Trending Searches — real buyer search activity, not a fixed list */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-[15px] font-bold text-[#222]">{t('nav.trendingSearches')}</span>
-                  <span className="text-[11px] text-[#bbb]">
-                    as of {new Date().getHours()}:{String(new Date().getMinutes()).padStart(2, '0')}
-                  </span>
+                  {trendingUpdatedAt && (
+                    <span className="text-[11px] text-[#bbb]">
+                      {t('nav.asOf', {
+                        time: `${trendingUpdatedAt.getHours()}:${String(trendingUpdatedAt.getMinutes()).padStart(2, '0')}`,
+                      })}
+                    </span>
+                  )}
                 </div>
+                {trendingSearches === null ? (
+                  <div className="grid grid-cols-2 gap-y-3">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="h-[18px] w-24 bg-[#f4f4f4] rounded animate-pulse" />
+                    ))}
+                  </div>
+                ) : trendingSearches.length === 0 ? (
+                  <p className="text-[13px] text-[#aaa] py-2">{t('nav.noTrendingSearches')}</p>
+                ) : (
                 <div className="grid grid-cols-2 gap-y-3">
-                  {[
-                    'Serum', 'Sunscreen', 'Toner', 'Essence',
-                    'Sheet mask', 'Cleanser', 'Eye cream', 'Foundation',
-                    'BB cream', 'Lip balm',
-                  ].map((term, idx) => (
+                  {trendingSearches.map(({ term }, idx) => (
                     <button
                       key={term}
                       onClick={() => {
+                        db.logSearchQuery(term, currentUser?.id);
                         navigate(`/products?search=${encodeURIComponent(term)}`);
                         setShowMobileSearch(false);
                       }}
@@ -727,10 +755,10 @@ export default function Header() {
                         {idx + 1}
                       </span>
                       <span className="text-[14px] text-[#333]">{term}</span>
-                      <span className="text-[#ff4d6d]" style={{fontSize: '9px'}}>▲</span>
                     </button>
                   ))}
                 </div>
+                )}
               </div>
             </div>
           </div>

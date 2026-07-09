@@ -36,7 +36,9 @@
     "keywordSuggestions": "キーワード候補",
     "trendingSearches": "急上昇ワード",
     "brandSearchPlaceholder": "ブランド名で検索",
-    "noBrandsFound": "該当するブランドがありません"
+    "noBrandsFound": "該当するブランドがありません",
+    "asOf": "{{time}} 時点",
+    "noTrendingSearches": "まだ人気検索ワードがありません"
   },
   "categoryMenu": {
     "skincare": "スキンケア",

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { initialProducts } from '../data/products';
 import ProductCard from '../components/ProductCard';
+import ProductGridSkeleton from '../components/ProductGridSkeleton';
 import { ChevronLeft, ChevronRight, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { heroBanners as banners, eventBanners } from '../config/banners';
 import { useTranslation } from 'react-i18next';
@@ -22,9 +23,12 @@ const brandLogos = [
 
 export default function Home() {
   const { t } = useTranslation();
-  const { products } = useStore();
+  const { products, productsLoading } = useStore();
   const [currentBanner, setCurrentBanner] = useState(0);
-  const allProducts = products.length > 0 ? products : initialProducts;
+  // Only fall back to the demo catalogue once loading has actually finished
+  // and come back empty — otherwise this briefly flashes demo products before
+  // the real Supabase fetch replaces them a moment later.
+  const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
 
   // Weekly best = most reviewed; New arrivals = highest id (newest first).
   // Previously New Arrivals was `slice(4, 12)`, which rendered an empty section
@@ -128,11 +132,15 @@ export default function Home() {
             <ChevronRightIcon size={14} />
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-          {weeklyBest.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {productsLoading ? (
+          <ProductGridSkeleton />
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            {weeklyBest.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Event Banners */}
@@ -160,7 +168,7 @@ export default function Home() {
       </section>
 
       {/* New Arrivals */}
-      {newArrivals.length > 0 && (
+      {(productsLoading || newArrivals.length > 0) && (
         <section className="bg-[#f8f8fa] py-16">
           <div className="max-w-[1100px] mx-auto px-4">
             <div className="flex items-center justify-between mb-8">
@@ -173,11 +181,13 @@ export default function Home() {
                 <ChevronRightIcon size={14} />
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-              {newArrivals.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            {productsLoading ? <ProductGridSkeleton /> : (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                {newArrivals.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}

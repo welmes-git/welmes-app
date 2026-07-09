@@ -7,11 +7,14 @@ import { useTranslation } from 'react-i18next';
 
 export default function Wishlist() {
   const navigate = useNavigate();
-  const { isAuthenticated, wishlist, toggleWishlist, addToCart, products, showToast, currentUser } = useStore();
+  const { isAuthenticated, wishlist, toggleWishlist, addToCart, products, productsLoading, showToast, currentUser } = useStore();
   const { formatPrice } = useCurrency();
   const { t } = useTranslation();
 
-  const allProducts = products.length > 0 ? products : initialProducts;
+  // Only fall back to the demo catalogue once loading has actually finished
+  // and come back empty — otherwise a wishlist that genuinely has items can
+  // flash the "your wishlist is empty" state while the real fetch is in flight.
+  const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
   const wishlistProducts = allProducts.filter((p) => wishlist.includes(p.id));
   const isVerified = currentUser?.status === 'approved';
 
@@ -24,6 +27,14 @@ export default function Wishlist() {
         <button onClick={() => navigate('/login')} className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[14px] hover:bg-[#555] transition-colors">
           {t('wishlist.goToLogin')}
         </button>
+      </div>
+    );
+  }
+
+  if (productsLoading && wishlist.length > 0) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#e5e5e5] border-t-[#333] rounded-full animate-spin" />
       </div>
     );
   }

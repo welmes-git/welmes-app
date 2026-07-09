@@ -36,7 +36,9 @@
     "keywordSuggestions": "คำค้นหาแนะนำ",
     "trendingSearches": "คำค้นหายอดนิยม",
     "brandSearchPlaceholder": "ค้นหาชื่อแบรนด์",
-    "noBrandsFound": "ไม่พบแบรนด์"
+    "noBrandsFound": "ไม่พบแบรนด์",
+    "asOf": "ณ เวลา {{time}}",
+    "noTrendingSearches": "ยังไม่มีคำค้นหายอดนิยม"
   },
   "categoryMenu": {
     "skincare": "บำรุงผิว",

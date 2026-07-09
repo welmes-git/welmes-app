@@ -36,7 +36,9 @@
     "keywordSuggestions": "Gợi ý từ khóa",
     "trendingSearches": "Tìm kiếm thịnh hành",
     "brandSearchPlaceholder": "Tìm kiếm tên thương hiệu",
-    "noBrandsFound": "Không tìm thấy thương hiệu"
+    "noBrandsFound": "Không tìm thấy thương hiệu",
+    "asOf": "tính đến {{time}}",
+    "noTrendingSearches": "Chưa có từ khóa tìm kiếm phổ biến"
   },
   "categoryMenu": {
     "skincare": "Chăm sóc da",

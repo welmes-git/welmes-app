@@ -36,7 +36,9 @@
     "keywordSuggestions": "Sugerencias de búsqueda",
     "trendingSearches": "Búsquedas populares",
     "brandSearchPlaceholder": "Busca el nombre de una marca",
-    "noBrandsFound": "No se encontraron marcas"
+    "noBrandsFound": "No se encontraron marcas",
+    "asOf": "a las {{time}}",
+    "noTrendingSearches": "Aún no hay búsquedas populares"
   },
   "categoryMenu": {
     "skincare": "Cuidado facial",

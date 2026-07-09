@@ -36,7 +36,9 @@
     "keywordSuggestions": "Подсказки",
     "trendingSearches": "Популярные запросы",
     "brandSearchPlaceholder": "Поиск по названию бренда",
-    "noBrandsFound": "Бренды не найдены"
+    "noBrandsFound": "Бренды не найдены",
+    "asOf": "по состоянию на {{time}}",
+    "noTrendingSearches": "Пока нет популярных запросов"
   },
   "categoryMenu": {
     "skincare": "Уход за кожей",

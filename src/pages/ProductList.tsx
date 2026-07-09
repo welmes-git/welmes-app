@@ -4,6 +4,8 @@ import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { initialProducts, brands, categories } from '../data/products';
 import ProductCard from '../components/ProductCard';
+import ProductGridSkeleton from '../components/ProductGridSkeleton';
+import * as db from '../lib/db';
 import { ChevronLeft, ChevronRight, ChevronDown, Search, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,11 +14,14 @@ type SortOption = 'popular' | 'price-low' | 'price-high' | 'newest' | 'discount'
 export default function ProductList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { products } = useStore();
+  const { products, productsLoading } = useStore();
   const { formatPrice } = useCurrency();
   const { t } = useTranslation();
 
-  const allProducts = products.length > 0 ? products : initialProducts;
+  // Only fall back to the demo catalogue once loading has actually finished
+  // and come back empty — otherwise this briefly flashes demo products before
+  // the real Supabase fetch replaces them a moment later.
+  const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
 
   const categoryFilter = searchParams.get('category') || 'All';
   const brandFilter    = searchParams.get('brand')    || '';
@@ -132,6 +137,7 @@ export default function ProductList() {
     e.preventDefault();
     const q = inlineSearch.trim();
     if (q) {
+      db.logSearchQuery(q);
       navigate(`/products?search=${encodeURIComponent(q)}`);
     } else {
       // Clear search → back to all products
@@ -367,31 +373,37 @@ export default function ProductList() {
               </div>
             </div>
 
-            {/* No Results */}
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-16">
-                <Search size={48} className="mx-auto text-[#ddd] mb-4" />
-                <p className="text-[15px] font-medium text-[#666] mb-1">{t('products.noResults')}</p>
-                {searchQuery && (
-                  <p className="text-[13px] text-[#aaa] mb-4">
-                    "{searchQuery}"
-                  </p>
+            {productsLoading ? (
+              <ProductGridSkeleton count={9} />
+            ) : (
+              <>
+                {/* No Results */}
+                {filteredProducts.length === 0 && (
+                  <div className="text-center py-16">
+                    <Search size={48} className="mx-auto text-[#ddd] mb-4" />
+                    <p className="text-[15px] font-medium text-[#666] mb-1">{t('products.noResults')}</p>
+                    {searchQuery && (
+                      <p className="text-[13px] text-[#aaa] mb-4">
+                        "{searchQuery}"
+                      </p>
+                    )}
+                    <button
+                      onClick={() => { clearFilters(); clearSearch(); }}
+                      className="mt-2 px-5 py-2 bg-[#333] text-white text-[13px] rounded-lg hover:bg-[#555] transition-colors"
+                    >
+                      {t('products.clearFilters')}
+                    </button>
+                  </div>
                 )}
-                <button
-                  onClick={() => { clearFilters(); clearSearch(); }}
-                  className="mt-2 px-5 py-2 bg-[#333] text-white text-[13px] rounded-lg hover:bg-[#555] transition-colors"
-                >
-                  {t('products.clearFilters')}
-                </button>
-              </div>
-            )}
 
-            {/* Product Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-              {paginatedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+                {/* Product Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+                  {paginatedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* Pagination */}
             {totalPages > 1 && (

@@ -372,6 +372,37 @@ export async function deleteNotificationsByMemberId(memberId: string) {
   return supabase.from('notifications').delete().eq('member_id', memberId);
 }
 
+// ── Search trends ────────────────────────────────────────────────
+// Logs real buyer search terms so "Trending Searches" reflects actual
+// activity instead of a hardcoded list.
+
+/** Fire-and-forget — a failed log shouldn't block the user's search. */
+export function logSearchQuery(term: string, memberId?: string) {
+  const trimmed = term.trim();
+  if (!trimmed) return;
+  supabase
+    .from('search_queries')
+    .insert([{ term: trimmed, member_id: memberId ?? null }])
+    .then(({ error }) => { if (error) console.error('[logSearchQuery]', error.message); });
+}
+
+export interface TrendingSearch {
+  term: string;
+  count: number;
+}
+
+export async function fetchTrendingSearches(limit = 10): Promise<TrendingSearch[]> {
+  const { data, error } = await supabase.rpc('get_trending_searches', { p_limit: limit });
+  if (error || !data) {
+    if (error) console.error('[fetchTrendingSearches]', error.message);
+    return [];
+  }
+  return (data as { term: string; search_count: number }[]).map((row) => ({
+    term: row.term,
+    count: Number(row.search_count),
+  }));
+}
+
 // ── Reviews ──────────────────────────────────────────────────────
 
 export interface Review {

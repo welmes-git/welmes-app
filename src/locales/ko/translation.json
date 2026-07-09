@@ -36,7 +36,9 @@
     "keywordSuggestions": "추천 검색어",
     "trendingSearches": "인기 검색어",
     "brandSearchPlaceholder": "브랜드 이름을 검색해 보세요",
-    "noBrandsFound": "검색된 브랜드가 없습니다"
+    "noBrandsFound": "검색된 브랜드가 없습니다",
+    "asOf": "{{time}} 기준",
+    "noTrendingSearches": "아직 인기 검색어가 없습니다"
   },
   "categoryMenu": {
     "skincare": "스킨케어",

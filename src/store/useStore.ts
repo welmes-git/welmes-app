@@ -112,6 +112,9 @@ interface AppState {
 
   // Products
   products: Product[];
+  /** True until the initial Supabase fetch settles — lets pages show a
+   *  spinner instead of flashing the demo catalogue before real data loads */
+  productsLoading: boolean;
   loadProducts: () => Promise<void>;
   addProduct: (product: Omit<Product, 'id'>) => Promise<Product | null>;
   updateProduct: (id: number, updates: Partial<Product>) => Promise<{ error: any } | void>;
@@ -246,10 +249,11 @@ export const useStore = create<AppState>()(
 
       // ── Products ──────────────────────────────────────────────
       products: [],
+      productsLoading: true,
 
       loadProducts: async () => {
         const products = await db.fetchProducts();
-        set({ products });
+        set({ products, productsLoading: false });
       },
 
       addProduct: async (product) => {

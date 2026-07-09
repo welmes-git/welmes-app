@@ -36,7 +36,9 @@
     "keywordSuggestions": "Keyword Suggestions",
     "trendingSearches": "Trending Searches",
     "brandSearchPlaceholder": "Search for a brand name",
-    "noBrandsFound": "No brands found"
+    "noBrandsFound": "No brands found",
+    "asOf": "as of {{time}}",
+    "noTrendingSearches": "No trending searches yet"
   },
   "categoryMenu": {
     "skincare": "Skincare",

@@ -36,7 +36,9 @@
     "keywordSuggestions": "Suggestions de recherche",
     "trendingSearches": "Recherches populaires",
     "brandSearchPlaceholder": "Rechercher une marque",
-    "noBrandsFound": "Aucune marque trouvée"
+    "noBrandsFound": "Aucune marque trouvée",
+    "asOf": "à {{time}}",
+    "noTrendingSearches": "Aucune recherche tendance pour l'instant"
   },
   "categoryMenu": {
     "skincare": "Soin visage",

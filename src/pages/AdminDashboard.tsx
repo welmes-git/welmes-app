@@ -50,6 +50,7 @@ export default function AdminDashboard() {
     currentUser,
     members,
     products,
+    productsLoading,
     orders,
     approveMember,
     rejectMember,
@@ -268,7 +269,10 @@ export default function AdminDashboard() {
     return null;
   }
 
-  const allProducts = products.length > 0 ? products : initialProducts;
+  // Only fall back to the demo catalogue once loading has actually finished
+  // and come back empty — otherwise the real inventory can briefly flash the
+  // demo products while the Supabase fetch is still in flight.
+  const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
 
   // Stats — all derived from live data
   const totalMembers = members.length;
