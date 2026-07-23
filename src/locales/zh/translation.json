@@ -416,7 +416,18 @@
     "resetSuccess": "密码已更新，请重新登录。",
     "resetEmailRequired": "请先输入您的电子邮箱",
     "resetSent": "密码重置链接已发送至 {{email}}",
-    "loginAsPending": "以待审核会员登录"
+    "loginAsPending": "以待审核会员登录",
+    "browseWhileWaiting": "审核期间先逛逛商品",
+    "checkApplicationStatus": "查看申请状态",
+    "stepSubmitted": "已提交",
+    "stepReviewing": "审核中",
+    "stepApproved": "已批准",
+    "afterApproval": "批准后会发生什么变化",
+    "afterApproval1": "解锁全部商品的批发价格",
+    "afterApproval2": "可直接下批量订单，支持套装/数量选择",
+    "afterApproval3": "支持多种货币结算（日元、美元、欧元等）",
+    "afterApproval4": "专属客户经理提供订单支持",
+    "browseWhileWaitingTitle": "审核期间先逛逛"
   },
   "account": {
     "title": "我的账户",

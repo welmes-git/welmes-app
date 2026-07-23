@@ -36,6 +36,19 @@ export function emailOrderPlaced(order: Order, buyerEmail: string) {
   });
 }
 
+export function emailMemberRegistered(data: {
+  email: string;
+  companyName: string;
+  businessNumber: string;
+  representative: string;
+  phone: string;
+}) {
+  invoke('member_registered', {
+    ...data,
+    date: new Date().toISOString().split('T')[0],
+  });
+}
+
 export function emailMemberApproved(email: string, companyName: string) {
   invoke('member_approved', { email, companyName });
 }

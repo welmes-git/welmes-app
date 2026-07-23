@@ -202,7 +202,67 @@ function orderPlacedAdminHtml(d: OrderPlacedData) {
   `)
 }
 
-// ── 3. Member Approved ───────────────────────────────────────────────────────
+// ── 3. Member Registered (buyer welcome + admin alert) ───────────────────────
+// Sent the moment a business finishes registration, before any admin action —
+// closes the "did this actually submit?" anxiety gap during the approval wait,
+// and makes sure the admin actually finds out there's a new application to
+// review (previously nothing notified them at all).
+
+interface MemberRegisteredData {
+  email: string; companyName: string; businessNumber: string
+  representative: string; phone: string; date: string
+}
+
+function memberRegisteredBuyerHtml(d: MemberRegisteredData) {
+  return base(`
+    <p style="margin:0 0 6px;">${badge('#4a90e2', 'APPLICATION RECEIVED')}</p>
+    <h1 style="margin:8px 0 8px;font-size:22px;font-weight:800;color:#1a1a1a;">Thanks for applying, ${esc(d.companyName)}!</h1>
+    <p style="margin:0 0 24px;font-size:14px;color:#666;line-height:1.7;">
+      We've received your business registration and our team is reviewing it now.
+      Approval typically takes <strong>1–2 business days</strong> — we'll email you
+      the moment a decision is made.
+    </p>
+
+    <div style="background:#f8f8fa;border-radius:8px;padding:16px;margin-bottom:24px;font-size:13px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:3px 0;color:#888;">Company</td><td align="right" style="color:#222;font-weight:600;">${esc(d.companyName)}</td></tr>
+        <tr><td style="padding:3px 0;color:#888;">Business Reg. No.</td><td align="right" style="color:#222;font-weight:600;">${esc(d.businessNumber)}</td></tr>
+        <tr><td style="padding:3px 0;color:#888;">Submitted</td><td align="right" style="color:#222;font-weight:600;">${esc(d.date)}</td></tr>
+      </table>
+    </div>
+
+    <p style="margin:0 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#aaa;">While you wait</p>
+    <p style="margin:0 0 20px;font-size:13px;color:#666;line-height:1.7;">
+      You can already browse our full catalogue and save items to your wishlist —
+      wholesale pricing unlocks automatically the moment you're approved.
+    </p>
+    ${button('https://welmes-app.vercel.app/#/products', 'Browse Products')}
+  `)
+}
+
+function memberRegisteredAdminHtml(d: MemberRegisteredData) {
+  return base(`
+    <p style="margin:0 0 6px;">${badge('#ff9500', 'NEW APPLICATION')}</p>
+    <h1 style="margin:8px 0 4px;font-size:20px;font-weight:800;color:#1a1a1a;">${esc(d.companyName)} applied for a business account</h1>
+    <p style="margin:0 0 24px;font-size:13px;color:#666;">Submitted ${esc(d.date)}</p>
+
+    <div style="background:#f8f8fa;border-radius:8px;padding:16px;margin-bottom:24px;font-size:13px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:3px 0;color:#888;">Representative</td><td align="right" style="color:#222;font-weight:600;">${esc(d.representative)}</td></tr>
+        <tr><td style="padding:3px 0;color:#888;">Business Reg. No.</td><td align="right" style="color:#222;font-weight:600;">${esc(d.businessNumber)}</td></tr>
+        <tr><td style="padding:3px 0;color:#888;">Email</td><td align="right" style="color:#222;font-weight:600;">${esc(d.email)}</td></tr>
+        <tr><td style="padding:3px 0;color:#888;">Phone</td><td align="right" style="color:#222;font-weight:600;">${esc(d.phone)}</td></tr>
+      </table>
+    </div>
+
+    <p style="margin:0 0 20px;font-size:13px;color:#666;line-height:1.7;">
+      The site promises a 1–2 business day review — please action this application soon.
+    </p>
+    ${button('https://welmes-app.vercel.app/#/admin', 'Review in Admin Dashboard', '#4a90e2')}
+  `)
+}
+
+// ── 4. Member Approved ───────────────────────────────────────────────────────
 
 interface MemberData { email: string; companyName: string }
 
@@ -228,7 +288,7 @@ function memberApprovedHtml(d: MemberData) {
   `)
 }
 
-// ── 4. Member Rejected ───────────────────────────────────────────────────────
+// ── 5. Member Rejected ───────────────────────────────────────────────────────
 
 function memberRejectedHtml(d: MemberData) {
   return base(`
@@ -250,7 +310,7 @@ function memberRejectedHtml(d: MemberData) {
   `)
 }
 
-// ── 5. Order Shipped ─────────────────────────────────────────────────────────
+// ── 6. Order Shipped ─────────────────────────────────────────────────────────
 
 interface ShippedData {
   buyerEmail: string; orderId: string; memberName: string
@@ -313,8 +373,11 @@ Deno.serve(async (req) => {
     if (ADMIN_ONLY.has(type) && !caller.isAdmin) {
       return json({ error: 'Forbidden' }, 403)
     }
-    // A buyer may only trigger their own order confirmation.
+    // A buyer may only trigger their own order confirmation / registration email.
     if (type === 'order_placed' && !caller.isAdmin && data?.buyerEmail !== caller.email) {
+      return json({ error: 'Forbidden' }, 403)
+    }
+    if (type === 'member_registered' && !caller.isAdmin && data?.email !== caller.email) {
       return json({ error: 'Forbidden' }, 403)
     }
 
@@ -323,6 +386,12 @@ Deno.serve(async (req) => {
         await Promise.all([
           sendEmail(data.buyerEmail, `Order Confirmed — ${data.orderId}`, orderPlacedBuyerHtml(data)),
           sendEmail(ADMIN_EMAIL, `[New Order] ${data.orderId} from ${data.memberName}`, orderPlacedAdminHtml(data)),
+        ])
+        break
+      case 'member_registered':
+        await Promise.all([
+          sendEmail(data.email, 'Your WELMES Business Application Has Been Received', memberRegisteredBuyerHtml(data)),
+          sendEmail(ADMIN_EMAIL, `[New Application] ${data.companyName}`, memberRegisteredAdminHtml(data)),
         ])
         break
       case 'member_approved':

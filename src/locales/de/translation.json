@@ -416,7 +416,18 @@
     "resetSuccess": "Passwort aktualisiert. Bitte melden Sie sich an.",
     "resetEmailRequired": "Bitte geben Sie zuerst Ihre E-Mail-Adresse ein",
     "resetSent": "Link zum Zurücksetzen an {{email}} gesendet",
-    "loginAsPending": "Als ausstehendes Mitglied anmelden"
+    "loginAsPending": "Als ausstehendes Mitglied anmelden",
+    "browseWhileWaiting": "Produkte ansehen, während Sie warten",
+    "checkApplicationStatus": "Antragsstatus prüfen",
+    "stepSubmitted": "Eingereicht",
+    "stepReviewing": "In Prüfung",
+    "stepApproved": "Genehmigt",
+    "afterApproval": "Was sich nach der Genehmigung ändert",
+    "afterApproval1": "Großhandelspreise für den gesamten Katalog werden freigeschaltet",
+    "afterApproval2": "Sie können direkt Großbestellungen mit Set-/Mengenoptionen aufgeben",
+    "afterApproval3": "Bezahlung in Ihrer Währung (JPY, USD, EUR und mehr)",
+    "afterApproval4": "Ein persönlicher Account-Manager für Ihre Bestellungen",
+    "browseWhileWaitingTitle": "Stöbern Sie in der Zwischenzeit"
   },
   "account": {
     "title": "Mein Konto",

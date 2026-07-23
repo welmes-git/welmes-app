@@ -414,7 +414,18 @@
     "resetSuccess": "Đã cập nhật mật khẩu. Vui lòng đăng nhập.",
     "resetEmailRequired": "Vui lòng nhập email của bạn trước",
     "resetSent": "Đã gửi liên kết đặt lại mật khẩu tới {{email}}",
-    "loginAsPending": "Đăng nhập với tư cách thành viên chờ duyệt"
+    "loginAsPending": "Đăng nhập với tư cách thành viên chờ duyệt",
+    "browseWhileWaiting": "Xem sản phẩm trong khi chờ",
+    "checkApplicationStatus": "Kiểm tra trạng thái đơn đăng ký",
+    "stepSubmitted": "Đã gửi",
+    "stepReviewing": "Đang xét duyệt",
+    "stepApproved": "Đã duyệt",
+    "afterApproval": "Điều gì thay đổi sau khi được duyệt",
+    "afterApproval1": "Mở khóa giá sỉ cho toàn bộ danh mục sản phẩm",
+    "afterApproval2": "Đặt hàng số lượng lớn trực tiếp với tùy chọn bộ/số lượng",
+    "afterApproval3": "Thanh toán bằng đơn vị tiền tệ của bạn (JPY, USD, EUR và hơn thế)",
+    "afterApproval4": "Quản lý tài khoản riêng hỗ trợ đơn hàng",
+    "browseWhileWaitingTitle": "Xem sản phẩm trong lúc chờ"
   },
   "account": {
     "title": "Tài khoản của tôi",

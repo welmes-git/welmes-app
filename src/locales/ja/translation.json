@@ -416,7 +416,18 @@
     "resetSuccess": "パスワードを更新しました。再度ログインしてください。",
     "resetEmailRequired": "先にメールアドレスを入力してください",
     "resetSent": "{{email}} にパスワード再設定リンクを送信しました",
-    "loginAsPending": "承認待ち会員としてログイン"
+    "loginAsPending": "承認待ち会員としてログイン",
+    "browseWhileWaiting": "審査を待つ間に商品を見る",
+    "checkApplicationStatus": "申請状況を確認する",
+    "stepSubmitted": "提出済み",
+    "stepReviewing": "審査中",
+    "stepApproved": "承認",
+    "afterApproval": "承認後にできること",
+    "afterApproval1": "全商品の卸売価格が表示されます",
+    "afterApproval2": "セット・数量を選んで直接まとめ注文が可能です",
+    "afterApproval3": "ご希望の通貨で決済できます（JPY・USD・EURなど）",
+    "afterApproval4": "専任担当者が注文をサポートします",
+    "browseWhileWaitingTitle": "審査中に商品をチェック"
   },
   "account": {
     "title": "マイアカウント",

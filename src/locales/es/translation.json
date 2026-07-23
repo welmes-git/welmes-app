@@ -416,7 +416,18 @@
     "resetSuccess": "Contraseña actualizada. Inicia sesión.",
     "resetEmailRequired": "Introduce primero tu correo electrónico",
     "resetSent": "Enlace de restablecimiento enviado a {{email}}",
-    "loginAsPending": "Entrar como miembro pendiente"
+    "loginAsPending": "Entrar como miembro pendiente",
+    "browseWhileWaiting": "Explora productos mientras esperas",
+    "checkApplicationStatus": "Ver el estado de mi solicitud",
+    "stepSubmitted": "Enviado",
+    "stepReviewing": "En revisión",
+    "stepApproved": "Aprobado",
+    "afterApproval": "Qué cambia una vez aprobado",
+    "afterApproval1": "Se desbloquean los precios mayoristas en todo el catálogo",
+    "afterApproval2": "Realiza pedidos al por mayor con opciones de set/cantidad",
+    "afterApproval3": "Pago en tu moneda (JPY, USD, EUR y más)",
+    "afterApproval4": "Un gestor de cuenta dedicado para tus pedidos",
+    "browseWhileWaitingTitle": "Explora mientras esperas"
   },
   "account": {
     "title": "Mi cuenta",

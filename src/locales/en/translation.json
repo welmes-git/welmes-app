@@ -416,7 +416,18 @@
     "resetSuccess": "Password updated. Please sign in.",
     "resetEmailRequired": "Enter your email address first",
     "resetSent": "Password reset link sent to {{email}}",
-    "loginAsPending": "Login as Pending Member"
+    "loginAsPending": "Login as Pending Member",
+    "browseWhileWaiting": "Browse Products While You Wait",
+    "checkApplicationStatus": "Check my application status",
+    "stepSubmitted": "Submitted",
+    "stepReviewing": "Under Review",
+    "stepApproved": "Approved",
+    "afterApproval": "What Changes Once You're Approved",
+    "afterApproval1": "Wholesale pricing unlocks on every product in the catalogue",
+    "afterApproval2": "Place bulk orders directly, with set/quantity options",
+    "afterApproval3": "Checkout in your currency (JPY, USD, EUR and more)",
+    "afterApproval4": "A dedicated account manager for order support",
+    "browseWhileWaitingTitle": "Browse While You Wait"
   },
   "account": {
     "title": "My Account",

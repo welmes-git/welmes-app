@@ -225,8 +225,15 @@ export default function Register() {
                 <p className="text-[12px] text-[#666] mt-1"><span className="font-medium">Business No:</span> {businessNumber}</p>
                 <p className="text-[12px] text-[#666] mt-1"><span className="font-medium">Status:</span> <span className="text-yellow-600 font-medium">{t('status.pending')}</span></p>
               </div>
-              <Link to="/" className="inline-flex w-full h-[46px] bg-[#333] text-white rounded-lg font-medium text-[14px] hover:bg-[#555] transition-colors items-center justify-center">
-                {t('common.backToHome')}
+              {/* Send them straight into the catalogue instead of a dead-end
+                  "back to home" — browsing already works while pending
+                  (pricing just stays locked), so give them something to do
+                  during the 1–2 day wait instead of just leaving. */}
+              <Link to="/products" className="inline-flex w-full h-[46px] bg-[#333] text-white rounded-lg font-medium text-[14px] hover:bg-[#555] transition-colors items-center justify-center">
+                {t('auth.browseWhileWaiting')}
+              </Link>
+              <Link to="/pending" className="inline-flex w-full h-[42px] mt-2 text-[#666] text-[13px] hover:text-[#333] transition-colors items-center justify-center">
+                {t('auth.checkApplicationStatus')}
               </Link>
             </div>
           )}

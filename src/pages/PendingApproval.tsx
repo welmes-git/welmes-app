@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTranslation } from 'react-i18next';
+import { initialProducts } from '../data/products';
+import ProductCard from '../components/ProductCard';
 import {
   Clock,
   XCircle,
@@ -9,16 +11,18 @@ import {
   CheckCircle2,
   FileText,
   MessageCircle,
+  Check,
 } from 'lucide-react';
 
 export default function PendingApproval() {
-  const { currentUser, logout } = useStore();
+  const { currentUser, logout, products } = useStore();
   const { t } = useTranslation();
   const status = currentUser?.status ?? 'pending';
+  const previewProducts = (products.length > 0 ? products : initialProducts).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-[#f8f8fa] flex flex-col items-center justify-center px-4 py-16">
-      <div className="w-full max-w-[520px]">
+      <div className="w-full max-w-[560px]">
 
         {/* Status card */}
         <div className="bg-white rounded-2xl border border-[#e5e5e5] p-8 text-center mb-5">
@@ -56,6 +60,36 @@ export default function PendingApproval() {
             </>
           )}
         </div>
+
+        {/* Progress stepper — a concrete "where am I" beat instead of a bare
+            date-range sentence; the vague wait is what drives abandonment. */}
+        {status === 'pending' && (
+          <div className="bg-white rounded-2xl border border-[#e5e5e5] p-5 mb-5">
+            <div className="flex items-center">
+              {[
+                { label: t('auth.stepSubmitted'), done: true },
+                { label: t('auth.stepReviewing'), done: true, current: true },
+                { label: t('auth.stepApproved'), done: false },
+              ].map((s, i, arr) => (
+                <div key={i} className={`flex items-center ${i < arr.length - 1 ? 'flex-1' : ''}`}>
+                  <div className="flex flex-col items-center gap-1.5 shrink-0">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold ${
+                      s.done ? (s.current ? 'bg-yellow-400 text-white' : 'bg-[#4a90e2] text-white') : 'bg-[#eee] text-[#aaa]'
+                    }`}>
+                      {s.done && !s.current ? <Check size={13} /> : i + 1}
+                    </div>
+                    <span className={`text-[11px] text-center whitespace-nowrap ${s.done ? 'text-[#333] font-medium' : 'text-[#aaa]'}`}>
+                      {s.label}
+                    </span>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <div className={`flex-1 h-[2px] mb-5 ${arr[i + 1].done ? 'bg-[#4a90e2]' : 'bg-[#eee]'}`} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Account info */}
         <div className="bg-white rounded-2xl border border-[#e5e5e5] p-5 mb-5">
@@ -100,6 +134,51 @@ export default function PendingApproval() {
                   <div className="shrink-0 mt-0.5">{item.icon}</div>
                   <p className="text-[13px] text-[#555]">{item.text}</p>
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* What changes after approval — a concrete reason to keep waiting,
+            not just a rules explanation. No prices here: what pricing gets
+            shown to unapproved visitors is a separate, not-yet-decided policy. */}
+        {status === 'pending' && (
+          <div className="bg-white rounded-2xl border border-[#e5e5e5] p-5 mb-5">
+            <h2 className="text-[13px] font-semibold text-[#aaa] uppercase tracking-wide mb-3">
+              {t('auth.afterApproval')}
+            </h2>
+            <div className="space-y-2">
+              {[
+                t('auth.afterApproval1'),
+                t('auth.afterApproval2'),
+                t('auth.afterApproval3'),
+                t('auth.afterApproval4'),
+              ].map((line, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <CheckCircle2 size={15} className="text-green-500 shrink-0 mt-0.5" />
+                  <p className="text-[13px] text-[#555]">{line}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Browse while waiting — pricing stays masked (same as any other
+            unapproved visitor), but gives them something to do besides
+            leaving the tab open for two days. */}
+        {status === 'pending' && previewProducts.length > 0 && (
+          <div className="bg-white rounded-2xl border border-[#e5e5e5] p-5 mb-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[13px] font-semibold text-[#aaa] uppercase tracking-wide">
+                {t('auth.browseWhileWaitingTitle')}
+              </h2>
+              <Link to="/products" className="text-[12px] text-[#4a90e2] hover:underline">
+                {t('common.viewAll')}
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {previewProducts.map((p) => (
+                <ProductCard key={p.id} product={p} showQuickAdd={false} />
               ))}
             </div>
           </div>

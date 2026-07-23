@@ -414,7 +414,18 @@
     "resetSuccess": "Kata sandi diperbarui. Silakan masuk.",
     "resetEmailRequired": "Masukkan alamat email Anda terlebih dahulu",
     "resetSent": "Tautan atur ulang kata sandi dikirim ke {{email}}",
-    "loginAsPending": "Masuk sebagai anggota tertunda"
+    "loginAsPending": "Masuk sebagai anggota tertunda",
+    "browseWhileWaiting": "Jelajahi produk sambil menunggu",
+    "checkApplicationStatus": "Periksa status pengajuan saya",
+    "stepSubmitted": "Terkirim",
+    "stepReviewing": "Sedang ditinjau",
+    "stepApproved": "Disetujui",
+    "afterApproval": "Yang berubah setelah disetujui",
+    "afterApproval1": "Harga grosir terbuka untuk semua produk",
+    "afterApproval2": "Melakukan pemesanan grosir langsung dengan opsi set/jumlah",
+    "afterApproval3": "Checkout dengan mata uang Anda (JPY, USD, EUR, dan lainnya)",
+    "afterApproval4": "Manajer akun khusus untuk dukungan pesanan",
+    "browseWhileWaitingTitle": "Jelajahi sambil menunggu"
   },
   "account": {
     "title": "Akun Saya",

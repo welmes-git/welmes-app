@@ -414,7 +414,18 @@
     "resetSuccess": "อัปเดตรหัสผ่านแล้ว กรุณาเข้าสู่ระบบ",
     "resetEmailRequired": "กรุณากรอกอีเมลของคุณก่อน",
     "resetSent": "ส่งลิงก์รีเซ็ตรหัสผ่านไปที่ {{email}} แล้ว",
-    "loginAsPending": "เข้าสู่ระบบในฐานะสมาชิกรออนุมัติ"
+    "loginAsPending": "เข้าสู่ระบบในฐานะสมาชิกรออนุมัติ",
+    "browseWhileWaiting": "เลือกดูสินค้าระหว่างรอ",
+    "checkApplicationStatus": "ตรวจสอบสถานะการสมัคร",
+    "stepSubmitted": "ส่งแล้ว",
+    "stepReviewing": "กำลังตรวจสอบ",
+    "stepApproved": "อนุมัติแล้ว",
+    "afterApproval": "สิ่งที่เปลี่ยนไปเมื่อได้รับการอนุมัติ",
+    "afterApproval1": "ปลดล็อกราคาส่งสำหรับสินค้าทั้งหมด",
+    "afterApproval2": "สั่งซื้อจำนวนมากได้โดยตรงพร้อมตัวเลือกชุด/จำนวน",
+    "afterApproval3": "ชำระเงินด้วยสกุลเงินของคุณ (JPY, USD, EUR และอื่นๆ)",
+    "afterApproval4": "ผู้จัดการบัญชีเฉพาะดูแลคำสั่งซื้อของคุณ",
+    "browseWhileWaitingTitle": "เลือกดูสินค้าระหว่างรอ"
   },
   "account": {
     "title": "บัญชีของฉัน",

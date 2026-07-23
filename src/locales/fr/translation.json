@@ -416,7 +416,18 @@
     "resetSuccess": "Mot de passe mis à jour. Veuillez vous connecter.",
     "resetEmailRequired": "Saisissez d'abord votre adresse e-mail",
     "resetSent": "Lien de réinitialisation envoyé à {{email}}",
-    "loginAsPending": "Connexion en tant que membre en attente"
+    "loginAsPending": "Connexion en tant que membre en attente",
+    "browseWhileWaiting": "Parcourir les produits en attendant",
+    "checkApplicationStatus": "Vérifier l'état de ma demande",
+    "stepSubmitted": "Envoyé",
+    "stepReviewing": "En cours d'examen",
+    "stepApproved": "Approuvé",
+    "afterApproval": "Ce qui change après approbation",
+    "afterApproval1": "Les prix de gros sont débloqués sur tout le catalogue",
+    "afterApproval2": "Passez des commandes en gros avec options de lot/quantité",
+    "afterApproval3": "Paiement dans votre devise (JPY, USD, EUR et plus)",
+    "afterApproval4": "Un gestionnaire de compte dédié pour vos commandes",
+    "browseWhileWaitingTitle": "Parcourez en attendant"
   },
   "account": {
     "title": "Mon compte",

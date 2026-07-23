@@ -420,7 +420,18 @@
     "resetSuccess": "Пароль обновлён. Пожалуйста, войдите.",
     "resetEmailRequired": "Сначала введите свой e-mail",
     "resetSent": "Ссылка для сброса пароля отправлена на {{email}}",
-    "loginAsPending": "Войти как участник на модерации"
+    "loginAsPending": "Войти как участник на модерации",
+    "browseWhileWaiting": "Смотреть товары, пока вы ждёте",
+    "checkApplicationStatus": "Проверить статус заявки",
+    "stepSubmitted": "Отправлено",
+    "stepReviewing": "На рассмотрении",
+    "stepApproved": "Одобрено",
+    "afterApproval": "Что изменится после одобрения",
+    "afterApproval1": "Открывается оптовая цена на весь каталог",
+    "afterApproval2": "Оформляйте оптовые заказы с выбором комплекта и количества",
+    "afterApproval3": "Оплата в вашей валюте (JPY, USD, EUR и другие)",
+    "afterApproval4": "Персональный менеджер для поддержки заказов",
+    "browseWhileWaitingTitle": "Смотрите товары, пока ждёте"
   },
   "account": {
     "title": "Мой аккаунт",

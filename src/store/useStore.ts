@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CurrencyCode } from '../lib/currency';
 import * as db from '../lib/db';
-import { emailOrderPlaced, emailMemberApproved, emailMemberRejected, emailOrderShipped } from '../lib/email';
+import { emailOrderPlaced, emailMemberRegistered, emailMemberApproved, emailMemberRejected, emailOrderShipped } from '../lib/email';
 
 export interface AppNotification {
   id: string;
@@ -314,6 +314,20 @@ export const useStore = create<AppState>()(
           console.error('[registerMember] upsertMember failed:', memberErr.message);
           return { error: memberErr.message };
         }
+
+        // signUp already opened a Supabase session (Confirm Email is off), but
+        // nothing populated the app's own auth state — without this the buyer
+        // looks "logged out" to the UI right after registering, even though
+        // they're technically signed in, until they log in again manually.
+        const member = await db.fetchMemberByAuthId(data.user.id);
+        if (member) {
+          set({ currentUser: member, isAuthenticated: true, isAdmin: member.isAdmin });
+        }
+
+        // Confirms receipt to the applicant and — critically — alerts the
+        // admin, who otherwise has no way to know a new application is
+        // waiting (previously only found by checking the dashboard manually).
+        emailMemberRegistered({ email, companyName, businessNumber, representative, phone });
         return {};
       },
 
