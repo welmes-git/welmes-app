@@ -333,8 +333,13 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Main Header */}
-      <header className="bg-white sticky top-0 z-40 border-b border-[#e5e5e5]">
+      {/* Main Header
+          Olive Young's category mega menu isn't anchored to a sticky header —
+          its nav is `position: relative`, so the whole header + dropdown
+          scrolls away with the page, revealing whatever was below the fold.
+          We match that by dropping `sticky` only while the dropdown is open;
+          it reverts to sticky as soon as it closes. */}
+      <header className={`bg-white z-40 border-b border-[#e5e5e5] ${showCategoryDropdown ? '' : 'sticky top-0'}`}>
         <div className="max-w-[1100px] mx-auto px-4">
           <div className="flex items-center justify-between h-[70px]">
             {/* Logo */}
@@ -561,6 +566,10 @@ export default function Header() {
               {t('nav.category')}
             </button>
             {showCategoryDropdown && (
+              // No max-height/overflow here on purpose — the header drops its
+              // `sticky` above while this is open, so the panel renders at its
+              // natural height and the whole page scrolls past it (Olive
+              // Young's actual mechanism), instead of scrolling inside a box.
               <div className="absolute top-full left-0 right-0 bg-white border border-[#e5e5e5] shadow-[0_16px_32px_rgba(0,0,0,0.12)] z-50">
                 <div className="grid grid-cols-6 divide-x divide-[#f0f0f0] px-1 py-7">
                   {categoryMenuColumns.map((column, colIdx) => (
