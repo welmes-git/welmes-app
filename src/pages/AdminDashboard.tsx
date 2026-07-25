@@ -3,8 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import type { Order, SetOption, Member } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
-import { initialProducts, brands, categories } from '../data/products';
+import { initialProducts, brands } from '../data/products';
 import { supabase } from '../lib/supabase';
+import { categoryMenuColumns } from '../config/categoryMenu';
+import enLabels from '../locales/en/translation.json';
 import {
   LayoutDashboard,
   Users,
@@ -41,6 +43,20 @@ const menuItems: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'orders',    label: 'Orders',      icon: ClipboardList },
   { id: 'support',   label: 'Support Chat', icon: MessageCircle },
 ];
+
+// Same 19-group taxonomy as the storefront's category mega menu (src/config/categoryMenu.ts),
+// so a product registered here can actually be found under the nav the customer sees.
+// This admin screen is English-only, so labels come straight from the en locale file
+// rather than the live i18n instance.
+const enCategoryLabels = enLabels.categoryMenu as Record<string, string>;
+const PRODUCT_CATEGORIES = categoryMenuColumns.flat().map((group) => ({
+  key: group.key,
+  label: enCategoryLabels[group.key] ?? group.key,
+  subs: group.subs.map((sub) => ({
+    key: sub.key,
+    label: enCategoryLabels[sub.key] ?? sub.key,
+  })),
+}));
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -88,7 +104,8 @@ export default function AdminDashboard() {
     nameEn: '',
     name: '',
     brand: brands[0],
-    category: categories[1],
+    category: PRODUCT_CATEGORIES[0].label,
+    subcategory: PRODUCT_CATEGORIES[0].subs[0]?.label ?? '',
     originalPrice: 0,
     wholesalePrice: 0,
     stock: 0,
@@ -317,7 +334,8 @@ export default function AdminDashboard() {
       nameEn: '',
       name: '',
       brand: brands[0],
-      category: categories[1],
+      category: PRODUCT_CATEGORIES[0].label,
+      subcategory: PRODUCT_CATEGORIES[0].subs[0]?.label ?? '',
       originalPrice: 0,
       wholesalePrice: 0,
       stock: 0,
@@ -343,7 +361,13 @@ export default function AdminDashboard() {
       nameEn: product.nameEn,
       name: product.name,
       brand: product.brand,
-      category: product.category,
+      // Fall back to the first group/sub if this product's stored value
+      // doesn't match any current label (e.g. an old free-text category
+      // from before this taxonomy existed).
+      category: PRODUCT_CATEGORIES.some((c) => c.label === product.category)
+        ? product.category
+        : PRODUCT_CATEGORIES[0].label,
+      subcategory: product.subcategory ?? '',
       originalPrice: product.originalPrice,
       wholesalePrice: product.wholesalePrice,
       stock: product.stock,
@@ -376,6 +400,7 @@ export default function AdminDashboard() {
       name: productForm.name.trim() || productForm.nameEn,
       brand: productForm.brand,
       category: productForm.category,
+      subcategory: productForm.subcategory || undefined,
       image: productForm.images[0] || productForm.image || '',
       images: productForm.images,
       originalPrice: productForm.originalPrice,
@@ -1126,49 +1151,73 @@ export default function AdminDashboard() {
                         </p>
                       </div>
 
+                      <div>
+                        <label className="block text-[12px] text-[#666] mb-1">
+                          Brand *
+                        </label>
+                        <select
+                          value={productForm.brand}
+                          onChange={(e) =>
+                            setProductForm({
+                              ...productForm,
+                              brand: e.target.value,
+                            })
+                          }
+                          className="w-full h-10 px-3 border border-[#e5e5e5] rounded text-[13px] focus:outline-none focus:border-[#333]"
+                        >
+                          {brands.map((b) => (
+                            <option key={b} value={b}>
+                              {b}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-[12px] text-[#666] mb-1">
-                            Brand *
+                            Top Category *
                           </label>
                           <select
-                            value={productForm.brand}
-                            onChange={(e) =>
+                            value={productForm.category}
+                            onChange={(e) => {
+                              const nextGroup = PRODUCT_CATEGORIES.find((c) => c.label === e.target.value);
                               setProductForm({
                                 ...productForm,
-                                brand: e.target.value,
-                              })
-                            }
+                                category: e.target.value,
+                                // Changing the top category invalidates the old
+                                // sub-category (it belongs to the previous group's
+                                // sub-list) — default to the new group's first sub.
+                                subcategory: nextGroup?.subs[0]?.label ?? '',
+                              });
+                            }}
                             className="w-full h-10 px-3 border border-[#e5e5e5] rounded text-[13px] focus:outline-none focus:border-[#333]"
                           >
-                            {brands.map((b) => (
-                              <option key={b} value={b}>
-                                {b}
+                            {PRODUCT_CATEGORIES.map((c) => (
+                              <option key={c.key} value={c.label}>
+                                {c.label}
                               </option>
                             ))}
                           </select>
                         </div>
                         <div>
                           <label className="block text-[12px] text-[#666] mb-1">
-                            Category *
+                            Sub Category
                           </label>
                           <select
-                            value={productForm.category}
+                            value={productForm.subcategory}
                             onChange={(e) =>
                               setProductForm({
                                 ...productForm,
-                                category: e.target.value,
+                                subcategory: e.target.value,
                               })
                             }
                             className="w-full h-10 px-3 border border-[#e5e5e5] rounded text-[13px] focus:outline-none focus:border-[#333]"
                           >
-                            {categories
-                              .filter((c) => c !== 'All')
-                              .map((c) => (
-                                <option key={c} value={c}>
-                                  {c}
-                                </option>
-                              ))}
+                            {(PRODUCT_CATEGORIES.find((c) => c.label === productForm.category)?.subs ?? []).map((s) => (
+                              <option key={s.key} value={s.label}>
+                                {s.label}
+                              </option>
+                            ))}
                           </select>
                         </div>
                       </div>

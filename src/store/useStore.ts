@@ -32,7 +32,10 @@ export interface Product {
   /** Canonical English/romanized name — shown as the primary heading site-wide */
   nameEn: string;
   brand: string;
+  /** Top-level category — one of the 19 mega-menu groups (e.g. "Skincare") */
   category: string;
+  /** Sub-category within that group (e.g. "Toner") — optional for legacy rows */
+  subcategory?: string;
   image: string;
   images?: string[];
   originalPrice: number;

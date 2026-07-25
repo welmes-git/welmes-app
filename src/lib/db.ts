@@ -481,6 +481,7 @@ function rowToProduct(row: Record<string, unknown>): Product {
     nameEn:         (row.name_en as string) || (row.name as string),
     brand:          row.brand as string,
     category:       row.category as string,
+    subcategory:    (row.subcategory as string) || undefined,
     image:          (row.image as string) || '',
     images:         (row.images as string[]) || [],
     originalPrice:  Number(row.original_price),
@@ -502,6 +503,7 @@ function productToRow(p: Partial<Product>): Record<string, unknown> {
   if (p.nameEn !== undefined)         row.name_en = p.nameEn;
   if (p.brand !== undefined)          row.brand = p.brand;
   if (p.category !== undefined)       row.category = p.category;
+  if (p.subcategory !== undefined)    row.subcategory = p.subcategory || null;
   if (p.image !== undefined)          row.image = p.image;
   if (p.images !== undefined)         row.images = p.images;
   if (p.originalPrice !== undefined)  row.original_price = p.originalPrice;
