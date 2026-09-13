@@ -84,6 +84,7 @@ export default function Home() {
               className="h-full w-full object-cover"
               style={{ objectPosition: homeHero.focus }}
             >
+              {homeHero.videoMobile && <source src={homeHero.videoMobile} type="video/mp4" media="(max-width: 767px)" />}
               <source src={homeHero.video} type="video/mp4" />
             </video>
           ) : (
