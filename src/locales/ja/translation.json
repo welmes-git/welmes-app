@@ -187,7 +187,8 @@
     "feature3Title": "グローバル配送",
     "feature3Desc": "50カ国以上に配送。物流コスト削減のための混載便も対応。",
     "feature4Title": "専任アカウントマネージャー",
-    "feature4Desc": "承認されたすべての企業に、注文サポートと商品提案を行う専任担当者が付きます。"
+    "feature4Desc": "承認されたすべての企業に、注文サポートと商品提案を行う専任担当者が付きます。",
+    "exploreCategories": "カテゴリーから探す"
   },
   "products": {
     "allProducts": "全商品",

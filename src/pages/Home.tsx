@@ -1,10 +1,12 @@
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { initialProducts } from '../data/products';
 import ProductCard from '../components/ProductCard';
 import ProductGridSkeleton from '../components/ProductGridSkeleton';
-import { ChevronRight as ChevronRightIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { homeHero } from '../config/banners';
+import { categoryMenuColumns } from '../config/categoryMenu';
 import { useTranslation } from 'react-i18next';
 import { brandsByCount, hasJapanese } from '../lib/utils';
 
@@ -24,6 +26,17 @@ export default function Home() {
   const newArrivals = [...allProducts].sort((a, b) => b.id - a.id).slice(0, 12);
   // From the live catalogue — the old hardcoded list was brands we don't carry
   const popularBrands = brandsByCount(allProducts).slice(0, 10);
+  const categoryGroups = categoryMenuColumns.flat();
+  const categoryTrack = useRef<HTMLDivElement>(null);
+  // One page = 3 tiles + gap; wraps around at either end like Faire's looping carousel
+  const pageCategories = (dir: 1 | -1) => {
+    const el = categoryTrack.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    const atEdge = dir === 1 ? el.scrollLeft >= max - 1 : el.scrollLeft <= 1;
+    if (atEdge) el.scrollTo({ left: dir === 1 ? 0 : max, behavior: 'smooth' });
+    else el.scrollBy({ left: dir * (el.clientWidth + 16), behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -169,6 +182,58 @@ export default function Home() {
           </Link>
         </div>
         <div className="hidden md:block relative shrink-0 overflow-hidden bg-[#8a8636] md:size-60 min-[1440px]:size-[437px] min-[1920px]:size-[576px]" aria-hidden="true" />
+      </section>
+
+      {/* Explore categories — faire.com carousel, measured at 375/768/1024/1440/1920px.
+          Mobile: stacked 3.75:1 tiles. md+: 3 per view, 1.4:1, arrows centred 32px outside the track
+          (clipped by the section like Faire's). Tiles are solid colour until we have category imagery. */}
+      <section className="relative overflow-hidden px-4 pb-4 pt-8 md:p-8 lg:p-12 min-[1920px]:px-20 min-[1920px]:py-12">
+        <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 min-[1440px]:text-[30px] min-[1440px]:leading-[38px] min-[1920px]:text-[38px] min-[1920px]:leading-[50px]">
+          {t('home.exploreCategories')}
+        </h2>
+        <div className="relative mt-6">
+          <button
+            type="button"
+            onClick={() => pageCategories(-1)}
+            aria-label="Previous categories"
+            className="absolute -left-14 top-1/2 z-10 hidden size-12 -translate-y-1/2 items-center justify-center text-ink-700 md:flex"
+          >
+            <ChevronLeft size={20} strokeWidth={1.25} />
+          </button>
+          <div
+            ref={categoryTrack}
+            className="flex flex-col gap-4 md:snap-x md:snap-mandatory md:flex-row md:overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {categoryGroups.map((group) => (
+              <Link
+                key={group.key}
+                to={group.link}
+                className="group relative block shrink-0 snap-start overflow-hidden rounded-sm md:w-[calc((100%-32px)/3)]"
+              >
+                <div
+                  className="aspect-[3.75/1] w-full bg-[#7d7466] transition-transform duration-[1200ms] ease-[cubic-bezier(0.17,0.67,0.24,1)] group-hover:scale-110 md:aspect-[1.4/1]"
+                  aria-hidden="true"
+                />
+                <div
+                  className="absolute inset-0 z-[1]"
+                  style={{ background: 'linear-gradient(22.18deg, rgba(0,0,0,0.5) 1.86%, rgba(0,0,0,0) 31.23%)' }}
+                  aria-hidden="true"
+                />
+                <span className="absolute bottom-0 left-0 z-[2] pb-2 pl-2 text-[14px] leading-5 tracking-[0.15px] text-white md:p-4 md:font-serif md:text-[22px] md:leading-8 md:tracking-normal">
+                  {t(`categoryMenu.${group.key}`)}
+                </span>
+              </Link>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => pageCategories(1)}
+            aria-label="Next categories"
+            className="absolute -right-14 top-1/2 z-10 hidden size-12 -translate-y-1/2 items-center justify-center text-ink-700 md:flex"
+          >
+            <ChevronRightIcon size={20} strokeWidth={1.25} />
+          </button>
+        </div>
       </section>
 
       {/* Brand Showcase */}

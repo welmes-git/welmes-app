@@ -187,7 +187,8 @@
     "feature3Title": "전 세계 배송",
     "feature3Desc": "50개국 이상 배송 가능합니다. 물류비 절감을 위한 합배송 서비스도 제공합니다.",
     "feature4Title": "전담 매니저 배정",
-    "feature4Desc": "승인된 모든 사업자에게 주문 지원과 상품 추천을 위한 전담 매니저가 배정됩니다."
+    "feature4Desc": "승인된 모든 사업자에게 주문 지원과 상품 추천을 위한 전담 매니저가 배정됩니다.",
+    "exploreCategories": "카테고리 둘러보기"
   },
   "products": {
     "allProducts": "전체 상품",

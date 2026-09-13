@@ -187,7 +187,8 @@
     "feature3Title": "Global Shipping",
     "feature3Desc": "We ship to 50+ countries. Consolidated shipping available to reduce your logistics costs.",
     "feature4Title": "Dedicated Account Manager",
-    "feature4Desc": "Every approved business gets a dedicated account manager for order support and product recommendations."
+    "feature4Desc": "Every approved business gets a dedicated account manager for order support and product recommendations.",
+    "exploreCategories": "Explore categories"
   },
   "products": {
     "allProducts": "All Products",

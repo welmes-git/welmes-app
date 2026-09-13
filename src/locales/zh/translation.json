@@ -187,7 +187,8 @@
     "feature3Title": "全球配送",
     "feature3Desc": "配送至50多个国家和地区。提供拼箱服务，降低物流成本。",
     "feature4Title": "专属客户经理",
-    "feature4Desc": "每个获批准的企业都将获得专属客户经理，提供订单支持和产品推荐。"
+    "feature4Desc": "每个获批准的企业都将获得专属客户经理，提供订单支持和产品推荐。",
+    "exploreCategories": "浏览分类"
   },
   "products": {
     "allProducts": "全部商品",
