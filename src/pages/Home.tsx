@@ -209,7 +209,7 @@ export default function Home() {
 
       {/* Explore categories — faire.com carousel, measured at 375/768/1024/1440/1920px.
           Mobile: stacked 3.75:1 tiles. md+: 3 per view, 1.4:1, arrows centred 32px outside the track
-          (clipped by the section like Faire's). Tiles are solid colour until we have category imagery. */}
+          (clipped by the section like Faire's). Photos live in public/categories/<group key>.jpg. */}
       <section className="relative overflow-hidden px-4 pb-4 pt-8 md:p-8 lg:p-12 min-[1920px]:px-20 min-[1920px]:py-12">
         <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 min-[1440px]:text-[30px] min-[1440px]:leading-[38px] min-[1920px]:text-[38px] min-[1920px]:leading-[50px]">
           {t('home.exploreCategories')}
@@ -233,9 +233,12 @@ export default function Home() {
                 to={group.link}
                 className="group relative block shrink-0 snap-start overflow-hidden rounded-sm md:w-[calc((100%-32px)/3)]"
               >
-                <div
-                  className="aspect-[3.75/1] w-full bg-[#7d7466] transition-transform duration-[1200ms] ease-[cubic-bezier(0.17,0.67,0.24,1)] group-hover:scale-110 md:aspect-[1.4/1]"
-                  aria-hidden="true"
+                <img
+                  src={`/categories/${group.key}.jpg`}
+                  alt=""
+                  loading="lazy"
+                  // Oral care props sit low in the frame; keep them inside the 3.75:1 mobile crop
+                  className={`aspect-[3.75/1] w-full bg-sunken object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.17,0.67,0.24,1)] group-hover:scale-110 md:aspect-[1.4/1] ${group.key === 'oralCare' ? 'object-[50%_68%]' : ''}`}
                 />
                 <div
                   className="absolute inset-0 z-[1]"
