@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
-import { initialProducts, brands, categories } from '../data/products';
+import { initialProducts, categories } from '../data/products';
+import { brandsByCount } from '../lib/utils';
 import ProductCard from '../components/ProductCard';
 import ProductGridSkeleton from '../components/ProductGridSkeleton';
 import * as db from '../lib/db';
@@ -22,6 +23,7 @@ export default function ProductList() {
   // and come back empty — otherwise this briefly flashes demo products before
   // the real Supabase fetch replaces them a moment later.
   const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
+  const brands = brandsByCount(allProducts).map(([brand]) => brand);
 
   const categoryFilter = searchParams.get('category') || 'All';
   const brandFilter    = searchParams.get('brand')    || '';
@@ -170,10 +172,10 @@ export default function ProductList() {
       <div className="max-w-[1100px] mx-auto px-4 py-8">
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-[13px] text-[#999] mb-6">
-          <Link to="/" className="hover:text-[#333]">{t('common.home')}</Link>
+        <div className="flex items-center gap-2 text-[13px] text-ink-500 mb-6">
+          <Link to="/" className="hover:text-ink-700">{t('common.home')}</Link>
           <span>&gt;</span>
-          <span className="text-[#333]">
+          <span className="text-ink-700">
             {searchQuery
               ? t('common.search')
               : selectedCategory !== 'All'
@@ -188,26 +190,26 @@ export default function ProductList() {
         <div className="mb-6">
           <form onSubmit={handleInlineSearch} className="md:hidden">
             <div className="relative max-w-[560px]">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#aaa]" />
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300" />
               <input
                 type="text"
                 value={inlineSearch}
                 onChange={(e) => setInlineSearch(e.target.value)}
                 placeholder={t('nav.searchPlaceholderFull')}
-                className="w-full h-[44px] pl-10 pr-24 border border-[#ddd] rounded-full text-[14px] focus:outline-none focus:border-[#333] transition-colors"
+                className="w-full h-[44px] pl-10 pr-24 border border-line-strong rounded-full bg-canvas text-[14px] text-ink-700 placeholder:text-ink-300 focus:outline-none focus:border-ink-900 transition-colors"
               />
               {inlineSearch && (
                 <button
                   type="button"
                   onClick={clearSearch}
-                  className="absolute right-16 top-1/2 -translate-y-1/2 text-[#bbb] hover:text-[#666] p-1"
+                  className="absolute right-16 top-1/2 -translate-y-1/2 text-ink-300 hover:text-ink-500 p-1"
                 >
                   <X size={15} />
                 </button>
               )}
               <button
                 type="submit"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-[36px] px-4 bg-[#333] text-white text-[13px] font-medium rounded-full hover:bg-[#555] transition-colors"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-[36px] px-4 bg-ink-900 text-white text-[13px] font-bold rounded-full hover:shadow-hover transition-shadow"
               >
                 {t('common.search')}
               </button>
@@ -217,8 +219,8 @@ export default function ProductList() {
           {/* Active search tag */}
           {searchQuery && (
             <div className="flex items-center gap-2 mt-3">
-              <span className="text-[12px] text-[#999]">{t('common.search')}:</span>
-              <span className="inline-flex items-center gap-1.5 bg-[#333] text-white text-[12px] font-medium px-3 py-1 rounded-full">
+              <span className="text-[12px] text-ink-500">{t('common.search')}:</span>
+              <span className="inline-flex items-center gap-1.5 border border-ink-900 text-ink-900 text-[12px] font-bold px-2.5 py-1 rounded-md">
                 "{searchQuery}"
                 <button onClick={clearSearch} className="hover:opacity-70">
                   <X size={12} />
@@ -231,17 +233,17 @@ export default function ProductList() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Filters */}
           <aside className={`lg:w-[220px] shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <div className="bg-[#f8f8fa] rounded-lg p-4">
+            <div className="border border-line rounded-[10px] p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[14px] font-bold">{t('products.filters')}</h3>
-                <button onClick={clearFilters} className="text-[12px] text-[#4a90e2] hover:underline">
+                <h3 className="text-[14px] font-extrabold text-ink-900">{t('products.filters')}</h3>
+                <button onClick={clearFilters} className="text-[12px] text-ink-500 underline underline-offset-2 hover:text-ink-900">
                   {t('products.reset')}
                 </button>
               </div>
 
               {/* Category */}
               <div className="mb-5">
-                <h4 className="text-[13px] font-semibold mb-2">{t('products.category')}</h4>
+                <h4 className="text-[11px] font-bold uppercase tracking-[0.02em] text-ink-500 mb-2">{t('products.category')}</h4>
                 <div className="space-y-1">
                   {categories.map((cat) => (
                     <button
@@ -254,8 +256,8 @@ export default function ProductList() {
                       }}
                       className={`block w-full text-left text-[13px] py-1 px-2 rounded ${
                         selectedCategory === cat
-                          ? 'bg-[#333] text-white'
-                          : 'text-[#666] hover:bg-white'
+                          ? 'bg-sunken font-bold text-ink-900 shadow-[inset_2px_0_0_var(--wm-ink-900)]'
+                          : 'text-ink-700 hover:bg-sunken'
                       }`}
                     >
                       {cat}
@@ -266,12 +268,12 @@ export default function ProductList() {
 
               {/* Brand */}
               <div className="mb-5">
-                <h4 className="text-[13px] font-semibold mb-2">{t('products.brand')}</h4>
+                <h4 className="text-[11px] font-bold uppercase tracking-[0.02em] text-ink-500 mb-2">{t('products.brand')}</h4>
                 <div className="space-y-1 max-h-[200px] overflow-y-auto">
                   {brands.map((brand) => (
                     <label
                       key={brand}
-                      className="flex items-center gap-2 text-[12px] text-[#666] cursor-pointer hover:text-[#333] py-0.5"
+                      className="flex items-center gap-2 text-[12px] text-ink-700 cursor-pointer hover:text-ink-900 py-0.5"
                     >
                       <input
                         type="checkbox"
@@ -280,7 +282,7 @@ export default function ProductList() {
                           toggleBrand(brand);
                           if (searchQuery) clearSearch();
                         }}
-                        className="w-3.5 h-3.5 rounded border-[#ccc]"
+                        className="w-3.5 h-3.5 rounded border-line-strong accent-ink-900"
                       />
                       {brand}
                     </label>
@@ -290,17 +292,17 @@ export default function ProductList() {
 
               {/* Price Range */}
               <div>
-                <h4 className="text-[13px] font-semibold mb-3">{t('products.priceRange')}</h4>
-                <div className="flex justify-between text-[12px] text-[#555] mb-3">
+                <h4 className="text-[11px] font-bold uppercase tracking-[0.02em] text-ink-500 mb-3">{t('products.priceRange')}</h4>
+                <div className="flex justify-between text-[12px] tabular-nums text-ink-700 mb-3">
                   <span className="font-medium">{formatPrice(rangeMin)}</span>
                   <span className="font-medium">
                     {priceRange[1] === Infinity ? `${formatPrice(priceMax)}+` : formatPrice(rangeMax)}
                   </span>
                 </div>
                 <div className="relative h-5 flex items-center">
-                  <div className="absolute w-full h-1.5 bg-[#e5e5e5] rounded-full" />
+                  <div className="absolute w-full h-1.5 bg-line rounded-full" />
                   <div
-                    className="absolute h-1.5 bg-[#4a90e2] rounded-full"
+                    className="absolute h-1.5 bg-ink-900 rounded-full"
                     style={{ left: `${rangePercLow}%`, right: `${100 - rangePercHigh}%` }}
                   />
                   <input
@@ -328,7 +330,7 @@ export default function ProductList() {
                     style={{ zIndex: 4 }}
                   />
                 </div>
-                <div className="flex justify-between text-[11px] text-[#bbb] mt-2">
+                <div className="flex justify-between text-[11px] tabular-nums text-ink-300 mt-2">
                   <span>{formatPrice(priceMin)}</span>
                   <span>{formatPrice(priceMax)}</span>
                 </div>
@@ -341,15 +343,15 @@ export default function ProductList() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-[20px] font-bold text-[#333]">{pageTitle}</h1>
-                <p className="text-[13px] text-[#999]">
+                <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900">{pageTitle}</h1>
+                <p className="text-[13px] tabular-nums text-ink-500">
                   {filteredProducts.length} {t('products.products')}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden px-3 py-2 border border-[#ddd] rounded text-[13px] text-[#666]"
+                  className="lg:hidden h-9 px-3 border border-line-strong rounded-md text-[13px] font-bold text-ink-700 hover:bg-sunken"
                 >
                   {t('products.filters')}
                 </button>
@@ -357,7 +359,7 @@ export default function ProductList() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="appearance-none bg-white border border-[#ddd] rounded px-3 py-2 pr-8 text-[13px] text-[#666] focus:outline-none"
+                    className="appearance-none bg-canvas border border-line-strong rounded-md h-9 px-3 pr-8 text-[13px] text-ink-700 focus:outline-none focus:border-ink-900"
                   >
                     <option value="popular">{t('products.popular')}</option>
                     <option value="price-low">{t('products.priceLow')}</option>
@@ -367,7 +369,7 @@ export default function ProductList() {
                   </select>
                   <ChevronDown
                     size={14}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[#999] pointer-events-none"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none"
                   />
                 </div>
               </div>
@@ -380,16 +382,16 @@ export default function ProductList() {
                 {/* No Results */}
                 {filteredProducts.length === 0 && (
                   <div className="text-center py-16">
-                    <Search size={48} className="mx-auto text-[#ddd] mb-4" />
-                    <p className="text-[15px] font-medium text-[#666] mb-1">{t('products.noResults')}</p>
+                    <Search size={48} className="mx-auto text-line-strong mb-4" />
+                    <p className="text-[15px] font-bold text-ink-700 mb-1">{t('products.noResults')}</p>
                     {searchQuery && (
-                      <p className="text-[13px] text-[#aaa] mb-4">
+                      <p className="text-[13px] text-ink-300 mb-4">
                         "{searchQuery}"
                       </p>
                     )}
                     <button
                       onClick={() => { clearFilters(); clearSearch(); }}
-                      className="mt-2 px-5 py-2 bg-[#333] text-white text-[13px] rounded-lg hover:bg-[#555] transition-colors"
+                      className="mt-2 h-10 px-5 bg-ink-900 text-white text-[13px] font-bold rounded-lg hover:shadow-hover transition-shadow"
                     >
                       {t('products.clearFilters')}
                     </button>
@@ -411,7 +413,7 @@ export default function ProductList() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="w-8 h-8 flex items-center justify-center border border-[#ddd] rounded hover:bg-[#f5f5f5] disabled:opacity-30"
+                  className="w-8 h-8 flex items-center justify-center border border-line-strong rounded-md text-ink-700 hover:bg-sunken disabled:opacity-30"
                 >
                   <ChevronLeft size={14} />
                 </button>
@@ -427,15 +429,15 @@ export default function ProductList() {
                   }, [])
                   .map((item, idx) =>
                     item === 'ellipsis' ? (
-                      <span key={`e-${idx}`} className="w-8 text-center text-[#bbb] text-[13px]">…</span>
+                      <span key={`e-${idx}`} className="w-8 text-center text-ink-300 text-[13px]">…</span>
                     ) : (
                       <button
                         key={item}
                         onClick={() => setCurrentPage(item as number)}
-                        className={`w-8 h-8 flex items-center justify-center rounded text-[13px] ${
+                        className={`w-8 h-8 flex items-center justify-center rounded-md text-[13px] tabular-nums ${
                           item === currentPage
-                            ? 'bg-[#333] text-white'
-                            : 'border border-[#ddd] hover:bg-[#f5f5f5]'
+                            ? 'bg-ink-900 font-bold text-white'
+                            : 'border border-line-strong text-ink-700 hover:bg-sunken'
                         }`}
                       >
                         {item}
@@ -445,7 +447,7 @@ export default function ProductList() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="w-8 h-8 flex items-center justify-center border border-[#ddd] rounded hover:bg-[#f5f5f5] disabled:opacity-30"
+                  className="w-8 h-8 flex items-center justify-center border border-line-strong rounded-md text-ink-700 hover:bg-sunken disabled:opacity-30"
                 >
                   <ChevronRight size={14} />
                 </button>

@@ -5,7 +5,8 @@ import type { AppNotification } from '../store/useStore';
 import CartDrawer from './CartDrawer';
 import CurrencySelector from './CurrencySelector';
 import { useTranslation } from 'react-i18next';
-import { brands } from '../data/products';
+import { initialProducts } from '../data/products';
+import { brandsByCount } from '../lib/utils';
 import { categoryMenuColumns } from '../config/categoryMenu';
 import { useOutsideClick } from '../hooks/useOutsideClick';
 import * as db from '../lib/db';
@@ -51,7 +52,7 @@ export default function Header() {
   const location = useLocation();
   const {
     isAuthenticated, isAdmin, currentUser, logout,
-    cart, wishlist, notifications,
+    cart, wishlist, notifications, products, productsLoading,
     markNotificationRead, markAllNotificationsRead, clearNotifications,
   } = useStore();
   const { t, i18n } = useTranslation();
@@ -80,9 +81,14 @@ export default function Header() {
   const [showMobileCategory, setShowMobileCategory] = useState(false);
   const [showMobileBrandShop, setShowMobileBrandShop] = useState(false);
   const [brandSearch, setBrandSearch] = useState('');
+  // Brand Shop lists brands we actually carry (same fallback as the product pages)
+  const brands = useMemo(
+    () => brandsByCount(products.length > 0 ? products : productsLoading ? [] : initialProducts).map(([b]) => b),
+    [products, productsLoading]
+  );
   const filteredBrands = useMemo(
     () => brands.filter((b) => b.toLowerCase().includes(brandSearch.trim().toLowerCase())),
-    [brandSearch]
+    [brands, brandSearch]
   );
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -255,8 +261,8 @@ export default function Header() {
   };
 
   const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
+    const [pathname, query = ''] = path.split('?');
+    return location.pathname === pathname && location.search.replace(/^\?/, '') === query;
   };
 
   return (

@@ -7,19 +7,8 @@ import ProductGridSkeleton from '../components/ProductGridSkeleton';
 import { ChevronLeft, ChevronRight, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { heroBanners as banners, eventBanners } from '../config/banners';
 import { useTranslation } from 'react-i18next';
+import { brandsByCount, hasJapanese } from '../lib/utils';
 
-const brandLogos = [
-  { name: 'COSRX', color: '#333' },
-  { name: 'Innisfree', color: '#2e7d32' },
-  { name: 'Etude', color: '#f48fb1' },
-  { name: 'Laneige', color: '#4a90e2' },
-  { name: 'Peripera', color: '#ff6b6b' },
-  { name: 'Mediheal', color: '#00bcd4' },
-  { name: 'Some By Mi', color: '#4caf50' },
-  { name: 'Dr.G', color: '#e53935' },
-  { name: 'Beauty of Joseon', color: '#8d6e63' },
-  { name: 'Anua', color: '#66bb6a' },
-];
 
 export default function Home() {
   const { t } = useTranslation();
@@ -33,8 +22,10 @@ export default function Home() {
   // Weekly best = most reviewed; New arrivals = highest id (newest first).
   // Previously New Arrivals was `slice(4, 12)`, which rendered an empty section
   // whenever the catalogue held 5 products or fewer.
-  const weeklyBest = [...allProducts].sort((a, b) => b.reviews - a.reviews).slice(0, 8);
-  const newArrivals = [...allProducts].sort((a, b) => b.id - a.id).slice(0, 8);
+  const weeklyBest = [...allProducts].sort((a, b) => b.reviews - a.reviews).slice(0, 12);
+  const newArrivals = [...allProducts].sort((a, b) => b.id - a.id).slice(0, 12);
+  // From the live catalogue — the old hardcoded list was brands we don't carry
+  const popularBrands = brandsByCount(allProducts).slice(0, 10);
 
   // Auto-slide banners
   useEffect(() => {
@@ -72,16 +63,16 @@ export default function Home() {
                   }`}
                 >
                   <div className="max-w-[85%] md:max-w-[44%]">
-                    <p className="text-[10px] md:text-[13px] font-semibold tracking-[2.5px] uppercase text-[#4a90e2] mb-2 md:mb-3">
+                    <p className="text-[10px] md:text-[13px] font-semibold tracking-[2.5px] uppercase text-ink-500 mb-2 md:mb-3">
                       {t(`banners.${banner.textKey}Eyebrow`)}
                     </p>
-                    <h2 className="text-[26px] md:text-[46px] font-extrabold leading-[1.08] text-[#26221c] whitespace-pre-line">
+                    <h2 className="text-[26px] md:text-[46px] font-extrabold leading-[1.08] tracking-[-0.02em] text-ink-900 whitespace-pre-line">
                       {t(`banners.${banner.textKey}Title`)}
                     </h2>
-                    <p className="text-[12px] md:text-[15px] text-[#6b665e] mt-2 md:mt-3 leading-relaxed">
+                    <p className="text-[12px] md:text-[15px] text-ink-500 mt-2 md:mt-3 leading-relaxed">
                       {t(`banners.${banner.textKey}Subtitle`)}
                     </p>
-                    <span className="inline-flex items-center gap-2 mt-3 md:mt-5 bg-[#2f2b26] text-white text-[12px] md:text-[14px] font-semibold px-4 py-2 md:px-6 md:py-3 rounded-lg">
+                    <span className="inline-flex items-center gap-2 mt-3 md:mt-5 bg-ink-900 text-white text-[12px] md:text-[14px] font-bold px-4 py-2 md:px-6 md:py-3 rounded-lg">
                       {t(`banners.${banner.textKey}Cta`)}
                       <ChevronRightIcon size={14} />
                     </span>
@@ -95,13 +86,13 @@ export default function Home() {
         {/* Navigation Arrows */}
         <button
           onClick={prevBanner}
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center shadow-md hover:bg-white transition-colors z-10"
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-canvas/90 border border-line-strong text-ink-700 rounded-full flex items-center justify-center hover:bg-canvas transition-colors z-10"
         >
           <ChevronLeft size={20} />
         </button>
         <button
           onClick={nextBanner}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center shadow-md hover:bg-white transition-colors z-10"
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-canvas/90 border border-line-strong text-ink-700 rounded-full flex items-center justify-center hover:bg-canvas transition-colors z-10"
         >
           <ChevronRight size={20} />
         </button>
@@ -113,7 +104,7 @@ export default function Home() {
               key={index}
               onClick={() => setCurrentBanner(index)}
               className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                index === currentBanner ? 'bg-[#333]' : 'bg-white/60'
+                index === currentBanner ? 'bg-ink-900' : 'bg-canvas/70 border border-line-strong'
               }`}
             />
           ))}
@@ -122,11 +113,11 @@ export default function Home() {
 
       {/* Weekly Best Sellers */}
       <section className="max-w-[1100px] mx-auto px-4 py-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-[22px] font-bold text-[#333]">{t('home.weeklySellers')}</h2>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900">{t('home.weeklySellers')}</h2>
           <Link
             to="/products?sort=popular"
-            className="flex items-center gap-1 text-[13px] text-[#999] hover:text-[#ff4d6d] transition-colors"
+            className="flex items-center gap-1 text-[13px] text-ink-500 hover:text-ink-900 transition-colors"
           >
             {t('common.viewAll')}
             <ChevronRightIcon size={14} />
@@ -169,13 +160,13 @@ export default function Home() {
 
       {/* New Arrivals */}
       {(productsLoading || newArrivals.length > 0) && (
-        <section className="bg-[#f8f8fa] py-16">
+        <section className="bg-sunken py-16">
           <div className="max-w-[1100px] mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-[22px] font-bold text-[#333]">{t('home.newArrivals')}</h2>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900">{t('home.newArrivals')}</h2>
               <Link
                 to="/products?sort=newest"
-                className="flex items-center gap-1 text-[13px] text-[#999] hover:text-[#ff4d6d] transition-colors"
+                className="flex items-center gap-1 text-[13px] text-ink-500 hover:text-ink-900 transition-colors"
               >
                 {t('common.viewAll')}
                 <ChevronRightIcon size={14} />
@@ -193,50 +184,47 @@ export default function Home() {
       )}
 
       {/* Brand Showcase */}
-      <section className="max-w-[1100px] mx-auto px-4 py-16">
-        <h2 className="text-[22px] font-bold text-[#333] mb-8 text-center">
-          {t('home.popularBrands')}
-        </h2>
-        <div className="flex flex-wrap justify-center gap-6 md:gap-10">
-          {brandLogos.map((brand) => (
-            <Link
-              key={brand.name}
-              to={`/products?brand=${brand.name}`}
-              className="group flex flex-col items-center"
-            >
-              <div
-                className="w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-full flex items-center justify-center text-white text-[11px] md:text-[12px] font-bold shadow-md transition-transform group-hover:scale-110"
-                style={{ backgroundColor: brand.color }}
+      {popularBrands.length > 0 && (
+        <section className="max-w-[1100px] mx-auto px-4 py-16">
+          <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900 mb-5">
+            {t('home.popularBrands')}
+          </h2>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
+            {popularBrands.map(([brand, count]) => (
+              <Link
+                key={brand}
+                to={`/products?brand=${encodeURIComponent(brand)}`}
+                className="flex h-16 flex-col items-center justify-center rounded-md border border-line px-3 text-center transition-colors hover:border-ink-900"
               >
-                {brand.name.slice(0, 2).toUpperCase()}
-              </div>
-              <span className="mt-2 text-[12px] text-[#666] group-hover:text-[#ff4d6d] transition-colors">
-                {brand.name}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
+                <span className={`max-w-full truncate text-[13px] font-bold text-ink-900 ${hasJapanese(brand) ? 'font-jp' : ''}`}>
+                  {brand}
+                </span>
+                <span className="text-[11.5px] tabular-nums text-ink-500">{count}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* B2B Info Section */}
-      <section className="bg-[#2c3e50] py-16">
+      <section className="bg-ink-900 py-16">
         <div className="max-w-[1100px] mx-auto px-4 text-center">
-          <h2 className="text-[24px] md:text-[28px] font-bold text-white mb-4">
+          <h2 className="text-[24px] md:text-[30px] font-extrabold tracking-[-0.02em] text-white mb-4">
             {t('home.businessExclusive')}
           </h2>
-          <p className="text-[#bdc3c7] text-[14px] md:text-[16px] max-w-[600px] mx-auto mb-8 leading-relaxed">
+          <p className="text-white/70 text-[14px] md:text-[16px] max-w-[600px] mx-auto mb-8 leading-relaxed">
             {t('home.businessDesc')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/register"
-              className="bg-[#4a90e2] text-white px-8 py-3 rounded-lg text-[14px] font-semibold hover:bg-[#357abd] transition-colors"
+              className="h-11 inline-flex items-center justify-center bg-white text-ink-900 px-8 rounded-lg text-[14px] font-bold hover:bg-sunken transition-colors"
             >
               {t('home.registerBusiness')}
             </Link>
             <Link
               to="/login"
-              className="bg-transparent border border-white/30 text-white px-8 py-3 rounded-lg text-[14px] font-semibold hover:bg-white/10 transition-colors"
+              className="h-11 inline-flex items-center justify-center bg-transparent border-[1.5px] border-white/40 text-white px-8 rounded-lg text-[14px] font-bold hover:border-white transition-colors"
             >
               {t('home.memberLogin')}
             </Link>
