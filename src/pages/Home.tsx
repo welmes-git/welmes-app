@@ -8,7 +8,6 @@ import { ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { homeHero } from '../config/banners';
 import { categoryMenuColumns } from '../config/categoryMenu';
 import { useTranslation } from 'react-i18next';
-import { brandsByCount, hasJapanese } from '../lib/utils';
 
 
 export default function Home() {
@@ -24,8 +23,6 @@ export default function Home() {
   // whenever the catalogue held 5 products or fewer.
   const weeklyBest = [...allProducts].sort((a, b) => b.reviews - a.reviews).slice(0, 12);
   const newArrivals = [...allProducts].sort((a, b) => b.id - a.id).slice(0, 12);
-  // From the live catalogue — the old hardcoded list was brands we don't carry
-  const popularBrands = brandsByCount(allProducts).slice(0, 10);
   const categoryGroups = categoryMenuColumns.flat();
   const categoryTrack = useRef<HTMLDivElement>(null);
   // Bottom sign-up banner: 5 scenes, each a highlighted category word + 4 photos.
@@ -344,29 +341,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Brand Showcase */}
-      {popularBrands.length > 0 && (
-        <section className="page-container py-16">
-          <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-5">
-            {t('home.popularBrands')}
-          </h2>
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
-            {popularBrands.map(([brand, count]) => (
-              <Link
-                key={brand}
-                to={`/products?brand=${encodeURIComponent(brand)}`}
-                className="flex h-16 flex-col items-center justify-center rounded-md border border-line px-3 text-center transition-colors hover:border-ink-900"
-              >
-                <span className={`max-w-full truncate text-[13px] font-bold text-ink-900 ${hasJapanese(brand) ? 'font-jp' : ''}`}>
-                  {brand}
-                </span>
-                <span className="text-[11.5px] tabular-nums text-ink-500">{count}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* B2B Info Section */}
       <section className="bg-sunken border-t border-line py-16">
