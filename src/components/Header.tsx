@@ -20,6 +20,7 @@ import {
   X,
   ChevronDown,
   ChevronRight,
+  ArrowRight,
   User,
   LogOut,
   LayoutDashboard,
@@ -169,13 +170,7 @@ export default function Header() {
   ];
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
-
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useOutsideClick(notifRef, showNotifications, () => setShowNotifications(false));
 
@@ -263,50 +258,28 @@ export default function Header() {
 
   return (
     <>
-      {/* Utility strip below lg (Faire also swaps headers at 1024px) — the row has no room for
-          account, currency and language, and the hamburger menu was removed. */}
-      <div className="lg:hidden bg-sunken border-b border-line">
-        <div className="page-container flex justify-end items-center h-9">
-          <div className="flex items-center gap-3 text-[12px] text-ink-500">
-            {!isAuthenticated ? (
-              <>
-                <Link to="/register" className="whitespace-nowrap hover:text-ink-900 transition-colors">{t('common.register')}</Link>
-                <span className="text-line-strong">|</span>
-                <Link to="/login" className="whitespace-nowrap hover:text-ink-900 transition-colors">{t('common.login')}</Link>
-              </>
-            ) : (
-              <>
-                <Link to="/account" className="whitespace-nowrap hover:text-ink-900 transition-colors">{t('common.myAccount')}</Link>
-                <span className="text-line-strong">|</span>
-                <button onClick={handleLogout} className="flex items-center gap-1 whitespace-nowrap hover:text-ink-900 transition-colors">
-                  <LogOut size={12} />
-                  {t('common.logout')}
-                </button>
-              </>
-            )}
-            <span className="text-line-strong">|</span>
-            <Link to="/support" className="whitespace-nowrap hover:text-ink-900 transition-colors">{t('common.support')}</Link>
-            <span className="text-line-strong">|</span>
-            <CurrencySelector />
-            <span className="text-line-strong">|</span>
-            <LanguageSwitcher compact />
-          </div>
-        </div>
-      </div>
-
       {/* Header — measured on faire.com (1440px): one 60px row
           [logo · 16 · search (flex, 40px pill, #dadada) · 16 · language · links · Sign in · Sign up]
           then a 47px centred link row, 1px #dadada under both.
           Sticky is dropped while the category mega menu is open so the panel
           scrolls away with the page (Olive Young behaviour). */}
       <header className={`bg-white z-40 border-b border-line-control tracking-[0.15px] ${showCategoryDropdown ? '' : 'sticky top-0'}`}>
-        <div className="flex h-[50px] md:h-[60px] items-center pr-1 md:pr-3">
-          <Link to="/" aria-label="WELMES Business" className="mx-2 flex shrink-0 px-2 py-2 md:px-4">
+        {/* Below lg (Faire swaps headers at 1024px): [menu · logo · grow · search · cart], 20px icons,
+            icons 20px apart and 20px from the edge; everything else lives in the menu drawer. */}
+        <div className="flex h-[50px] md:h-[60px] items-center lg:pr-3">
+          <button
+            onClick={() => setShowMobileMenu(true)}
+            aria-label="Menu"
+            className="flex h-full shrink-0 items-center px-4 text-ink-700 lg:hidden"
+          >
+            <Menu size={20} strokeWidth={1.5} />
+          </button>
+          <Link to="/" aria-label="WELMES Business" className="-ml-1 flex shrink-0 py-2 lg:mx-2 lg:px-4">
             <Logo />
           </Link>
 
           {/* Search — 40px pill, 1px #dadada, 16px icon inset 16px, text 14/20 */}
-          <form onSubmit={handleSearch} className="mx-4 hidden min-w-0 flex-1 md:block" role="search">
+          <form onSubmit={handleSearch} className="mx-4 hidden min-w-0 flex-1 lg:block" role="search">
             <label className="relative flex h-10 items-center rounded-full border border-line-control bg-canvas pr-4 focus-within:border-ink-700">
               <Search size={16} strokeWidth={1.5} className="pointer-events-none absolute left-4 text-ink-700" />
               <input
@@ -320,7 +293,7 @@ export default function Header() {
               />
             </label>
           </form>
-          <div className="flex-1 md:hidden" />
+          <div className="flex-1 lg:hidden" />
 
           <div className="flex h-full items-center">
             <div className="hidden h-full items-center px-3 lg:flex">
@@ -332,7 +305,7 @@ export default function Header() {
             </Link>
 
               {isAuthenticated && (
-                <div className="relative h-full" ref={userRef}>
+                <div className="relative hidden h-full lg:block" ref={userRef}>
                   <button
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
                     aria-label={t('common.myAccount')}
@@ -385,7 +358,7 @@ export default function Header() {
               <button
                 onClick={() => navigate('/wishlist')}
                 aria-label={t('wishlist.title')}
-                className={`relative h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors max-sm:hidden ${isAuthenticated ? '' : 'lg:hidden'}`}
+                className={`relative hidden h-full px-3 items-center text-ink-700 hover:text-ink-900 transition-colors ${isAuthenticated ? 'lg:flex' : ''}`}
               >
                 <Heart size={20} strokeWidth={1.5} />
                 {wishlist.length > 0 && (
@@ -396,7 +369,7 @@ export default function Header() {
               </button>
               {/* Bell Notification Button */}
               {isAuthenticated && (
-                <div className="relative h-full max-sm:hidden" ref={notifRef}>
+                <div className="relative hidden h-full lg:block" ref={notifRef}>
                   <button
                     onClick={() => setShowNotifications((v) => !v)}
                     className="relative h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors"
@@ -494,23 +467,23 @@ export default function Header() {
                 </div>
               )}
               <button
+                onClick={() => { setShowMobileSearch(!showMobileSearch); }}
+                aria-label={t('common.search')}
+                className="mr-5 flex h-full items-center text-ink-700 transition-colors hover:text-ink-900 lg:hidden"
+              >
+                <Search size={20} strokeWidth={1.5} />
+              </button>
+              <button
                 onClick={() => setIsCartOpen(true)}
                 aria-label={t('cart.title')}
-                className={`relative h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors ${isAuthenticated ? '' : 'lg:hidden'}`}
+                className={`relative mr-5 flex h-full items-center text-ink-700 transition-colors hover:text-ink-900 lg:mr-0 lg:px-3 ${isAuthenticated ? '' : 'lg:hidden'}`}
               >
                 <ShoppingBag size={20} strokeWidth={1.5} />
                 {cartCount > 0 && (
-                  <span className="absolute top-3 right-0.5 bg-ink-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[18px] h-[18px]">
+                  <span className="absolute -right-2.5 top-2.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink-900 text-[10px] font-bold text-white md:top-3.5 lg:right-0.5 lg:top-3">
                     {cartCount}
                   </span>
                 )}
-              </button>
-              <button
-                onClick={() => { setShowMobileSearch(!showMobileSearch); }}
-                aria-label={t('common.search')}
-                className="md:hidden h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors"
-              >
-                <Search size={20} strokeWidth={1.5} />
               </button>
 
               {!isAuthenticated && (
@@ -527,9 +500,9 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Link row — desktop only, 47px, centred, 14px regular. Faire uses 14px gaps between
+        {/* Link row — lg+ only, 47px, centred, 14px regular. Faire uses 14px gaps between
             long category names; our five short labels need 32–40px to read as separate items. */}
-        <nav ref={megaMenuRef} className="relative hidden h-[47px] items-center justify-center gap-8 lg:gap-10 md:flex">
+        <nav ref={megaMenuRef} className="relative hidden h-[47px] items-center justify-center gap-10 lg:flex">
             <button
               onClick={() => setShowCategoryDropdown((v) => !v)}
               aria-expanded={showCategoryDropdown}
@@ -632,7 +605,7 @@ export default function Header() {
 
         {/* Mobile Search Full-Screen Overlay */}
         {showMobileSearch && (
-          <div className="fixed inset-0 bg-white z-[60] flex flex-col md:hidden">
+          <div className="fixed inset-0 bg-white z-[60] flex flex-col lg:hidden">
             {/* Overlay Header */}
             <div className="flex items-center justify-between px-4 h-[56px] border-b border-line shrink-0">
               <button
@@ -748,7 +721,7 @@ export default function Header() {
 
         {/* Mobile Category Full-Screen Overlay — Olive Young style master/detail */}
         {showMobileCategory && (
-          <div className="fixed inset-0 bg-white z-[60] flex flex-col md:hidden">
+          <div className="fixed inset-0 bg-white z-[60] flex flex-col lg:hidden">
             {/* Overlay Header */}
             <div className="flex items-center justify-between px-4 h-[56px] border-b border-line shrink-0">
               <button onClick={() => setShowMobileCategory(false)} className="text-ink-700 w-8">
@@ -814,80 +787,78 @@ export default function Header() {
           </div>
         )}
 
-        {/* Mobile Navigation Tab Bar */}
-        {isMobile && (
-          <div>
-            <div style={{
-              borderTop: '1px solid var(--wm-line)',
-              overflowX: 'auto',
-              display: 'flex',
-              scrollbarWidth: 'none',
-              WebkitOverflowScrolling: 'touch',
-            }}>
-              <button
-                onClick={() => { setShowMobileBrandShop(false); setShowMobileCategory(true); }}
-                style={{
-                  flexShrink: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '10px 14px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: 'var(--wm-ink-700)',
-                  whiteSpace: 'nowrap',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                <Menu size={14} />
-                {t('nav.category')}
-              </button>
-              <button
-                onClick={() => { setShowMobileCategory(false); setShowMobileBrandShop(true); }}
-                style={{
-                  flexShrink: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '10px 14px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: 'var(--wm-ink-700)',
-                  whiteSpace: 'nowrap',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                {t('nav.brandShop')}
-              </button>
-              {navItems.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  onClick={() => setShowMobileBrandShop(false)}
-                  style={{
-                    flexShrink: 0,
-                    padding: '10px 14px',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: isActive(item.path) ? 'var(--wm-ink-900)' : 'var(--wm-ink-700)',
-                    whiteSpace: 'nowrap',
-                    textDecoration: 'none',
-                  }}
-                >
-                  {item.label}
+        {/* Mobile menu drawer — faire.com: 300px panel from the left over a dimmed page,
+            dark account block with arrow rows, then 36px chevron rows. */}
+        {showMobileMenu && (
+          <div className="fixed inset-0 z-[70] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+            <button onClick={() => setShowMobileMenu(false)} aria-label="Close menu" className="absolute inset-0 bg-black/50" />
+            <div className="relative flex h-full w-[300px] max-w-[85vw] flex-col overflow-y-auto bg-white text-[15px] leading-5 tracking-[0.15px]">
+              <div className="bg-ink-700 px-5 pb-3 pt-4 text-white">
+                <div className="flex items-center justify-between pb-2">
+                  <Link to="/" onClick={() => setShowMobileMenu(false)} aria-label="WELMES Business" className="flex py-1">
+                    <Logo inverse />
+                  </Link>
+                  <button onClick={() => setShowMobileMenu(false)} aria-label="Close menu" className="-mr-2 p-2">
+                    <X size={20} strokeWidth={1.5} />
+                  </button>
+                </div>
+                {(isAuthenticated
+                  ? [{ label: t('common.myAccount'), to: '/account' }]
+                  : [{ label: t('homeHero.cta'), to: '/register' }, { label: t('common.login'), to: '/login' }]
+                ).map((item) => (
+                  <Link key={item.to} to={item.to} onClick={() => setShowMobileMenu(false)} className="flex h-9 items-center justify-between">
+                    {item.label}
+                    <ArrowRight size={18} strokeWidth={1.25} />
+                  </Link>
+                ))}
+                {isAuthenticated && (
+                  <button onClick={() => { setShowMobileMenu(false); handleLogout(); }} className="flex h-9 w-full items-center justify-between">
+                    {t('common.logout')}
+                    <ArrowRight size={18} strokeWidth={1.25} />
+                  </button>
+                )}
+              </div>
+              <nav className="p-4 text-ink-700">
+                <button onClick={() => { setShowMobileMenu(false); setShowMobileCategory(true); }} className="flex h-9 w-full items-center justify-between">
+                  {t('nav.category')}
+                  <ChevronRight size={18} strokeWidth={1.25} />
+                </button>
+                <button onClick={() => { setShowMobileMenu(false); setShowMobileBrandShop(true); }} className="flex h-9 w-full items-center justify-between">
+                  {t('nav.brandShop')}
+                  <ChevronRight size={18} strokeWidth={1.25} />
+                </button>
+                {navItems.map((item) => (
+                  <Link key={item.label} to={item.path} onClick={() => setShowMobileMenu(false)} className="flex h-9 items-center justify-between">
+                    {item.label}
+                    <ChevronRight size={18} strokeWidth={1.25} />
+                  </Link>
+                ))}
+                {isAuthenticated && (
+                  <Link to="/wishlist" onClick={() => setShowMobileMenu(false)} className="flex h-9 items-center justify-between">
+                    {t('wishlist.title')}
+                    <ChevronRight size={18} strokeWidth={1.25} />
+                  </Link>
+                )}
+              </nav>
+              <hr className="mx-4 border-line-control" />
+              <div className="flex items-center gap-6 px-4 py-3 text-ink-700">
+                <LanguageSwitcher className="flex h-9" />
+                <CurrencySelector />
+              </div>
+              <hr className="mx-4 border-line-control" />
+              <div className="p-4 text-ink-700">
+                <Link to="/support" onClick={() => setShowMobileMenu(false)} className="flex h-9 items-center justify-between">
+                  {t('common.support')}
+                  <ArrowRight size={18} strokeWidth={1.25} />
                 </Link>
-              ))}
+              </div>
             </div>
           </div>
         )}
 
         {/* Mobile Brand Shop Full-Screen Overlay — Olive Young style searchable list */}
         {showMobileBrandShop && (
-          <div className="fixed inset-0 bg-white z-[60] flex flex-col md:hidden">
+          <div className="fixed inset-0 bg-white z-[60] flex flex-col lg:hidden">
             {/* Overlay Header */}
             <div className="flex items-center justify-between px-4 h-[56px] border-b border-line shrink-0">
               <button

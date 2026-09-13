@@ -9,12 +9,12 @@ const SIZES = {
   print: { gap: 'gap-1', mark: 'text-[26px]', sub: 'text-[11px]' },
 };
 
-export default function Logo({ size = 'header' }: { size?: keyof typeof SIZES }) {
+export default function Logo({ size = 'header', inverse = false }: { size?: keyof typeof SIZES; inverse?: boolean }) {
   const s = SIZES[size];
   return (
     <span className={`inline-flex flex-col items-center ${s.gap}`}>
-      <span className={`-mr-[0.32em] font-logo font-medium leading-none tracking-[0.32em] text-ink-900 ${s.mark}`}>WELMES</span>
-      <span className={`-mr-[0.5em] leading-none tracking-[0.5em] text-ink-500 ${s.sub}`}>BUSINESS</span>
+      <span className={`-mr-[0.32em] font-logo font-medium leading-none tracking-[0.32em] ${inverse ? 'text-white' : 'text-ink-900'} ${s.mark}`}>WELMES</span>
+      <span className={`-mr-[0.5em] leading-none tracking-[0.5em] ${inverse ? 'text-white/70' : 'text-ink-500'} ${s.sub}`}>BUSINESS</span>
     </span>
   );
 }
