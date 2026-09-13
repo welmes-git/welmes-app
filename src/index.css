@@ -217,3 +217,8 @@
   .bottom-banner-cycle { animation: none; }
   .bottom-banner-cycle:first-child { opacity: 1; visibility: visible; }
 }
+
+/* Home product rows: show exactly two rows at every .product-grid column count (2/4/5/6) */
+@media (max-width: 767px) { .product-grid-2rows > :nth-child(n+5) { display: none; } }
+@media (min-width: 768px) and (max-width: 1023px) { .product-grid-2rows > :nth-child(n+9) { display: none; } }
+@media (min-width: 1024px) and (max-width: 1279px) { .product-grid-2rows > :nth-child(n+11) { display: none; } }

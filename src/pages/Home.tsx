@@ -130,9 +130,9 @@ export default function Home() {
           </Link>
         </div>
         {productsLoading ? (
-          <ProductGridSkeleton />
+          <ProductGridSkeleton className="product-grid product-grid-2rows" />
         ) : (
-          <div className="product-grid">
+          <div className="product-grid product-grid-2rows">
             {weeklyBest.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -179,8 +179,8 @@ export default function Home() {
                 <ChevronRightIcon size={14} />
               </Link>
             </div>
-            {productsLoading ? <ProductGridSkeleton /> : (
-              <div className="product-grid">
+            {productsLoading ? <ProductGridSkeleton className="product-grid product-grid-2rows" /> : (
+              <div className="product-grid product-grid-2rows">
                 {newArrivals.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
