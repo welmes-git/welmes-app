@@ -80,7 +80,7 @@ export default function Home() {
       {/* Weekly Best Sellers */}
       <section className="page-container py-16">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900">{t('home.weeklySellers')}</h2>
+          <h2 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700">{t('home.weeklySellers')}</h2>
           <Link
             to="/products?sort=popular"
             className="flex items-center gap-1 text-[13px] text-ink-500 hover:text-ink-900 transition-colors"
@@ -129,7 +129,7 @@ export default function Home() {
         <section className="bg-sunken py-16">
           <div className="page-container">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900">{t('home.newArrivals')}</h2>
+              <h2 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700">{t('home.newArrivals')}</h2>
               <Link
                 to="/products?sort=newest"
                 className="flex items-center gap-1 text-[13px] text-ink-500 hover:text-ink-900 transition-colors"
@@ -152,7 +152,7 @@ export default function Home() {
       {/* Brand Showcase */}
       {popularBrands.length > 0 && (
         <section className="page-container py-16">
-          <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900 mb-5">
+          <h2 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700 mb-5">
             {t('home.popularBrands')}
           </h2>
           <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
@@ -175,7 +175,7 @@ export default function Home() {
       {/* B2B Info Section */}
       <section className="bg-sunken border-t border-line py-16">
         <div className="page-container text-center">
-          <h2 className="text-[24px] md:text-[30px] font-extrabold tracking-[-0.02em] text-ink-900 mb-4">
+          <h2 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700 mb-4">
             {t('home.businessExclusive')}
           </h2>
           <p className="text-ink-500 text-[14px] md:text-[16px] max-w-[600px] mx-auto mb-8 leading-relaxed">
