@@ -10,6 +10,8 @@ import { initialProducts } from '../data/products';
 import { brandsByCount } from '../lib/utils';
 import { categoryMenuColumns } from '../config/categoryMenu';
 import { useOutsideClick } from '../hooks/useOutsideClick';
+import { CURRENCIES } from '../lib/currency';
+import type { CurrencyCode } from '../lib/currency';
 import * as db from '../lib/db';
 import {
   ShoppingBag,
@@ -54,10 +56,10 @@ export default function Header() {
   const location = useLocation();
   const {
     isAuthenticated, isAdmin, currentUser, logout,
-    cart, wishlist, notifications, products, productsLoading,
+    cart, wishlist, notifications, products, productsLoading, selectedCurrency, setSelectedCurrency,
     markNotificationRead, markAllNotificationsRead, clearNotifications,
   } = useStore();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -841,9 +843,40 @@ export default function Header() {
                 )}
               </nav>
               <hr className="mx-4 border-line-control" />
-              <div className="flex items-center gap-6 px-4 py-3 text-ink-700">
-                <LanguageSwitcher className="flex h-9" />
-                <CurrencySelector />
+              {/* Language + currency open inline (Faire's accordion row) — a popover would overflow the 300px panel */}
+              <div className="px-4 py-3 text-ink-700">
+                {[
+                  {
+                    key: 'lang',
+                    icon: <Globe size={16} strokeWidth={1.5} />,
+                    label: LANGUAGES.find((l) => l.code === i18n.language)?.name ?? 'English',
+                    options: LANGUAGES.map((l) => ({ id: l.code, text: l.name, active: l.code === i18n.language, pick: () => i18n.changeLanguage(l.code) })),
+                  },
+                  {
+                    key: 'currency',
+                    icon: <span className="text-[16px] leading-none">{CURRENCIES.find((c) => c.code === selectedCurrency)?.flag}</span>,
+                    label: selectedCurrency,
+                    options: CURRENCIES.map((c) => ({ id: c.code, text: `${c.flag} ${c.code} · ${c.name}`, active: c.code === selectedCurrency, pick: () => setSelectedCurrency(c.code as CurrencyCode) })),
+                  },
+                ].map((menu) => (
+                  <details key={menu.key} className="group">
+                    <summary className="flex h-9 cursor-pointer list-none items-center justify-between [&::-webkit-details-marker]:hidden">
+                      <span className="flex items-center gap-2">{menu.icon}{menu.label}</span>
+                      <ChevronDown size={18} strokeWidth={1.25} className="transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="pb-2">
+                      {menu.options.map((o) => (
+                        <button
+                          key={o.id}
+                          onClick={(e) => { o.pick(); e.currentTarget.closest('details')?.removeAttribute('open'); }}
+                          className={`flex h-9 w-full items-center pl-6 text-left text-[14px] ${o.active ? 'font-medium text-ink-900' : 'text-ink-500'}`}
+                        >
+                          {o.text}
+                        </button>
+                      ))}
+                    </div>
+                  </details>
+                ))}
               </div>
               <hr className="mx-4 border-line-control" />
               <div className="p-4 text-ink-700">
