@@ -114,8 +114,7 @@ export default function Home() {
       </section>
 
       {/* Brand statement — faire.com "We're Faire" banner, measured at 375/768/1024/1280/1440/1920px.
-          Faire breakpoints here are md 768, lg 1024, xl 1440, 2xl 1920. The photo is replaced
-          by a solid purple block until we have our own imagery. */}
+          Faire breakpoints here are md 768, lg 1024, xl 1440, 2xl 1920. */}
       <section className="flex flex-col items-stretch overflow-hidden bg-[#41252a] px-4 pb-4 pt-[26px] md:p-8 lg:p-12 min-[1920px]:px-20 min-[1920px]:py-12">
         <div className="flex w-full flex-col justify-center gap-4 md:flex-row md:items-center md:gap-0">
           <div className="flex w-full flex-col md:w-1/2">
@@ -130,7 +129,13 @@ export default function Home() {
             {t('brandStatement.body')}
           </p>
         </div>
-        <div className="relative mt-8 aspect-square w-full overflow-hidden bg-[#6b4e8a] md:aspect-[3/1]" aria-hidden="true" />
+        {/* 16:9 source: square crop shifted right (x 36%) to keep the product group; 3:1 stays centred */}
+        <img
+          src="/banners/brand-statement.jpg"
+          alt=""
+          loading="lazy"
+          className="mt-8 aspect-square w-full bg-[#6b4e8a] object-cover object-[36%_50%] md:aspect-[3/1] md:object-center"
+        />
       </section>
 
       {/* New Arrivals */}
