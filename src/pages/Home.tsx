@@ -80,7 +80,7 @@ export default function Home() {
       {/* Weekly Best Sellers */}
       <section className="page-container py-16">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700">{t('home.weeklySellers')}</h2>
+          <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700">{t('home.weeklySellers')}</h2>
           <Link
             to="/products?sort=popular"
             className="flex items-center gap-1 text-[13px] text-ink-500 hover:text-ink-900 transition-colors"
@@ -129,7 +129,7 @@ export default function Home() {
         <section className="bg-sunken py-16">
           <div className="page-container">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700">{t('home.newArrivals')}</h2>
+              <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700">{t('home.newArrivals')}</h2>
               <Link
                 to="/products?sort=newest"
                 className="flex items-center gap-1 text-[13px] text-ink-500 hover:text-ink-900 transition-colors"
