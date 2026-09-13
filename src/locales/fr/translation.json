@@ -697,7 +697,7 @@
     "submitted": "Avis envoyé !"
   },
   "footer": {
-    "tagline": "Plateforme de gros premium K-Beauty",
+    "tagline": "Plateforme de gros premium de cosmétiques japonais",
     "company": "Entreprise",
     "about": "À propos",
     "careers": "Carrières",
@@ -717,5 +717,9 @@
     "wholesaleInfo": "Informations grossistes",
     "businessHours": "Lun – Ven  09:00 – 18:00\nDéjeuner  12:00 – 13:00\nFermé week-ends et jours fériés",
     "companyInfo": "Société : WELMES Co., Ltd. | PDG : Kim Daepyo | N° d'immatriculation : 123-45-67890 | Enregistrement e-commerce : 2025-Seoul Gangnam-0001"
+  },
+  "currency": {
+    "ratesAsOf": "Taux à {{time}}",
+    "loadingRates": "Chargement des taux de change…"
   }
 }

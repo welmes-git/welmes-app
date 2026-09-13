@@ -45,15 +45,15 @@ export default function OrderPrint() {
     if (!loaded) {
       return (
         <div className="min-h-screen flex items-center justify-center">
-          <Loader2 size={28} className="animate-spin text-[#4a90e2]" />
+          <Loader2 size={28} className="animate-spin text-ink-500" />
         </div>
       );
     }
     return (
       <div className="min-h-screen flex items-center justify-center text-center px-4">
         <div>
-          <p className="text-[18px] text-[#999] mb-4">Order not found.</p>
-          <button onClick={() => navigate('/account')} className="text-[#4a90e2] hover:underline">
+          <p className="text-[18px] text-ink-500 mb-4">Order not found.</p>
+          <button onClick={() => navigate('/account')} className="font-bold text-ink-900 underline underline-offset-2">
             ← Back to My Account
           </button>
         </div>
@@ -71,7 +71,7 @@ export default function OrderPrint() {
   return (
     <>
       {/* ── Action toolbar (hidden when printing) ── */}
-      <div className="print:hidden bg-[#2c3e50] text-white px-6 py-3 flex items-center justify-between">
+      <div className="print:hidden bg-ink-900 text-white px-6 py-3 flex items-center justify-between">
         <button
           onClick={() => navigate('/account')}
           className="flex items-center gap-2 text-[13px] text-white/80 hover:text-white transition-colors"
@@ -81,7 +81,7 @@ export default function OrderPrint() {
         </button>
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-2 bg-[#4a90e2] hover:bg-[#357abd] text-white text-[13px] font-semibold px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-white hover:bg-sunken text-ink-900 text-[13px] font-bold px-4 py-2 rounded-lg transition-colors"
         >
           <Printer size={15} />
           Save as PDF / Print
@@ -95,52 +95,51 @@ export default function OrderPrint() {
         style={{ width: '210mm', minHeight: '297mm', padding: '16mm 18mm', fontFamily: "'Arial', sans-serif" }}
       >
         {/* Header */}
-        <div className="flex justify-between items-start mb-8 pb-6 border-b-2 border-[#2c3e50]">
+        <div className="flex justify-between items-start mb-8 pb-6 border-b-2 border-ink-900">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[26px] font-bold text-[#2c3e50] tracking-tight">WELMES</span>
-              <span className="bg-[#4a90e2] text-white text-[10px] font-bold px-2 py-0.5 rounded">Business</span>
+              <span className="text-[26px] font-bold text-ink-900 tracking-tight">WELMES</span>
+              <span className="border border-line-strong text-ink-700 text-[10px] font-bold px-[6px] py-[2px] rounded">Business</span>
             </div>
-            <p className="text-[11px] text-[#666] leading-relaxed">
+            <p className="text-[11px] text-ink-500 leading-relaxed">
               123 Teheran-ro, Gangnam-gu, Seoul, South Korea<br />
               Tel: 1544-1234 &nbsp;|&nbsp; support@welmes.kr<br />
               Business Reg. No.: 123-45-67890
             </p>
           </div>
           <div className="text-right">
-            <p className="text-[22px] font-bold text-[#2c3e50] uppercase tracking-widest mb-1">
+            <p className="text-[22px] font-bold text-ink-900 uppercase tracking-widest mb-1">
               Purchase Order
             </p>
             <table className="text-[11px] text-right ml-auto">
               <tbody>
                 <tr>
-                  <td className="text-[#888] pr-3 py-0.5">Order No.</td>
-                  <td className="font-bold text-[#222] font-mono">{order.id}</td>
+                  <td className="text-ink-500 pr-3 py-0.5">Order No.</td>
+                  <td className="font-bold text-ink-900 font-mono">{order.id}</td>
                 </tr>
                 <tr>
-                  <td className="text-[#888] pr-3 py-0.5">Order Date</td>
-                  <td className="font-semibold text-[#222]">{order.date}</td>
+                  <td className="text-ink-500 pr-3 py-0.5">Order Date</td>
+                  <td className="font-semibold text-ink-900">{order.date}</td>
                 </tr>
                 <tr>
-                  <td className="text-[#888] pr-3 py-0.5">Print Date</td>
-                  <td className="font-semibold text-[#222]">{today}</td>
+                  <td className="text-ink-500 pr-3 py-0.5">Print Date</td>
+                  <td className="font-semibold text-ink-900">{today}</td>
                 </tr>
                 {order.poNumber && (
                   <tr>
-                    <td className="text-[#888] pr-3 py-0.5">PO Number</td>
-                    <td className="font-semibold text-[#222]">{order.poNumber}</td>
+                    <td className="text-ink-500 pr-3 py-0.5">PO Number</td>
+                    <td className="font-semibold text-ink-900">{order.poNumber}</td>
                   </tr>
                 )}
                 <tr>
-                  <td className="text-[#888] pr-3 py-0.5">Status</td>
+                  <td className="text-ink-500 pr-3 py-0.5">Status</td>
                   <td>
-                    <span className={`font-bold uppercase text-[10px] px-1.5 py-0.5 rounded ${
-                      order.status === 'completed' ? 'bg-green-100 text-green-700' :
-                      order.status === 'shipped'   ? 'bg-indigo-100 text-indigo-700' :
-                      order.status === 'processing'? 'bg-blue-100 text-blue-700' :
-                      order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                                                     'bg-yellow-100 text-yellow-700'
-                    }`}>
+                    <span className="inline-flex items-center gap-1.5 font-bold uppercase text-[10px] text-ink-900">
+                      <span className={`h-1.5 w-1.5 rounded-full ${
+                        order.status === 'completed' ? 'bg-signal-ok' :
+                        order.status === 'cancelled' ? 'bg-signal-error' :
+                        order.status === 'shipped'   ? 'bg-ink-900' : 'bg-ink-500'
+                      }`} />
                       {order.status}
                     </span>
                   </td>
@@ -153,55 +152,55 @@ export default function OrderPrint() {
         {/* Bill To / Ship To */}
         <div className="grid grid-cols-2 gap-6 mb-8">
           {/* Bill To */}
-          <div className="bg-[#f8f8fa] rounded-lg p-4 border border-[#e5e5e5]">
-            <p className="text-[10px] font-bold text-[#4a90e2] uppercase tracking-widest mb-2">Bill To</p>
-            <p className="text-[13px] font-bold text-[#222]">{order.memberName}</p>
+          <div className="bg-sunken rounded-lg p-4 border border-line">
+            <p className="text-[10px] font-bold text-ink-500 uppercase tracking-widest mb-2">Bill To</p>
+            <p className="text-[13px] font-bold text-ink-900">{order.memberName}</p>
             {billTo && (
               <>
-                <p className="text-[11px] text-[#666] mt-0.5">{billTo.email}</p>
-                <p className="text-[11px] text-[#666]">Reg. No.: {billTo.businessNumber}</p>
-                <p className="text-[11px] text-[#666]">Rep.: {billTo.representative}</p>
-                <p className="text-[11px] text-[#666]">{billTo.phone}</p>
+                <p className="text-[11px] text-ink-500 mt-0.5">{billTo.email}</p>
+                <p className="text-[11px] text-ink-500">Reg. No.: {billTo.businessNumber}</p>
+                <p className="text-[11px] text-ink-500">Rep.: {billTo.representative}</p>
+                <p className="text-[11px] text-ink-500">{billTo.phone}</p>
               </>
             )}
           </div>
 
           {/* Ship To */}
-          <div className="bg-[#f8f8fa] rounded-lg p-4 border border-[#e5e5e5]">
-            <p className="text-[10px] font-bold text-[#4a90e2] uppercase tracking-widest mb-2">Ship To</p>
+          <div className="bg-sunken rounded-lg p-4 border border-line">
+            <p className="text-[10px] font-bold text-ink-500 uppercase tracking-widest mb-2">Ship To</p>
             {sh ? (
               <>
-                <p className="text-[13px] font-bold text-[#222]">{sh.company}</p>
-                <p className="text-[11px] text-[#666] mt-0.5">Attn: {sh.recipient}</p>
-                <p className="text-[11px] text-[#666]">{sh.phone}</p>
-                <p className="text-[11px] text-[#666]">{sh.addressLine1}{sh.addressLine2 ? `, ${sh.addressLine2}` : ''}</p>
-                <p className="text-[11px] text-[#666]">
+                <p className="text-[13px] font-bold text-ink-900">{sh.company}</p>
+                <p className="text-[11px] text-ink-500 mt-0.5">Attn: {sh.recipient}</p>
+                <p className="text-[11px] text-ink-500">{sh.phone}</p>
+                <p className="text-[11px] text-ink-500">{sh.addressLine1}{sh.addressLine2 ? `, ${sh.addressLine2}` : ''}</p>
+                <p className="text-[11px] text-ink-500">
                   {[sh.city, sh.state, sh.zipCode].filter(Boolean).join(', ')}, {sh.country}
                 </p>
               </>
             ) : (
-              <p className="text-[11px] text-[#666]">{order.memberName}</p>
+              <p className="text-[11px] text-ink-500">{order.memberName}</p>
             )}
           </div>
         </div>
 
         {/* Order Notes */}
         {order.notes && (
-          <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-[10px] font-bold text-yellow-700 uppercase tracking-wide mb-1">Delivery Notes</p>
-            <p className="text-[12px] text-[#555]">{order.notes}</p>
+          <div className="mb-6 p-3 bg-sunken border border-line-strong rounded-lg">
+            <p className="text-[10px] font-bold text-ink-900 uppercase tracking-wide mb-1">Delivery Notes</p>
+            <p className="text-[12px] text-ink-500">{order.notes}</p>
           </div>
         )}
 
         {/* Items table */}
         <table className="w-full mb-6" style={{ borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ backgroundColor: '#2c3e50', color: 'white' }}>
+            <tr style={{ backgroundColor: 'var(--wm-ink-900)', color: 'white' }}>
               {['#', 'Product', 'Brand', 'Set', 'Qty (sets)', 'Unit Price', 'Amount'].map((h) => (
                 <th
                   key={h}
                   className="text-left py-2.5 px-3 text-[10px] font-bold uppercase tracking-wide"
-                  style={{ borderBottom: '2px solid #2c3e50' }}
+                  style={{ borderBottom: '2px solid var(--wm-ink-900)' }}
                 >
                   {h}
                 </th>
@@ -217,30 +216,30 @@ export default function OrderPrint() {
                 return (
                   <tr
                     key={idx}
-                    style={{ backgroundColor: idx % 2 === 0 ? '#ffffff' : '#f8f8fa' }}
+                    style={{ backgroundColor: idx % 2 === 0 ? 'var(--wm-canvas)' : 'var(--wm-sunken)' }}
                   >
-                    <td className="py-2.5 px-3 text-[11px] text-[#888]">{idx + 1}</td>
-                    <td className="py-2.5 px-3 text-[11px] text-[#222] font-medium" style={{ maxWidth: '180px' }}>
+                    <td className="py-2.5 px-3 text-[11px] text-ink-500">{idx + 1}</td>
+                    <td className="py-2.5 px-3 text-[11px] text-ink-900 font-medium" style={{ maxWidth: '180px' }}>
                       {item.product.nameEn ?? item.product.name}
                     </td>
-                    <td className="py-2.5 px-3 text-[11px] text-[#888]">{item.product.brand}</td>
+                    <td className="py-2.5 px-3 text-[11px] text-ink-500">{item.product.brand}</td>
                     <td className="py-2.5 px-3 text-[11px]">
                       {item.setOption ? (
                         <span>
-                          <span className="font-bold text-[#4a90e2]">{item.setOption.id}</span>
-                          <span className="text-[#888]"> · {item.setOption.description}</span>
+                          <span className="font-bold text-ink-900">{item.setOption.id}</span>
+                          <span className="text-ink-500"> · {item.setOption.description}</span>
                         </span>
                       ) : '—'}
                     </td>
-                    <td className="py-2.5 px-3 text-[11px] text-[#333] text-center font-semibold">{item.quantity}</td>
-                    <td className="py-2.5 px-3 text-[11px] text-[#333] text-right">{formatPrice(unitPrice)}</td>
-                    <td className="py-2.5 px-3 text-[11px] font-bold text-[#222] text-right">{formatPrice(lineTotal)}</td>
+                    <td className="py-2.5 px-3 text-[11px] text-ink-700 text-center font-semibold">{item.quantity}</td>
+                    <td className="py-2.5 px-3 text-[11px] text-ink-700 text-right tabular-nums">{formatPrice(unitPrice)}</td>
+                    <td className="py-2.5 px-3 text-[11px] font-bold text-ink-900 text-right tabular-nums">{formatPrice(lineTotal)}</td>
                   </tr>
                 );
               })
             ) : (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-[12px] text-[#aaa]">
+                <td colSpan={7} className="py-8 text-center text-[12px] text-ink-300">
                   Item details not available for legacy orders.
                 </td>
               </tr>
@@ -253,20 +252,20 @@ export default function OrderPrint() {
           <div style={{ width: '240px' }}>
             <div className="space-y-1.5">
               <div className="flex justify-between text-[12px]">
-                <span className="text-[#666]">Subtotal (excl. VAT)</span>
+                <span className="text-ink-500">Subtotal (excl. VAT)</span>
                 <span className="font-medium">{formatPrice(order.subtotal ?? order.total)}</span>
               </div>
               {order.vat !== undefined && (
                 <div className="flex justify-between text-[12px]">
-                  <span className="text-[#666]">VAT (10%)</span>
+                  <span className="text-ink-500">VAT (10%)</span>
                   <span className="font-medium">{formatPrice(order.vat)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-[14px] font-bold text-[#222] pt-2 border-t-2 border-[#2c3e50] mt-2">
+              <div className="flex justify-between text-[14px] font-bold text-ink-900 pt-2 border-t-2 border-ink-900 mt-2">
                 <span>Grand Total</span>
                 <span>{formatPrice(order.total)}</span>
               </div>
-              <p className="text-[10px] text-[#aaa] text-right">VAT included in total amount</p>
+              <p className="text-[10px] text-ink-300 text-right">VAT included in total amount</p>
             </div>
           </div>
         </div>
@@ -275,8 +274,8 @@ export default function OrderPrint() {
         <div className="grid grid-cols-2 gap-8 mb-8">
           {/* Terms */}
           <div>
-            <p className="text-[10px] font-bold text-[#888] uppercase tracking-wide mb-2">Terms & Conditions</p>
-            <ul className="text-[10px] text-[#888] space-y-1 list-disc list-inside">
+            <p className="text-[10px] font-bold text-ink-500 uppercase tracking-wide mb-2">Terms & Conditions</p>
+            <ul className="text-[10px] text-ink-500 space-y-1 list-disc list-inside">
               <li>Payment due within 30 days of invoice date.</li>
               <li>All prices are in Japanese Yen (JPY).</li>
               <li>Goods remain property of WELMES until full payment received.</li>
@@ -288,25 +287,25 @@ export default function OrderPrint() {
           {/* Signatures */}
           <div className="space-y-6">
             <div>
-              <p className="text-[10px] font-bold text-[#888] uppercase tracking-wide mb-3">Authorized by (Buyer)</p>
-              <div className="border-b border-[#ccc] mb-1" style={{ height: '36px' }} />
-              <p className="text-[10px] text-[#aaa]">Signature &nbsp; / &nbsp; Date</p>
+              <p className="text-[10px] font-bold text-ink-500 uppercase tracking-wide mb-3">Authorized by (Buyer)</p>
+              <div className="border-b border-line-strong mb-1" style={{ height: '36px' }} />
+              <p className="text-[10px] text-ink-300">Signature &nbsp; / &nbsp; Date</p>
             </div>
             <div>
-              <p className="text-[10px] font-bold text-[#888] uppercase tracking-wide mb-3">Confirmed by (WELMES)</p>
-              <div className="border-b border-[#ccc] mb-1" style={{ height: '36px' }} />
-              <p className="text-[10px] text-[#aaa]">Signature &nbsp; / &nbsp; Date</p>
+              <p className="text-[10px] font-bold text-ink-500 uppercase tracking-wide mb-3">Confirmed by (WELMES)</p>
+              <div className="border-b border-line-strong mb-1" style={{ height: '36px' }} />
+              <p className="text-[10px] text-ink-300">Signature &nbsp; / &nbsp; Date</p>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#e5e5e5] pt-4 text-center">
-          <p className="text-[10px] text-[#aaa]">
+        <div className="border-t border-line pt-4 text-center">
+          <p className="text-[10px] text-ink-300">
             WELMES Co., Ltd. &nbsp;|&nbsp; 123 Teheran-ro, Gangnam-gu, Seoul &nbsp;|&nbsp;
             1544-1234 &nbsp;|&nbsp; support@welmes.kr &nbsp;|&nbsp; www.welmes.kr
           </p>
-          <p className="text-[9px] text-[#ccc] mt-1">
+          <p className="text-[9px] text-line-strong mt-1">
             This document is computer-generated and valid without a physical signature where not required by law.
           </p>
         </div>

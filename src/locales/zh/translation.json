@@ -697,7 +697,7 @@
     "submitted": "评价提交成功！"
   },
   "footer": {
-    "tagline": "韩国美妆优质批发平台",
+    "tagline": "日本美妆优质批发平台",
     "company": "公司",
     "about": "关于我们",
     "careers": "加入我们",
@@ -717,5 +717,9 @@
     "wholesaleInfo": "批发信息",
     "businessHours": "周一至周五  09:00 – 18:00\n午休  12:00 – 13:00\n周末及节假日休息",
     "companyInfo": "公司：WELMES Co., Ltd. | 代表：金代杓 | 营业执照号：123-45-67890 | 电商备案：2025-Seoul Gangnam-0001"
+  },
+  "currency": {
+    "ratesAsOf": "汇率更新于 {{time}}",
+    "loadingRates": "正在加载汇率…"
   }
 }

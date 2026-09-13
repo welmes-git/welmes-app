@@ -695,7 +695,7 @@
     "submitted": "리뷰가 등록되었습니다!"
   },
   "footer": {
-    "tagline": "프리미엄 K-뷰티 도매 플랫폼",
+    "tagline": "프리미엄 일본 화장품 도매 플랫폼",
     "company": "회사",
     "about": "회사 소개",
     "careers": "채용",
@@ -715,5 +715,9 @@
     "wholesaleInfo": "도매 안내",
     "businessHours": "월~금  09:00~18:00\n점심시간  12:00~13:00\n주말·공휴일 휴무",
     "companyInfo": "상호: (주)웰메스 | 대표: 김대표 | 사업자등록번호: 123-45-67890 | 통신판매업신고: 2025-서울강남-0001"
+  },
+  "currency": {
+    "ratesAsOf": "{{time}} 기준 환율",
+    "loadingRates": "환율 불러오는 중…"
   }
 }

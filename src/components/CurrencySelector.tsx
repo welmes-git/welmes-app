@@ -4,10 +4,12 @@ import { CURRENCIES } from '../lib/currency';
 import type { CurrencyCode } from '../lib/currency';
 import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
+import { useTranslation } from 'react-i18next';
 
 export default function CurrencySelector() {
   const { selectedCurrency, setSelectedCurrency } = useStore();
   const { loading, lastUpdated } = useCurrency();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -26,7 +28,7 @@ export default function CurrencySelector() {
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-1.5 text-[12px] text-ink-500 hover:text-ink-900 transition-colors"
-        title={lastUpdated ? `Rates updated: ${lastUpdated.toLocaleTimeString()}` : 'Loading rates…'}
+        title={lastUpdated ? t('currency.ratesAsOf', { time: lastUpdated.toLocaleTimeString() }) : t('currency.loadingRates')}
       >
         <span>{current.flag}</span>
         <span className="font-semibold">{current.code}</span>
@@ -38,8 +40,8 @@ export default function CurrencySelector() {
         <div className="absolute right-0 top-full mt-1.5 w-[200px] bg-canvas border border-line rounded-lg shadow-hover z-50 py-1 overflow-hidden">
           <p className="text-[10px] tabular-nums text-ink-500 px-3 py-1.5 border-b border-line">
             {lastUpdated
-              ? `Rates as of ${lastUpdated.toLocaleTimeString()}`
-              : 'Loading exchange rates…'}
+              ? t('currency.ratesAsOf', { time: lastUpdated.toLocaleTimeString() })
+              : t('currency.loadingRates')}
           </p>
           {CURRENCIES.map((c) => (
             <button

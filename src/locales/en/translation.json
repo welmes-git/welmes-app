@@ -697,7 +697,7 @@
     "submitted": "Review submitted!"
   },
   "footer": {
-    "tagline": "Premium K-Beauty Wholesale Platform",
+    "tagline": "Premium Japanese Cosmetics Wholesale Platform",
     "company": "Company",
     "about": "About Us",
     "careers": "Careers",
@@ -717,5 +717,9 @@
     "wholesaleInfo": "Wholesale Info",
     "businessHours": "Mon – Fri  09:00 – 18:00\nLunch  12:00 – 13:00\nClosed on weekends & holidays",
     "companyInfo": "Company: WELMES Co., Ltd. | CEO: Kim Daepyo | Business Reg. No.: 123-45-67890 | E-Commerce Reg.: 2025-Seoul Gangnam-0001"
+  },
+  "currency": {
+    "ratesAsOf": "Rates as of {{time}}",
+    "loadingRates": "Loading exchange rates…"
   }
 }

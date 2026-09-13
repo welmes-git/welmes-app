@@ -695,7 +695,7 @@
     "submitted": "Đã gửi đánh giá!"
   },
   "footer": {
-    "tagline": "Nền tảng bán sỉ K-Beauty cao cấp",
+    "tagline": "Nền tảng bán sỉ mỹ phẩm Nhật Bản cao cấp",
     "company": "Công ty",
     "about": "Về chúng tôi",
     "careers": "Tuyển dụng",
@@ -715,5 +715,9 @@
     "wholesaleInfo": "Thông tin bán sỉ",
     "businessHours": "T2 – T6  09:00 – 18:00\nNghỉ trưa  12:00 – 13:00\nNghỉ cuối tuần & ngày lễ",
     "companyInfo": "Công ty: WELMES Co., Ltd. | CEO: Kim Daepyo | Mã số ĐKKD: 123-45-67890 | Đăng ký TMĐT: 2025-Seoul Gangnam-0001"
+  },
+  "currency": {
+    "ratesAsOf": "Tỷ giá lúc {{time}}",
+    "loadingRates": "Đang tải tỷ giá…"
   }
 }
