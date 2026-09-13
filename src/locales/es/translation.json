@@ -731,5 +731,14 @@
     "title": "La plataforma mayorista de cosmética japonesa",
     "desc": "Los compradores empresariales verificados ven el precio mayorista de cada producto y pueden pedir desde 1 set.",
     "cta": "Ver precios mayoristas"
+  },
+  "homeHero": {
+    "title": "Lleva a tu tienda la cosmética japonesa más querida",
+    "subtitle": "Regístrate para ver los precios mayoristas de cosmética japonesa original.",
+    "subtitleMember": "Tus precios mayoristas ya están disponibles. Empieza tu pedido.",
+    "cta": "Regístrate como comprador",
+    "ctaMember": "Ver productos",
+    "brandQuestion": "¿Eres una marca?",
+    "brandCta": "Consultar para vender"
   }
 }

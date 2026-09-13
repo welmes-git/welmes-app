@@ -731,5 +731,14 @@
     "title": "La plateforme de gros pour les cosmétiques japonais",
     "desc": "Les acheteurs professionnels vérifiés voient le prix de gros de chaque produit et commandent dès 1 lot.",
     "cta": "Voir les prix de gros"
+  },
+  "homeHero": {
+    "title": "Les cosmétiques japonais préférés, dans votre boutique",
+    "subtitle": "Inscrivez-vous pour voir les prix de gros des cosmétiques japonais authentiques.",
+    "subtitleMember": "Vos prix de gros sont débloqués. Commencez votre commande.",
+    "cta": "S'inscrire comme acheteur",
+    "ctaMember": "Voir les produits",
+    "brandQuestion": "Vous êtes une marque ?",
+    "brandCta": "Nous contacter pour vendre"
   }
 }

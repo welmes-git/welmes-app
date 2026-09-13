@@ -729,5 +729,14 @@
     "title": "Platform grosir kosmetik Jepang",
     "desc": "Pembeli bisnis terverifikasi dapat melihat harga grosir setiap produk dan memesan mulai dari 1 set.",
     "cta": "Lihat harga grosir"
+  },
+  "homeHero": {
+    "title": "Hadirkan kosmetik Jepang favorit di toko Anda",
+    "subtitle": "Daftar untuk melihat harga grosir kosmetik Jepang asli.",
+    "subtitleMember": "Harga grosir sudah terbuka untuk bisnis Anda. Mulai susun pesanan Anda.",
+    "cta": "Daftar sebagai pembeli",
+    "ctaMember": "Lihat produk",
+    "brandQuestion": "Anda pemilik merek?",
+    "brandCta": "Hubungi kami untuk berjualan"
   }
 }

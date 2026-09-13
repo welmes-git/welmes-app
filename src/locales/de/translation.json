@@ -731,5 +731,14 @@
     "title": "Die Großhandelsplattform für japanische Kosmetik",
     "desc": "Verifizierte Geschäftskunden sehen bei jedem Produkt den Großhandelspreis und bestellen schon ab 1 Set.",
     "cta": "Großhandelspreise freischalten"
+  },
+  "homeHero": {
+    "title": "Japans beliebteste Kosmetik für Ihr Geschäft",
+    "subtitle": "Registrieren Sie sich, um Großhandelspreise für originale japanische Kosmetik zu sehen.",
+    "subtitleMember": "Ihre Großhandelspreise sind freigeschaltet. Stellen Sie jetzt Ihre Bestellung zusammen.",
+    "cta": "Als Einkäufer registrieren",
+    "ctaMember": "Produkte ansehen",
+    "brandQuestion": "Sie sind eine Marke?",
+    "brandCta": "Anfrage zum Verkauf"
   }
 }

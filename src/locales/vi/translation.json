@@ -729,5 +729,14 @@
     "title": "Nền tảng bán sỉ mỹ phẩm Nhật Bản",
     "desc": "Người mua doanh nghiệp đã xác minh có thể xem giá sỉ của mọi sản phẩm và đặt hàng từ 1 bộ.",
     "cta": "Xem giá sỉ"
+  },
+  "homeHero": {
+    "title": "Đưa mỹ phẩm Nhật được yêu thích về cửa hàng của bạn",
+    "subtitle": "Đăng ký để xem giá sỉ mỹ phẩm Nhật Bản chính hãng.",
+    "subtitleMember": "Giá sỉ đã mở cho doanh nghiệp của bạn. Bắt đầu đặt hàng ngay.",
+    "cta": "Đăng ký làm người mua",
+    "ctaMember": "Xem sản phẩm",
+    "brandQuestion": "Bạn là thương hiệu?",
+    "brandCta": "Liên hệ để bán hàng"
   }
 }

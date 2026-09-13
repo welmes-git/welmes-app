@@ -731,5 +731,14 @@
     "title": "The wholesale platform for Japanese beauty",
     "desc": "Verified business buyers see the wholesale price on every product and can order from just 1 set.",
     "cta": "Unlock wholesale pricing"
+  },
+  "homeHero": {
+    "title": "Stock Japan's best-loved beauty",
+    "subtitle": "Sign up to unlock wholesale pricing on genuine Japanese cosmetics.",
+    "subtitleMember": "Wholesale pricing is unlocked for your business. Start building your order.",
+    "cta": "Sign up to buy",
+    "ctaMember": "Browse products",
+    "brandQuestion": "Are you a brand?",
+    "brandCta": "Contact us about selling"
   }
 }
