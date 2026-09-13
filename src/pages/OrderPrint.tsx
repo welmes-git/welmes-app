@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Logo from '../components/Logo';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Printer, ArrowLeft, Loader2 } from 'lucide-react';
@@ -97,9 +98,8 @@ export default function OrderPrint() {
         {/* Header */}
         <div className="flex justify-between items-start mb-8 pb-6 border-b-2 border-ink-900">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[26px] font-bold text-ink-900 tracking-tight">WELMES</span>
-              <span className="border border-line-strong text-ink-700 text-[10px] font-bold px-[6px] py-[2px] rounded">Business</span>
+            <div className="mb-2">
+              <Logo size="print" />
             </div>
             <p className="text-[11px] text-ink-500 leading-relaxed">
               123 Teheran-ro, Gangnam-gu, Seoul, South Korea<br />

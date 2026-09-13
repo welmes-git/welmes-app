@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTranslation } from 'react-i18next';
+import Logo from '../components/Logo';
 import { Eye, EyeOff, Check, Upload, FileText, X } from 'lucide-react';
 
 const MAX_CERT_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -89,9 +90,8 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-canvas flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-[480px]">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <span className="text-[28px] font-extrabold tracking-[-0.02em] text-ink-900">WELMES</span>
-          <span className="bg-canvas border border-line-strong text-ink-700 text-[11px] font-bold tracking-[0.02em] px-[7px] py-[3px] rounded">Business</span>
+        <Link to="/" aria-label="WELMES Business" className="mb-8 flex justify-center">
+          <Logo size="auth" />
         </Link>
 
         {step < 3 && (

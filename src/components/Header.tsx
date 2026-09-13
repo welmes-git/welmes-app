@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import type { AppNotification } from '../store/useStore';
 import CartDrawer from './CartDrawer';
+import Logo from './Logo';
 import CurrencySelector from './CurrencySelector';
 import { useTranslation } from 'react-i18next';
 import { initialProducts } from '../data/products';
@@ -300,11 +301,8 @@ export default function Header() {
           scrolls away with the page (Olive Young behaviour). */}
       <header className={`bg-white z-40 border-b border-line-control tracking-[0.15px] ${showCategoryDropdown ? '' : 'sticky top-0'}`}>
         <div className="flex h-[50px] md:h-[60px] items-center pr-1 md:pr-3">
-          {/* Wordmark: Cormorant Garamond 500 with wide tracking, small BUSINESS line below.
-              Negative right margins cancel the trailing letter-spacing so both lines end flush. */}
-          <Link to="/" aria-label="WELMES Business" className="mx-2 flex shrink-0 flex-col items-start gap-1 px-2 py-2 md:px-4">
-            <span className="-mr-[0.32em] font-logo text-[18px] font-medium leading-none tracking-[0.32em] text-ink-900 md:text-[21px]">WELMES</span>
-            <span className="-mr-[0.5em] text-[10px] leading-none tracking-[0.5em] text-ink-500 md:text-[11px]">BUSINESS</span>
+          <Link to="/" aria-label="WELMES Business" className="mx-2 flex shrink-0 px-2 py-2 md:px-4">
+            <Logo />
           </Link>
 
           {/* Search — 40px pill, 1px #dadada, 16px icon inset 16px, text 14/20 */}
