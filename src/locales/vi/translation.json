@@ -748,5 +748,11 @@
   "retailerRange": {
     "title": "Dành cho mọi cửa hàng, dù bạn bán gì.",
     "body": "Dù là nhà thuốc, salon hay cửa hàng tuyển chọn, bạn đều tìm được mỹ phẩm Nhật Bản cần thiết trên WELMES."
+  },
+  "bottomBanner": {
+    "lead": "Lựa chọn hoàn hảo",
+    "tail1": "cho cửa hàng của bạn,",
+    "tail2": "ngay tại đây.",
+    "moreToExplore": "Khám phá thêm"
   }
 }

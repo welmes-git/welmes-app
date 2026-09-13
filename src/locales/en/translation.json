@@ -750,5 +750,11 @@
   "retailerRange": {
     "title": "For any retailer, whatever you sell.",
     "body": "Whether you run a drugstore, a salon or a select shop, find the Japanese beauty products you need on WELMES."
+  },
+  "bottomBanner": {
+    "lead": "The perfect",
+    "tail1": "for your store,",
+    "tail2": "right this way.",
+    "moreToExplore": "More to explore"
   }
 }

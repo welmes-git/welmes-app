@@ -28,6 +28,24 @@ export default function Home() {
   const popularBrands = brandsByCount(allProducts).slice(0, 10);
   const categoryGroups = categoryMenuColumns.flat();
   const categoryTrack = useRef<HTMLDivElement>(null);
+  // Bottom sign-up banner: 5 scenes, each a highlighted category word + 4 photos.
+  // images[2] is the scene's own category and, with images[3], is all mobile shows.
+  const bannerScenes = [
+    { key: 'skincare', images: ['dermoCosmetic', 'maskPack', 'skincare', 'cleansing'] },
+    { key: 'sunCare', images: ['bodyCare', 'oralCare', 'sunCare', 'hygiene'] },
+    { key: 'makeup', images: ['nail', 'beautyTools', 'makeup', 'fashion'] },
+    { key: 'hairCare', images: ['healthGoods', 'homeLiving', 'hairCare', 'healthFood'] },
+    { key: 'fragrance', images: ['food', 'hobby', 'fragrance', 'bodyCare'] },
+  ];
+  // Photo slots measured on faire.com at 375 / 1024 / 1440px
+  const bannerSlots = [
+    'hidden lg:block lg:left-[10%] lg:top-0 lg:h-[258px] lg:w-[201px] min-[1440px]:h-[273px] min-[1440px]:w-[213px]',
+    'hidden lg:block lg:bottom-[40px] lg:left-0 lg:h-[212px] lg:w-[321px] min-[1440px]:bottom-[44px] min-[1440px]:h-[225px] min-[1440px]:w-[341px]',
+    'left-[31px] top-0 h-[265px] w-[233px] lg:left-auto lg:right-0 lg:top-[88px] lg:h-[311px] lg:w-[273px] min-[1440px]:h-[330px] min-[1440px]:w-[290px]',
+    'left-0 top-[232px] h-[168px] w-[150px] lg:bottom-[17px] lg:left-auto lg:right-[111px] lg:top-auto lg:h-[219px] lg:w-[195px] min-[1440px]:bottom-[32px] min-[1440px]:right-[167px] min-[1440px]:h-[232px] min-[1440px]:w-[207px]',
+  ];
+  const groupLink = (key: string) => categoryGroups.find((g) => g.key === key)?.link ?? '/products';
+  const explorePills = categoryGroups.flatMap((g) => g.subs.slice(0, 2)).slice(0, 25);
   // One page = 3 tiles + gap; wraps around at either end like Faire's looping carousel
   const pageCategories = (dir: 1 | -1) => {
     const el = categoryTrack.current;
@@ -307,6 +325,71 @@ export default function Home() {
             >
               {t('home.memberLogin')}
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom sign-up banner — faire.com "bottom-sign-up-banner", measured at 375/1024/1440/1920px.
+          Scenes (photos + category word) cycle every 5s via .bottom-banner-cycle in index.css. */}
+      <section className="flex flex-col items-center justify-end gap-8 bg-[#ffd0b6] pb-6 pt-14 lg:justify-center lg:pt-0">
+        <div className="relative flex w-full flex-col items-center gap-8 lg:block">
+          <div className="relative h-[400px] w-[264px] shrink-0 overflow-hidden lg:h-[566px] lg:w-full min-[1440px]:h-[631px]" aria-hidden="true">
+            {bannerScenes.map((scene, i) => (
+              <div key={scene.key} className="bottom-banner-cycle absolute inset-0" style={{ animationDelay: `${i * 5}s` }}>
+                {scene.images.map((img, slot) => (
+                  <img
+                    key={slot}
+                    src={`/categories/${img}.jpg`}
+                    alt=""
+                    loading="lazy"
+                    className={`absolute object-cover ${bannerSlots[slot]}`}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+          <div className="relative flex flex-col items-center text-center lg:absolute lg:inset-0 lg:justify-center lg:pt-[72px]">
+            <h2 className="max-w-[230px] font-serif text-[38px] font-normal leading-[50px] text-ink-700 lg:max-w-none lg:text-[52px] lg:leading-[64px]">
+              <span className="flex flex-col items-center min-[1440px]:flex-row min-[1440px]:justify-center min-[1440px]:gap-3">
+                <span>{t('bottomBanner.lead')}</span>
+                <span className="grid">
+                  {bannerScenes.map((scene, i) => (
+                    <Link
+                      key={scene.key}
+                      to={groupLink(scene.key)}
+                      className="bottom-banner-cycle col-start-1 row-start-1 whitespace-nowrap underline decoration-[1.4px]"
+                      style={{ animationDelay: `${i * 5}s` }}
+                    >
+                      {t(`categoryMenu.${scene.key}`)}
+                    </Link>
+                  ))}
+                </span>
+              </span>
+              <span className="flex flex-col items-center gap-1 min-[1440px]:flex-row min-[1440px]:justify-center min-[1440px]:gap-2">
+                <span>{t('bottomBanner.tail1')}</span>
+                <span>{t('bottomBanner.tail2')}</span>
+              </span>
+            </h2>
+            <Link
+              to={isAuthenticated ? '/products' : '/register'}
+              className="mt-8 text-[14px] leading-5 text-ink-700 underline lg:mt-10"
+            >
+              {t(isAuthenticated ? 'homeHero.ctaMember' : 'homeHero.cta')}
+            </Link>
+          </div>
+        </div>
+        <div className="flex w-full items-center pl-6">
+          <p className="whitespace-nowrap pr-4 text-[14px] font-medium leading-5 text-ink-700">{t('bottomBanner.moreToExplore')}</p>
+          <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {explorePills.map((sub) => (
+              <Link
+                key={sub.key}
+                to={sub.link}
+                className="mr-2 flex h-10 shrink-0 items-center rounded-full border border-ink-700 px-4 text-[14px] leading-5 text-ink-700 hover:bg-black/5"
+              >
+                <span className="whitespace-nowrap">{t(`categoryMenu.${sub.key}`)}</span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

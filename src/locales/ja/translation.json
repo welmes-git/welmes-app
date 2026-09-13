@@ -750,5 +750,11 @@
   "retailerRange": {
     "title": "どんなお店でも、何を扱っていても。",
     "body": "ドラッグストア、サロン、セレクトショップなど、必要な日本コスメがWELMESで見つかります。"
+  },
+  "bottomBanner": {
+    "lead": "お店にぴったりの",
+    "tail1": "WELMESで",
+    "tail2": "今すぐ見つけよう。",
+    "moreToExplore": "もっと見る"
   }
 }

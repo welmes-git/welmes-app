@@ -750,5 +750,11 @@
   "retailerRange": {
     "title": "Pour toute boutique, quoi que vous vendiez.",
     "body": "Parapharmacie, salon ou concept store : trouvez sur WELMES les cosmétiques japonais dont vous avez besoin."
+  },
+  "bottomBanner": {
+    "lead": "Le meilleur de",
+    "tail1": "pour votre boutique,",
+    "tail2": "juste ici.",
+    "moreToExplore": "Découvrir plus"
   }
 }

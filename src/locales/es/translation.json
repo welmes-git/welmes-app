@@ -750,5 +750,11 @@
   "retailerRange": {
     "title": "Para cualquier tienda, vendas lo que vendas.",
     "body": "Ya tengas una droguería, un salón o una tienda multimarca, encuentra en WELMES la cosmética japonesa que necesitas."
+  },
+  "bottomBanner": {
+    "lead": "Lo mejor en",
+    "tail1": "para tu tienda,",
+    "tail2": "justo aquí.",
+    "moreToExplore": "Descubre más"
   }
 }

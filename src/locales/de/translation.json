@@ -750,5 +750,11 @@
   "retailerRange": {
     "title": "Für jedes Geschäft, egal was Sie verkaufen.",
     "body": "Ob Drogerie, Salon oder Concept Store – auf WELMES finden Sie die japanische Kosmetik, die Sie brauchen."
+  },
+  "bottomBanner": {
+    "lead": "Das perfekte Sortiment:",
+    "tail1": "für Ihr Geschäft –",
+    "tail2": "genau hier.",
+    "moreToExplore": "Mehr entdecken"
   }
 }

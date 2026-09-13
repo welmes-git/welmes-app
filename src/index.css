@@ -204,3 +204,16 @@
 @keyframes retailer-flip { 0%, 50% { opacity: 0; } 50.01%, 100% { opacity: 1; } }
 .retailer-flip { animation: retailer-flip 2s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .retailer-flip { animation: none; } }
+
+/* Bottom sign-up banner — faire.com: each scene rises in, holds ~4.5s, rises out; 5 scenes × 5s */
+@keyframes bottom-banner-cycle {
+  0% { opacity: 0; visibility: hidden; transform: translateY(30px); }
+  2%, 18% { opacity: 1; visibility: visible; transform: translateY(0); }
+  20% { opacity: 0; visibility: hidden; transform: translateY(-30px); }
+  22%, 100% { opacity: 0; visibility: hidden; transform: translateY(30px); }
+}
+.bottom-banner-cycle { opacity: 0; visibility: hidden; animation: bottom-banner-cycle 25s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .bottom-banner-cycle { animation: none; }
+  .bottom-banner-cycle:first-child { opacity: 1; visibility: visible; }
+}

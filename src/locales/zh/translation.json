@@ -750,5 +750,11 @@
   "retailerRange": {
     "title": "无论什么店铺，无论卖什么。",
     "body": "无论是药妆店、美容院还是买手店，都能在 WELMES 找到所需的日本美妆。"
+  },
+  "bottomBanner": {
+    "lead": "为您的店铺精选",
+    "tail1": "尽在 WELMES，",
+    "tail2": "立即探索。",
+    "moreToExplore": "更多探索"
   }
 }
