@@ -6,6 +6,7 @@ import { initialProducts } from '../data/products';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/ProductCard';
+import { BADGE_TAGS, hasJapanese, maskDigits } from '../lib/utils';
 import * as db from '../lib/db';
 import type { Review } from '../lib/db';
 import {
@@ -24,12 +25,11 @@ export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { products, productsLoading, addToCart, isAuthenticated, currentUser, showToast } =
+  const { products, productsLoading, addToCart, isAuthenticated, currentUser, showToast, toggleWishlist, isWishlisted } =
     useStore();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, currencyInfo } = useCurrency();
   const [setQty, setSetQty] = useState<Record<string, number>>({});
   const [activeTab, setActiveTab] = useState<'info' | 'reviews' | 'shipping'>('info');
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
@@ -164,21 +164,54 @@ export default function ProductDetail() {
     if (productsLoading) {
       return (
         <div className="min-h-screen flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-[#e5e5e5] border-t-[#333] rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-line border-t-ink-700 rounded-full animate-spin" />
         </div>
       );
     }
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-[18px] text-[#999] mb-4">{t('productDetail.notFound')}</p>
-          <Link to="/" className="text-[#4a90e2] hover:underline">
+          <p className="text-[18px] text-ink-500 mb-4">{t('productDetail.notFound')}</p>
+          <Link to="/" className="text-ink-900 font-bold underline underline-offset-2">
             {t('common.backToHome')}
           </Link>
         </div>
       </div>
     );
   }
+
+  // Locked price: currency symbol stays crisp, only digits blur (DESIGN.md §4 가격 게이팅)
+  const lockedPrice = (amount: number) => (
+    <span className="inline-flex items-baseline gap-[2px]">
+      <span>{currencyInfo.symbol}</span>
+      <span className="tabular-nums select-none blur-[4px]" aria-hidden="true">
+        {maskDigits(formatPrice(amount), currencyInfo.symbol)}
+      </span>
+    </span>
+  );
+
+  const stepper = (setId: string, qty: number, size: 'sm' | 'lg') => {
+    const box = size === 'sm' ? 'h-7 w-7' : 'h-9 w-9';
+    return (
+      <div className="inline-flex overflow-hidden rounded-md border border-line-strong">
+        <button type="button" aria-label="-" onClick={() => changeQty(setId, -1)} disabled={!canSeePrice}
+          className={`${box} flex items-center justify-center text-ink-700 hover:bg-sunken disabled:opacity-30`}>
+          <Minus size={11} />
+        </button>
+        <span className={`${size === 'sm' ? 'h-7 w-9' : 'h-9 w-11'} flex items-center justify-center border-x border-line-strong text-[13px] font-medium tabular-nums text-ink-900`}>
+          {qty}
+        </span>
+        <button type="button" aria-label="+" onClick={() => changeQty(setId, 1)} disabled={!canSeePrice}
+          className={`${box} flex items-center justify-center text-ink-700 hover:bg-sunken disabled:opacity-30`}>
+          <Plus size={11} />
+        </button>
+      </div>
+    );
+  };
+
+  // Selected set: sunken ground + 2px ink stripe on the left, never a color
+  const selectedRow = 'bg-sunken shadow-[inset_2px_0_0_var(--wm-ink-900)]';
+  const wishlisted = isWishlisted(product.id);
 
   const relatedProducts = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
@@ -188,16 +221,16 @@ export default function ProductDetail() {
     <div className="min-h-screen bg-white">
       <div className="max-w-[1100px] mx-auto px-4 py-8">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-[13px] text-[#999] mb-6">
-          <Link to="/" className="hover:text-[#333]">
+        <div className="flex items-center gap-2 text-[13px] text-ink-500 mb-6">
+          <Link to="/" className="hover:text-ink-700">
             {t('common.home')}
           </Link>
           <span>&gt;</span>
-          <Link to={`/products?category=${product.category}`} className="hover:text-[#333]">
+          <Link to={`/products?category=${product.category}`} className="hover:text-ink-700">
             {product.category}
           </Link>
           <span>&gt;</span>
-          <span className="text-[#333] truncate max-w-[200px]">{product.nameEn}</span>
+          <span className="text-ink-700 truncate max-w-[200px]">{product.nameEn}</span>
         </div>
 
         {/* Product Info */}
@@ -211,7 +244,7 @@ export default function ProductDetail() {
               const current = imgs[activeImageIdx] || imgs[0] || '';
               return (
                 <>
-                  <div className="aspect-square bg-[#f8f8fa] rounded-lg overflow-hidden mb-3 relative">
+                  <div className="aspect-square bg-canvas border border-line rounded-md overflow-hidden mb-3 relative">
                     <img
                       src={current}
                       alt={product.nameEn}
@@ -221,11 +254,11 @@ export default function ProductDetail() {
                       <>
                         <button
                           onClick={() => setActiveImageIdx((i) => (i - 1 + imgs.length) % imgs.length)}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-[#333] hover:bg-white shadow"
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-canvas/90 border border-line-strong rounded-full flex items-center justify-center text-ink-700 hover:bg-canvas"
                         >‹</button>
                         <button
                           onClick={() => setActiveImageIdx((i) => (i + 1) % imgs.length)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 rounded-full flex items-center justify-center text-[#333] hover:bg-white shadow"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-canvas/90 border border-line-strong rounded-full flex items-center justify-center text-ink-700 hover:bg-canvas"
                         >›</button>
                       </>
                     )}
@@ -236,8 +269,8 @@ export default function ProductDetail() {
                         <button
                           key={idx}
                           onClick={() => setActiveImageIdx(idx)}
-                          className={`shrink-0 w-16 h-16 rounded border-2 overflow-hidden bg-[#f8f8fa] transition-colors ${
-                            idx === activeImageIdx ? 'border-[#333]' : 'border-[#e5e5e5]'
+                          className={`shrink-0 w-16 h-16 rounded-md border-2 overflow-hidden bg-canvas transition-colors ${
+                            idx === activeImageIdx ? 'border-ink-700' : 'border-line'
                           }`}
                         >
                           <img src={url} alt={`thumb ${idx + 1}`} className="w-full h-full object-cover" />
@@ -255,17 +288,17 @@ export default function ProductDetail() {
             {/* Brand */}
             <Link
               to={`/products?brand=${product.brand}`}
-              className="text-[14px] text-[#999] hover:text-[#ff4d6d] transition-colors"
+              className="text-[14px] text-ink-500 hover:text-ink-900 transition-colors"
             >
               {product.brand}
             </Link>
 
             {/* Name */}
-            <h1 className="text-[22px] font-bold text-[#333] mt-1">
+            <h1 className={`mt-1 text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 ${hasJapanese(product.nameEn) ? 'font-jp' : ''}`}>
               {product.nameEn}
             </h1>
             {product.name !== product.nameEn && (
-              <p className="text-[13px] text-[#aaa] mb-3">
+              <p className={`mb-3 text-[13px] text-ink-500 ${hasJapanese(product.name) ? 'font-jp' : ''}`}>
                 {product.name}
               </p>
             )}
@@ -280,39 +313,28 @@ export default function ProductDetail() {
                     size={16}
                     className={
                       star <= Math.round(product.rating)
-                        ? 'text-[#ffc107] fill-[#ffc107]'
-                        : 'text-[#ddd]'
+                        ? 'text-ink-700 fill-ink-700'
+                        : 'text-line-strong'
                     }
                   />
                 ))}
               </div>
-              <span className="text-[13px] text-[#333] font-medium">
+              <span className="text-[13px] text-ink-700 font-medium">
                 {product.rating}
               </span>
-              <span className="text-[13px] text-[#999]">
+              <span className="text-[13px] text-ink-500">
                 ({product.reviews.toLocaleString()} {t('review.basedOn')})
               </span>
             </div>
 
             {/* Tags */}
-            <div className="flex gap-2 mb-5">
-              {product.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className={`${
-                    tag === 'Sale'
-                      ? 'bg-[#ff4d6d]'
-                      : tag === 'Best'
-                      ? 'bg-[#ff6b35]'
-                      : tag === 'New'
-                      ? 'bg-[#4a90e2]'
-                      : 'bg-[#e74c3c]'
-                  } text-white text-[11px] font-medium px-2.5 py-1 rounded`}
-                >
+            <div className="mb-5 flex items-center gap-2">
+              {product.tags.filter((tag) => BADGE_TAGS.includes(tag)).map((tag) => (
+                <span key={tag} className="rounded-sm border border-line-strong bg-canvas px-[7px] py-[3px] text-[11px] font-bold tracking-[0.02em] text-ink-700">
                   {tag}
                 </span>
               ))}
-              <span className="bg-[#f8f8fa] text-[#666] text-[11px] px-2.5 py-1 rounded">
+              <span className="text-[11.5px] tabular-nums text-ink-500">
                 {t('productDetail.stock')}: {product.stock}
               </span>
             </div>
@@ -322,52 +344,46 @@ export default function ProductDetail() {
               <div className="mb-5">
                 {isMobile ? (
                   /* Mobile: Card layout */
-                  <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
+                  <div className="flex flex-col gap-2">
                     {product.setOptions.map((opt: SetOption) => {
                       const qty = setQty[opt.id] ?? 0;
                       const unitWholesale = Math.round(opt.wholesalePrice / opt.unitsPerSet);
                       const unitOriginal = Math.round(opt.originalPrice / opt.unitsPerSet);
                       return (
-                        <div
-                          key={opt.id}
-                          style={{
-                            border: qty > 0 ? '1.5px solid #4a90e2' : '1px solid #e5e5e5',
-                            borderRadius: '10px',
-                            padding: '12px',
-                            backgroundColor: qty > 0 ? '#f0f7ff' : '#fff',
-                          }}
-                        >
-                          <div style={{display:'flex', alignItems:'center', gap:'8px', marginBottom:'8px'}}>
-                            <span style={{fontSize:'11px', fontWeight:700, color:'#4a90e2', background:'#eef4ff', padding:'2px 7px', borderRadius:'4px'}}>{opt.id}</span>
-                            <span style={{fontSize:'13px', fontWeight:600, color:'#333'}}>{opt.description}</span>
+                        <div key={opt.id} className={`rounded-[10px] border border-line p-3 transition-colors ${qty > 0 ? selectedRow : 'bg-canvas'}`}>
+                          <div className="mb-2 flex items-center gap-2">
+                            <span className="rounded-sm border border-line-strong bg-canvas px-[7px] py-[3px] text-[11px] font-bold tracking-[0.02em] text-ink-700">{opt.id}</span>
+                            <span className="text-[13px] font-semibold text-ink-700">{opt.description}</span>
                           </div>
-                          <p style={{fontSize:'11px', color:'#999', marginBottom:'8px'}}>{opt.unitsPerSet} {t('productDetail.units')} / {t('productDetail.setOptions').toLowerCase()}</p>
-                          <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'10px'}}>
+                          <p className="mb-2 text-[11px] text-ink-500">{opt.unitsPerSet} {t('productDetail.units')} / {t('productDetail.setOptions').toLowerCase()}</p>
+                          <div className="mb-2.5 flex items-end justify-between">
                             <div>
+                              <p className="text-[10px] font-semibold text-ink-500">{t('productDetail.unitPrice')}</p>
                               {canSeePrice ? (
                                 <>
-                                  <p style={{fontSize:'10px', color:'#999'}}>{t('productDetail.unitPrice')}</p>
-                                  <p style={{fontSize:'11px', color:'#bbb', textDecoration:'line-through'}}>{formatPrice(unitOriginal)}</p>
-                                  <p style={{fontSize:'13px', fontWeight:600, color:'#333'}}>{formatPrice(unitWholesale)} <span style={{fontSize:'10px', fontWeight:400, color:'#999'}}>/ {t('productDetail.units')}</span></p>
+                                  <p className="text-[11px] tabular-nums text-ink-300 line-through">{formatPrice(unitOriginal)}</p>
+                                  <p className="text-[13px] font-semibold tabular-nums text-ink-700">{formatPrice(unitWholesale)} <span className="text-[10px] font-normal text-ink-500">/ {t('productDetail.units')}</span></p>
                                 </>
                               ) : (
-                                <span style={{fontSize:'12px', color:'#999'}}>{t('products.loginToView')}</span>
+                                <p className="text-[13px] font-semibold text-ink-700">{lockedPrice(unitWholesale)}</p>
                               )}
                             </div>
-                            {canSeePrice && (
-                              <div style={{textAlign:'right'}}>
-                                <p style={{fontSize:'10px', color:'#999'}}>{t('productDetail.setTotal')}</p>
-                                <p style={{fontSize:'11px', color:'#bbb', textDecoration:'line-through'}}>{formatPrice(opt.originalPrice)}</p>
-                                <p style={{fontSize:'15px', fontWeight:700, color:'#e53e3e'}}>{formatPrice(opt.wholesalePrice)}</p>
-                                <p style={{fontSize:'10px', color:'#999'}}>1 set ({opt.unitsPerSet}pcs)</p>
-                              </div>
-                            )}
+                            <div className="text-right">
+                              <p className="text-[10px] font-semibold text-ink-500">{t('productDetail.setTotal')}</p>
+                              {canSeePrice ? (
+                                <>
+                                  <p className="text-[11px] tabular-nums text-ink-300 line-through">{formatPrice(opt.originalPrice)}</p>
+                                  <p className="text-[15px] font-bold tabular-nums text-ink-900">{formatPrice(opt.wholesalePrice)}</p>
+                                </>
+                              ) : (
+                                <p className="text-[15px] font-bold text-ink-900">{lockedPrice(opt.wholesalePrice)}</p>
+                              )}
+                              <p className="text-[10px] text-ink-500">1 set ({opt.unitsPerSet}pcs)</p>
+                            </div>
                           </div>
-                          <div style={{display:'flex', alignItems:'center', borderTop:'1px solid #f0f0f0', paddingTop:'8px'}}>
-                            <span style={{fontSize:'12px', color:'#666', flex:1}}>{t('productDetail.qty')}</span>
-                            <button onClick={() => changeQty(opt.id, -1)} disabled={!canSeePrice} style={{width:'32px', height:'32px', border:'1px solid #ddd', background:'#fff', borderRadius:'6px 0 0 6px', display:'flex', alignItems:'center', justifyContent:'center', opacity: !canSeePrice ? 0.3 : 1}}><Minus size={12} /></button>
-                            <span style={{width:'40px', height:'32px', border:'1px solid #ddd', borderLeft:'none', borderRight:'none', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'14px', fontWeight:500}}>{qty}</span>
-                            <button onClick={() => changeQty(opt.id, 1)} disabled={!canSeePrice} style={{width:'32px', height:'32px', border:'1px solid #ddd', background:'#fff', borderRadius:'0 6px 6px 0', display:'flex', alignItems:'center', justifyContent:'center', opacity: !canSeePrice ? 0.3 : 1}}><Plus size={12} /></button>
+                          <div className="flex items-center border-t border-line pt-2">
+                            <span className="flex-1 text-[12px] text-ink-500">{t('productDetail.qty')}</span>
+                            {stepper(opt.id, qty, 'lg')}
                           </div>
                         </div>
                       );
@@ -375,73 +391,66 @@ export default function ProductDetail() {
                   </div>
                 ) : (
                   /* Desktop: Table layout */
-                  <>
-                    <div className="grid grid-cols-[48px_1fr_120px_140px_110px] text-[11px] font-semibold text-[#999] uppercase tracking-wide bg-[#f8f8fa] border border-[#e5e5e5] rounded-t-lg px-3 py-2.5">
+                  <div className="overflow-hidden rounded-[10px] border border-line">
+                    <div className="grid grid-cols-[1fr_92px_112px_auto] gap-x-3 bg-sunken px-3 py-2.5 text-[11px] font-bold uppercase tracking-[0.02em] text-ink-500">
                       <span>Set</span>
-                      <span>Description</span>
                       <span className="text-right">{t('productDetail.unitPrice')}</span>
                       <span className="text-right">{t('productDetail.setTotal')}</span>
                       <span className="text-right">{t('productDetail.qty')}</span>
                     </div>
-                    <div className="border-x border-b border-[#e5e5e5] rounded-b-lg divide-y divide-[#f0f0f0]">
+                    <div className="divide-y divide-line border-t border-line">
                       {product.setOptions.map((opt: SetOption) => {
                         const qty = setQty[opt.id] ?? 0;
                         const unitWholesale = Math.round(opt.wholesalePrice / opt.unitsPerSet);
                         const unitOriginal = Math.round(opt.originalPrice / opt.unitsPerSet);
-                        const setTotal = opt.wholesalePrice;
                         return (
-                          <div key={opt.id} className={`grid grid-cols-[48px_1fr_120px_140px_110px] items-center px-3 py-3 transition-colors ${qty > 0 ? 'bg-[#f0f7ff]' : 'hover:bg-[#fafafa]'}`}>
-                            <span className="text-[13px] font-bold text-[#333]">{opt.id}</span>
-                            <div>
-                              <p className="text-[13px] text-[#333] font-medium">{opt.description}</p>
-                              <p className="text-[11px] text-[#999] mt-0.5">{opt.unitsPerSet} {t('productDetail.units')} / set</p>
+                          <div key={opt.id} className={`grid grid-cols-[1fr_92px_112px_auto] gap-x-3 items-center px-3 py-3 transition-colors ${qty > 0 ? selectedRow : 'hover:bg-sunken'}`}>
+                            <div className="min-w-0">
+                              <p className="text-[13px] font-medium text-ink-700"><span className="mr-1.5 font-bold text-ink-900">{opt.id}</span>{opt.description}</p>
+                              <p className="mt-0.5 text-[11px] text-ink-500">{opt.unitsPerSet} {t('productDetail.units')} / set</p>
                             </div>
                             <div className="text-right">
                               {canSeePrice ? (
                                 <>
-                                  <p className="text-[11px] text-[#bbb] line-through">{formatPrice(unitOriginal)}</p>
-                                  <p className="text-[13px] font-semibold text-[#333]">{formatPrice(unitWholesale)}</p>
-                                  <p className="text-[10px] text-[#999]">/ {t('productDetail.units')}</p>
+                                  <p className="text-[11px] tabular-nums text-ink-300 line-through">{formatPrice(unitOriginal)}</p>
+                                  <p className="text-[13px] font-semibold tabular-nums text-ink-700">{formatPrice(unitWholesale)}</p>
                                 </>
                               ) : (
-                                <div className="flex items-center justify-end gap-1 text-[#999]"><Lock size={12} /><span className="text-[12px]">{t('common.login')}</span></div>
+                                <p className="text-[13px] font-semibold text-ink-700">{lockedPrice(unitWholesale)}</p>
                               )}
+                              <p className="text-[10px] text-ink-500">/ {t('productDetail.units')}</p>
                             </div>
                             <div className="text-right">
                               {canSeePrice ? (
                                 <>
-                                  <p className="text-[11px] text-[#bbb] line-through">{formatPrice(opt.originalPrice)}</p>
-                                  <p className="text-[14px] font-bold text-[#e53e3e]">{formatPrice(setTotal)}</p>
-                                  <p className="text-[10px] text-[#999]">1 set ({opt.unitsPerSet}pcs)</p>
+                                  <p className="text-[11px] tabular-nums text-ink-300 line-through">{formatPrice(opt.originalPrice)}</p>
+                                  <p className="text-[15px] font-bold tabular-nums text-ink-900">{formatPrice(opt.wholesalePrice)}</p>
                                 </>
                               ) : (
-                                <span className="text-[12px] text-[#ccc]">—</span>
+                                <p className="text-[15px] font-bold text-ink-900">{lockedPrice(opt.wholesalePrice)}</p>
                               )}
+                              <p className="text-[10px] text-ink-500">1 set ({opt.unitsPerSet}pcs)</p>
                             </div>
-                            <div className="flex items-center justify-end">
-                              <button onClick={() => changeQty(opt.id, -1)} disabled={!canSeePrice} className="w-7 h-7 border border-[#ddd] flex items-center justify-center rounded-l hover:bg-[#f0f0f0] disabled:opacity-30"><Minus size={11} /></button>
-                              <span className="w-9 h-7 border-t border-b border-[#ddd] flex items-center justify-center text-[13px] font-medium">{qty}</span>
-                              <button onClick={() => changeQty(opt.id, 1)} disabled={!canSeePrice} className="w-7 h-7 border border-[#ddd] flex items-center justify-center rounded-r hover:bg-[#f0f0f0] disabled:opacity-30"><Plus size={11} /></button>
-                            </div>
+                            <div className="flex justify-end">{stepper(opt.id, qty, 'sm')}</div>
                           </div>
                         );
                       })}
                     </div>
-                  </>
+                  </div>
                 )}
 
-                {/* Login prompt */}
+                {/* Login / approval prompt */}
                 {!canSeePrice && (
-                  <div className="flex items-center gap-2 mt-3 px-1">
-                    <Lock size={14} className="text-[#999]" />
-                    <p className="text-[13px] text-[#999]">
+                  <div className="mt-3 flex items-center gap-2 px-1">
+                    <Lock size={14} className="text-ink-500" />
+                    <p className="text-[13px] text-ink-500">
                       {isAuthenticated
                         ? t('productDetail.verifyToViewPrices')
                         : t('productDetail.loginToOrder')}
                     </p>
                     <button
                       onClick={() => navigate(isAuthenticated ? '/register' : '/login')}
-                      className="text-[13px] text-[#4a90e2] hover:underline"
+                      className="text-[13px] font-bold text-ink-900 underline underline-offset-2"
                     >
                       {isAuthenticated ? t('productDetail.verifyNow') : t('productDetail.loginArrow')}
                     </button>
@@ -450,17 +459,17 @@ export default function ProductDetail() {
 
                 {/* Grand Total */}
                 {canSeePrice && grandTotal > 0 && (
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#e5e5e5]">
-                    <div className="text-[13px] text-[#666]">
+                  <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
+                    <div className="text-[13px] tabular-nums text-ink-500">
                       {selectedSets.map((opt) => (
                         <span key={opt.id} className="mr-3">
                           {opt.id} × {setQty[opt.id]}
                         </span>
                       ))}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px] text-[#999]">{t('productDetail.grandTotal')}</span>
-                      <span className="text-[22px] font-bold text-[#333]">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-[13px] text-ink-500">{t('productDetail.grandTotal')}</span>
+                      <span className="text-[22px] font-extrabold tracking-[-0.01em] tabular-nums text-ink-900">
                         {formatPrice(grandTotal)}
                       </span>
                     </div>
@@ -469,39 +478,47 @@ export default function ProductDetail() {
               </div>
             ) : (
               /* Fallback: no set options */
-              <div className="bg-[#f8f8fa] rounded-lg p-4 mb-5 text-[14px] text-[#999]">
+              <div className="bg-sunken rounded-lg p-4 mb-5 text-[14px] text-ink-500">
                 {t('productDetail.setOptionsNA')}
               </div>
             )}
 
             {/* Actions */}
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
-                onClick={() => setIsWishlisted(!isWishlisted)}
-                className={`w-12 h-12 flex items-center justify-center border rounded-lg transition-colors ${
-                  isWishlisted
-                    ? 'border-[#ff4d6d] text-[#ff4d6d]'
-                    : 'border-[#ddd] text-[#999] hover:border-[#ff4d6d] hover:text-[#ff4d6d]'
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    showToast(t('wishlist.loginRequired'), 'info');
+                    navigate('/login');
+                    return;
+                  }
+                  toggleWishlist(product.id);
+                  showToast(t(wishlisted ? 'wishlist.removedFromWishlist' : 'wishlist.addedToWishlist'), 'success');
+                }}
+                aria-pressed={wishlisted}
+                aria-label={t('wishlist.title')}
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition-colors ${
+                  wishlisted ? 'border-ink-900 text-ink-900' : 'border-line-strong text-ink-500 hover:border-ink-900 hover:text-ink-900'
                 }`}
               >
-                <Heart size={20} className={isWishlisted ? 'fill-[#ff4d6d]' : ''} />
+                <Heart size={18} className={wishlisted ? 'fill-ink-900' : ''} />
               </button>
               <button
                 onClick={() => showToast(t('productDetail.shareLink'), 'success')}
-                className="w-12 h-12 flex items-center justify-center border border-[#ddd] rounded-lg text-[#999] hover:border-[#4a90e2] hover:text-[#4a90e2] transition-colors"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-line-strong text-ink-500 transition-colors hover:border-ink-900 hover:text-ink-900"
               >
-                <Share2 size={20} />
+                <Share2 size={18} />
               </button>
               <button
                 onClick={handleAddToCart}
-                className="flex-1 h-12 border-2 border-[#333] text-[#333] rounded-lg font-medium text-[14px] hover:bg-[#333] hover:text-white transition-colors flex items-center justify-center gap-2"
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border-[1.5px] border-ink-900 bg-canvas text-[14px] font-bold text-ink-900 transition-colors hover:bg-sunken"
               >
                 <ShoppingCart size={16} />
                 {t('productDetail.addToCart')}
               </button>
               <button
                 onClick={handleOrderInquiry}
-                className="flex-1 h-12 bg-[#333] text-white rounded-lg font-medium text-[14px] hover:bg-[#555] transition-colors flex items-center justify-center gap-2"
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-ink-900 text-[14px] font-bold text-white transition-shadow hover:shadow-hover"
               >
                 <MessageCircle size={16} />
                 {t('productDetail.orderInquiry')}
@@ -511,7 +528,7 @@ export default function ProductDetail() {
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-[#e5e5e5] mb-6">
+        <div className="border-b border-line mb-6">
           <div className="flex gap-0">
             {(['info', 'reviews', 'shipping'] as const).map((tab) => (
               <button
@@ -519,8 +536,8 @@ export default function ProductDetail() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-6 py-3 text-[14px] font-medium border-b-2 transition-colors capitalize ${
                   activeTab === tab
-                    ? 'border-[#333] text-[#333]'
-                    : 'border-transparent text-[#999] hover:text-[#666]'
+                    ? 'border-ink-900 font-bold text-ink-900'
+                    : 'border-transparent text-ink-500 hover:text-ink-900'
                 }`}
               >
                 {tab === 'info'
@@ -538,7 +555,7 @@ export default function ProductDetail() {
           {activeTab === 'info' && (
             <div className="prose max-w-none">
               <div
-                className="text-[14px] text-[#555] leading-relaxed"
+                className="text-[14px] text-ink-500 leading-relaxed"
                 dangerouslySetInnerHTML={{
                   __html: (product.description || '')
                     .replace(/&/g, '&amp;')
@@ -547,36 +564,31 @@ export default function ProductDetail() {
                     .replace(/\r?\n/g, '<br />'),
                 }}
               />
-              <div className="mt-6 bg-[#f8f8fa] rounded-lg p-6">
-                <h3 className="text-[16px] font-bold text-[#333] mb-4">
+              <div className="mt-6 bg-sunken rounded-lg p-6">
+                <h3 className="text-[16px] font-bold text-ink-700 mb-4">
                   {t('productDetail.productDetails')}
                 </h3>
                 <table className="w-full text-[13px]">
                   <tbody>
-                    <tr className="border-b border-[#e5e5e5]">
-                      <td className="py-2.5 text-[#999] w-[120px]">{t('productDetail.brand')}</td>
-                      <td className="py-2.5 text-[#333]">{product.brand}</td>
+                    <tr className="border-b border-line">
+                      <td className="py-2.5 text-ink-500 w-[120px]">{t('productDetail.brand')}</td>
+                      <td className="py-2.5 text-ink-700">{product.brand}</td>
                     </tr>
-                    <tr className="border-b border-[#e5e5e5]">
-                      <td className="py-2.5 text-[#999]">{t('products.category')}</td>
-                      <td className="py-2.5 text-[#333]">{product.category}</td>
+                    <tr className="border-b border-line">
+                      <td className="py-2.5 text-ink-500">{t('products.category')}</td>
+                      <td className="py-2.5 text-ink-700">{product.category}</td>
                     </tr>
-                    <tr className="border-b border-[#e5e5e5]">
-                      <td className="py-2.5 text-[#999]">{t('productDetail.stock')}</td>
-                      <td className="py-2.5 text-[#333]">
+                    <tr className="border-b border-line">
+                      <td className="py-2.5 text-ink-500">{t('productDetail.stock')}</td>
+                      <td className="py-2.5 text-ink-700">
                         {product.stock} {t('productDetail.units')}
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2.5 text-[#999]">{t('productDetail.status')}</td>
+                      <td className="py-2.5 text-ink-500">{t('productDetail.status')}</td>
                       <td className="py-2.5">
-                        <span
-                          className={`text-[12px] px-2 py-0.5 rounded ${
-                            product.status === 'active'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}
-                        >
+                        <span className="inline-flex items-center gap-1.5 text-[12px] text-ink-700">
+                          <span className={`h-1.5 w-1.5 rounded-full ${product.status === 'active' ? 'bg-signal-ok' : 'bg-signal-error'}`} />
                           {product.status === 'active' ? t('productDetail.inStock') : t('productDetail.outOfStock')}
                         </span>
                       </td>
@@ -591,9 +603,9 @@ export default function ProductDetail() {
             <div className="space-y-6">
 
               {/* ── Rating Summary ── */}
-              <div className="bg-[#f8f8fa] rounded-xl p-5 flex flex-col sm:flex-row gap-6 items-center">
+              <div className="bg-sunken rounded-[10px] p-5 flex flex-col sm:flex-row gap-6 items-center">
                 <div className="text-center shrink-0">
-                  <p className="text-[52px] font-black text-[#222] leading-none">
+                  <p className="text-[40px] font-extrabold tabular-nums text-ink-900 leading-none">
                     {reviews.length > 0
                       ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
                       : product.rating.toFixed(1)}
@@ -605,11 +617,11 @@ export default function ProductDetail() {
                         : product.rating;
                       return (
                         <Star key={s} size={16}
-                          className={s <= Math.round(avg) ? 'text-[#ffc107] fill-[#ffc107]' : 'text-[#ddd]'} />
+                          className={s <= Math.round(avg) ? 'text-ink-700 fill-ink-700' : 'text-line-strong'} />
                       );
                     })}
                   </div>
-                  <p className="text-[13px] text-[#999]">{reviews.length} {t('review.basedOn')}</p>
+                  <p className="text-[13px] text-ink-500">{reviews.length} {t('review.basedOn')}</p>
                 </div>
 
                 <div className="flex-1 w-full space-y-1.5">
@@ -618,15 +630,15 @@ export default function ProductDetail() {
                     const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
                     return (
                       <div key={star} className="flex items-center gap-2 text-[12px]">
-                        <span className="w-4 text-[#666] text-right">{star}</span>
-                        <Star size={11} className="text-[#ffc107] fill-[#ffc107] shrink-0" />
-                        <div className="flex-1 h-2 bg-[#e5e5e5] rounded-full overflow-hidden">
+                        <span className="w-4 text-ink-500 text-right">{star}</span>
+                        <Star size={11} className="text-ink-700 fill-ink-700 shrink-0" />
+                        <div className="flex-1 h-2 bg-line rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-[#ffc107] rounded-full transition-all duration-500"
+                            className="h-full bg-ink-700 rounded-full transition-all duration-500"
                             style={{ width: `${pct}%` }}
                           />
                         </div>
-                        <span className="w-6 text-[#999]">{count}</span>
+                        <span className="w-6 text-ink-500">{count}</span>
                       </div>
                     );
                   })}
@@ -635,11 +647,11 @@ export default function ProductDetail() {
 
               {/* ── Write Review Form ── */}
               {isAuthenticated && isVerified && !alreadyReviewed && (
-                <div className="bg-white border border-[#e5e5e5] rounded-xl p-5">
-                  <h3 className="text-[15px] font-bold text-[#222] mb-4">{t('review.writeReview')}</h3>
+                <div className="bg-white border border-line rounded-[10px] p-5">
+                  <h3 className="text-[15px] font-bold text-ink-900 mb-4">{t('review.writeReview')}</h3>
 
                   <div className="mb-4">
-                    <p className="text-[12px] text-[#999] mb-2">{t('review.yourRating')}</p>
+                    <p className="text-[12px] text-ink-500 mb-2">{t('review.yourRating')}</p>
                     <div className="flex gap-1">
                       {[1,2,3,4,5].map((s) => (
                         <button
@@ -653,40 +665,40 @@ export default function ProductDetail() {
                             size={28}
                             className={
                               s <= (hoverRating || reviewRating)
-                                ? 'text-[#ffc107] fill-[#ffc107]'
-                                : 'text-[#ddd]'
+                                ? 'text-ink-700 fill-ink-700'
+                                : 'text-line-strong'
                             }
                           />
                         </button>
                       ))}
-                      <span className="ml-2 text-[13px] text-[#666] self-center">
+                      <span className="ml-2 text-[13px] text-ink-500 self-center">
                         {ratingLabels[hoverRating || reviewRating]}
                       </span>
                     </div>
                   </div>
 
                   <div className="mb-4">
-                    <p className="text-[12px] text-[#999] mb-2">{t('review.review')}</p>
+                    <p className="text-[12px] text-ink-500 mb-2">{t('review.review')}</p>
                     <textarea
                       value={reviewContent}
                       onChange={(e) => setReviewContent(e.target.value)}
                       rows={4}
                       maxLength={500}
                       placeholder={t('review.placeholder')}
-                      className="w-full px-3 py-2.5 border border-[#e5e5e5] rounded-lg text-[13px] text-[#333] focus:outline-none focus:border-[#4a90e2] resize-none transition-colors"
+                      className="w-full px-3 py-2.5 border border-line rounded-lg text-[13px] text-ink-700 focus:outline-none focus:border-ink-900 resize-none transition-colors"
                     />
                     <div className="flex justify-between mt-1">
                       {reviewError
-                        ? <p className="text-[11px] text-red-500">{reviewError}</p>
+                        ? <p className="text-[11px] text-signal-error">{reviewError}</p>
                         : <span />}
-                      <span className="text-[11px] text-[#bbb]">{reviewContent.length}/500</span>
+                      <span className="text-[11px] text-ink-300">{reviewContent.length}/500</span>
                     </div>
                   </div>
 
                   <button
                     onClick={submitReview}
                     disabled={reviewSubmitting}
-                    className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[13px] font-semibold hover:bg-[#555] transition-colors disabled:opacity-50"
+                    className="px-6 py-2.5 bg-ink-900 text-white rounded-lg text-[13px] font-semibold hover:shadow-hover transition-colors disabled:opacity-50"
                   >
                     {reviewSubmitting ? t('review.submitting') : t('review.submit')}
                   </button>
@@ -695,20 +707,20 @@ export default function ProductDetail() {
 
               {/* Already reviewed */}
               {isAuthenticated && isVerified && alreadyReviewed && (
-                <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-lg text-[13px] text-green-700">
-                  <CheckCircle2 size={15} />
+                <div className="flex items-center gap-2 px-4 py-3 border border-line rounded-lg text-[13px] text-ink-700">
+                  <CheckCircle2 size={15} className="text-signal-ok" />
                   {t('review.alreadyReviewed')}
                 </div>
               )}
 
               {/* Login prompt */}
               {!isAuthenticated && (
-                <div className="text-center py-6 border border-[#e5e5e5] rounded-xl">
-                  <Lock size={24} className="mx-auto text-[#ccc] mb-2" />
-                  <p className="text-[13px] text-[#999] mb-3">{t('review.loginToReview')}</p>
+                <div className="text-center py-6 border border-line rounded-[10px]">
+                  <Lock size={24} className="mx-auto text-ink-300 mb-2" />
+                  <p className="text-[13px] text-ink-500 mb-3">{t('review.loginToReview')}</p>
                   <button
                     onClick={() => navigate('/login')}
-                    className="px-5 py-2 bg-[#333] text-white rounded-lg text-[13px] font-medium hover:bg-[#555] transition-colors"
+                    className="px-5 py-2 bg-ink-900 text-white rounded-lg text-[13px] font-medium hover:shadow-hover transition-colors"
                   >
                     {t('common.login')}
                   </button>
@@ -718,32 +730,32 @@ export default function ProductDetail() {
               {/* ── Review List ── */}
               {reviewsLoading ? (
                 <div className="flex justify-center py-10">
-                  <div className="w-7 h-7 border-2 border-[#4a90e2] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-7 h-7 border-2 border-ink-900 border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : reviews.length === 0 ? (
-                <div className="text-center py-12 text-[#bbb]">
+                <div className="text-center py-12 text-ink-300">
                   <MessageCircle size={40} className="mx-auto mb-3 opacity-40" />
                   <p className="text-[14px]">{t('review.noReviews')}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {reviews.map((review) => (
-                    <div key={review.id} className="bg-white border border-[#e5e5e5] rounded-xl p-5">
+                    <div key={review.id} className="bg-white border border-line rounded-[10px] p-5">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="text-[14px] font-semibold text-[#222]">{review.memberName}</p>
+                          <p className="text-[14px] font-semibold text-ink-900">{review.memberName}</p>
                           <div className="flex gap-0.5 mt-0.5">
                             {[1,2,3,4,5].map((s) => (
                               <Star key={s} size={13}
-                                className={s <= review.rating ? 'text-[#ffc107] fill-[#ffc107]' : 'text-[#ddd]'} />
+                                className={s <= review.rating ? 'text-ink-700 fill-ink-700' : 'text-line-strong'} />
                             ))}
                           </div>
                         </div>
-                        <span className="text-[11px] text-[#bbb] shrink-0">
+                        <span className="text-[11px] text-ink-300 shrink-0">
                           {new Date(review.createdAt).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })}
                         </span>
                       </div>
-                      <p className="text-[13px] text-[#555] leading-relaxed">{review.content}</p>
+                      <p className="text-[13px] text-ink-500 leading-relaxed">{review.content}</p>
                     </div>
                   ))}
                 </div>
@@ -752,23 +764,23 @@ export default function ProductDetail() {
           )}
 
           {activeTab === 'shipping' && (
-            <div className="bg-[#f8f8fa] rounded-lg p-6">
-              <h3 className="text-[16px] font-bold text-[#333] mb-4">
+            <div className="bg-sunken rounded-lg p-6">
+              <h3 className="text-[16px] font-bold text-ink-700 mb-4">
                 {t('productDetail.shippingInfo')}
               </h3>
-              <div className="space-y-4 text-[13px] text-[#555]">
+              <div className="space-y-4 text-[13px] text-ink-500">
                 <div>
-                  <p className="font-medium text-[#333] mb-1">{t('productDetail.standardShipping')}</p>
+                  <p className="font-medium text-ink-700 mb-1">{t('productDetail.standardShipping')}</p>
                   <p>{t('productDetail.standardShippingDesc1')}</p>
                   <p>{t('productDetail.standardShippingDesc2')}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-[#333] mb-1">{t('productDetail.bulkOrders')}</p>
+                  <p className="font-medium text-ink-700 mb-1">{t('productDetail.bulkOrders')}</p>
                   <p>{t('productDetail.bulkOrdersDesc1')}</p>
                   <p>{t('productDetail.bulkOrdersDesc2')}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-[#333] mb-1">{t('productDetail.returnPolicy')}</p>
+                  <p className="font-medium text-ink-700 mb-1">{t('productDetail.returnPolicy')}</p>
                   <p>{t('productDetail.returnPolicyDesc1')}</p>
                   <p>{t('productDetail.returnPolicyDesc2')}</p>
                 </div>
@@ -780,7 +792,7 @@ export default function ProductDetail() {
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div>
-            <h2 className="text-[20px] font-bold text-[#333] mb-6">
+            <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900 mb-5">
               {t('productDetail.relatedProducts')}
             </h2>
             <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-4">

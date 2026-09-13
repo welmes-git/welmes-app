@@ -257,6 +257,6 @@ gap-x: 8px   gap-y: 24px
 - [x] 토큰을 `src/index.css` CSS 변수 + `tailwind.config.js`로 이관 (`ink-900/700/500/300`, `line`, `line-strong`, `canvas`, `sunken`, `signal-error/ok`, `shadow-hover`)
 - [x] `ProductCard.tsx` 를 위 카드 규격으로 재작성
 - [x] 상품 그리드 간격을 `gap-x-2 gap-y-6` 으로 통일
-- [ ] `ProductDetail.tsx` 세트 테이블 그림자 제거 · 선택 행 스트라이프
+- [x] `ProductDetail.tsx` 세트 테이블 그림자 제거 · 선택 행 스트라이프 (Header도 완료)
 - [ ] 페이지에 하드코딩된 `#4a90e2` / `#ff4d6d` 전량 제거
 - [ ] 관리자 화면 스탯 카드 · 상태 점 표기 적용

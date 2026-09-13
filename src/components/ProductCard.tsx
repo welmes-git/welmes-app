@@ -4,23 +4,13 @@ import type { Product } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Heart, ShoppingCart, Star } from 'lucide-react';
+import { BADGE_TAGS, hasJapanese, maskDigits } from '../lib/utils';
 
 interface ProductCardProps {
   /** Use the shared Product type so this card can't drift from the model */
   product: Product;
   showQuickAdd?: boolean;
 }
-
-/** Marketing badges we're willing to render. Anything else in `tags` — scraped
- *  genres, JAN codes, source names — is data, not a badge. */
-const BADGE_TAGS = ['New', 'Best', 'Sale', 'Hot'];
-
-/** Kana or CJK ideographs — these need the JP face, not Pretendard's Korean kanji. */
-const hasJapanese = (s: string) => /[぀-ヿ一-龯]/.test(s);
-
-/** "¥1,234" -> "¥" + "X,XXX" so the blurred placeholder keeps the real width. */
-const maskDigits = (formatted: string, symbol: string) =>
-  formatted.slice(symbol.length).replace(/\d/g, 'X');
 
 export default function ProductCard({ product, showQuickAdd = true }: ProductCardProps) {
   const navigate = useNavigate();
