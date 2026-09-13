@@ -385,7 +385,7 @@ export default function Header() {
               <button
                 onClick={() => navigate('/wishlist')}
                 aria-label={t('wishlist.title')}
-                className="relative h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors max-sm:hidden"
+                className={`relative h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors max-sm:hidden ${isAuthenticated ? '' : 'lg:hidden'}`}
               >
                 <Heart size={20} strokeWidth={1.5} />
                 {wishlist.length > 0 && (
@@ -496,7 +496,7 @@ export default function Header() {
               <button
                 onClick={() => setIsCartOpen(true)}
                 aria-label={t('cart.title')}
-                className="relative h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors"
+                className={`relative h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors ${isAuthenticated ? '' : 'lg:hidden'}`}
               >
                 <ShoppingBag size={20} strokeWidth={1.5} />
                 {cartCount > 0 && (
@@ -518,9 +518,9 @@ export default function Header() {
                   <Link to="/login" className="hidden h-full items-center px-4 text-[14px] leading-5 text-ink-700 transition-colors hover:text-ink-900 lg:flex">
                     {t('common.login')}
                   </Link>
-                  {/* Faire "Sign up to buy": 36px, #333 fill, 4px radius, 20px padding */}
+                  {/* Faire "Sign up to buy": 36px, #333 fill, 4px radius, 20px padding. Wishlist/cart icons stay hidden on desktop until signed in, like Faire */}
                   <Link to="/register" className="ml-3 hidden h-9 items-center whitespace-nowrap rounded-sm border border-ink-700 bg-ink-700 px-5 text-[14px] leading-5 text-white transition-colors hover:bg-ink-900 lg:inline-flex">
-                    {t('common.register')}
+                    {t('homeHero.cta')}
                   </Link>
                 </>
               )}
