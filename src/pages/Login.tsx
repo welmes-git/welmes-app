@@ -51,23 +51,6 @@ export default function Login() {
     showToast(t('auth.resetSent', { email: email.trim() }), 'success');
   };
 
-  const handleDemoLogin = async (type: 'admin' | 'member' | 'pending') => {
-    // Dev-only. Credentials live in the git-ignored .env.local — never hardcode
-    // them here. The early return lets the production build drop the lookups.
-    if (!import.meta.env.DEV) return;
-    const credentials = {
-      admin:   { email: import.meta.env.VITE_DEMO_ADMIN_EMAIL,   password: import.meta.env.VITE_DEMO_ADMIN_PASSWORD },
-      member:  { email: import.meta.env.VITE_DEMO_MEMBER_EMAIL,  password: import.meta.env.VITE_DEMO_MEMBER_PASSWORD },
-      pending: { email: import.meta.env.VITE_DEMO_PENDING_EMAIL, password: import.meta.env.VITE_DEMO_PENDING_PASSWORD },
-    }[type];
-    if (!credentials.email || !credentials.password) {
-      showToast('Set VITE_DEMO_* in .env.local to use demo logins', 'error');
-      return;
-    }
-    const success = await login(credentials.email, credentials.password);
-    if (success) routeAfterLogin();
-  };
-
   return (
     <div className="min-h-screen bg-canvas flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-[420px]">
@@ -126,30 +109,6 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Demo logins are for local development only — dead-code-eliminated
-              from production builds so the admin credentials never ship. */}
-          {import.meta.env.DEV && (
-            <>
-              <div className="flex items-center gap-3 my-6">
-                <div className="flex-1 h-px bg-line" />
-                <span className="text-[12px] text-ink-500">or</span>
-                <div className="flex-1 h-px bg-line" />
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-[12px] text-ink-500 text-center mb-3">{t('auth.demoLogin')}</p>
-                <button onClick={() => handleDemoLogin('admin')} className="w-full h-[42px] bg-ink-900 text-white rounded-lg text-[13px] font-bold hover:shadow-hover transition-shadow">
-                  {t('auth.loginAsAdmin')}
-                </button>
-                <button onClick={() => handleDemoLogin('member')} className="w-full h-[42px] bg-canvas border-[1.5px] border-ink-900 text-ink-900 rounded-lg text-[13px] font-bold hover:bg-sunken transition-colors">
-                  {t('auth.loginAsBuyer')}
-                </button>
-                <button onClick={() => handleDemoLogin('pending')} className="w-full h-[42px] border border-line-strong rounded-lg text-[13px] font-bold text-ink-700 hover:bg-sunken transition-colors">
-                  {t('auth.loginAsPending')}
-                </button>
-              </div>
-            </>
-          )}
 
           <p className="text-[13px] text-ink-500 text-center mt-6">
             {t('auth.noAccount')}{' '}
