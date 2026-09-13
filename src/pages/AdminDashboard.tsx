@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import type { Order, SetOption, Member } from '../store/useStore';
@@ -115,6 +115,8 @@ export default function AdminDashboard() {
     setOptions: [] as SetOption[],
     image: '',
     images: [] as string[],
+    sdDealerId: '',
+    sdDealerName: '',
   });
 
   const [imageUrlInput, setImageUrlInput] = useState('');
@@ -291,6 +293,17 @@ export default function AdminDashboard() {
   // demo products while the Supabase fetch is still in flight.
   const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
 
+  // Brand suggestions = hardcoded demo brands + every brand already stored in
+  // products (Supabase `brand` is free text, so imported products can carry
+  // brands that aren't in the demo list). The brand field itself is a free
+  // text input with this datalist — a select would silently reset imported
+  // brands to brands[0] ('SK-II') when the value isn't in the option list.
+  const brandSuggestions = useMemo(() => {
+    const set = new Set<string>(brands);
+    for (const p of allProducts) if (p.brand) set.add(p.brand);
+    return [...set].sort();
+  }, [allProducts]);
+
   // Stats — all derived from live data
   const totalMembers = members.length;
   const pendingMembers = members.filter((m) => m.status === 'pending').length;
@@ -345,6 +358,8 @@ export default function AdminDashboard() {
       setOptions: [],
       image: '',
       images: [],
+      sdDealerId: '',
+      sdDealerName: '',
     });
     setImageUrlInput('');
     setShowProductModal(true);
@@ -377,6 +392,8 @@ export default function AdminDashboard() {
       setOptions: opts,
       image: product.image || '',
       images: product.images && product.images.length > 0 ? product.images : (product.image ? [product.image] : []),
+      sdDealerId: product.sdDealerId ?? '',
+      sdDealerName: product.sdDealerName ?? '',
     });
     setImageUrlInput('');
     setShowProductModal(true);
@@ -413,6 +430,8 @@ export default function AdminDashboard() {
       stock: productForm.stock,
       status: productForm.status,
       setOptions: productForm.setOptions.length > 0 ? productForm.setOptions : undefined,
+      sdDealerId: productForm.sdDealerId.trim(),
+      sdDealerName: productForm.sdDealerName.trim(),
     };
 
     if (editingProduct) {
@@ -1155,7 +1174,8 @@ export default function AdminDashboard() {
                         <label className="block text-[12px] text-[#666] mb-1">
                           Brand *
                         </label>
-                        <select
+                        <input
+                          list="brand-suggestions"
                           value={productForm.brand}
                           onChange={(e) =>
                             setProductForm({
@@ -1163,14 +1183,14 @@ export default function AdminDashboard() {
                               brand: e.target.value,
                             })
                           }
+                          placeholder="Type or pick a brand"
                           className="w-full h-10 px-3 border border-[#e5e5e5] rounded text-[13px] focus:outline-none focus:border-[#333]"
-                        >
-                          {brands.map((b) => (
-                            <option key={b} value={b}>
-                              {b}
-                            </option>
+                        />
+                        <datalist id="brand-suggestions">
+                          {brandSuggestions.map((b) => (
+                            <option key={b} value={b} />
                           ))}
-                        </select>
+                        </datalist>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
@@ -1432,6 +1452,50 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                         )}
+                      </div>
+
+                      {/* Internal source metadata — Superdelivery dealer info.
+                          Admin-only: never rendered on the storefront. */}
+                      <div className="border-t border-[#e5e5e5] pt-4">
+                        <p className="text-[11px] font-semibold text-[#999] uppercase tracking-wide mb-2">
+                          Source (internal — not shown on the storefront)
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[12px] text-[#666] mb-1">
+                              Dealer ID
+                            </label>
+                            <input
+                              type="text"
+                              value={productForm.sdDealerId}
+                              onChange={(e) =>
+                                setProductForm({
+                                  ...productForm,
+                                  sdDealerId: e.target.value,
+                                })
+                              }
+                              placeholder="e.g. 99999"
+                              className="w-full h-10 px-3 border border-[#e5e5e5] rounded text-[13px] focus:outline-none focus:border-[#333]"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[12px] text-[#666] mb-1">
+                              Dealer Name
+                            </label>
+                            <input
+                              type="text"
+                              value={productForm.sdDealerName}
+                              onChange={(e) =>
+                                setProductForm({
+                                  ...productForm,
+                                  sdDealerName: e.target.value,
+                                })
+                              }
+                              placeholder="e.g. 株式会社◯◯"
+                              className="w-full h-10 px-3 border border-[#e5e5e5] rounded text-[13px] focus:outline-none focus:border-[#333]"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div className="flex gap-3 p-5 border-t border-[#e5e5e5]">

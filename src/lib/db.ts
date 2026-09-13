@@ -494,6 +494,8 @@ function rowToProduct(row: Record<string, unknown>): Product {
     stock:          Number(row.stock),
     status:         (row.status as 'active' | 'inactive') || 'active',
     setOptions:     row.set_options as Product['setOptions'],
+    sdDealerId:     (row.sd_dealer_id as string) || undefined,
+    sdDealerName:   (row.sd_dealer_name as string) || undefined,
   };
 }
 
@@ -516,6 +518,8 @@ function productToRow(p: Partial<Product>): Record<string, unknown> {
   if (p.stock !== undefined)          row.stock = p.stock;
   if (p.status !== undefined)         row.status = p.status;
   if (p.setOptions !== undefined)     row.set_options = p.setOptions ?? null;
+  if (p.sdDealerId !== undefined)     row.sd_dealer_id = p.sdDealerId || null;
+  if (p.sdDealerName !== undefined)   row.sd_dealer_name = p.sdDealerName || null;
   return row;
 }
 

@@ -48,6 +48,10 @@ export interface Product {
   stock: number;
   status: 'active' | 'inactive';
   setOptions?: SetOption[];
+  /** Superdelivery dealer (出展企業) page id (/p/do/dpsl/{id}/) — admin-only metadata */
+  sdDealerId?: string;
+  /** Superdelivery dealer company name — admin-only, never rendered on the storefront */
+  sdDealerName?: string;
 }
 
 export interface Member {
