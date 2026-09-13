@@ -745,5 +745,9 @@
     "title": "Nous sommes WELMES.",
     "subtitle": "La plateforme des détaillants beauté.",
     "body": "Nous vous aidons à découvrir des cosmétiques japonais authentiques et à référencer les produits qui font la différence en boutique."
+  },
+  "retailerRange": {
+    "title": "Pour toute boutique, quoi que vous vendiez.",
+    "body": "Parapharmacie, salon ou concept store : trouvez sur WELMES les cosmétiques japonais dont vous avez besoin."
   }
 }

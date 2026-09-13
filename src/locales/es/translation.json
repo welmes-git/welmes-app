@@ -745,5 +745,9 @@
     "title": "Somos WELMES.",
     "subtitle": "La plataforma para minoristas de belleza.",
     "body": "Te ayudamos a descubrir cosmética japonesa original y a abastecerte de productos que hagan destacar tu tienda."
+  },
+  "retailerRange": {
+    "title": "Para cualquier tienda, vendas lo que vendas.",
+    "body": "Ya tengas una droguería, un salón o una tienda multimarca, encuentra en WELMES la cosmética japonesa que necesitas."
   }
 }

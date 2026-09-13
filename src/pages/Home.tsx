@@ -145,6 +145,32 @@ export default function Home() {
         </section>
       )}
 
+      {/* Retailer range — faire.com "For any retailer" banner, measured at 375/1024/1440/1920px
+          (Faire breakpoints md 768, xl 1440, 2xl 1920). Photo tiles are solid colour blocks for now. */}
+      <section className="flex flex-col gap-4 bg-[#595604] px-4 pb-6 pt-4 md:flex-row md:items-center md:justify-between md:p-8 min-[1440px]:p-12">
+        {/* Mobile: two tiles side by side above the copy */}
+        <div className="flex justify-between gap-4 md:hidden" aria-hidden="true">
+          <div className="h-44 min-w-0 flex-1 bg-[#8a8636]" />
+          <div className="h-44 min-w-0 flex-1 bg-[#8a8636]" />
+        </div>
+        <div className="hidden md:block relative shrink-0 overflow-hidden bg-[#8a8636] md:size-60 min-[1440px]:size-[437px] min-[1920px]:size-[576px]" aria-hidden="true" />
+        <div className="flex w-full flex-col items-start gap-4 md:w-60 md:items-center min-[1440px]:w-[370px] min-[1440px]:gap-6 min-[1920px]:w-[500px]">
+          <h2 className="font-serif text-[30px] font-normal leading-[38px] text-white md:mx-auto md:text-center min-[1440px]:text-[38px] min-[1440px]:leading-[50px] min-[1920px]:text-[52px] min-[1920px]:leading-[64px]">
+            {t('retailerRange.title')}
+          </h2>
+          <p className="text-[14px] leading-5 tracking-[0.15px] text-white md:text-center min-[1920px]:text-[18px] min-[1920px]:leading-[26px]">
+            {t('retailerRange.body')}
+          </p>
+          <Link
+            to={isAuthenticated ? '/products' : '/register'}
+            className="inline-flex h-12 items-center rounded-sm border border-ink-700 bg-white px-[23px] text-[14px] leading-5 tracking-[0.15px] text-ink-700 transition-colors hover:bg-sunken"
+          >
+            {t(isAuthenticated ? 'homeHero.ctaMember' : 'homeHero.cta')}
+          </Link>
+        </div>
+        <div className="hidden md:block relative shrink-0 overflow-hidden bg-[#8a8636] md:size-60 min-[1440px]:size-[437px] min-[1920px]:size-[576px]" aria-hidden="true" />
+      </section>
+
       {/* Brand Showcase */}
       {popularBrands.length > 0 && (
         <section className="page-container py-16">
