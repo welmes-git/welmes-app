@@ -21,40 +21,40 @@ export default function PendingApproval() {
   const previewProducts = (products.length > 0 ? products : initialProducts).slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-[#f8f8fa] flex flex-col items-center justify-center px-4 py-16">
+    <div className="min-h-screen bg-canvas flex flex-col items-center justify-center px-4 py-16">
       <div className="w-full max-w-[560px]">
 
         {/* Status card */}
-        <div className="bg-white rounded-2xl border border-[#e5e5e5] p-8 text-center mb-5">
+        <div className="bg-white rounded-[10px] border border-line p-8 text-center mb-5">
           {status === 'pending' ? (
             <>
-              <div className="w-16 h-16 rounded-full bg-yellow-50 flex items-center justify-center mx-auto mb-4">
-                <Clock size={32} className="text-yellow-500" />
+              <div className="w-16 h-16 rounded-full border border-line flex items-center justify-center mx-auto mb-4">
+                <Clock size={32} className="text-ink-700" />
               </div>
-              <h1 className="text-[22px] font-bold text-[#222] mb-2">
+              <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-2">
                 {t('auth.pendingTitle')}
               </h1>
-              <p className="text-[14px] text-[#666] leading-relaxed mb-4">
+              <p className="text-[14px] text-ink-500 leading-relaxed mb-4">
                 {t('auth.pendingDesc')}
               </p>
-              <div className="inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 text-yellow-700 text-[13px] font-semibold px-4 py-2 rounded-full">
-                <Clock size={14} />
+              <div className="inline-flex items-center gap-1.5 text-[13px] font-bold text-ink-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-ink-500" />
                 {t('status.pending')}
               </div>
             </>
           ) : (
             <>
-              <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
-                <XCircle size={32} className="text-red-500" />
+              <div className="w-16 h-16 rounded-full border border-line flex items-center justify-center mx-auto mb-4">
+                <XCircle size={32} className="text-signal-error" />
               </div>
-              <h1 className="text-[22px] font-bold text-[#222] mb-2">
+              <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-2">
                 {t('auth.notApproved')}
               </h1>
-              <p className="text-[14px] text-[#666] leading-relaxed mb-4">
+              <p className="text-[14px] text-ink-500 leading-relaxed mb-4">
                 {t('auth.notApprovedDesc')}
               </p>
-              <div className="inline-flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-[13px] font-semibold px-4 py-2 rounded-full">
-                <XCircle size={14} />
+              <div className="inline-flex items-center gap-1.5 text-[13px] font-bold text-ink-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-signal-error" />
                 {t('account.notApproved')}
               </div>
             </>
@@ -64,7 +64,7 @@ export default function PendingApproval() {
         {/* Progress stepper — a concrete "where am I" beat instead of a bare
             date-range sentence; the vague wait is what drives abandonment. */}
         {status === 'pending' && (
-          <div className="bg-white rounded-2xl border border-[#e5e5e5] p-5 mb-5">
+          <div className="bg-white rounded-[10px] border border-line p-5 mb-5">
             <div className="flex items-center">
               {[
                 { label: t('auth.stepSubmitted'), done: true },
@@ -74,16 +74,16 @@ export default function PendingApproval() {
                 <div key={i} className={`flex items-center ${i < arr.length - 1 ? 'flex-1' : ''}`}>
                   <div className="flex flex-col items-center gap-1.5 shrink-0">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                      s.done ? (s.current ? 'bg-yellow-400 text-white' : 'bg-[#4a90e2] text-white') : 'bg-[#eee] text-[#aaa]'
+                      s.done ? (s.current ? 'bg-ink-900 text-white ring-2 ring-ink-900 ring-offset-2' : 'bg-ink-900 text-white') : 'border border-line-strong bg-canvas text-ink-500'
                     }`}>
                       {s.done && !s.current ? <Check size={13} /> : i + 1}
                     </div>
-                    <span className={`text-[11px] text-center whitespace-nowrap ${s.done ? 'text-[#333] font-medium' : 'text-[#aaa]'}`}>
+                    <span className={`text-[11px] text-center whitespace-nowrap ${s.done ? 'text-ink-900 font-bold' : 'text-ink-500'}`}>
                       {s.label}
                     </span>
                   </div>
                   {i < arr.length - 1 && (
-                    <div className={`flex-1 h-[2px] mb-5 ${arr[i + 1].done ? 'bg-[#4a90e2]' : 'bg-[#eee]'}`} />
+                    <div className={`flex-1 h-[2px] mb-5 ${arr[i + 1].done ? 'bg-ink-900' : 'bg-line'}`} />
                   )}
                 </div>
               ))}
@@ -92,27 +92,27 @@ export default function PendingApproval() {
         )}
 
         {/* Account info */}
-        <div className="bg-white rounded-2xl border border-[#e5e5e5] p-5 mb-5">
-          <h2 className="text-[13px] font-semibold text-[#aaa] uppercase tracking-wide mb-3">
+        <div className="bg-white rounded-[10px] border border-line p-5 mb-5">
+          <h2 className="text-[11px] font-bold text-ink-500 uppercase tracking-[0.02em] mb-3">
             {t('auth.yourApplication')}
           </h2>
           <div className="space-y-2 text-[13px]">
             <div className="flex justify-between">
-              <span className="text-[#888]">{t('auth.company')}</span>
-              <span className="font-medium text-[#333]">{currentUser?.companyName}</span>
+              <span className="text-ink-500">{t('auth.company')}</span>
+              <span className="font-medium text-ink-700">{currentUser?.companyName}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#888]">{t('auth.email')}</span>
-              <span className="font-medium text-[#333]">{currentUser?.email}</span>
+              <span className="text-ink-500">{t('auth.email')}</span>
+              <span className="font-medium text-ink-700">{currentUser?.email}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#888]">{t('auth.businessRegNo')}</span>
-              <span className="font-medium text-[#333]">{currentUser?.businessNumber}</span>
+              <span className="text-ink-500">{t('auth.businessRegNo')}</span>
+              <span className="font-medium text-ink-700">{currentUser?.businessNumber}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#888]">{t('auth.appliedOn')}</span>
-              <span className="font-medium text-[#333]">
-                {(currentUser as any)?.registeredDate ?? '—'}
+              <span className="text-ink-500">{t('auth.appliedOn')}</span>
+              <span className="font-medium text-ink-700">
+                {currentUser?.registeredDate ?? '—'}
               </span>
             </div>
           </div>
@@ -120,19 +120,19 @@ export default function PendingApproval() {
 
         {/* What's next */}
         {status === 'pending' && (
-          <div className="bg-white rounded-2xl border border-[#e5e5e5] p-5 mb-5">
-            <h2 className="text-[13px] font-semibold text-[#aaa] uppercase tracking-wide mb-3">
+          <div className="bg-white rounded-[10px] border border-line p-5 mb-5">
+            <h2 className="text-[11px] font-bold text-ink-500 uppercase tracking-[0.02em] mb-3">
               {t('auth.whatsNext')}
             </h2>
             <div className="space-y-3">
               {[
-                { icon: <FileText size={15} className="text-[#4a90e2]" />, text: t('auth.step1') },
-                { icon: <CheckCircle2 size={15} className="text-[#4a90e2]" />, text: t('auth.step2') },
-                { icon: <Mail size={15} className="text-[#4a90e2]" />, text: t('auth.step3') },
+                { icon: <FileText size={15} className="text-ink-500" />, text: t('auth.step1') },
+                { icon: <CheckCircle2 size={15} className="text-ink-500" />, text: t('auth.step2') },
+                { icon: <Mail size={15} className="text-ink-500" />, text: t('auth.step3') },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="shrink-0 mt-0.5">{item.icon}</div>
-                  <p className="text-[13px] text-[#555]">{item.text}</p>
+                  <p className="text-[13px] text-ink-500">{item.text}</p>
                 </div>
               ))}
             </div>
@@ -143,8 +143,8 @@ export default function PendingApproval() {
             not just a rules explanation. No prices here: what pricing gets
             shown to unapproved visitors is a separate, not-yet-decided policy. */}
         {status === 'pending' && (
-          <div className="bg-white rounded-2xl border border-[#e5e5e5] p-5 mb-5">
-            <h2 className="text-[13px] font-semibold text-[#aaa] uppercase tracking-wide mb-3">
+          <div className="bg-white rounded-[10px] border border-line p-5 mb-5">
+            <h2 className="text-[11px] font-bold text-ink-500 uppercase tracking-[0.02em] mb-3">
               {t('auth.afterApproval')}
             </h2>
             <div className="space-y-2">
@@ -155,8 +155,8 @@ export default function PendingApproval() {
                 t('auth.afterApproval4'),
               ].map((line, i) => (
                 <div key={i} className="flex items-start gap-2.5">
-                  <CheckCircle2 size={15} className="text-green-500 shrink-0 mt-0.5" />
-                  <p className="text-[13px] text-[#555]">{line}</p>
+                  <CheckCircle2 size={15} className="text-ink-700 shrink-0 mt-0.5" />
+                  <p className="text-[13px] text-ink-500">{line}</p>
                 </div>
               ))}
             </div>
@@ -167,12 +167,12 @@ export default function PendingApproval() {
             unapproved visitor), but gives them something to do besides
             leaving the tab open for two days. */}
         {status === 'pending' && previewProducts.length > 0 && (
-          <div className="bg-white rounded-2xl border border-[#e5e5e5] p-5 mb-5">
+          <div className="bg-white rounded-[10px] border border-line p-5 mb-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[13px] font-semibold text-[#aaa] uppercase tracking-wide">
+              <h2 className="text-[11px] font-bold text-ink-500 uppercase tracking-[0.02em]">
                 {t('auth.browseWhileWaitingTitle')}
               </h2>
-              <Link to="/products" className="text-[12px] text-[#4a90e2] hover:underline">
+              <Link to="/products" className="text-[12px] font-bold text-ink-900 underline underline-offset-2">
                 {t('common.viewAll')}
               </Link>
             </div>
@@ -185,30 +185,30 @@ export default function PendingApproval() {
         )}
 
         {/* Contact support */}
-        <div className="bg-[#f0f7ff] border border-[#4a90e2]/20 rounded-2xl p-5 mb-6">
-          <h2 className="text-[13px] font-semibold text-[#4a90e2] uppercase tracking-wide mb-3">
+        <div className="bg-sunken border border-line rounded-[10px] p-5 mb-6">
+          <h2 className="text-[11px] font-bold text-ink-500 uppercase tracking-wide mb-3">
             {t('auth.needHelp')}
           </h2>
           <div className="space-y-2">
             <a
               href="tel:1544-1234"
-              className="flex items-center gap-3 text-[13px] text-[#555] hover:text-[#4a90e2] transition-colors"
+              className="flex items-center gap-3 text-[13px] text-ink-700 hover:text-ink-900 transition-colors"
             >
-              <Phone size={14} className="text-[#4a90e2]" />
+              <Phone size={14} className="text-ink-500" />
               1544-1234 (Mon–Fri 09:00–18:00)
             </a>
             <a
               href="mailto:support@welmes.kr"
-              className="flex items-center gap-3 text-[13px] text-[#555] hover:text-[#4a90e2] transition-colors"
+              className="flex items-center gap-3 text-[13px] text-ink-700 hover:text-ink-900 transition-colors"
             >
-              <Mail size={14} className="text-[#4a90e2]" />
+              <Mail size={14} className="text-ink-500" />
               support@welmes.kr
             </a>
             <Link
               to="/support"
-              className="flex items-center gap-3 text-[13px] text-[#555] hover:text-[#4a90e2] transition-colors"
+              className="flex items-center gap-3 text-[13px] text-ink-700 hover:text-ink-900 transition-colors"
             >
-              <MessageCircle size={14} className="text-[#4a90e2]" />
+              <MessageCircle size={14} className="text-ink-500" />
               {t('auth.visitSupport')}
             </Link>
           </div>
@@ -218,13 +218,13 @@ export default function PendingApproval() {
         <div className="flex gap-3">
           <Link
             to="/account"
-            className="flex-1 py-3 border border-[#ddd] rounded-xl text-[13px] font-medium text-[#555] text-center hover:bg-[#f5f5f5] transition-colors"
+            className="flex-1 h-11 flex items-center justify-center border border-line-strong rounded-lg text-[13px] font-bold text-ink-700 text-center hover:bg-sunken transition-colors"
           >
             {t('account.title')}
           </Link>
           <button
             onClick={logout}
-            className="flex-1 py-3 bg-[#333] text-white rounded-xl text-[13px] font-semibold hover:bg-[#555] transition-colors"
+            className="flex-1 h-11 bg-ink-900 text-white rounded-lg text-[13px] font-bold hover:shadow-hover transition-shadow"
           >
             {t('common.logout')}
           </button>
