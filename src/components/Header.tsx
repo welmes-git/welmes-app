@@ -527,8 +527,9 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Link row — desktop only, 47px, centred, 14px regular with 14px gaps (Faire) */}
-        <nav ref={megaMenuRef} className="relative hidden h-[47px] items-center justify-center gap-[14px] md:flex">
+        {/* Link row — desktop only, 47px, centred, 14px regular. Faire uses 14px gaps between
+            long category names; our five short labels need 32–40px to read as separate items. */}
+        <nav ref={megaMenuRef} className="relative hidden h-[47px] items-center justify-center gap-8 lg:gap-10 md:flex">
             <button
               onClick={() => setShowCategoryDropdown((v) => !v)}
               aria-expanded={showCategoryDropdown}
