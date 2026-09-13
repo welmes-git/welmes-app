@@ -188,14 +188,14 @@ export default function Header() {
     switch (n.type) {
       case 'member_approved':
         return {
-          icon: <ShieldCheck size={16} className="text-green-500" />,
+          icon: <ShieldCheck size={16} className="text-signal-ok" />,
           title: t('notifications.member_approved_title'),
           message: t('notifications.member_approved_message'),
           link: '/account',
         };
       case 'member_rejected':
         return {
-          icon: <XCircle size={16} className="text-red-500" />,
+          icon: <XCircle size={16} className="text-signal-error" />,
           title: t('notifications.member_rejected_title'),
           message: t('notifications.member_rejected_message'),
           link: '/support',
@@ -213,10 +213,10 @@ export default function Header() {
         };
       case 'order_status': {
         const statusIcon =
-          n.orderStatus === 'completed' ? <CheckCircle2 size={16} className="text-green-500" /> :
-          n.orderStatus === 'cancelled' ? <XCircle size={16} className="text-red-500" /> :
-          n.orderStatus === 'processing' ? <Package size={16} className="text-blue-500" /> :
-          <Package size={16} className="text-[#aaa]" />;
+          n.orderStatus === 'completed' ? <CheckCircle2 size={16} className="text-signal-ok" /> :
+          n.orderStatus === 'cancelled' ? <XCircle size={16} className="text-signal-error" /> :
+          n.orderStatus === 'processing' ? <Package size={16} className="text-ink-500" /> :
+          <Package size={16} className="text-ink-300" />;
         return {
           icon: statusIcon,
           title: t('notifications.order_status_title'),
@@ -262,32 +262,32 @@ export default function Header() {
   return (
     <>
       {/* Top Utility Bar */}
-      <div className="bg-[#f8f8fa] border-b border-[#e5e5e5]">
+      <div className="bg-sunken border-b border-line">
         <div className="max-w-[1100px] mx-auto px-4 flex justify-end items-center h-9">
-          <div className="flex items-center gap-3 text-[12px] text-[#666666]">
+          <div className="flex items-center gap-3 text-[12px] text-ink-500">
             {!isAuthenticated ? (
               <>
-                <Link to="/register" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
+                <Link to="/register" className="hover:text-ink-900 transition-colors" style={{whiteSpace: 'nowrap'}}>
                   {t('common.register')}
                 </Link>
-                <span className="text-[#ddd]">|</span>
-                <Link to="/login" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
+                <span className="text-line-strong">|</span>
+                <Link to="/login" className="hover:text-ink-900 transition-colors" style={{whiteSpace: 'nowrap'}}>
                   {t('common.login')}
                 </Link>
               </>
             ) : (
               <>
-                <span className="text-[#333] font-medium" style={{whiteSpace: 'nowrap'}}>
+                <span className="text-ink-700 font-medium" style={{whiteSpace: 'nowrap'}}>
                   {currentUser?.companyName || currentUser?.email}
                 </span>
-                <span className="text-[#ddd]">|</span>
-                <Link to="/account" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
+                <span className="text-line-strong">|</span>
+                <Link to="/account" className="hover:text-ink-900 transition-colors" style={{whiteSpace: 'nowrap'}}>
                   {t('common.myAccount')}
                 </Link>
-                <span className="text-[#ddd]">|</span>
+                <span className="text-line-strong">|</span>
                 <button
                   onClick={handleLogout}
-                  className="hover:text-[#ff4d6d] transition-colors flex items-center gap-1"
+                  className="hover:text-ink-900 transition-colors flex items-center gap-1"
                   style={{whiteSpace: 'nowrap'}}
                 >
                   <LogOut size={12} />
@@ -295,18 +295,18 @@ export default function Header() {
                 </button>
               </>
             )}
-            <span className="text-[#ddd]">|</span>
-            <Link to="/support" className="hover:text-[#ff4d6d] transition-colors" style={{whiteSpace: 'nowrap'}}>
+            <span className="text-line-strong">|</span>
+            <Link to="/support" className="hover:text-ink-900 transition-colors" style={{whiteSpace: 'nowrap'}}>
               {t('common.support')}
             </Link>
-            <span className="text-[#ddd]">|</span>
+            <span className="text-line-strong">|</span>
             <CurrencySelector />
-            <span className="text-[#ddd]">|</span>
+            <span className="text-line-strong">|</span>
             {/* Language Switcher */}
             <div className="relative" ref={langRef}>
               <button
                 onClick={() => setShowLangDropdown(!showLangDropdown)}
-                className="flex items-center gap-1 hover:text-[#ff4d6d] transition-colors"
+                className="flex items-center gap-1 hover:text-ink-900 transition-colors"
                 style={{whiteSpace: 'nowrap'}}
               >
                 <Globe size={12} />
@@ -314,13 +314,13 @@ export default function Header() {
                 <ChevronDown size={10} />
               </button>
               {showLangDropdown && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-[#e5e5e5] rounded-lg shadow-lg py-1 z-50 min-w-[170px] max-h-[320px] overflow-y-auto">
+                <div className="absolute right-0 top-full mt-1 bg-white border border-line rounded-lg shadow-hover py-1 z-50 min-w-[170px] max-h-[320px] overflow-y-auto">
                   {LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => { i18n.changeLanguage(lang.code); setShowLangDropdown(false); }}
-                      className={`w-full text-left px-3 py-1.5 text-[12px] hover:bg-[#f8f8fa] transition-colors ${
-                        i18n.language === lang.code ? 'font-bold text-[#4a90e2]' : 'text-[#555]'
+                      className={`w-full text-left px-3 py-1.5 text-[12px] hover:bg-sunken transition-colors ${
+                        i18n.language === lang.code ? 'font-bold text-ink-900' : 'text-ink-500'
                       }`}
                     >
                       {lang.label} · {lang.name}
@@ -339,15 +339,15 @@ export default function Header() {
           scrolls away with the page, revealing whatever was below the fold.
           We match that by dropping `sticky` only while the dropdown is open;
           it reverts to sticky as soon as it closes. */}
-      <header className={`bg-white z-40 border-b border-[#e5e5e5] ${showCategoryDropdown ? '' : 'sticky top-0'}`}>
+      <header className={`bg-white z-40 border-b border-line ${showCategoryDropdown ? '' : 'sticky top-0'}`}>
         <div className="max-w-[1100px] mx-auto px-4">
           <div className="flex items-center justify-between h-[70px]">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 shrink-0">
-              <span className="text-[24px] font-bold tracking-tight text-[#333]">
+              <span className="text-[24px] font-bold tracking-tight text-ink-700">
                 WELMES
               </span>
-              <span className="bg-[#4a90e2] text-white text-[11px] font-semibold px-2 py-0.5 rounded">
+              <span className="bg-white border border-line-strong text-ink-700 text-[11px] font-bold tracking-[0.02em] px-[7px] py-[3px] rounded">
                 Business
               </span>
             </Link>
@@ -360,11 +360,11 @@ export default function Header() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('nav.searchPlaceholder')}
-                  className="w-full h-[42px] pl-4 pr-12 border border-[#cccccc] rounded-full text-[14px] focus:outline-none focus:border-[#333333] transition-colors"
+                  className="w-full h-[42px] pl-4 pr-12 border border-line-strong rounded-full text-[14px] focus:outline-none focus:border-ink-900 transition-colors"
                 />
                 <button
                   type="submit"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-[#333] hover:text-[#ff4d6d]"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-ink-700 hover:text-ink-900"
                 >
                   <Search size={18} />
                 </button>
@@ -377,18 +377,18 @@ export default function Header() {
                 <div className="relative" ref={userRef}>
                   <button
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
-                    className="flex items-center gap-1 text-[#333] hover:text-[#ff4d6d] transition-colors"
+                    className="flex items-center gap-1 text-ink-700 hover:text-ink-900 transition-colors"
                   >
                     <User size={22} />
                     <ChevronDown size={14} />
                   </button>
                   {showUserDropdown && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-[#e5e5e5] rounded-lg shadow-lg py-2 z-50">
-                      <div className="px-4 py-2 border-b border-[#f0f0f0]">
-                        <p className="text-[13px] font-medium text-[#333]">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-line rounded-lg shadow-hover py-2 z-50">
+                      <div className="px-4 py-2 border-b border-line">
+                        <p className="text-[13px] font-medium text-ink-700">
                           {currentUser?.companyName}
                         </p>
-                        <p className="text-[11px] text-[#999]">
+                        <p className="text-[11px] text-ink-500">
                           {currentUser?.status === 'approved'
                             ? t('account.verifiedBusiness')
                             : t('account.pendingReview')}
@@ -396,7 +396,7 @@ export default function Header() {
                       </div>
                       <Link
                         to="/account"
-                        className="flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] hover:bg-[#f8f8fa]"
+                        className="flex items-center gap-2 px-4 py-2.5 text-[13px] text-ink-700 hover:bg-sunken"
                         onClick={() => setShowUserDropdown(false)}
                       >
                         <User size={14} />
@@ -405,7 +405,7 @@ export default function Header() {
                       {isAdmin && (
                         <Link
                           to="/admin"
-                          className="flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] hover:bg-[#f8f8fa]"
+                          className="flex items-center gap-2 px-4 py-2.5 text-[13px] text-ink-700 hover:bg-sunken"
                           onClick={() => setShowUserDropdown(false)}
                         >
                           <LayoutDashboard size={14} />
@@ -414,7 +414,7 @@ export default function Header() {
                       )}
                       <button
                         onClick={handleLogout}
-                        className="flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] hover:bg-[#f8f8fa] w-full"
+                        className="flex items-center gap-2 px-4 py-2.5 text-[13px] text-ink-700 hover:bg-sunken w-full"
                       >
                         <LogOut size={14} />
                         {t('common.logout')}
@@ -425,11 +425,11 @@ export default function Header() {
               )}
               <button
                 onClick={() => navigate('/wishlist')}
-                className="relative text-[#333] hover:text-[#ff4d6d] transition-colors hidden sm:block"
+                className="relative text-ink-700 hover:text-ink-900 transition-colors hidden sm:block"
               >
-                <Heart size={22} className={wishlist.length > 0 ? 'text-[#ff4d6d]' : ''} />
+                <Heart size={22} className={wishlist.length > 0 ? 'text-ink-900' : ''} />
                 {wishlist.length > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] bg-[#ff4d6d] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] bg-ink-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                     {wishlist.length}
                   </span>
                 )}
@@ -439,25 +439,25 @@ export default function Header() {
                 <div className="relative hidden sm:flex sm:items-center" ref={notifRef}>
                   <button
                     onClick={() => setShowNotifications((v) => !v)}
-                    className="relative text-[#333] hover:text-[#ff4d6d] transition-colors"
+                    className="relative text-ink-700 hover:text-ink-900 transition-colors"
                     aria-label={t('notifications.title')}
                   >
                     <Bell size={22} />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-[#ff4d6d] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-ink-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </span>
                     )}
                   </button>
 
                   {showNotifications && (
-                    <div className="absolute right-0 top-full mt-2 w-[360px] bg-white border border-[#e5e5e5] rounded-xl shadow-xl z-50 overflow-hidden">
+                    <div className="absolute right-0 top-full mt-2 w-[360px] bg-white border border-line rounded-[10px] shadow-hover z-50 overflow-hidden">
                       {/* Header */}
-                      <div className="flex items-center justify-between px-4 py-3 border-b border-[#f0f0f0]">
-                        <span className="text-[14px] font-bold text-[#222]">
+                      <div className="flex items-center justify-between px-4 py-3 border-b border-line">
+                        <span className="text-[14px] font-bold text-ink-900">
                           {t('notifications.title')}
                           {unreadCount > 0 && (
-                            <span className="ml-2 text-[11px] font-semibold bg-[#ff4d6d] text-white rounded-full px-1.5 py-0.5">
+                            <span className="ml-2 text-[11px] font-semibold bg-ink-900 text-white rounded-full px-1.5 py-0.5">
                               {unreadCount}
                             </span>
                           )}
@@ -467,14 +467,14 @@ export default function Header() {
                             <>
                               <button
                                 onClick={() => markAllNotificationsRead()}
-                                className="p-1.5 text-[#999] hover:text-[#4a90e2] rounded-lg hover:bg-[#f0f7ff] transition-colors"
+                                className="p-1.5 text-ink-500 hover:text-ink-900 rounded-lg hover:bg-sunken transition-colors"
                                 title={t('notifications.markAllRead')}
                               >
                                 <CheckCheck size={15} />
                               </button>
                               <button
                                 onClick={() => clearNotifications(currentUser!.id)}
-                                className="p-1.5 text-[#999] hover:text-[#ff4d6d] rounded-lg hover:bg-[#fff0f0] transition-colors"
+                                className="p-1.5 text-ink-500 hover:text-ink-900 rounded-lg hover:bg-sunken transition-colors"
                                 title={t('notifications.clearAll')}
                               >
                                 <Trash2 size={15} />
@@ -488,9 +488,9 @@ export default function Header() {
                       <div className="max-h-[400px] overflow-y-auto">
                         {myNotifications.length === 0 ? (
                           <div className="py-12 text-center">
-                            <Bell size={32} className="mx-auto text-[#ddd] mb-3" />
-                            <p className="text-[13px] font-medium text-[#999]">{t('notifications.empty')}</p>
-                            <p className="text-[12px] text-[#bbb] mt-0.5">{t('notifications.emptyDesc')}</p>
+                            <Bell size={32} className="mx-auto text-line-strong mb-3" />
+                            <p className="text-[13px] font-medium text-ink-500">{t('notifications.empty')}</p>
+                            <p className="text-[12px] text-ink-300 mt-0.5">{t('notifications.emptyDesc')}</p>
                           </div>
                         ) : (
                           myNotifications.map((n) => {
@@ -503,26 +503,26 @@ export default function Header() {
                                   setShowNotifications(false);
                                   navigate(link);
                                 }}
-                                className={`w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-[#f8f8fa] transition-colors border-b border-[#f5f5f5] last:border-0 ${
-                                  !n.read ? 'bg-[#f0f7ff]' : ''
+                                className={`w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-sunken transition-colors border-b border-line last:border-0 ${
+                                  !n.read ? 'bg-sunken' : ''
                                 }`}
                               >
-                                <div className="shrink-0 w-8 h-8 rounded-full bg-white border border-[#e5e5e5] flex items-center justify-center mt-0.5 shadow-sm">
+                                <div className="shrink-0 w-8 h-8 rounded-full bg-white border border-line flex items-center justify-center mt-0.5">
                                   {icon}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className={`text-[13px] leading-snug ${!n.read ? 'font-semibold text-[#222]' : 'font-medium text-[#333]'}`}>
+                                  <p className={`text-[13px] leading-snug ${!n.read ? 'font-semibold text-ink-900' : 'font-medium text-ink-700'}`}>
                                     {title}
                                   </p>
-                                  <p className="text-[12px] text-[#777] mt-0.5 leading-relaxed line-clamp-2">
+                                  <p className="text-[12px] text-ink-500 mt-0.5 leading-relaxed line-clamp-2">
                                     {message}
                                   </p>
-                                  <p className="text-[11px] text-[#bbb] mt-1">
+                                  <p className="text-[11px] text-ink-300 mt-1">
                                     {formatRelativeTime(n.createdAt)}
                                   </p>
                                 </div>
                                 {!n.read && (
-                                  <div className="shrink-0 w-2 h-2 rounded-full bg-[#4a90e2] mt-1.5" />
+                                  <div className="shrink-0 w-2 h-2 rounded-full bg-ink-900 mt-1.5" />
                                 )}
                               </button>
                             );
@@ -535,18 +535,18 @@ export default function Header() {
               )}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative text-[#333] hover:text-[#ff4d6d] transition-colors"
+                className="relative text-ink-700 hover:text-ink-900 transition-colors"
               >
                 <ShoppingBag size={22} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 bg-[#ff4d6d] text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[18px] h-[18px]">
+                  <span className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 bg-ink-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[18px] h-[18px]">
                     {cartCount}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => { setShowMobileSearch(!showMobileSearch); }}
-                className="md:hidden text-[#333] hover:text-[#ff4d6d] transition-colors"
+                className="md:hidden text-ink-700 hover:text-ink-900 transition-colors"
               >
                 <Search size={22} />
               </button>
@@ -554,12 +554,12 @@ export default function Header() {
           </div>
 
           {/* Navigation Bar — desktop only */}
-          <nav ref={megaMenuRef} className="hidden md:flex items-center border-t border-[#e5e5e5] relative">
+          <nav ref={megaMenuRef} className="hidden md:flex items-center border-t border-line relative">
             {/* Category — Olive Young style mega menu */}
             <button
               onClick={() => setShowCategoryDropdown((v) => !v)}
               className={`flex items-center gap-2 py-3.5 px-5 text-[14px] font-semibold transition-colors ${
-                showCategoryDropdown ? 'bg-[#222] text-white' : 'text-[#333] hover:text-[#ff4d6d]'
+                showCategoryDropdown ? 'bg-ink-900 text-white' : 'text-ink-700 hover:text-ink-900'
               }`}
             >
               <Menu size={16} />
@@ -570,8 +570,8 @@ export default function Header() {
               // `sticky` above while this is open, so the panel renders at its
               // natural height and the whole page scrolls past it (Olive
               // Young's actual mechanism), instead of scrolling inside a box.
-              <div className="absolute top-full left-0 right-0 bg-white border border-[#e5e5e5] shadow-[0_16px_32px_rgba(0,0,0,0.12)] z-50">
-                <div className="grid grid-cols-6 divide-x divide-[#f0f0f0] px-1 py-7">
+              <div className="absolute top-full left-0 right-0 bg-white border border-line shadow-hover z-50">
+                <div className="grid grid-cols-6 divide-x divide-line px-1 py-7">
                   {categoryMenuColumns.map((column, colIdx) => (
                     <div key={colIdx} className="px-5 space-y-7">
                       {column.map((group) => (
@@ -579,10 +579,10 @@ export default function Header() {
                           <Link
                             to={group.link}
                             onClick={() => setShowCategoryDropdown(false)}
-                            className="inline-flex items-center gap-1 text-[15px] font-bold text-[#222] hover:text-[#ff4d6d] mb-3 transition-colors"
+                            className="inline-flex items-center gap-1 text-[15px] font-bold text-ink-900 hover:text-ink-900 mb-3 transition-colors"
                           >
                             {t(`categoryMenu.${group.key}`)}
-                            <ChevronRight size={14} className="text-[#999]" />
+                            <ChevronRight size={14} className="text-ink-500" />
                           </Link>
                           <ul className="space-y-1">
                             {group.subs.map((sub) => (
@@ -590,7 +590,7 @@ export default function Header() {
                                 <Link
                                   to={sub.link}
                                   onClick={() => setShowCategoryDropdown(false)}
-                                  className="block py-[4px] text-[13px] text-[#666] hover:text-[#ff4d6d] hover:underline transition-colors"
+                                  className="block py-[4px] text-[13px] text-ink-500 hover:text-ink-900 hover:underline transition-colors"
                                 >
                                   {t(`categoryMenu.${sub.key}`)}
                                 </Link>
@@ -604,7 +604,7 @@ export default function Header() {
                 </div>
                 <button
                   onClick={() => setShowCategoryDropdown(false)}
-                  className="absolute bottom-0 right-0 w-9 h-9 bg-[#222] text-white flex items-center justify-center hover:bg-[#444] transition-colors"
+                  className="absolute bottom-0 right-0 w-9 h-9 bg-ink-900 text-white flex items-center justify-center hover:bg-ink-700 transition-colors"
                   aria-label="Close category menu"
                 >
                   <X size={16} />
@@ -618,18 +618,18 @@ export default function Header() {
               onMouseEnter={() => setShowBrandDropdown(true)}
               onMouseLeave={() => setShowBrandDropdown(false)}
             >
-              <button className="flex items-center gap-1 py-3.5 px-5 text-[14px] font-semibold text-[#333] hover:text-[#ff4d6d]">
+              <button className="flex items-center gap-1 py-3.5 px-5 text-[14px] font-semibold text-ink-700 hover:text-ink-900">
                 {t('nav.brandShop')}
                 <ChevronDown size={14} />
               </button>
               {showBrandDropdown && (
-                <div className="absolute top-full left-0 w-[360px] bg-white border border-[#e5e5e5] shadow-lg py-3 z-50">
+                <div className="absolute top-full left-0 w-[360px] bg-white border border-line shadow-hover py-3 z-50">
                   <div className="grid grid-cols-2">
                     {brands.map((brand) => (
                       <Link
                         key={brand}
                         to={`/products?brand=${encodeURIComponent(brand)}`}
-                        className="px-5 py-2 text-[13px] text-[#555] hover:bg-[#f8f8fa] hover:text-[#ff4d6d]"
+                        className="px-5 py-2 text-[13px] text-ink-500 hover:bg-sunken hover:text-ink-900"
                         onClick={() => setShowBrandDropdown(false)}
                       >
                         {brand}
@@ -647,8 +647,8 @@ export default function Header() {
                 to={item.path}
                 className={`py-3.5 px-5 text-[14px] font-semibold transition-colors ${
                   isActive(item.path)
-                    ? 'text-[#ff4d6d]'
-                    : 'text-[#333] hover:text-[#ff4d6d]'
+                    ? 'text-ink-900 underline underline-offset-[6px] decoration-2'
+                    : 'text-ink-700 hover:text-ink-900'
                 }`}
               >
                 {item.label}
@@ -661,18 +661,18 @@ export default function Header() {
         {showMobileSearch && (
           <div className="fixed inset-0 bg-white z-[60] flex flex-col md:hidden">
             {/* Overlay Header */}
-            <div className="flex items-center justify-between px-4 h-[56px] border-b border-[#e5e5e5] shrink-0">
+            <div className="flex items-center justify-between px-4 h-[56px] border-b border-line shrink-0">
               <button
                 onClick={() => { setShowMobileSearch(false); setSearchQuery(''); }}
-                className="text-[#333] w-8"
+                className="text-ink-700 w-8"
               >
                 <X size={22} />
               </button>
-              <span className="text-[16px] font-bold text-[#222]">{t('common.search')}</span>
-              <button onClick={() => setIsCartOpen(true)} className="relative text-[#333] w-8 flex justify-end">
+              <span className="text-[16px] font-bold text-ink-900">{t('common.search')}</span>
+              <button onClick={() => setIsCartOpen(true)} className="relative text-ink-700 w-8 flex justify-end">
                 <ShoppingBag size={22} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-0 min-w-[18px] h-[18px] bg-[#ff4d6d] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+                  <span className="absolute -top-1.5 -right-0 min-w-[18px] h-[18px] bg-ink-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
                     {cartCount}
                   </span>
                 )}
@@ -680,7 +680,7 @@ export default function Header() {
             </div>
 
             {/* Search Input */}
-            <div className="px-4 py-3 border-b border-[#e5e5e5] shrink-0">
+            <div className="px-4 py-3 border-b border-line shrink-0">
               <form onSubmit={handleSearch}>
                 <div className="relative">
                   <input
@@ -689,10 +689,10 @@ export default function Header() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t('nav.searchPlaceholderFull')}
                     autoFocus
-                    className="w-full h-[42px] pl-4 pr-10 bg-[#f4f4f4] rounded-full focus:outline-none"
+                    className="w-full h-[42px] pl-4 pr-10 bg-sunken rounded-full focus:outline-none"
                     style={{ fontSize: '16px' }}
                   />
-                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-[#888]">
+                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-500">
                     <Search size={17} />
                   </button>
                 </div>
@@ -704,8 +704,8 @@ export default function Header() {
               {/* Keyword Recommendations */}
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-[15px] font-bold text-[#222]">{t('nav.keywordSuggestions')}</span>
-                  <span className="text-[12px] text-[#aaa] font-normal">beta</span>
+                  <span className="text-[15px] font-bold text-ink-900">{t('nav.keywordSuggestions')}</span>
+                  <span className="text-[12px] text-ink-300 font-normal">beta</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {[
@@ -720,7 +720,7 @@ export default function Header() {
                         navigate(`/products?search=${encodeURIComponent(kw)}`);
                         setShowMobileSearch(false);
                       }}
-                      className="px-4 py-2 bg-[#f4f4f4] rounded-full text-[13px] text-[#444] hover:bg-[#e8e8e8] transition-colors"
+                      className="px-4 py-2 bg-sunken rounded-full text-[13px] text-ink-700 hover:bg-line transition-colors"
                     >
                       {kw}
                     </button>
@@ -731,9 +731,9 @@ export default function Header() {
               {/* Trending Searches — real buyer search activity, not a fixed list */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[15px] font-bold text-[#222]">{t('nav.trendingSearches')}</span>
+                  <span className="text-[15px] font-bold text-ink-900">{t('nav.trendingSearches')}</span>
                   {trendingUpdatedAt && (
-                    <span className="text-[11px] text-[#bbb]">
+                    <span className="text-[11px] text-ink-300">
                       {t('nav.asOf', {
                         time: `${trendingUpdatedAt.getHours()}:${String(trendingUpdatedAt.getMinutes()).padStart(2, '0')}`,
                       })}
@@ -743,11 +743,11 @@ export default function Header() {
                 {trendingSearches === null ? (
                   <div className="grid grid-cols-2 gap-y-3">
                     {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="h-[18px] w-24 bg-[#f4f4f4] rounded animate-pulse" />
+                      <div key={i} className="h-[18px] w-24 bg-sunken rounded animate-pulse" />
                     ))}
                   </div>
                 ) : trendingSearches.length === 0 ? (
-                  <p className="text-[13px] text-[#aaa] py-2">{t('nav.noTrendingSearches')}</p>
+                  <p className="text-[13px] text-ink-300 py-2">{t('nav.noTrendingSearches')}</p>
                 ) : (
                 <div className="grid grid-cols-2 gap-y-3">
                   {trendingSearches.map(({ term }, idx) => (
@@ -760,10 +760,10 @@ export default function Header() {
                       }}
                       className="flex items-center gap-3 text-left"
                     >
-                      <span className={`text-[14px] font-bold w-5 ${idx < 3 ? 'text-[#ff4d6d]' : 'text-[#aaa]'}`}>
+                      <span className={`text-[14px] font-bold w-5 ${idx < 3 ? 'text-ink-900' : 'text-ink-300'}`}>
                         {idx + 1}
                       </span>
-                      <span className="text-[14px] text-[#333]">{term}</span>
+                      <span className="text-[14px] text-ink-700">{term}</span>
                     </button>
                   ))}
                 </div>
@@ -777,18 +777,18 @@ export default function Header() {
         {showMobileCategory && (
           <div className="fixed inset-0 bg-white z-[60] flex flex-col md:hidden">
             {/* Overlay Header */}
-            <div className="flex items-center justify-between px-4 h-[56px] border-b border-[#e5e5e5] shrink-0">
-              <button onClick={() => setShowMobileCategory(false)} className="text-[#333] w-8">
+            <div className="flex items-center justify-between px-4 h-[56px] border-b border-line shrink-0">
+              <button onClick={() => setShowMobileCategory(false)} className="text-ink-700 w-8">
                 <X size={22} />
               </button>
-              <span className="text-[16px] font-bold text-[#222]">{t('nav.category')}</span>
+              <span className="text-[16px] font-bold text-ink-900">{t('nav.category')}</span>
               <span className="w-8" />
             </div>
 
             {/* Master/detail body */}
             <div className="flex-1 flex overflow-hidden">
               {/* Left rail — every top-level group */}
-              <div className="w-[104px] shrink-0 bg-[#fafafa] overflow-y-auto border-r border-[#eee]">
+              <div className="w-[104px] shrink-0 bg-sunken overflow-y-auto border-r border-line">
                 {allCategoryGroups.map((group) => (
                   <button
                     key={group.key}
@@ -796,8 +796,8 @@ export default function Header() {
                     onClick={() => scrollToCategoryGroup(group.key)}
                     className={`w-full text-left px-3 py-3.5 text-[12.5px] leading-tight border-l-[3px] transition-colors ${
                       activeGroupKey === group.key
-                        ? 'border-[#222] bg-white text-[#222] font-bold'
-                        : 'border-transparent text-[#999]'
+                        ? 'border-ink-900 bg-white text-ink-900 font-bold'
+                        : 'border-transparent text-ink-500'
                     }`}
                   >
                     {t(`categoryMenu.${group.key}`)}
@@ -817,10 +817,10 @@ export default function Header() {
                     <Link
                       to={group.link}
                       onClick={() => setShowMobileCategory(false)}
-                      className="inline-flex items-center gap-1 text-[16px] font-bold text-[#222] mb-2.5"
+                      className="inline-flex items-center gap-1 text-[16px] font-bold text-ink-900 mb-2.5"
                     >
                       {t(`categoryMenu.${group.key}`)}
-                      <ChevronRight size={15} className="text-[#999]" />
+                      <ChevronRight size={15} className="text-ink-500" />
                     </Link>
                     <div>
                       {group.subs.map((sub) => (
@@ -828,7 +828,7 @@ export default function Header() {
                           key={sub.key}
                           to={sub.link}
                           onClick={() => setShowMobileCategory(false)}
-                          className="block py-2 text-[14px] text-[#555] active:text-[#ff4d6d]"
+                          className="block py-2 text-[14px] text-ink-500 active:text-ink-900"
                         >
                           {t(`categoryMenu.${sub.key}`)}
                         </Link>
@@ -845,7 +845,7 @@ export default function Header() {
         {isMobile && (
           <div>
             <div style={{
-              borderTop: '1px solid #e5e5e5',
+              borderTop: '1px solid var(--wm-line)',
               overflowX: 'auto',
               display: 'flex',
               scrollbarWidth: 'none',
@@ -861,7 +861,7 @@ export default function Header() {
                   padding: '10px 14px',
                   fontSize: '13px',
                   fontWeight: 600,
-                  color: '#333',
+                  color: 'var(--wm-ink-700)',
                   whiteSpace: 'nowrap',
                   background: 'none',
                   border: 'none',
@@ -881,7 +881,7 @@ export default function Header() {
                   padding: '10px 14px',
                   fontSize: '13px',
                   fontWeight: 600,
-                  color: '#333',
+                  color: 'var(--wm-ink-700)',
                   whiteSpace: 'nowrap',
                   background: 'none',
                   border: 'none',
@@ -900,7 +900,7 @@ export default function Header() {
                     padding: '10px 14px',
                     fontSize: '13px',
                     fontWeight: 600,
-                    color: isActive(item.path) ? '#ff4d6d' : '#333',
+                    color: isActive(item.path) ? 'var(--wm-ink-900)' : 'var(--wm-ink-700)',
                     whiteSpace: 'nowrap',
                     textDecoration: 'none',
                   }}
@@ -916,28 +916,28 @@ export default function Header() {
         {showMobileBrandShop && (
           <div className="fixed inset-0 bg-white z-[60] flex flex-col md:hidden">
             {/* Overlay Header */}
-            <div className="flex items-center justify-between px-4 h-[56px] border-b border-[#e5e5e5] shrink-0">
+            <div className="flex items-center justify-between px-4 h-[56px] border-b border-line shrink-0">
               <button
                 onClick={() => { setShowMobileBrandShop(false); setBrandSearch(''); }}
-                className="text-[#333] w-8"
+                className="text-ink-700 w-8"
               >
                 <X size={22} />
               </button>
-              <span className="text-[16px] font-bold text-[#222]">{t('nav.brandShop')}</span>
+              <span className="text-[16px] font-bold text-ink-900">{t('nav.brandShop')}</span>
               <span className="w-8" />
             </div>
 
             {/* Search */}
-            <div className="px-4 py-3 border-b border-[#e5e5e5] shrink-0">
+            <div className="px-4 py-3 border-b border-line shrink-0">
               <div className="relative">
-                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#aaa]" />
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300" />
                 <input
                   type="text"
                   value={brandSearch}
                   onChange={(e) => setBrandSearch(e.target.value)}
                   placeholder={t('nav.brandSearchPlaceholder')}
                   autoFocus
-                  className="w-full h-[42px] pl-10 pr-4 bg-[#f4f4f4] rounded-full focus:outline-none"
+                  className="w-full h-[42px] pl-10 pr-4 bg-sunken rounded-full focus:outline-none"
                   style={{ fontSize: '16px' }}
                 />
               </div>
@@ -946,17 +946,17 @@ export default function Header() {
             {/* Brand list */}
             <div className="flex-1 overflow-y-auto">
               {filteredBrands.length === 0 ? (
-                <p className="text-center text-[13px] text-[#999] py-16">{t('nav.noBrandsFound')}</p>
+                <p className="text-center text-[13px] text-ink-500 py-16">{t('nav.noBrandsFound')}</p>
               ) : (
                 filteredBrands.map((brand) => (
                   <Link
                     key={brand}
                     to={`/products?brand=${encodeURIComponent(brand)}`}
                     onClick={() => { setShowMobileBrandShop(false); setBrandSearch(''); }}
-                    className="flex items-center justify-between px-4 py-4 border-b border-[#f5f5f5] text-[15px] text-[#222] active:bg-[#fafafa]"
+                    className="flex items-center justify-between px-4 py-4 border-b border-line text-[15px] text-ink-900 active:bg-sunken"
                   >
                     {brand}
-                    <ChevronRight size={16} className="text-[#ccc]" />
+                    <ChevronRight size={16} className="text-ink-300" />
                   </Link>
                 ))
               )}
