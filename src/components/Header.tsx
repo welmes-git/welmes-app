@@ -300,9 +300,11 @@ export default function Header() {
           scrolls away with the page (Olive Young behaviour). */}
       <header className={`bg-white z-40 border-b border-line-control tracking-[0.15px] ${showCategoryDropdown ? '' : 'sticky top-0'}`}>
         <div className="flex h-[50px] md:h-[60px] items-center pr-1 md:pr-3">
-          <Link to="/" className="mx-2 flex shrink-0 items-center gap-2 px-2 py-2 md:px-4">
-            <span className="text-[22px] font-extrabold leading-none tracking-[-0.02em] text-ink-900">WELMES</span>
-            <span className="rounded-sm border border-line-strong px-[6px] py-[2px] text-[11px] font-medium leading-4 text-ink-700">Business</span>
+          {/* Wordmark: Cormorant Garamond 500 with wide tracking, small BUSINESS line below.
+              Negative right margins cancel the trailing letter-spacing so both lines end flush. */}
+          <Link to="/" aria-label="WELMES Business" className="mx-2 flex shrink-0 flex-col items-start gap-1 px-2 py-2 md:px-4">
+            <span className="-mr-[0.32em] font-logo text-[18px] font-medium leading-none tracking-[0.32em] text-ink-900 md:text-[21px]">WELMES</span>
+            <span className="-mr-[0.5em] text-[10px] leading-none tracking-[0.5em] text-ink-500 md:text-[11px]">BUSINESS</span>
           </Link>
 
           {/* Search — 40px pill, 1px #dadada, 16px icon inset 16px, text 14/20 */}

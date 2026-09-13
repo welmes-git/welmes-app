@@ -7,6 +7,7 @@ module.exports = {
       fontFamily: {
         sans: ["Pretendard", "Pretendard Variable", "system-ui", "sans-serif"],
         jp: ["Pretendard JP", "Pretendard", "system-ui", "sans-serif"],
+        logo: ['"Cormorant Garamond"', "Georgia", "serif"],
       },
       colors: {
         // WELMES design tokens — see DESIGN.md. Prefer these over raw hex.
