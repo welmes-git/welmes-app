@@ -726,5 +726,10 @@
   "currency": {
     "ratesAsOf": "Tipos de cambio a las {{time}}",
     "loadingRates": "Cargando tipos de cambio…"
+  },
+  "signupBanner": {
+    "title": "La plataforma mayorista de cosmética japonesa",
+    "desc": "Los compradores empresariales verificados ven el precio mayorista de cada producto y pueden pedir desde 1 set.",
+    "cta": "Ver precios mayoristas"
   }
 }

@@ -49,6 +49,7 @@
     --wm-line: #e5e3e3;
     --wm-line-strong: #c9c6c6;
     --wm-line-control: #dadada; /* x-small tile buttons — Faire fs-button--secondary */
+    --wm-sand: #f6efe2; /* sign-up banner ground only (Faire) */
     --wm-signal-error: #c0392b; /* validation, out of stock — never for pricing */
     --wm-signal-ok: #1e7f4f; /* approved, order placed */
   }
@@ -92,6 +93,7 @@
     --wm-line: #2c2a2a;
     --wm-line-strong: #403e3e;
     --wm-line-control: #3a3838;
+    --wm-sand: #2a2621;
     --wm-signal-error: #e8705f;
     --wm-signal-ok: #4fbf8b;
   }
@@ -176,3 +178,24 @@
 .filter-scroll { scrollbar-width: thin; scrollbar-color: var(--wm-sunken) var(--wm-canvas); }
 .filter-scroll::-webkit-scrollbar { width: 3px; background: var(--wm-canvas); }
 .filter-scroll::-webkit-scrollbar-thumb { border-radius: 10px; background: var(--wm-sunken); }
+
+/* Sign-up banner in the product grid — faire.com DiscoverSignUpInlineBanner.
+   Container queries on the banner width: stacked below 48rem, side by side from 48rem,
+   roomier type and padding from 64rem. Sand ground is Faire's; it is the one warm
+   surface allowed besides product photography. */
+.signup-banner { container-type: inline-size; }
+.signup-banner__inner { display: flex; flex-direction: column; width: 100%; overflow: hidden; background: var(--wm-sand); }
+.signup-banner__media { position: relative; height: 200px; width: 100%; flex-shrink: 0; overflow: hidden; }
+.signup-banner__text { margin: auto 0; display: flex; flex: 1; max-width: 724px; flex-direction: column; padding: 20px 20px 32px; text-align: left; }
+.signup-banner__title { max-width: 521px; padding-bottom: 16px; font-size: 30px; font-weight: 400; line-height: 38px; color: var(--wm-ink-700); }
+.signup-banner__desc { max-width: 523px; padding-bottom: 24px; font-size: 14px; line-height: 20px; letter-spacing: 0.15px; color: var(--wm-ink-700); }
+@container (min-width: 48rem) {
+  .signup-banner__inner { flex-direction: row; min-height: 350px; }
+  .signup-banner__media { height: auto; width: 48.13%; }
+  .signup-banner__text { padding: 32px 24px 32px 32px; }
+}
+@container (min-width: 64rem) {
+  .signup-banner__text { padding: 48px; }
+  .signup-banner__title { font-size: 38px; line-height: 50px; }
+  .signup-banner__desc { font-size: 18px; line-height: 26px; }
+}

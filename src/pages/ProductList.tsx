@@ -6,6 +6,7 @@ import { initialProducts, categories } from '../data/products';
 import { brandsByCount, hasJapanese } from '../lib/utils';
 import ProductCard from '../components/ProductCard';
 import ProductGridSkeleton from '../components/ProductGridSkeleton';
+import SignUpBanner from '../components/SignUpBanner';
 import * as db from '../lib/db';
 import { Check, ChevronLeft, ChevronRight, ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +16,7 @@ type SortOption = 'popular' | 'price-low' | 'price-high' | 'newest' | 'discount'
 export default function ProductList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { products, productsLoading } = useStore();
+  const { products, productsLoading, isAuthenticated } = useStore();
   const { formatPrice } = useCurrency();
   const { t } = useTranslation();
 
@@ -383,6 +384,15 @@ export default function ProductList() {
                   {paginatedProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
+                  {/* Signed-out visitors: full-width banner pinned to the 3rd grid row (Faire),
+                      8px inset on top and sides. With too few products for two rows it
+                      follows the last tile instead of leaving an empty row. */}
+                  {!isAuthenticated && paginatedProducts.length > 0 && (
+                    <SignUpBanner
+                      className="col-span-full px-2 pt-2"
+                      style={paginatedProducts.length > 6 ? { gridRow: '3 / span 1' } : undefined}
+                    />
+                  )}
                 </div>
               </>
             )}

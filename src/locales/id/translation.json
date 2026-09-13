@@ -724,5 +724,10 @@
   "currency": {
     "ratesAsOf": "Kurs per {{time}}",
     "loadingRates": "Memuat kurs…"
+  },
+  "signupBanner": {
+    "title": "Platform grosir kosmetik Jepang",
+    "desc": "Pembeli bisnis terverifikasi dapat melihat harga grosir setiap produk dan memesan mulai dari 1 set.",
+    "cta": "Lihat harga grosir"
   }
 }

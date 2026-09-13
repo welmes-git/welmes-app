@@ -726,5 +726,10 @@
   "currency": {
     "ratesAsOf": "Kurse Stand {{time}}",
     "loadingRates": "Wechselkurse werden geladen…"
+  },
+  "signupBanner": {
+    "title": "Die Großhandelsplattform für japanische Kosmetik",
+    "desc": "Verifizierte Geschäftskunden sehen bei jedem Produkt den Großhandelspreis und bestellen schon ab 1 Set.",
+    "cta": "Großhandelspreise freischalten"
   }
 }

@@ -726,5 +726,10 @@
   "currency": {
     "ratesAsOf": "Rates as of {{time}}",
     "loadingRates": "Loading exchange rates…"
+  },
+  "signupBanner": {
+    "title": "The wholesale platform for Japanese beauty",
+    "desc": "Verified business buyers see the wholesale price on every product and can order from just 1 set.",
+    "cta": "Unlock wholesale pricing"
   }
 }

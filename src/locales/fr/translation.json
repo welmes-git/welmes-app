@@ -726,5 +726,10 @@
   "currency": {
     "ratesAsOf": "Taux à {{time}}",
     "loadingRates": "Chargement des taux de change…"
+  },
+  "signupBanner": {
+    "title": "La plateforme de gros pour les cosmétiques japonais",
+    "desc": "Les acheteurs professionnels vérifiés voient le prix de gros de chaque produit et commandent dès 1 lot.",
+    "cta": "Voir les prix de gros"
   }
 }

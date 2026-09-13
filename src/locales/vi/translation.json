@@ -724,5 +724,10 @@
   "currency": {
     "ratesAsOf": "Tỷ giá lúc {{time}}",
     "loadingRates": "Đang tải tỷ giá…"
+  },
+  "signupBanner": {
+    "title": "Nền tảng bán sỉ mỹ phẩm Nhật Bản",
+    "desc": "Người mua doanh nghiệp đã xác minh có thể xem giá sỉ của mọi sản phẩm và đặt hàng từ 1 bộ.",
+    "cta": "Xem giá sỉ"
   }
 }
