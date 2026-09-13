@@ -1,14 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
+import { Heart, Trash2 } from 'lucide-react';
+import ProductCard from '../components/ProductCard';
 import { useStore } from '../store/useStore';
-import { useCurrency } from '../context/CurrencyContext';
 import { initialProducts } from '../data/products';
 import { useTranslation } from 'react-i18next';
 
 export default function Wishlist() {
   const navigate = useNavigate();
-  const { isAuthenticated, wishlist, toggleWishlist, addToCart, products, productsLoading, showToast, currentUser } = useStore();
-  const { formatPrice } = useCurrency();
+  const { isAuthenticated, wishlist, toggleWishlist, products, productsLoading, showToast } = useStore();
   const { t } = useTranslation();
 
   // Only fall back to the demo catalogue once loading has actually finished
@@ -16,15 +15,14 @@ export default function Wishlist() {
   // flash the "your wishlist is empty" state while the real fetch is in flight.
   const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
   const wishlistProducts = allProducts.filter((p) => wishlist.includes(p.id));
-  const isVerified = currentUser?.status === 'approved';
 
   if (!isAuthenticated) {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-24 text-center">
-        <Heart size={48} className="mx-auto text-[#ddd] mb-4" />
-        <h2 className="text-[20px] font-bold mb-2">{t('wishlist.loginRequired')}</h2>
-        <p className="text-[14px] text-[#999] mb-6">{t('wishlist.loginRequiredDesc')}</p>
-        <button onClick={() => navigate('/login')} className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[14px] hover:bg-[#555] transition-colors">
+        <Heart size={48} className="mx-auto text-line-strong mb-4" />
+        <h2 className="text-[20px] font-extrabold text-ink-900 mb-2">{t('wishlist.loginRequired')}</h2>
+        <p className="text-[14px] text-ink-500 mb-6">{t('wishlist.loginRequiredDesc')}</p>
+        <button onClick={() => navigate('/login')} className="h-11 px-6 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow">
           {t('wishlist.goToLogin')}
         </button>
       </div>
@@ -34,7 +32,7 @@ export default function Wishlist() {
   if (productsLoading && wishlist.length > 0) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#e5e5e5] border-t-[#333] rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-line border-t-ink-900 rounded-full animate-spin" />
       </div>
     );
   }
@@ -42,51 +40,32 @@ export default function Wishlist() {
   if (wishlistProducts.length === 0) {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-24 text-center">
-        <Heart size={48} className="mx-auto text-[#ddd] mb-4" />
-        <h2 className="text-[20px] font-bold mb-2">{t('wishlist.empty')}</h2>
-        <p className="text-[14px] text-[#999] mb-6">{t('wishlist.emptyDesc')}</p>
-        <button onClick={() => navigate('/products')} className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[14px] hover:bg-[#555] transition-colors">
+        <Heart size={48} className="mx-auto text-line-strong mb-4" />
+        <h2 className="text-[20px] font-extrabold text-ink-900 mb-2">{t('wishlist.empty')}</h2>
+        <p className="text-[14px] text-ink-500 mb-6">{t('wishlist.emptyDesc')}</p>
+        <button onClick={() => navigate('/products')} className="h-11 px-6 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow">
           {t('wishlist.browseProducts')}
         </button>
       </div>
     );
   }
 
-  function handleAddToCart(product: typeof wishlistProducts[0]) {
-    if (!isVerified) {
-      showToast(t('products.verifyBusiness'), 'info');
-      return;
-    }
-    if (product.stock <= 0) {
-      showToast(t('productDetail.outOfStock'), 'error');
-      return;
-    }
-    // Set-based products must be configured on the detail page, otherwise they
-    // land in the cart at the single-unit price.
-    if ((product.setOptions?.length ?? 0) > 0) {
-      navigate(`/product/${product.id}`);
-      return;
-    }
-    addToCart(product);
-    showToast(t('productDetail.addedToCart'), 'success');
-  }
-
   return (
-    <div className="bg-[#f8f8fa] min-h-screen pb-16">
-      <div className="bg-white border-b border-[#e5e5e5]">
-        <div className="max-w-[960px] mx-auto px-4 py-5 flex items-center justify-between">
+    <div className="bg-canvas min-h-screen pb-16">
+      <div className="border-b border-line">
+        <div className="max-w-[1100px] mx-auto px-4 py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Heart size={18} className="text-[#ff4d6d] fill-[#ff4d6d]" />
-            <h1 className="text-[20px] font-bold text-[#222]">{t('wishlist.title')}</h1>
-            <span className="text-[13px] text-[#aaa] ml-1">{wishlistProducts.length}</span>
+            <Heart size={18} className="text-ink-900 fill-ink-900" />
+            <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900">{t('wishlist.title')}</h1>
+            <span className="text-[13px] tabular-nums text-ink-500 ml-1">{wishlistProducts.length}</span>
           </div>
           {wishlistProducts.length > 0 && (
             <button
               onClick={() => {
                 wishlist.forEach((id) => toggleWishlist(id));
-                showToast(t('wishlist.title'), 'info');
+                showToast(t('wishlist.removedFromWishlist'), 'info');
               }}
-              className="text-[12px] text-[#aaa] hover:text-[#ff4d6d] transition-colors flex items-center gap-1"
+              className="text-[12px] text-ink-500 hover:text-ink-900 transition-colors flex items-center gap-1"
             >
               <Trash2 size={13} />
               {t('wishlist.clearAll')}
@@ -95,61 +74,10 @@ export default function Wishlist() {
         </div>
       </div>
 
-      <div className="max-w-[960px] mx-auto px-4 pt-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="max-w-[1100px] mx-auto px-4 pt-6">
+        <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-4 lg:grid-cols-5">
           {wishlistProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden hover:shadow-md transition-shadow group">
-              <div className="relative aspect-square overflow-hidden cursor-pointer bg-[#f8f8fa]" onClick={() => navigate(`/product/${product.id}`)}>
-                <img
-                  src={product.image}
-                  alt={product.nameEn}
-                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/300x300/f0f0f0/999?text=IMG'; }}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                {product.discount > 0 && (
-                  <span className="absolute top-2 left-2 bg-[#ff4d6d] text-white text-[11px] font-bold px-2 py-0.5 rounded">-{product.discount}%</span>
-                )}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleWishlist(product.id);
-                    showToast(t('wishlist.removedFromWishlist'), 'info');
-                  }}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
-                >
-                  <Heart size={15} className="text-[#ff4d6d] fill-[#ff4d6d]" />
-                </button>
-              </div>
-
-              <div className="p-3">
-                <p className="text-[11px] text-[#aaa] uppercase tracking-wide mb-0.5">{product.brand}</p>
-                <p className="text-[13px] text-[#222] font-medium line-clamp-2 leading-snug mb-2 cursor-pointer hover:text-[#4a90e2] transition-colors min-h-[36px]" onClick={() => navigate(`/product/${product.id}`)}>
-                  {product.nameEn}
-                </p>
-
-                {isVerified ? (
-                  <div className="mb-2">
-                    <span className="text-[15px] font-bold text-[#333]">{formatPrice(product.wholesalePrice)}</span>
-                    {product.discount > 0 && <span className="text-[12px] text-[#bbb] line-through ml-2">{formatPrice(product.originalPrice)}</span>}
-                  </div>
-                ) : (
-                  <p className="text-[12px] text-[#bbb] mb-2">{t('products.loginToView')}</p>
-                )}
-
-                <button
-                  onClick={() => handleAddToCart(product)}
-                  disabled={!isVerified || product.stock <= 0}
-                  className={`w-full py-2 rounded-lg text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-colors ${isVerified && product.stock > 0 ? 'bg-[#333] text-white hover:bg-[#555]' : 'bg-[#f0f0f0] text-[#bbb] cursor-not-allowed'}`}
-                >
-                  <ShoppingCart size={13} />
-                  {product.stock <= 0
-                    ? t('productDetail.outOfStock')
-                    : (product.setOptions?.length ?? 0) > 0
-                    ? t('productDetail.chooseSet')
-                    : t('common.addToCart')}
-                </button>
-              </div>
-            </div>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </div>
