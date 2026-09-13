@@ -162,3 +162,12 @@
 .tile-cta { container-type: inline-size; }
 .tile-cta-icon { display: none; }
 @container (min-width: 180px) { .tile-cta-icon { display: inline-flex; } }
+
+@layer components {
+  /* Site-wide content width, measured on faire.com: fluid up to 1920px,
+     16px gutters below lg, 48px from lg (1024px) up. Header, footer and every
+     full-width page use this so edges line up. */
+  .page-container { @apply mx-auto w-full max-w-[1920px] px-4 lg:px-12; }
+  /* Faire product grid: 2 / 4 / 5 / 6 columns, 8px across, 24px down */
+  .product-grid { @apply grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6; }
+}

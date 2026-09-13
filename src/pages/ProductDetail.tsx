@@ -215,11 +215,11 @@ export default function ProductDetail() {
 
   const relatedProducts = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
+    .slice(0, 6);
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-[1100px] mx-auto px-4 py-8">
+      <div className="page-container py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-[13px] text-ink-500 mb-6">
           <Link to="/" className="hover:text-ink-700">
@@ -234,7 +234,7 @@ export default function ProductDetail() {
         </div>
 
         {/* Product Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
+        <div className="grid grid-cols-1 gap-10 mb-12 md:grid-cols-2 lg:grid-cols-[minmax(0,600px)_minmax(0,720px)] lg:gap-12">
           {/* Left - Image Gallery */}
           <div>
             {(() => {
@@ -795,7 +795,7 @@ export default function ProductDetail() {
             <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900 mb-5">
               {t('productDetail.relatedProducts')}
             </h2>
-            <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-4">
+            <div className="product-grid">
               {relatedProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}

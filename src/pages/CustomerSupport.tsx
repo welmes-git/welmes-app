@@ -254,7 +254,7 @@ export default function CustomerSupport() {
 
       {/* Hero */}
       <section className="bg-sunken border-b border-line py-16">
-        <div className="max-w-[1100px] mx-auto px-4 text-center">
+        <div className="page-container text-center">
           <h1 className="text-[30px] font-extrabold tracking-[-0.02em] text-ink-900 mb-3">{t('support.title')}</h1>
           <p className="text-ink-500 text-[15px] max-w-[520px] mx-auto leading-relaxed">
             {t('support.subtitle')}
@@ -263,7 +263,7 @@ export default function CustomerSupport() {
       </section>
 
       {/* Contact Cards */}
-      <section className="max-w-[1100px] mx-auto px-4 py-12">
+      <section className="page-container py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {contactCards.map(({ icon: Icon, label, value, sub }) => (
             <div key={label} className="border border-line rounded-[10px] p-5">
@@ -280,7 +280,7 @@ export default function CustomerSupport() {
 
       {/* Tab Navigation */}
       <section className="border-b border-line bg-canvas sticky top-[112px] md:top-[121px] z-10">
-        <div className="max-w-[1100px] mx-auto px-4 flex gap-0">
+        <div className="page-container flex gap-0">
           {([
             { id: 'faq',     label: t('support.faq') },
             { id: 'contact', label: t('support.contactForm') },
@@ -304,7 +304,7 @@ export default function CustomerSupport() {
       {/* FAQ Tab */}
       {pageTab === 'faq' && (
         <section className="bg-canvas py-14">
-          <div className="max-w-[1100px] mx-auto px-4">
+          <div className="page-container">
             <h2 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-2">{t('support.faqTitle')}</h2>
             <p className="text-[13px] text-ink-500 mb-8">{t('support.faqSubtitle')}</p>
             <div className="flex flex-wrap gap-2 mb-6">
@@ -331,7 +331,7 @@ export default function CustomerSupport() {
 
       {/* Contact Form Tab */}
       {pageTab === 'contact' && (
-        <section className="max-w-[1100px] mx-auto px-4 py-14">
+        <section className="page-container py-14">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
             <div>
               <h2 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-3">{t('support.sendMessage')}</h2>
@@ -401,7 +401,7 @@ export default function CustomerSupport() {
 
       {/* Live Chat Tab */}
       {pageTab === 'chat' && (
-        <section className="max-w-[1100px] mx-auto px-4 py-14">
+        <section className="page-container py-14">
           <div className="mb-8">
             <h2 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-2">{t('support.liveChatTitle')}</h2>
             <p className="text-[13px] text-ink-500">{t('support.liveChatDesc')}</p>
@@ -412,7 +412,7 @@ export default function CustomerSupport() {
 
       {/* Notices */}
       <section className="bg-sunken border-t border-line py-12">
-        <div className="max-w-[1100px] mx-auto px-4">
+        <div className="page-container">
           <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900 mb-5">{t('support.notices')}</h2>
           <div className="bg-canvas rounded-[10px] border border-line divide-y divide-line">
             {[

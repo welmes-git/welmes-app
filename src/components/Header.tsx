@@ -269,7 +269,7 @@ export default function Header() {
     <>
       {/* Top Utility Bar */}
       <div className="bg-sunken border-b border-line">
-        <div className="max-w-[1100px] mx-auto px-4 flex justify-end items-center h-9">
+        <div className="page-container flex justify-end items-center h-9">
           <div className="flex items-center gap-3 text-[12px] text-ink-500">
             {!isAuthenticated ? (
               <>
@@ -346,7 +346,7 @@ export default function Header() {
           We match that by dropping `sticky` only while the dropdown is open;
           it reverts to sticky as soon as it closes. */}
       <header className={`bg-white z-40 border-b border-line ${showCategoryDropdown ? '' : 'sticky top-0'}`}>
-        <div className="max-w-[1100px] mx-auto px-4">
+        <div className="page-container">
           <div className="flex items-center justify-between h-[70px]">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 shrink-0">

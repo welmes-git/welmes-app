@@ -53,7 +53,7 @@ export default function Wishlist() {
   return (
     <div className="bg-canvas min-h-screen pb-16">
       <div className="border-b border-line">
-        <div className="max-w-[1100px] mx-auto px-4 py-5 flex items-center justify-between">
+        <div className="page-container py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Heart size={18} className="text-ink-900 fill-ink-900" />
             <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900">{t('wishlist.title')}</h1>
@@ -74,8 +74,8 @@ export default function Wishlist() {
         </div>
       </div>
 
-      <div className="max-w-[1100px] mx-auto px-4 pt-6">
-        <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-4 lg:grid-cols-5">
+      <div className="page-container pt-6">
+        <div className="product-grid">
           {wishlistProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

@@ -57,7 +57,7 @@ export default function ProductList() {
     }
   }, [searchQuery]);
 
-  const itemsPerPage = 12;
+  const itemsPerPage = 60;
 
   const priceMin = useMemo(() => Math.floor(Math.min(...allProducts.map((p) => p.wholesalePrice))), [allProducts]);
   const priceMax = useMemo(() => Math.ceil(Math.max(...allProducts.map((p) => p.wholesalePrice))), [allProducts]);
@@ -169,7 +169,7 @@ export default function ProductList() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-[1100px] mx-auto px-4 py-8">
+      <div className="page-container py-8">
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-[13px] text-ink-500 mb-6">
@@ -376,7 +376,7 @@ export default function ProductList() {
             </div>
 
             {productsLoading ? (
-              <ProductGridSkeleton count={9} />
+              <ProductGridSkeleton count={10} className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" />
             ) : (
               <>
                 {/* No Results */}
@@ -399,7 +399,7 @@ export default function ProductList() {
                 )}
 
                 {/* Product Grid */}
-                <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-3 lg:grid-cols-4">
+                <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                   {paginatedProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}

@@ -112,7 +112,7 @@ export default function Home() {
       </section>
 
       {/* Weekly Best Sellers */}
-      <section className="max-w-[1100px] mx-auto px-4 py-16">
+      <section className="page-container py-16">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900">{t('home.weeklySellers')}</h2>
           <Link
@@ -126,7 +126,7 @@ export default function Home() {
         {productsLoading ? (
           <ProductGridSkeleton />
         ) : (
-          <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          <div className="product-grid">
             {weeklyBest.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -135,7 +135,7 @@ export default function Home() {
       </section>
 
       {/* Event Banners */}
-      <section className="max-w-[1100px] mx-auto px-4 pb-16">
+      <section className="page-container pb-16">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {eventBanners.map((event, index) => (
             <Link
@@ -161,7 +161,7 @@ export default function Home() {
       {/* New Arrivals */}
       {(productsLoading || newArrivals.length > 0) && (
         <section className="bg-sunken py-16">
-          <div className="max-w-[1100px] mx-auto px-4">
+          <div className="page-container">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900">{t('home.newArrivals')}</h2>
               <Link
@@ -173,7 +173,7 @@ export default function Home() {
               </Link>
             </div>
             {productsLoading ? <ProductGridSkeleton /> : (
-              <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              <div className="product-grid">
                 {newArrivals.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -185,7 +185,7 @@ export default function Home() {
 
       {/* Brand Showcase */}
       {popularBrands.length > 0 && (
-        <section className="max-w-[1100px] mx-auto px-4 py-16">
+        <section className="page-container py-16">
           <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900 mb-5">
             {t('home.popularBrands')}
           </h2>
@@ -208,7 +208,7 @@ export default function Home() {
 
       {/* B2B Info Section */}
       <section className="bg-sunken border-t border-line py-16">
-        <div className="max-w-[1100px] mx-auto px-4 text-center">
+        <div className="page-container text-center">
           <h2 className="text-[24px] md:text-[30px] font-extrabold tracking-[-0.02em] text-ink-900 mb-4">
             {t('home.businessExclusive')}
           </h2>

@@ -7,7 +7,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-ink-900 text-white/60 mt-auto">
-      <div className="max-w-[1100px] mx-auto px-4 py-10">
+      <div className="page-container py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h4 className="text-white font-bold text-[14px] mb-4">{t('footer.support')}</h4>
@@ -65,7 +65,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="max-w-[1100px] mx-auto px-4 py-5">
+        <div className="page-container py-5">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-[11px] text-white/50">
               {t('footer.companyInfo')}
