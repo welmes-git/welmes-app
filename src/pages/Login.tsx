@@ -52,11 +52,18 @@ export default function Login() {
   };
 
   const handleDemoLogin = async (type: 'admin' | 'member' | 'pending') => {
+    // Dev-only. Credentials live in the git-ignored .env.local — never hardcode
+    // them here. The early return lets the production build drop the lookups.
+    if (!import.meta.env.DEV) return;
     const credentials = {
-      admin:   { email: 'admin@welmes.kr',        password: 'admin1234' },
-      member:  { email: 'beautyworld@naver.com',   password: 'demo1234' },
-      pending: { email: 'glamourshop@gmail.com',   password: 'demo1234' },
+      admin:   { email: import.meta.env.VITE_DEMO_ADMIN_EMAIL,   password: import.meta.env.VITE_DEMO_ADMIN_PASSWORD },
+      member:  { email: import.meta.env.VITE_DEMO_MEMBER_EMAIL,  password: import.meta.env.VITE_DEMO_MEMBER_PASSWORD },
+      pending: { email: import.meta.env.VITE_DEMO_PENDING_EMAIL, password: import.meta.env.VITE_DEMO_PENDING_PASSWORD },
     }[type];
+    if (!credentials.email || !credentials.password) {
+      showToast('Set VITE_DEMO_* in .env.local to use demo logins', 'error');
+      return;
+    }
     const success = await login(credentials.email, credentials.password);
     if (success) routeAfterLogin();
   };

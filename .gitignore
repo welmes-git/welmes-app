@@ -25,3 +25,8 @@ dist-ssr
 
 # Supplier import session (login cookies)
 scripts/.sd-session.json
+
+# Environment files — never commit (set production values in the Vercel dashboard)
+.env
+.env.*
+!.env.example
