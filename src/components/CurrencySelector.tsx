@@ -25,18 +25,18 @@ export default function CurrencySelector() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 text-[12px] text-[#555] hover:text-[#222] transition-colors"
+        className="flex items-center gap-1.5 text-[12px] text-ink-500 hover:text-ink-900 transition-colors"
         title={lastUpdated ? `Rates updated: ${lastUpdated.toLocaleTimeString()}` : 'Loading rates…'}
       >
         <span>{current.flag}</span>
         <span className="font-semibold">{current.code}</span>
-        {loading && <RefreshCw size={10} className="animate-spin text-[#aaa]" />}
+        {loading && <RefreshCw size={10} className="animate-spin text-ink-300" />}
         <ChevronDown size={12} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 w-[200px] bg-white border border-[#e5e5e5] rounded-lg shadow-lg z-50 py-1 overflow-hidden">
-          <p className="text-[10px] text-[#aaa] px-3 py-1.5 border-b border-[#f0f0f0]">
+        <div className="absolute right-0 top-full mt-1.5 w-[200px] bg-canvas border border-line rounded-lg shadow-hover z-50 py-1 overflow-hidden">
+          <p className="text-[10px] tabular-nums text-ink-500 px-3 py-1.5 border-b border-line">
             {lastUpdated
               ? `Rates as of ${lastUpdated.toLocaleTimeString()}`
               : 'Loading exchange rates…'}
@@ -45,13 +45,13 @@ export default function CurrencySelector() {
             <button
               key={c.code}
               onClick={() => { setSelectedCurrency(c.code as CurrencyCode); setOpen(false); }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] hover:bg-[#f8f8fa] transition-colors ${
-                c.code === selectedCurrency ? 'bg-[#f0f7ff] text-[#4a90e2] font-semibold' : 'text-[#444]'
+              className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] hover:bg-sunken transition-colors ${
+                c.code === selectedCurrency ? 'bg-sunken text-ink-900 font-bold shadow-[inset_2px_0_0_var(--wm-ink-900)]' : 'text-ink-700'
               }`}
             >
               <span className="text-[16px]">{c.flag}</span>
               <span className="font-mono font-bold w-8">{c.code}</span>
-              <span className="text-[#888]">{c.name}</span>
+              <span className="text-ink-500">{c.name}</span>
               <span className="ml-auto font-bold">{c.symbol}</span>
             </button>
           ))}

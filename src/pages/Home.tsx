@@ -207,24 +207,24 @@ export default function Home() {
       )}
 
       {/* B2B Info Section */}
-      <section className="bg-ink-900 py-16">
+      <section className="bg-sunken border-t border-line py-16">
         <div className="max-w-[1100px] mx-auto px-4 text-center">
-          <h2 className="text-[24px] md:text-[30px] font-extrabold tracking-[-0.02em] text-white mb-4">
+          <h2 className="text-[24px] md:text-[30px] font-extrabold tracking-[-0.02em] text-ink-900 mb-4">
             {t('home.businessExclusive')}
           </h2>
-          <p className="text-white/70 text-[14px] md:text-[16px] max-w-[600px] mx-auto mb-8 leading-relaxed">
+          <p className="text-ink-500 text-[14px] md:text-[16px] max-w-[600px] mx-auto mb-8 leading-relaxed">
             {t('home.businessDesc')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/register"
-              className="h-11 inline-flex items-center justify-center bg-white text-ink-900 px-8 rounded-lg text-[14px] font-bold hover:bg-sunken transition-colors"
+              className="h-11 inline-flex items-center justify-center bg-ink-900 text-white px-8 rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow"
             >
               {t('home.registerBusiness')}
             </Link>
             <Link
               to="/login"
-              className="h-11 inline-flex items-center justify-center bg-transparent border-[1.5px] border-white/40 text-white px-8 rounded-lg text-[14px] font-bold hover:border-white transition-colors"
+              className="h-11 inline-flex items-center justify-center bg-canvas border-[1.5px] border-ink-900 text-ink-900 px-8 rounded-lg text-[14px] font-bold hover:bg-line transition-colors"
             >
               {t('home.memberLogin')}
             </Link>
