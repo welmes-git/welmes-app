@@ -280,55 +280,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Brand Showcase */}
-      {popularBrands.length > 0 && (
-        <section className="page-container py-16">
-          <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-5">
-            {t('home.popularBrands')}
-          </h2>
-          <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
-            {popularBrands.map(([brand, count]) => (
-              <Link
-                key={brand}
-                to={`/products?brand=${encodeURIComponent(brand)}`}
-                className="flex h-16 flex-col items-center justify-center rounded-md border border-line px-3 text-center transition-colors hover:border-ink-900"
-              >
-                <span className={`max-w-full truncate text-[13px] font-bold text-ink-900 ${hasJapanese(brand) ? 'font-jp' : ''}`}>
-                  {brand}
-                </span>
-                <span className="text-[11.5px] tabular-nums text-ink-500">{count}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* B2B Info Section */}
-      <section className="bg-sunken border-t border-line py-16">
-        <div className="page-container text-center">
-          <h2 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700 mb-4">
-            {t('home.businessExclusive')}
-          </h2>
-          <p className="text-ink-500 text-[14px] md:text-[16px] max-w-[600px] mx-auto mb-8 leading-relaxed">
-            {t('home.businessDesc')}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/register"
-              className="h-11 inline-flex items-center justify-center bg-ink-900 text-white px-8 rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow"
-            >
-              {t('home.registerBusiness')}
-            </Link>
-            <Link
-              to="/login"
-              className="h-11 inline-flex items-center justify-center bg-canvas border-[1.5px] border-ink-900 text-ink-900 px-8 rounded-lg text-[14px] font-bold hover:bg-line transition-colors"
-            >
-              {t('home.memberLogin')}
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Bottom sign-up banner — faire.com "bottom-sign-up-banner", measured at 375/1024/1440/1920px.
           Scenes (photos + category word) cycle every 5s via .bottom-banner-cycle in index.css. */}
       <section className="flex flex-col items-center justify-end gap-8 bg-[#ffd0b6] pb-6 pt-14 lg:justify-center lg:pt-0">
@@ -390,6 +341,55 @@ export default function Home() {
                 <span className="whitespace-nowrap">{t(`categoryMenu.${sub.key}`)}</span>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Brand Showcase */}
+      {popularBrands.length > 0 && (
+        <section className="page-container py-16">
+          <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-5">
+            {t('home.popularBrands')}
+          </h2>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
+            {popularBrands.map(([brand, count]) => (
+              <Link
+                key={brand}
+                to={`/products?brand=${encodeURIComponent(brand)}`}
+                className="flex h-16 flex-col items-center justify-center rounded-md border border-line px-3 text-center transition-colors hover:border-ink-900"
+              >
+                <span className={`max-w-full truncate text-[13px] font-bold text-ink-900 ${hasJapanese(brand) ? 'font-jp' : ''}`}>
+                  {brand}
+                </span>
+                <span className="text-[11.5px] tabular-nums text-ink-500">{count}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* B2B Info Section */}
+      <section className="bg-sunken border-t border-line py-16">
+        <div className="page-container text-center">
+          <h2 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700 mb-4">
+            {t('home.businessExclusive')}
+          </h2>
+          <p className="text-ink-500 text-[14px] md:text-[16px] max-w-[600px] mx-auto mb-8 leading-relaxed">
+            {t('home.businessDesc')}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/register"
+              className="h-11 inline-flex items-center justify-center bg-ink-900 text-white px-8 rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow"
+            >
+              {t('home.registerBusiness')}
+            </Link>
+            <Link
+              to="/login"
+              className="h-11 inline-flex items-center justify-center bg-canvas border-[1.5px] border-ink-900 text-ink-900 px-8 rounded-lg text-[14px] font-bold hover:bg-line transition-colors"
+            >
+              {t('home.memberLogin')}
+            </Link>
           </div>
         </div>
       </section>
