@@ -279,7 +279,7 @@ export default function CustomerSupport() {
       </section>
 
       {/* Tab Navigation */}
-      <section className="border-b border-line bg-canvas sticky top-[112px] md:top-[121px] z-10">
+      <section className="border-b border-line bg-canvas sticky top-[92px] md:top-[108px] z-10">
         <div className="page-container flex gap-0">
           {([
             { id: 'faq',     label: t('support.faq') },

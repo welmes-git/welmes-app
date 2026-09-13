@@ -6,7 +6,7 @@ import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
 
-export default function CurrencySelector() {
+export default function CurrencySelector({ large = false }: { large?: boolean }) {
   const { selectedCurrency, setSelectedCurrency } = useStore();
   const { loading, lastUpdated } = useCurrency();
   const { t } = useTranslation();
@@ -27,11 +27,11 @@ export default function CurrencySelector() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 text-[12px] text-ink-500 hover:text-ink-900 transition-colors"
+        className={`flex items-center transition-colors hover:text-ink-900 ${large ? 'gap-2 text-[14px] leading-5 text-ink-700' : 'gap-1.5 text-[12px] text-ink-500'}`}
         title={lastUpdated ? t('currency.ratesAsOf', { time: lastUpdated.toLocaleTimeString() }) : t('currency.loadingRates')}
       >
         <span>{current.flag}</span>
-        <span className="font-semibold">{current.code}</span>
+        <span className={large ? '' : 'font-semibold'}>{current.code}</span>
         {loading && <RefreshCw size={10} className="animate-spin text-ink-300" />}
         <ChevronDown size={12} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>

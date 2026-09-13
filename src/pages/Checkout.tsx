@@ -395,7 +395,7 @@ export default function Checkout() {
 
             {/* Summary sidebar */}
             <div className="lg:w-[280px] shrink-0">
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden lg:sticky lg:top-[136px]">
+              <div className="bg-white rounded-[10px] border border-line overflow-hidden lg:sticky lg:top-[124px]">
                 <div className="px-5 py-4 border-b border-line">
                   <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.orderSummary')}</h2>
                 </div>
@@ -574,7 +574,7 @@ export default function Checkout() {
 
             {/* Summary sidebar */}
             <div className="lg:w-[280px] shrink-0">
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden lg:sticky lg:top-[136px]">
+              <div className="bg-white rounded-[10px] border border-line overflow-hidden lg:sticky lg:top-[124px]">
                 <div className="px-5 py-4 border-b border-line">
                   <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.orderSummary')}</h2>
                 </div>

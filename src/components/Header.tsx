@@ -55,13 +55,12 @@ export default function Header() {
     cart, wishlist, notifications, products, productsLoading,
     markNotificationRead, markAllNotificationsRead, clearNotifications,
   } = useStore();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showBrandDropdown, setShowBrandDropdown] = useState(false);
-  const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [trendingSearches, setTrendingSearches] = useState<db.TrendingSearch[] | null>(null);
   const [trendingUpdatedAt, setTrendingUpdatedAt] = useState<Date | null>(null);
@@ -93,7 +92,6 @@ export default function Header() {
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const megaMenuRef = useRef<HTMLElement>(null);
-  const langRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
   // Flat, ordered list of every top-level category group (column-major, same
@@ -161,7 +159,6 @@ export default function Header() {
 
   // Every popover closes on an outside click
   useOutsideClick(megaMenuRef, showCategoryDropdown, () => setShowCategoryDropdown(false));
-  useOutsideClick(langRef, showLangDropdown, () => setShowLangDropdown(false));
   useOutsideClick(userRef, showUserDropdown, () => setShowUserDropdown(false));
 
   const navItems = [
@@ -169,8 +166,6 @@ export default function Header() {
     { label: t('nav.ranking'), path: '/products?sort=popular' },
     { label: t('nav.event'), path: '/products' },
   ];
-
-  const currentLang = LANGUAGES.find((l) => l.code === i18n.language) ?? LANGUAGES[0];
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -208,7 +203,7 @@ export default function Header() {
         };
       case 'order_shipped':
         return {
-          icon: <Truck size={16} className="text-indigo-500" />,
+          icon: <Truck size={16} className="text-ink-900" />,
           title: t('notifications.order_shipped_title'),
           message: t('notifications.order_shipped_message', {
             orderId: shortId,
@@ -267,129 +262,87 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Utility Bar */}
-      <div className="bg-sunken border-b border-line">
+      {/* Utility strip below lg (Faire also swaps headers at 1024px) — the row has no room for
+          account, currency and language, and the hamburger menu was removed. */}
+      <div className="lg:hidden bg-sunken border-b border-line">
         <div className="page-container flex justify-end items-center h-9">
           <div className="flex items-center gap-3 text-[12px] text-ink-500">
             {!isAuthenticated ? (
               <>
-                <Link to="/register" className="hover:text-ink-900 transition-colors" style={{whiteSpace: 'nowrap'}}>
-                  {t('common.register')}
-                </Link>
+                <Link to="/register" className="whitespace-nowrap hover:text-ink-900 transition-colors">{t('common.register')}</Link>
                 <span className="text-line-strong">|</span>
-                <Link to="/login" className="hover:text-ink-900 transition-colors" style={{whiteSpace: 'nowrap'}}>
-                  {t('common.login')}
-                </Link>
+                <Link to="/login" className="whitespace-nowrap hover:text-ink-900 transition-colors">{t('common.login')}</Link>
               </>
             ) : (
               <>
-                <span className="text-ink-700 font-medium" style={{whiteSpace: 'nowrap'}}>
-                  {currentUser?.companyName || currentUser?.email}
-                </span>
+                <Link to="/account" className="whitespace-nowrap hover:text-ink-900 transition-colors">{t('common.myAccount')}</Link>
                 <span className="text-line-strong">|</span>
-                <Link to="/account" className="hover:text-ink-900 transition-colors" style={{whiteSpace: 'nowrap'}}>
-                  {t('common.myAccount')}
-                </Link>
-                <span className="text-line-strong">|</span>
-                <button
-                  onClick={handleLogout}
-                  className="hover:text-ink-900 transition-colors flex items-center gap-1"
-                  style={{whiteSpace: 'nowrap'}}
-                >
+                <button onClick={handleLogout} className="flex items-center gap-1 whitespace-nowrap hover:text-ink-900 transition-colors">
                   <LogOut size={12} />
                   {t('common.logout')}
                 </button>
               </>
             )}
             <span className="text-line-strong">|</span>
-            <Link to="/support" className="hover:text-ink-900 transition-colors" style={{whiteSpace: 'nowrap'}}>
-              {t('common.support')}
-            </Link>
+            <Link to="/support" className="whitespace-nowrap hover:text-ink-900 transition-colors">{t('common.support')}</Link>
             <span className="text-line-strong">|</span>
             <CurrencySelector />
             <span className="text-line-strong">|</span>
-            {/* Language Switcher */}
-            <div className="relative" ref={langRef}>
-              <button
-                onClick={() => setShowLangDropdown(!showLangDropdown)}
-                className="flex items-center gap-1 hover:text-ink-900 transition-colors"
-                style={{whiteSpace: 'nowrap'}}
-              >
-                <Globe size={12} />
-                {currentLang.label}
-                <ChevronDown size={10} />
-              </button>
-              {showLangDropdown && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-line rounded-lg shadow-hover py-1 z-50 min-w-[170px] max-h-[320px] overflow-y-auto">
-                  {LANGUAGES.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => { i18n.changeLanguage(lang.code); setShowLangDropdown(false); }}
-                      className={`w-full text-left px-3 py-1.5 text-[12px] hover:bg-sunken transition-colors ${
-                        i18n.language === lang.code ? 'font-bold text-ink-900' : 'text-ink-500'
-                      }`}
-                    >
-                      {lang.label} · {lang.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <LanguageSwitcher compact />
           </div>
         </div>
       </div>
 
-      {/* Main Header
-          Olive Young's category mega menu isn't anchored to a sticky header —
-          its nav is `position: relative`, so the whole header + dropdown
-          scrolls away with the page, revealing whatever was below the fold.
-          We match that by dropping `sticky` only while the dropdown is open;
-          it reverts to sticky as soon as it closes. */}
-      <header className={`bg-white z-40 border-b border-line ${showCategoryDropdown ? '' : 'sticky top-0'}`}>
-        <div className="page-container">
-          <div className="flex items-center justify-between h-[70px]">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 shrink-0">
-              <span className="text-[24px] font-bold tracking-tight text-ink-700">
-                WELMES
-              </span>
-              <span className="bg-white border border-line-strong text-ink-700 text-[11px] font-bold tracking-[0.02em] px-[7px] py-[3px] rounded">
-                Business
-              </span>
+      {/* Header — measured on faire.com (1440px): one 60px row
+          [logo · 16 · search (flex, 40px pill, #dadada) · 16 · language · links · Sign in · Sign up]
+          then a 47px centred link row, 1px #dadada under both.
+          Sticky is dropped while the category mega menu is open so the panel
+          scrolls away with the page (Olive Young behaviour). */}
+      <header className={`bg-white z-40 border-b border-line-control tracking-[0.15px] ${showCategoryDropdown ? '' : 'sticky top-0'}`}>
+        <div className="flex h-[50px] md:h-[60px] items-center pr-1 md:pr-3">
+          <Link to="/" className="mx-2 flex shrink-0 items-center gap-2 px-2 py-2 md:px-4">
+            <span className="text-[22px] font-extrabold leading-none tracking-[-0.02em] text-ink-900">WELMES</span>
+            <span className="rounded-sm border border-line-strong px-[6px] py-[2px] text-[11px] font-medium leading-4 text-ink-700">Business</span>
+          </Link>
+
+          {/* Search — 40px pill, 1px #dadada, 16px icon inset 16px, text 14/20 */}
+          <form onSubmit={handleSearch} className="mx-4 hidden min-w-0 flex-1 md:block" role="search">
+            <label className="relative flex h-10 items-center rounded-full border border-line-control bg-canvas pr-4 focus-within:border-ink-700">
+              <Search size={16} strokeWidth={1.5} className="pointer-events-none absolute left-4 text-ink-700" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('nav.searchPlaceholder')}
+                aria-label={t('common.search')}
+                autoComplete="off"
+                className="w-full bg-transparent pl-10 text-[14px] leading-5 text-ink-700 placeholder:text-ink-500 focus:outline-none"
+              />
+            </label>
+          </form>
+          <div className="flex-1 md:hidden" />
+
+          <div className="flex h-full items-center">
+            <div className="hidden h-full items-center px-3 lg:flex">
+              <CurrencySelector large />
+            </div>
+            <LanguageSwitcher className="hidden h-full px-3 lg:flex" />
+            <Link to="/support" className="hidden h-full items-center px-3 text-[14px] leading-5 text-ink-700 transition-colors hover:text-ink-900 lg:flex">
+              {t('common.support')}
             </Link>
 
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-[420px] mx-8 hidden md:block">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('nav.searchPlaceholder')}
-                  className="w-full h-[42px] pl-4 pr-12 border border-line-strong rounded-full text-[14px] focus:outline-none focus:border-ink-900 transition-colors"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-ink-700 hover:text-ink-900"
-                >
-                  <Search size={18} />
-                </button>
-              </div>
-            </form>
-
-            {/* Right Icons */}
-            <div className="flex items-center gap-4">
               {isAuthenticated && (
-                <div className="relative" ref={userRef}>
+                <div className="relative h-full" ref={userRef}>
                   <button
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
-                    className="flex items-center gap-1 text-ink-700 hover:text-ink-900 transition-colors"
+                    aria-label={t('common.myAccount')}
+                    className="h-full px-3 flex items-center gap-1 text-ink-700 hover:text-ink-900 transition-colors"
                   >
-                    <User size={22} />
+                    <User size={20} strokeWidth={1.5} />
                     <ChevronDown size={14} />
                   </button>
                   {showUserDropdown && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-line rounded-lg shadow-hover py-2 z-50">
+                    <div className="absolute right-0 top-full w-48 bg-white border border-line rounded-lg shadow-hover py-2 z-50">
                       <div className="px-4 py-2 border-b border-line">
                         <p className="text-[13px] font-medium text-ink-700">
                           {currentUser?.companyName}
@@ -431,33 +384,34 @@ export default function Header() {
               )}
               <button
                 onClick={() => navigate('/wishlist')}
-                className="relative text-ink-700 hover:text-ink-900 transition-colors hidden sm:block"
+                aria-label={t('wishlist.title')}
+                className="relative h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors max-sm:hidden"
               >
-                <Heart size={22} className={wishlist.length > 0 ? 'text-ink-900' : ''} />
+                <Heart size={20} strokeWidth={1.5} />
                 {wishlist.length > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] bg-ink-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute top-3 right-0.5 w-[18px] h-[18px] bg-ink-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                     {wishlist.length}
                   </span>
                 )}
               </button>
               {/* Bell Notification Button */}
               {isAuthenticated && (
-                <div className="relative hidden sm:flex sm:items-center" ref={notifRef}>
+                <div className="relative h-full max-sm:hidden" ref={notifRef}>
                   <button
                     onClick={() => setShowNotifications((v) => !v)}
-                    className="relative text-ink-700 hover:text-ink-900 transition-colors"
+                    className="relative h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors"
                     aria-label={t('notifications.title')}
                   >
-                    <Bell size={22} />
+                    <Bell size={20} strokeWidth={1.5} />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-ink-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+                      <span className="absolute top-3 right-0.5 min-w-[18px] h-[18px] bg-ink-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </span>
                     )}
                   </button>
 
                   {showNotifications && (
-                    <div className="absolute right-0 top-full mt-2 w-[360px] bg-white border border-line rounded-[10px] shadow-hover z-50 overflow-hidden">
+                    <div className="absolute right-0 top-full w-[360px] bg-white border border-line rounded-[10px] shadow-hover z-50 overflow-hidden">
                       {/* Header */}
                       <div className="flex items-center justify-between px-4 py-3 border-b border-line">
                         <span className="text-[14px] font-bold text-ink-900">
@@ -541,34 +495,48 @@ export default function Header() {
               )}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative text-ink-700 hover:text-ink-900 transition-colors"
+                aria-label={t('cart.title')}
+                className="relative h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors"
               >
-                <ShoppingBag size={22} />
+                <ShoppingBag size={20} strokeWidth={1.5} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 bg-ink-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[18px] h-[18px]">
+                  <span className="absolute top-3 right-0.5 bg-ink-900 text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[18px] h-[18px]">
                     {cartCount}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => { setShowMobileSearch(!showMobileSearch); }}
-                className="md:hidden text-ink-700 hover:text-ink-900 transition-colors"
+                aria-label={t('common.search')}
+                className="md:hidden h-full px-3 flex items-center text-ink-700 hover:text-ink-900 transition-colors"
               >
-                <Search size={22} />
+                <Search size={20} strokeWidth={1.5} />
               </button>
-            </div>
-          </div>
 
-          {/* Navigation Bar — desktop only */}
-          <nav ref={megaMenuRef} className="hidden md:flex items-center border-t border-line relative">
-            {/* Category — Olive Young style mega menu */}
+              {!isAuthenticated && (
+                <>
+                  <Link to="/login" className="hidden h-full items-center px-4 text-[14px] leading-5 text-ink-700 transition-colors hover:text-ink-900 lg:flex">
+                    {t('common.login')}
+                  </Link>
+                  {/* Faire "Sign up to buy": 36px, #333 fill, 4px radius, 20px padding */}
+                  <Link to="/register" className="ml-3 hidden h-9 items-center whitespace-nowrap rounded-sm border border-ink-700 bg-ink-700 px-5 text-[14px] leading-5 text-white transition-colors hover:bg-ink-900 lg:inline-flex">
+                    {t('common.register')}
+                  </Link>
+                </>
+              )}
+          </div>
+        </div>
+
+        {/* Link row — desktop only, 47px, centred, 14px regular with 14px gaps (Faire) */}
+        <nav ref={megaMenuRef} className="relative hidden h-[47px] items-center justify-center gap-[14px] md:flex">
             <button
               onClick={() => setShowCategoryDropdown((v) => !v)}
-              className={`flex items-center gap-2 py-3.5 px-5 text-[14px] font-semibold transition-colors ${
-                showCategoryDropdown ? 'bg-ink-900 text-white' : 'text-ink-700 hover:text-ink-900'
+              aria-expanded={showCategoryDropdown}
+              className={`flex h-full items-center text-[14px] leading-5 transition-colors gap-1.5 ${
+                showCategoryDropdown ? 'text-ink-900 underline underline-offset-[6px]' : 'text-ink-700 hover:text-ink-900'
               }`}
             >
-              <Menu size={16} />
+              <Menu size={16} strokeWidth={1.5} />
               {t('nav.category')}
             </button>
             {showCategoryDropdown && (
@@ -577,7 +545,7 @@ export default function Header() {
               // natural height and the whole page scrolls past it (Olive
               // Young's actual mechanism), instead of scrolling inside a box.
               <div className="absolute top-full left-0 right-0 bg-white border border-line shadow-hover z-50">
-                <div className="grid grid-cols-6 divide-x divide-line px-1 py-7">
+                <div className="page-container grid grid-cols-6 divide-x divide-line py-7">
                   {categoryMenuColumns.map((column, colIdx) => (
                     <div key={colIdx} className="px-5 space-y-7">
                       {column.map((group) => (
@@ -620,16 +588,16 @@ export default function Header() {
 
             {/* Brand Shop with dropdown */}
             <div
-              className="relative"
+              className="relative h-full"
               onMouseEnter={() => setShowBrandDropdown(true)}
               onMouseLeave={() => setShowBrandDropdown(false)}
             >
-              <button className="flex items-center gap-1 py-3.5 px-5 text-[14px] font-semibold text-ink-700 hover:text-ink-900">
+              <button className="flex h-full items-center gap-1 text-[14px] leading-5 text-ink-700 hover:text-ink-900">
                 {t('nav.brandShop')}
                 <ChevronDown size={14} />
               </button>
               {showBrandDropdown && (
-                <div className="absolute top-full left-0 w-[360px] bg-white border border-line shadow-hover py-3 z-50">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 w-[360px] bg-white border border-line rounded-lg shadow-hover py-3 z-50">
                   <div className="grid grid-cols-2">
                     {brands.map((brand) => (
                       <Link
@@ -646,22 +614,20 @@ export default function Header() {
               )}
             </div>
 
-            {/* Nav items */}
             {navItems.map((item) => (
               <Link
                 key={item.label}
                 to={item.path}
-                className={`py-3.5 px-5 text-[14px] font-semibold transition-colors ${
+                className={`flex h-full items-center text-[14px] leading-5 transition-colors ${
                   isActive(item.path)
-                    ? 'text-ink-900 underline underline-offset-[6px] decoration-2'
+                    ? 'text-ink-900 underline underline-offset-[6px]'
                     : 'text-ink-700 hover:text-ink-900'
                 }`}
               >
                 {item.label}
               </Link>
             ))}
-          </nav>
-        </div>
+        </nav>
 
         {/* Mobile Search Full-Screen Overlay */}
         {showMobileSearch && (
@@ -975,5 +941,45 @@ export default function Header() {
       {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
+  );
+}
+
+/** Globe + language code; opens the 11-language list. Faire: 16px icon, 8px gap, 14/20 text. */
+function LanguageSwitcher({ className = '', compact = false }: { className?: string; compact?: boolean }) {
+  const { i18n } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useOutsideClick(ref, open, () => setOpen(false));
+  const current = LANGUAGES.find((l) => l.code === i18n.language) ?? LANGUAGES[0];
+
+  return (
+    <div ref={ref} className={`relative items-center ${compact ? 'flex' : ''} ${className}`}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className={`flex h-full items-center whitespace-nowrap transition-colors hover:text-ink-900 ${
+          compact ? 'gap-1 text-[12px]' : 'gap-2 text-[14px] leading-5 text-ink-700'
+        }`}
+      >
+        <Globe size={compact ? 12 : 16} strokeWidth={1.5} />
+        {current.label}
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 max-h-[320px] min-w-[170px] overflow-y-auto rounded-lg border border-line bg-white py-1 shadow-hover">
+          {LANGUAGES.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => { i18n.changeLanguage(lang.code); setOpen(false); }}
+              className={`w-full px-3 py-1.5 text-left text-[12px] transition-colors hover:bg-sunken ${
+                i18n.language === lang.code ? 'font-bold text-ink-900' : 'text-ink-500'
+              }`}
+            >
+              {lang.label} · {lang.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
