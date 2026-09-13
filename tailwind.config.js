@@ -21,6 +21,7 @@ module.exports = {
         line: {
           DEFAULT: "var(--wm-line)",
           strong: "var(--wm-line-strong)",
+          control: "var(--wm-line-control)",
         },
         signal: {
           error: "var(--wm-signal-error)",

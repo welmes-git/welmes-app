@@ -48,6 +48,7 @@
     --wm-ink-300: #a8a6a6; /* struck-through original price, placeholders */
     --wm-line: #e5e3e3;
     --wm-line-strong: #c9c6c6;
+    --wm-line-control: #dadada; /* x-small tile buttons — Faire fs-button--secondary */
     --wm-signal-error: #c0392b; /* validation, out of stock — never for pricing */
     --wm-signal-ok: #1e7f4f; /* approved, order placed */
   }
@@ -90,6 +91,7 @@
     --wm-ink-300: #5e5c5c;
     --wm-line: #2c2a2a;
     --wm-line-strong: #403e3e;
+    --wm-line-control: #3a3838;
     --wm-signal-error: #e8705f;
     --wm-signal-ok: #4fbf8b;
   }
@@ -155,3 +157,8 @@
 }
 .range-thumb::-webkit-slider-runnable-track { background: transparent; }
 .range-thumb::-moz-range-track { background: transparent; }
+/* Product tile CTA: show the arrow only when the tile is at least 180px wide
+   (Faire: @[180px]:inline-flex). Native container query, no plugin. */
+.tile-cta { container-type: inline-size; }
+.tile-cta-icon { display: none; }
+@container (min-width: 180px) { .tile-cta-icon { display: inline-flex; } }

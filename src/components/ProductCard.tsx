@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import type { Product } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, Heart, ShoppingCart, Star } from 'lucide-react';
+import { ArrowRight, Heart, ShoppingCart } from 'lucide-react';
 import { BADGE_TAGS, hasJapanese, maskDigits } from '../lib/utils';
 
 interface ProductCardProps {
@@ -63,47 +63,54 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
 
   const priceText = formatPrice(product.wholesalePrice);
 
+  // Faire x-small secondary button: 34px tall, 1px #dadada, 4px radius, 8px padding/gap
+  const ctaCls =
+    'inline-flex w-full min-[361px]:w-max max-w-full items-center justify-start gap-2 rounded-sm border border-line-control bg-canvas p-2 text-left text-[12px] leading-4 text-ink-700 transition-colors hover:border-ink-700 disabled:text-ink-300 disabled:hover:border-line-control';
+
   return (
-    <Link to={`/product/${product.id}`} className="group block">
-      {/* Image */}
+    <Link to={`/product/${product.id}`} className="group flex h-full flex-col tracking-[0.15px]">
+      {/* Image — 1:1, 4px radius, no border; a 2% black wash separates white packshots from the page */}
       <div className="relative">
         <img
           src={product.image}
           alt={product.nameEn}
           loading="lazy"
-          className="aspect-square w-full rounded-md border border-line bg-canvas object-cover transition-shadow duration-200 group-hover:shadow-hover"
+          className="aspect-square w-full rounded-sm bg-canvas object-cover object-center"
         />
+        <div className="pointer-events-none absolute inset-0 rounded-sm bg-black/[0.02]" />
 
         {(badge || outOfStock) && (
-          <span className="absolute left-2 top-2 rounded-sm border border-line-strong bg-canvas px-[7px] py-[3px] text-[11px] font-bold tracking-[0.02em] text-ink-700">
+          <span className="absolute left-2 top-2 min-h-[22px] min-w-[20px] max-w-[calc(100%-56px)] truncate rounded-sm border border-canvas bg-canvas px-[3px] py-[3px] text-[12px] font-medium leading-4 text-ink-700 lg:px-[7px]">
             {outOfStock ? t('productDetail.outOfStock') : badge}
           </span>
         )}
 
-        <button
-          type="button"
-          onClick={handleWishlist}
-          aria-label={t('wishlist.addedToWishlist')}
-          aria-pressed={wishlisted}
-          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-line-strong bg-canvas text-ink-500 transition-colors hover:text-ink-900"
-        >
-          <Heart size={13} className={wishlisted ? 'fill-ink-900 text-ink-900' : ''} />
-        </button>
+        {/* Faire only shows the favourite control to signed-in retailers */}
+        {isAuthenticated && (
+          <button
+            type="button"
+            onClick={handleWishlist}
+            aria-label={t('wishlist.addedToWishlist')}
+            aria-pressed={wishlisted}
+            className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-canvas text-ink-700 transition-colors hover:text-ink-900"
+          >
+            <Heart size={14} className={wishlisted ? 'fill-ink-900 text-ink-900' : ''} />
+          </button>
+        )}
       </div>
 
-      {/* Info */}
-      <div className="flex flex-col gap-0.5 pt-2">
-        {/* Price — locked keeps the currency symbol crisp and blurs only the digits,
-            so the card holds the same shape for signed-out and approved buyers. */}
-        <div className="flex items-baseline gap-[3px] text-[15px] font-bold text-ink-700">
+      {/* Info: 8px under the image, price → name 2px, name → brand 0 */}
+      <div className="flex flex-col gap-[2px] pt-2">
+        {/* Price — locked keeps the currency symbol crisp and blurs only the digits */}
+        <div className="flex items-baseline gap-[2px] text-[18px] font-medium leading-[26px] text-ink-700">
           {canSeePrice ? (
             <>
               {product.discount > 0 && (
-                <span className="tabular-nums mr-[3px] font-extrabold text-ink-900">{product.discount}%</span>
+                <span className="tabular-nums mr-1 font-bold text-ink-900">{product.discount}%</span>
               )}
               <span className="tabular-nums">{priceText}</span>
               {product.discount > 0 && (
-                <span className="tabular-nums ml-[3px] text-[11px] font-normal text-ink-300 line-through">
+                <span className="tabular-nums ml-1 text-[12px] font-normal leading-4 text-ink-300 line-through">
                   {formatPrice(product.originalPrice)}
                 </span>
               )}
@@ -111,7 +118,7 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
           ) : (
             <>
               <span>{currencyInfo.symbol}</span>
-              <span className="tabular-nums select-none blur-[4px]" aria-hidden="true">
+              <span className="tabular-nums pointer-events-none select-none blur-[8px]" aria-hidden="true">
                 {maskDigits(priceText, currencyInfo.symbol)}
               </span>
             </>
@@ -119,60 +126,45 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
         </div>
 
         <h3
-          className={`line-clamp-2 min-h-[36px] text-[12.5px] font-medium leading-[1.45] text-ink-700 ${
+          className={`line-clamp-1 break-words text-[14px] font-medium leading-5 text-ink-700 ${
             hasJapanese(product.nameEn) ? 'font-jp' : ''
           }`}
         >
           {product.nameEn}
         </h3>
+      </div>
 
-        <p className="truncate text-[11.5px] text-ink-500">{product.brand}</p>
+      <p className={`truncate text-[14px] leading-5 text-ink-700 ${hasJapanese(product.brand) ? 'font-jp' : ''}`}>
+        {product.brand}
+      </p>
 
-        <div className="flex items-center gap-1 text-[11.5px] text-ink-700">
-          <Star size={11} className="shrink-0 fill-ink-700 text-ink-700" />
-          <span className="tabular-nums">
-            {product.rating.toFixed(1)} ({product.reviews.toLocaleString()})
-          </span>
-        </div>
-
-        {/* One fixed-height slot, so every card in a row ends on the same line */}
-        <div className="mt-2 flex min-h-[28px] items-center">
-          {!canSeePrice ? (
-            <button
-              type="button"
-              onClick={handleUnlock}
-              disabled={isAuthenticated}
-              className="inline-flex h-7 max-w-full items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-[9px] text-[11px] font-bold text-ink-700 transition-colors hover:border-ink-900 hover:text-ink-900 disabled:border-line disabled:text-ink-300 disabled:hover:border-line"
-            >
-              <span className="truncate">
-                {isAuthenticated ? t('products.pendingPrice') : t('products.unlockPrice')}
-              </span>
-              {!isAuthenticated && <ArrowRight size={11} className="shrink-0" />}
-            </button>
-          ) : showQuickAdd ? (
-            <button
-              type="button"
-              onClick={handleQuickAdd}
-              disabled={outOfStock}
-              className="inline-flex h-7 max-w-full items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-[9px] text-[11px] font-bold text-ink-700 transition-colors hover:border-ink-900 hover:text-ink-900 disabled:border-line disabled:text-ink-300"
-            >
-              <ShoppingCart size={11} className="shrink-0" />
-              <span className="truncate">
-                {outOfStock
-                  ? t('productDetail.outOfStock')
-                  : hasSetOptions
-                  ? t('productDetail.chooseSet')
-                  : t('common.addToCart')}
-              </span>
-            </button>
-          ) : (
-            <span className={`text-[11.5px] ${outOfStock ? 'font-bold text-signal-error' : 'text-ink-500'}`}>
+      {/* Brand → CTA 12px. One fixed 34px slot so every tile in a row ends on the same line */}
+      <div className="tile-cta mt-3 flex min-h-[34px] items-start">
+        {!canSeePrice ? (
+          <button type="button" onClick={handleUnlock} disabled={isAuthenticated} className={ctaCls}>
+            <span className="min-w-0 flex-1 text-pretty">
+              {isAuthenticated ? t('products.pendingPrice') : t('products.unlockPrice')}
+            </span>
+            {!isAuthenticated && <ArrowRight size={12} strokeWidth={1.5} className="tile-cta-icon shrink-0" />}
+          </button>
+        ) : showQuickAdd ? (
+          <button type="button" onClick={handleQuickAdd} disabled={outOfStock} className={ctaCls}>
+            <ShoppingCart size={12} strokeWidth={1.5} className="shrink-0" />
+            <span className="min-w-0 flex-1 text-pretty">
               {outOfStock
                 ? t('productDetail.outOfStock')
-                : `${t('productDetail.stock')} ${product.stock.toLocaleString()}`}
+                : hasSetOptions
+                ? t('productDetail.chooseSet')
+                : t('common.addToCart')}
             </span>
-          )}
-        </div>
+          </button>
+        ) : (
+          <span className={`py-2 text-[12px] leading-4 ${outOfStock ? 'font-medium text-signal-error' : 'text-ink-500'}`}>
+            {outOfStock
+              ? t('productDetail.outOfStock')
+              : `${t('productDetail.stock')} ${product.stock.toLocaleString()}`}
+          </span>
+        )}
       </div>
     </Link>
   );
