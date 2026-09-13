@@ -209,7 +209,9 @@
     "perSet": "/ 세트",
     "loginToView": "로그인 후 가격 확인",
     "verifyBusiness": "사업자 인증",
-    "quickAdd": "장바구니 담기"
+    "quickAdd": "장바구니 담기",
+    "unlockPrice": "도매가 확인하기",
+    "pendingPrice": "승인 후 가격이 공개됩니다"
   },
   "productDetail": {
     "wholesalePrice": "도매가",

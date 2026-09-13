@@ -176,7 +176,7 @@ export default function PendingApproval() {
                 {t('common.viewAll')}
               </Link>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-x-2 gap-y-6">
               {previewProducts.map((p) => (
                 <ProductCard key={p.id} product={p} showQuickAdd={false} />
               ))}

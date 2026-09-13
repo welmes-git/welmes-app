@@ -209,7 +209,9 @@
     "perSet": "/ Set",
     "loginToView": "Zum Preis anzeigen anmelden",
     "verifyBusiness": "Unternehmen verifizieren",
-    "quickAdd": "In den Warenkorb"
+    "quickAdd": "In den Warenkorb",
+    "unlockPrice": "Großhandelspreis ansehen",
+    "pendingPrice": "Preis nach Freigabe sichtbar"
   },
   "productDetail": {
     "wholesalePrice": "Großhandelspreis",

@@ -209,7 +209,9 @@
     "perSet": "/ набор",
     "loginToView": "Войдите, чтобы увидеть цену",
     "verifyBusiness": "Подтвердить компанию",
-    "quickAdd": "В корзину"
+    "quickAdd": "В корзину",
+    "unlockPrice": "Узнать оптовую цену",
+    "pendingPrice": "Цена откроется после одобрения"
   },
   "productDetail": {
     "wholesalePrice": "Оптовая цена",

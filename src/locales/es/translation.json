@@ -209,7 +209,9 @@
     "perSet": "/ set",
     "loginToView": "Inicia sesión para ver el precio",
     "verifyBusiness": "Verificar empresa",
-    "quickAdd": "Añadir al carrito"
+    "quickAdd": "Añadir al carrito",
+    "unlockPrice": "Ver precio mayorista",
+    "pendingPrice": "Precio visible tras la aprobación"
   },
   "productDetail": {
     "wholesalePrice": "Precio mayorista",

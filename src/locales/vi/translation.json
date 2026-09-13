@@ -209,7 +209,9 @@
     "perSet": "/ set",
     "loginToView": "Đăng nhập để xem giá",
     "verifyBusiness": "Xác minh doanh nghiệp",
-    "quickAdd": "Thêm vào giỏ"
+    "quickAdd": "Thêm vào giỏ",
+    "unlockPrice": "Xem giá sỉ",
+    "pendingPrice": "Giá hiển thị sau khi được duyệt"
   },
   "productDetail": {
     "wholesalePrice": "Giá sỉ",

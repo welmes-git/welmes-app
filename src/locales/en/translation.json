@@ -209,7 +209,9 @@
     "perSet": "/ set",
     "loginToView": "Login to view price",
     "verifyBusiness": "Verify Business",
-    "quickAdd": "Add to Cart"
+    "quickAdd": "Add to Cart",
+    "unlockPrice": "Unlock wholesale price",
+    "pendingPrice": "Price visible after approval"
   },
   "productDetail": {
     "wholesalePrice": "Wholesale Price",

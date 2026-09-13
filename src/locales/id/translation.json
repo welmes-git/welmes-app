@@ -209,7 +209,9 @@
     "perSet": "/ set",
     "loginToView": "Masuk untuk melihat harga",
     "verifyBusiness": "Verifikasi Bisnis",
-    "quickAdd": "Tambah ke Keranjang"
+    "quickAdd": "Tambah ke Keranjang",
+    "unlockPrice": "Lihat harga grosir",
+    "pendingPrice": "Harga tampil setelah disetujui"
   },
   "productDetail": {
     "wholesalePrice": "Harga Grosir",

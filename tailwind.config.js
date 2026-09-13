@@ -4,7 +4,28 @@ module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Pretendard", "Pretendard Variable", "system-ui", "sans-serif"],
+        jp: ["Pretendard JP", "Pretendard", "system-ui", "sans-serif"],
+      },
       colors: {
+        // WELMES design tokens — see DESIGN.md. Prefer these over raw hex.
+        canvas: "var(--wm-canvas)",
+        sunken: "var(--wm-sunken)",
+        ink: {
+          900: "var(--wm-ink-900)",
+          700: "var(--wm-ink-700)",
+          500: "var(--wm-ink-500)",
+          300: "var(--wm-ink-300)",
+        },
+        line: {
+          DEFAULT: "var(--wm-line)",
+          strong: "var(--wm-line-strong)",
+        },
+        signal: {
+          error: "var(--wm-signal-error)",
+          ok: "var(--wm-signal-ok)",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -58,6 +79,8 @@ module.exports = {
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        // The only elevation tier in the system: card hover, dropdowns, modals.
+        hover: "0 1px 2px rgba(20,20,20,.04), 0 4px 12px -4px rgba(20,20,20,.10)",
       },
       keyframes: {
         "accordion-down": {

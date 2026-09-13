@@ -2,66 +2,96 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design tokens — see DESIGN.md at the repo root before changing anything here.
+   Direction A: fully monochrome. No brand accent colour anywhere in the UI;
+   the only saturation on screen comes from product photography. */
+
 @layer base {
   :root {
+    /* shadcn/ui tokens, retuned to the monochrome scale */
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 0 0% 20%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 0 0% 20%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.625rem;
+    --popover-foreground: 0 0% 20%;
+    --primary: 0 0% 8%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 3% 96%;
+    --secondary-foreground: 0 0% 8%;
+    --muted: 0 3% 96%;
+    --muted-foreground: 0 1% 42%;
+    --accent: 0 3% 96%;
+    --accent-foreground: 0 0% 8%;
+    --destructive: 6 63% 46%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 3% 89%;
+    --input: 0 3% 79%;
+    --ring: 0 0% 8%;
+    --radius: 0.5rem;
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 0 0% 8%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 3% 96%;
+    --sidebar-accent-foreground: 0 0% 8%;
+    --sidebar-border: 0 3% 89%;
+    --sidebar-ring: 0 0% 8%;
+
+    /* WELMES palette — use these (or the Tailwind aliases: ink-900/700/500/300,
+       line, line-strong, canvas, sunken, signal-error, signal-ok) instead of raw hex. */
+    --wm-canvas: #ffffff;
+    --wm-sunken: #f5f4f4;
+    --wm-ink-900: #141414; /* CTA fills, strongest emphasis */
+    --wm-ink-700: #333333; /* body, product names, prices, star icons */
+    --wm-ink-500: #6c6a6a; /* brand names, secondary copy */
+    --wm-ink-300: #a8a6a6; /* struck-through original price, placeholders */
+    --wm-line: #e5e3e3;
+    --wm-line-strong: #c9c6c6;
+    --wm-signal-error: #c0392b; /* validation, out of stock — never for pricing */
+    --wm-signal-ok: #1e7f4f; /* approved, order placed */
   }
 
+  /* Storefront is light-only; this is here for the admin console. */
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --background: 0 0% 6%;
+    --foreground: 0 0% 89%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 89%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 89%;
     --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --primary-foreground: 0 0% 6%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 89%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 1% 61%;
+    --accent: 0 0% 14%;
+    --accent-foreground: 0 0% 89%;
+    --destructive: 8 72% 64%;
+    --destructive-foreground: 0 0% 6%;
+    --border: 0 2% 17%;
+    --input: 0 2% 25%;
+    --ring: 0 0% 89%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 89%;
+    --sidebar-primary: 0 0% 98%;
+    --sidebar-primary-foreground: 0 0% 6%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 89%;
+    --sidebar-border: 0 2% 17%;
+    --sidebar-ring: 0 0% 89%;
+
+    --wm-canvas: #101010;
+    --wm-sunken: #1a1a1a;
+    --wm-ink-900: #fafafa;
+    --wm-ink-700: #e2e2e2;
+    --wm-ink-500: #9b9999;
+    --wm-ink-300: #5e5c5c;
+    --wm-line: #2c2a2a;
+    --wm-line-strong: #403e3e;
+    --wm-signal-error: #e8705f;
+    --wm-signal-ok: #4fbf8b;
   }
 }
 
@@ -107,8 +137,8 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #ffffff;
-  border: 2px solid #4a90e2;
+  background: var(--wm-canvas);
+  border: 2px solid var(--wm-ink-900);
   box-shadow: 0 1px 4px rgba(0,0,0,0.15);
   cursor: pointer;
   pointer-events: all;
@@ -117,8 +147,8 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #ffffff;
-  border: 2px solid #4a90e2;
+  background: var(--wm-canvas);
+  border: 2px solid var(--wm-ink-900);
   box-shadow: 0 1px 4px rgba(0,0,0,0.15);
   cursor: pointer;
   pointer-events: all;

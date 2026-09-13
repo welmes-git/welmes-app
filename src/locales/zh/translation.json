@@ -209,7 +209,9 @@
     "perSet": "/ 套",
     "loginToView": "登录查看价格",
     "verifyBusiness": "需要企业认证",
-    "quickAdd": "加入购物车"
+    "quickAdd": "加入购物车",
+    "unlockPrice": "查看批发价",
+    "pendingPrice": "审核通过后显示价格"
   },
   "productDetail": {
     "wholesalePrice": "批发价",

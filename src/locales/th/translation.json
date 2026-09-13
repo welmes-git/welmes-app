@@ -209,7 +209,9 @@
     "perSet": "/ เซ็ต",
     "loginToView": "เข้าสู่ระบบเพื่อดูราคา",
     "verifyBusiness": "ยืนยันธุรกิจ",
-    "quickAdd": "เพิ่มลงตะกร้า"
+    "quickAdd": "เพิ่มลงตะกร้า",
+    "unlockPrice": "ดูราคาส่ง",
+    "pendingPrice": "ราคาจะแสดงหลังได้รับอนุมัติ"
   },
   "productDetail": {
     "wholesalePrice": "ราคาค้าส่ง",

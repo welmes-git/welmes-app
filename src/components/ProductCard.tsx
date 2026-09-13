@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import type { Product } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
-import { Lock, Eye, ShoppingCart, Heart } from 'lucide-react';
+import { ArrowRight, Heart, ShoppingCart, Star } from 'lucide-react';
 
 interface ProductCardProps {
   /** Use the shared Product type so this card can't drift from the model */
@@ -12,18 +11,29 @@ interface ProductCardProps {
   showQuickAdd?: boolean;
 }
 
+/** Marketing badges we're willing to render. Anything else in `tags` — scraped
+ *  genres, JAN codes, source names — is data, not a badge. */
+const BADGE_TAGS = ['New', 'Best', 'Sale', 'Hot'];
+
+/** Kana or CJK ideographs — these need the JP face, not Pretendard's Korean kanji. */
+const hasJapanese = (s: string) => /[぀-ヿ一-龯]/.test(s);
+
+/** "¥1,234" -> "¥" + "X,XXX" so the blurred placeholder keeps the real width. */
+const maskDigits = (formatted: string, symbol: string) =>
+  formatted.slice(symbol.length).replace(/\d/g, 'X');
+
 export default function ProductCard({ product, showQuickAdd = true }: ProductCardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { isAuthenticated, currentUser, addToCart, showToast, toggleWishlist, isWishlisted } = useStore();
-  const { formatPrice } = useCurrency();
-  const [isHovered, setIsHovered] = useState(false);
+  const { formatPrice, currencyInfo } = useCurrency();
 
   const isVerified = currentUser?.status === 'approved';
   const canSeePrice = isAuthenticated && isVerified;
   const wishlisted = isWishlisted(product.id);
   const outOfStock = product.stock <= 0;
   const hasSetOptions = (product.setOptions?.length ?? 0) > 0;
+  const badge = outOfStock ? null : product.tags.find((tag) => BADGE_TAGS.includes(tag));
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,18 +47,16 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
     showToast(wishlisted ? t('wishlist.removedFromWishlist') : t('wishlist.addedToWishlist'), 'success');
   };
 
+  const handleUnlock = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Signed in but unverified: the price is gated on approval, not on login.
+    navigate(isAuthenticated ? '/register' : '/login');
+  };
+
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isAuthenticated) {
-      showToast(t('productDetail.loginToAddCart'), 'info');
-      navigate('/login');
-      return;
-    }
-    if (!isVerified) {
-      showToast(t('productDetail.verifyToOrder'), 'info');
-      return;
-    }
     if (outOfStock) {
       showToast(t('productDetail.outOfStock'), 'error');
       return;
@@ -63,157 +71,117 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
     showToast(t('productDetail.addedToCart'), 'success');
   };
 
-  const tagColors: Record<string, string> = {
-    Sale: 'bg-[#ff4d6d]',
-    Best: 'bg-[#ff6b35]',
-    New: 'bg-[#4a90e2]',
-    Hot: 'bg-[#e74c3c]',
-  };
+  const priceText = formatPrice(product.wholesalePrice);
 
   return (
-    <Link
-      to={`/product/${product.id}`}
-      className="group block"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-[#f8f8fa] mb-3">
+    <Link to={`/product/${product.id}`} className="group block">
+      {/* Image */}
+      <div className="relative">
         <img
           src={product.image}
           alt={product.nameEn}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+          className="aspect-square w-full rounded-md border border-line bg-canvas object-cover transition-shadow duration-200 group-hover:shadow-hover"
         />
 
-        {/* Tags */}
-        <div className="absolute top-2 left-2 flex gap-1">
-          {outOfStock ? (
-            <span className="bg-[#555] text-white text-[11px] font-medium px-2 py-0.5 rounded">
-              {t('productDetail.outOfStock')}
-            </span>
+        {(badge || outOfStock) && (
+          <span className="absolute left-2 top-2 rounded-sm border border-line-strong bg-canvas px-[7px] py-[3px] text-[11px] font-bold tracking-[0.02em] text-ink-700">
+            {outOfStock ? t('productDetail.outOfStock') : badge}
+          </span>
+        )}
+
+        <button
+          type="button"
+          onClick={handleWishlist}
+          aria-label={t('wishlist.addedToWishlist')}
+          aria-pressed={wishlisted}
+          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-line-strong bg-canvas text-ink-500 transition-colors hover:text-ink-900"
+        >
+          <Heart size={13} className={wishlisted ? 'fill-ink-900 text-ink-900' : ''} />
+        </button>
+      </div>
+
+      {/* Info */}
+      <div className="flex flex-col gap-0.5 pt-2">
+        {/* Price — locked keeps the currency symbol crisp and blurs only the digits,
+            so the card holds the same shape for signed-out and approved buyers. */}
+        <div className="flex items-baseline gap-[3px] text-[15px] font-bold text-ink-700">
+          {canSeePrice ? (
+            <>
+              {product.discount > 0 && (
+                <span className="tabular-nums mr-[3px] font-extrabold text-ink-900">{product.discount}%</span>
+              )}
+              <span className="tabular-nums">{priceText}</span>
+              {product.discount > 0 && (
+                <span className="tabular-nums ml-[3px] text-[11px] font-normal text-ink-300 line-through">
+                  {formatPrice(product.originalPrice)}
+                </span>
+              )}
+            </>
           ) : (
-            product.tags.map((tag) => (
-              <span
-                key={tag}
-                className={`${tagColors[tag] || 'bg-[#999]'} text-white text-[11px] font-medium px-2 py-0.5 rounded`}
-              >
-                {tag}
+            <>
+              <span>{currencyInfo.symbol}</span>
+              <span className="tabular-nums select-none blur-[4px]" aria-hidden="true">
+                {maskDigits(priceText, currencyInfo.symbol)}
               </span>
-            ))
+            </>
           )}
         </div>
 
-        {/* Wishlist button */}
-        <button
-          onClick={handleWishlist}
-          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+        <h3
+          className={`line-clamp-2 min-h-[36px] text-[12.5px] font-medium leading-[1.45] text-ink-700 ${
+            hasJapanese(product.nameEn) ? 'font-jp' : ''
+          }`}
         >
-          <Heart
-            size={15}
-            className={wishlisted ? 'text-[#ff4d6d] fill-[#ff4d6d]' : 'text-[#bbb]'}
-          />
-        </button>
+          {product.nameEn}
+        </h3>
 
-        {/* Hover Overlay */}
-        {showQuickAdd && isHovered && (
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center gap-2 transition-opacity">
-            {canSeePrice ? (
-              <button
-                onClick={handleQuickAdd}
-                disabled={outOfStock}
-                className="bg-white text-[#333] px-4 py-2 rounded-full text-[13px] font-medium flex items-center gap-2 hover:bg-[#ff4d6d] hover:text-white transition-colors shadow-lg disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-[#333] disabled:cursor-not-allowed"
-              >
-                <ShoppingCart size={14} />
+        <p className="truncate text-[11.5px] text-ink-500">{product.brand}</p>
+
+        <div className="flex items-center gap-1 text-[11.5px] text-ink-700">
+          <Star size={11} className="shrink-0 fill-ink-700 text-ink-700" />
+          <span className="tabular-nums">
+            {product.rating.toFixed(1)} ({product.reviews.toLocaleString()})
+          </span>
+        </div>
+
+        {/* One fixed-height slot, so every card in a row ends on the same line */}
+        <div className="mt-2 flex min-h-[28px] items-center">
+          {!canSeePrice ? (
+            <button
+              type="button"
+              onClick={handleUnlock}
+              disabled={isAuthenticated}
+              className="inline-flex h-7 max-w-full items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-[9px] text-[11px] font-bold text-ink-700 transition-colors hover:border-ink-900 hover:text-ink-900 disabled:border-line disabled:text-ink-300 disabled:hover:border-line"
+            >
+              <span className="truncate">
+                {isAuthenticated ? t('products.pendingPrice') : t('products.unlockPrice')}
+              </span>
+              {!isAuthenticated && <ArrowRight size={11} className="shrink-0" />}
+            </button>
+          ) : showQuickAdd ? (
+            <button
+              type="button"
+              onClick={handleQuickAdd}
+              disabled={outOfStock}
+              className="inline-flex h-7 max-w-full items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-[9px] text-[11px] font-bold text-ink-700 transition-colors hover:border-ink-900 hover:text-ink-900 disabled:border-line disabled:text-ink-300"
+            >
+              <ShoppingCart size={11} className="shrink-0" />
+              <span className="truncate">
                 {outOfStock
                   ? t('productDetail.outOfStock')
                   : hasSetOptions
                   ? t('productDetail.chooseSet')
                   : t('common.addToCart')}
-              </button>
-            ) : (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  navigate('/login');
-                }}
-                className="bg-white text-[#333] px-4 py-2 rounded-full text-[13px] font-medium flex items-center gap-2 hover:bg-[#4a90e2] hover:text-white transition-colors shadow-lg"
-              >
-                <Eye size={14} />
-                {isAuthenticated ? t('products.verifyBusiness') : t('products.loginToView')}
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Product Info */}
-      <div>
-        {/* Brand */}
-        <p className="text-[12px] text-[#999] uppercase tracking-wide mb-0.5">
-          {product.brand}
-        </p>
-
-        {/* Name */}
-        <div className="mb-2 min-h-[52px]">
-          <h3 className="text-[14px] text-[#333] leading-[1.4] line-clamp-2">
-            {product.nameEn}
-          </h3>
-          {product.name !== product.nameEn && (
-            <p className="text-[11px] text-[#aaa] truncate mt-0.5">
-              {product.name}
-            </p>
+              </span>
+            </button>
+          ) : (
+            <span className={`text-[11.5px] ${outOfStock ? 'font-bold text-signal-error' : 'text-ink-500'}`}>
+              {outOfStock
+                ? t('productDetail.outOfStock')
+                : `${t('productDetail.stock')} ${product.stock.toLocaleString()}`}
+            </span>
           )}
-        </div>
-
-        {/* Price Section - B2B Masked */}
-        {canSeePrice ? (
-          <div className="flex items-center gap-2 flex-wrap">
-            {product.discount > 0 && (
-              <span className="text-[14px] font-bold text-[#ff4d6d]">
-                {product.discount}%
-              </span>
-            )}
-            <span className="text-[16px] font-bold text-[#333]">
-              {formatPrice(product.wholesalePrice)}
-            </span>
-            {product.discount > 0 && (
-              <span className="text-[13px] text-[#999] line-through">
-                {formatPrice(product.originalPrice)}
-              </span>
-            )}
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Lock size={14} className="text-[#999]" />
-            <span className="text-[13px] text-[#999]">
-              {isAuthenticated
-                ? t('products.verifyBusiness')
-                : t('products.loginToView')}
-            </span>
-          </div>
-        )}
-
-        {/* Rating */}
-        <div className="flex items-center gap-1 mt-1.5">
-          <div className="flex">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <svg
-                key={star}
-                className={`w-3.5 h-3.5 ${
-                  star <= Math.round(product.rating)
-                    ? 'text-[#ffc107] fill-[#ffc107]'
-                    : 'text-[#ddd]'
-                }`}
-                viewBox="0 0 20 20"
-              >
-                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-              </svg>
-            ))}
-          </div>
-          <span className="text-[11px] text-[#999]">
-            ({product.reviews.toLocaleString()})
-          </span>
         </div>
       </div>
     </Link>

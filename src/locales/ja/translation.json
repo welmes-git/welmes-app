@@ -209,7 +209,9 @@
     "perSet": "/ セット",
     "loginToView": "価格を見るにはログイン",
     "verifyBusiness": "ビジネス認証が必要",
-    "quickAdd": "カートに追加"
+    "quickAdd": "カートに追加",
+    "unlockPrice": "卸価格を確認する",
+    "pendingPrice": "承認後に価格が表示されます"
   },
   "productDetail": {
     "wholesalePrice": "卸売価格",

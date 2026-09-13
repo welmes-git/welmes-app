@@ -209,7 +209,9 @@
     "perSet": "/ lot",
     "loginToView": "Connectez-vous pour voir le prix",
     "verifyBusiness": "Vérifier l'entreprise",
-    "quickAdd": "Ajouter au panier"
+    "quickAdd": "Ajouter au panier",
+    "unlockPrice": "Voir le prix de gros",
+    "pendingPrice": "Prix visible après validation"
   },
   "productDetail": {
     "wholesalePrice": "Prix de gros",

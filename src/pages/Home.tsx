@@ -135,7 +135,7 @@ export default function Home() {
         {productsLoading ? (
           <ProductGridSkeleton />
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {weeklyBest.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -182,7 +182,7 @@ export default function Home() {
               </Link>
             </div>
             {productsLoading ? <ProductGridSkeleton /> : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+              <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                 {newArrivals.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
