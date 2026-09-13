@@ -740,5 +740,10 @@
     "ctaMember": "浏览商品",
     "brandQuestion": "您是品牌方吗？",
     "brandCta": "咨询入驻"
+  },
+  "brandStatement": {
+    "title": "我们是 WELMES。",
+    "subtitle": "为美妆零售商打造的平台。",
+    "body": "帮助您轻松发现正品日本美妆，采购让店铺脱颖而出的商品。"
   }
 }

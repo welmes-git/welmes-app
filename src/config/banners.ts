@@ -10,18 +10,3 @@ export const homeHero: { image: string; video?: string; focus: string; scrim: nu
   focus: '30% 50%',
   scrim: 0.5,
 };
-
-export const eventBanners = [
-  {
-    image: '/banners/event1.jpg',
-    title: 'Spring Skincare Special',
-    subtitle: '봄 스킨케어 특별전',
-    link: '/products',
-  },
-  {
-    image: '/banners/event2.jpg',
-    title: 'Trending Colors 2025',
-    subtitle: '트렌딩 컬러 2025',
-    link: '/products',
-  },
-];

@@ -738,5 +738,10 @@
     "ctaMember": "상품 둘러보기",
     "brandQuestion": "브랜드사이신가요?",
     "brandCta": "입점 문의하기"
+  },
+  "brandStatement": {
+    "title": "WELMES입니다.",
+    "subtitle": "뷰티 리테일러를 위한 플랫폼.",
+    "body": "정품 일본 화장품을 쉽게 찾고, 매장을 돋보이게 할 상품을 들여놓을 수 있도록 돕습니다."
   }
 }

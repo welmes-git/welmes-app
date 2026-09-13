@@ -738,5 +738,10 @@
     "ctaMember": "Xem sản phẩm",
     "brandQuestion": "Bạn là thương hiệu?",
     "brandCta": "Liên hệ để bán hàng"
+  },
+  "brandStatement": {
+    "title": "Chúng tôi là WELMES.",
+    "subtitle": "Nền tảng dành cho nhà bán lẻ làm đẹp.",
+    "body": "Chúng tôi giúp bạn dễ dàng tìm mỹ phẩm Nhật Bản chính hãng và nhập những sản phẩm làm cửa hàng của bạn nổi bật."
   }
 }

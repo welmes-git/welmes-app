@@ -740,5 +740,10 @@
     "ctaMember": "Browse products",
     "brandQuestion": "Are you a brand?",
     "brandCta": "Contact us about selling"
+  },
+  "brandStatement": {
+    "title": "We're WELMES.",
+    "subtitle": "The platform for beauty retailers.",
+    "body": "We make it easy to discover genuine Japanese cosmetics and stock the products that make your store stand out."
   }
 }

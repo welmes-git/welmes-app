@@ -738,5 +738,10 @@
     "ctaMember": "Lihat produk",
     "brandQuestion": "Anda pemilik merek?",
     "brandCta": "Hubungi kami untuk berjualan"
+  },
+  "brandStatement": {
+    "title": "Kami WELMES.",
+    "subtitle": "Platform untuk peritel kecantikan.",
+    "body": "Kami memudahkan Anda menemukan kosmetik Jepang asli dan menyediakan produk yang membuat toko Anda menonjol."
   }
 }

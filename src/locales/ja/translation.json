@@ -740,5 +740,10 @@
     "ctaMember": "商品を見る",
     "brandQuestion": "ブランドの方ですか？",
     "brandCta": "出店のお問い合わせ"
+  },
+  "brandStatement": {
+    "title": "WELMESです。",
+    "subtitle": "ビューティー小売店のためのプラットフォーム。",
+    "body": "正規品の日本コスメを見つけやすくし、お店を際立たせる商品の仕入れをサポートします。"
   }
 }

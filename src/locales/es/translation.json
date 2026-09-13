@@ -740,5 +740,10 @@
     "ctaMember": "Ver productos",
     "brandQuestion": "¿Eres una marca?",
     "brandCta": "Consultar para vender"
+  },
+  "brandStatement": {
+    "title": "Somos WELMES.",
+    "subtitle": "La plataforma para minoristas de belleza.",
+    "body": "Te ayudamos a descubrir cosmética japonesa original y a abastecerte de productos que hagan destacar tu tienda."
   }
 }

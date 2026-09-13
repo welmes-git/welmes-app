@@ -4,7 +4,7 @@ import { initialProducts } from '../data/products';
 import ProductCard from '../components/ProductCard';
 import ProductGridSkeleton from '../components/ProductGridSkeleton';
 import { ChevronRight as ChevronRightIcon } from 'lucide-react';
-import { homeHero, eventBanners } from '../config/banners';
+import { homeHero } from '../config/banners';
 import { useTranslation } from 'react-i18next';
 import { brandsByCount, hasJapanese } from '../lib/utils';
 
@@ -100,28 +100,24 @@ export default function Home() {
         )}
       </section>
 
-      {/* Event Banners */}
-      <section className="page-container pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {eventBanners.map((event, index) => (
-            <Link
-              key={index}
-              to={event.link}
-              className="group relative overflow-hidden rounded-lg aspect-[3/2]"
-            >
-              <img
-                src={event.image}
-                alt={event.title}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              <div className="absolute bottom-4 left-4 text-white">
-                <p className="text-[12px] opacity-80 mb-1">{event.subtitle}</p>
-                <p className="text-[18px] font-bold">{event.title}</p>
-              </div>
-            </Link>
-          ))}
+      {/* Brand statement — faire.com "We're Faire" banner, measured at 375/768/1024/1280/1440/1920px.
+          Faire breakpoints here are md 768, lg 1024, xl 1440, 2xl 1920. The photo is replaced
+          by a solid purple block until we have our own imagery. */}
+      <section className="flex flex-col items-stretch overflow-hidden bg-[#41252a] px-4 pb-4 pt-[26px] md:p-8 lg:p-12 min-[1920px]:px-20 min-[1920px]:py-12">
+        <div className="flex w-full flex-col justify-center gap-4 md:flex-row md:items-center md:gap-0">
+          <div className="flex w-full flex-col md:w-1/2">
+            <h2 className="font-serif text-[30px] font-normal leading-[38px] text-[#f1f29f] min-[1440px]:text-[38px] min-[1440px]:leading-[50px] min-[1920px]:text-[52px] min-[1920px]:leading-[64px]">
+              {t('brandStatement.title')}
+            </h2>
+            <p className="text-[22px] leading-8 tracking-[0.15px] text-white min-[1440px]:text-[30px] min-[1440px]:leading-[38px]">
+              {t('brandStatement.subtitle')}
+            </p>
+          </div>
+          <p className="w-full text-[14px] font-medium leading-5 tracking-[0.15px] text-white md:w-1/2 lg:text-[18px] lg:leading-[26px] min-[1440px]:text-[22px] min-[1440px]:leading-8 min-[1920px]:text-[30px] min-[1920px]:leading-[38px]">
+            {t('brandStatement.body')}
+          </p>
         </div>
+        <div className="relative mt-8 aspect-square w-full overflow-hidden bg-[#6b4e8a] md:aspect-[3/1]" aria-hidden="true" />
       </section>
 
       {/* New Arrivals */}

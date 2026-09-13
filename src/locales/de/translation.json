@@ -740,5 +740,10 @@
     "ctaMember": "Produkte ansehen",
     "brandQuestion": "Sie sind eine Marke?",
     "brandCta": "Anfrage zum Verkauf"
+  },
+  "brandStatement": {
+    "title": "Wir sind WELMES.",
+    "subtitle": "Die Plattform für Beauty-Händler.",
+    "body": "Wir machen es einfach, originale japanische Kosmetik zu entdecken und Produkte einzukaufen, mit denen Ihr Geschäft heraussticht."
   }
 }
