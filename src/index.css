@@ -199,3 +199,8 @@
   .signup-banner__title { font-size: 38px; line-height: 50px; }
   .signup-banner__desc { font-size: 18px; line-height: 26px; }
 }
+
+/* Retailer range tiles — faire.com flipbook: hard cut to the other photo every 1s */
+@keyframes retailer-flip { 0%, 50% { opacity: 0; } 50.01%, 100% { opacity: 1; } }
+.retailer-flip { animation: retailer-flip 2s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .retailer-flip { animation: none; } }

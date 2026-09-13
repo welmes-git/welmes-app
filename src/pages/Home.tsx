@@ -38,6 +38,18 @@ export default function Home() {
     else el.scrollBy({ left: dir * (el.clientWidth + 16), behavior: 'smooth' });
   };
 
+  // Faire's banner hard-cuts between photos; negative delay puts the left tile half a beat ahead
+  const retailerTiles = [
+    { images: ['/banners/retailer-drugstore.jpg', '/banners/retailer-select-shop.jpg'], delay: '-1.5s' },
+    { images: ['/banners/retailer-salon.jpg', '/banners/retailer-stockroom.jpg'], delay: '0s' },
+  ];
+  const tilePhotos = ({ images, delay }: (typeof retailerTiles)[number]) => (
+    <>
+      <img src={images[0]} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
+      <img src={images[1]} alt="" loading="lazy" className="retailer-flip absolute inset-0 size-full object-cover" style={{ animationDelay: delay }} />
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero — measured on faire.com (1440px): full-bleed 1:0.38 media (9:10 on mobile),
@@ -164,14 +176,18 @@ export default function Home() {
       )}
 
       {/* Retailer range — faire.com "For any retailer" banner, measured at 375/1024/1440/1920px
-          (Faire breakpoints md 768, xl 1440, 2xl 1920). Photo tiles are solid colour blocks for now. */}
+          (Faire breakpoints md 768, xl 1440, 2xl 1920). Each tile flips between its photos every 1s,
+          the two tiles offset by 0.5s (.retailer-flip in index.css). */}
       <section className="flex flex-col gap-4 bg-[#595604] px-4 pb-6 pt-4 md:flex-row md:items-center md:justify-between md:p-8 min-[1440px]:p-12">
         {/* Mobile: two tiles side by side above the copy */}
         <div className="flex justify-between gap-4 md:hidden" aria-hidden="true">
-          <div className="h-44 min-w-0 flex-1 bg-[#8a8636]" />
-          <div className="h-44 min-w-0 flex-1 bg-[#8a8636]" />
+          {retailerTiles.map((tile) => (
+            <div key={tile.images[0]} className="relative h-44 min-w-0 flex-1 overflow-hidden bg-[#8a8636]">{tilePhotos(tile)}</div>
+          ))}
         </div>
-        <div className="hidden md:block relative shrink-0 overflow-hidden bg-[#8a8636] md:size-60 min-[1440px]:size-[437px] min-[1920px]:size-[576px]" aria-hidden="true" />
+        <div className="hidden md:block relative shrink-0 overflow-hidden bg-[#8a8636] md:size-60 min-[1440px]:size-[437px] min-[1920px]:size-[576px]" aria-hidden="true">
+          {tilePhotos(retailerTiles[0])}
+        </div>
         <div className="flex w-full flex-col items-start gap-4 md:w-60 md:items-center min-[1440px]:w-[370px] min-[1440px]:gap-6 min-[1920px]:w-[500px]">
           <h2 className="font-serif text-[30px] font-normal leading-[38px] text-white md:mx-auto md:text-center min-[1440px]:text-[38px] min-[1440px]:leading-[50px] min-[1920px]:text-[52px] min-[1920px]:leading-[64px]">
             {t('retailerRange.title')}
@@ -186,7 +202,9 @@ export default function Home() {
             {t(isAuthenticated ? 'homeHero.ctaMember' : 'homeHero.cta')}
           </Link>
         </div>
-        <div className="hidden md:block relative shrink-0 overflow-hidden bg-[#8a8636] md:size-60 min-[1440px]:size-[437px] min-[1920px]:size-[576px]" aria-hidden="true" />
+        <div className="hidden md:block relative shrink-0 overflow-hidden bg-[#8a8636] md:size-60 min-[1440px]:size-[437px] min-[1920px]:size-[576px]" aria-hidden="true">
+          {tilePhotos(retailerTiles[1])}
+        </div>
       </section>
 
       {/* Explore categories — faire.com carousel, measured at 375/768/1024/1440/1920px.
