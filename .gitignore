@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Supplier import session (login cookies)
+scripts/.sd-session.json
