@@ -64,9 +64,13 @@ AI 코딩 에이전트와 사람이 함께 읽는 기준 문서. 화면을 만�
 ### 패밀리
 
 ```css
-font-sans: Pretendard, system-ui, sans-serif;        /* UI 전부. index.html에서 이미 로드 중 */
-font-jp:   'Pretendard JP', Pretendard, sans-serif;  /* 일본어 상품명 전용 */
+font-sans:  Graphik, 'Hanken Grotesk', Pretendard, system-ui, sans-serif;  /* UI 전부 */
+font-serif: Nantes, Newsreader, Pretendard, Georgia, serif;               /* 큰 제목 전용 (Faire display) */
+font-jp:    'Pretendard JP', Pretendard, sans-serif;                        /* 일본어 상품명 전용 */
+font-logo:  'Cormorant Garamond', Georgia, serif;                         /* WELMES 로고만 */
 ```
+
+Faire의 Graphik·Nantes는 유료 라이선스라 무료 대체 서체(Hanken Grotesk·Newsreader, Google Fonts)를 쓴다. 목록 맨 앞의 Graphik·Nantes는 라이선스 파일을 `@font-face`로 추가하면 자동으로 적용되게 둔 자리다. 두 서체 모두 한글·가나가 없어 해당 글자는 Pretendard로 표시된다. `font-serif`는 검색 결과 제목(30/38), 가입 배너 제목(38/50), 메인 히어로 제목(52/64)에만 쓴다.
 
 **사이트 기본 언어는 영어다.** UI 문구는 영어로 쓰고 나머지 10개 언어는 `src/locales/*/translation.json`로 번역한다 (`fallbackLng: 'en'`).
 

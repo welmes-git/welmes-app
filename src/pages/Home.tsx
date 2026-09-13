@@ -53,7 +53,7 @@ export default function Home() {
         </div>
         <div className="absolute inset-0 z-10 flex h-full items-end px-4 pb-6 md:items-center md:px-0 md:pb-0 md:pl-12">
           <div className="flex w-full flex-col items-start gap-2 text-left tracking-[0.15px] text-white md:gap-5">
-            <h1 className="text-[30px] font-normal leading-[38px] tracking-normal md:text-[52px] md:leading-[64px]">
+            <h1 className="font-serif text-[30px] font-normal leading-[38px] tracking-normal md:text-[52px] md:leading-[64px]">
               {t('homeHero.title')}
             </h1>
             <p className="text-[14px] font-medium leading-5 md:text-[22px] md:leading-8">

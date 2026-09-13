@@ -21,7 +21,7 @@ export default function SignUpBanner({ className = '', style }: { className?: st
           />
         </div>
         <div className="signup-banner__text">
-          <h3 className="signup-banner__title">{t('signupBanner.title')}</h3>
+          <h3 className="signup-banner__title font-serif">{t('signupBanner.title')}</h3>
           <p className="signup-banner__desc">{t('signupBanner.desc')}</p>
           <div className="flex justify-start">
             {/* Faire primary medium: 48px, #333, 4px radius, 20px padding, 16px icon + 8px */}

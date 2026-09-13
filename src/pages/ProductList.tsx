@@ -318,7 +318,7 @@ export default function ProductList() {
           <div className="min-w-0 flex-1">
             {/* Title row: 30/38 title, 14px count in #6c6a6a, "Hide filters" underline link (Faire) */}
             <div className="flex flex-wrap items-baseline pt-4">
-              <h1 className="text-[30px] font-normal leading-[38px] text-ink-700">{pageTitle}</h1>
+              <h1 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700">{pageTitle}</h1>
               <p className="ml-4 text-[14px] leading-5 tabular-nums text-ink-500">
                 {filteredProducts.length} {t('products.products')}
               </p>

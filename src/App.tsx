@@ -47,7 +47,7 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col font-['Pretendard','Noto_Sans_KR',sans-serif]">
+    <div className="min-h-screen flex flex-col">
       <Routes>
         {/* Admin route without header/footer */}
         <Route path="/admin" element={<AdminDashboard />} />
