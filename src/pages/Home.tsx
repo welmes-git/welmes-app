@@ -152,7 +152,7 @@ export default function Home() {
       {/* Brand Showcase */}
       {popularBrands.length > 0 && (
         <section className="page-container py-16">
-          <h2 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700 mb-5">
+          <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-5">
             {t('home.popularBrands')}
           </h2>
           <div className="grid grid-cols-2 gap-2 md:grid-cols-5">

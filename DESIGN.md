@@ -70,7 +70,7 @@ font-jp:    'Pretendard JP', Pretendard, sans-serif;                        /* �
 font-logo:  'Cormorant Garamond', Georgia, serif;                         /* WELMES 로고만 */
 ```
 
-Faire의 Graphik·Nantes는 유료 라이선스라 무료 대체 서체(Hanken Grotesk·Newsreader, Google Fonts)를 쓴다. 목록 맨 앞의 Graphik·Nantes는 라이선스 파일을 `@font-face`로 추가하면 자동으로 적용되게 둔 자리다. 두 서체 모두 한글·가나가 없어 해당 글자는 Pretendard로 표시된다. `font-serif`(굵기 400)는 Faire display 자리에만 쓴다: 상품 줄 제목 Weekly Best Sellers·New Arrivals(22/32, Faire pageHeaderSerif), 인기 브랜드·검색 결과 제목·사업자 회원 전용 띠(30/38), 가입 배너 제목(38/50), 메인 히어로 제목(52/64).
+Faire의 Graphik·Nantes는 유료 라이선스라 무료 대체 서체(Hanken Grotesk·Newsreader, Google Fonts)를 쓴다. 목록 맨 앞의 Graphik·Nantes는 라이선스 파일을 `@font-face`로 추가하면 자동으로 적용되게 둔 자리다. 두 서체 모두 한글·가나가 없어 해당 글자는 Pretendard로 표시된다. `font-serif`(굵기 400)는 Faire display 자리에만 쓴다: 메인 섹션 제목 Weekly Best Sellers·New Arrivals·Popular Brands(22/32, Faire pageHeaderSerif), 검색 결과 제목·사업자 회원 전용 띠(30/38), 가입 배너 제목(38/50), 메인 히어로 제목(52/64).
 
 **사이트 기본 언어는 영어다.** UI 문구는 영어로 쓰고 나머지 10개 언어는 `src/locales/*/translation.json`로 번역한다 (`fallbackLng: 'en'`).
 
