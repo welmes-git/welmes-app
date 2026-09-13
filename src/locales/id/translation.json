@@ -211,7 +211,12 @@
     "verifyBusiness": "Verifikasi Bisnis",
     "quickAdd": "Tambah ke Keranjang",
     "unlockPrice": "Lihat harga grosir",
-    "pendingPrice": "Harga tampil setelah disetujui"
+    "pendingPrice": "Harga tampil setelah disetujui",
+    "showMore": "Lihat lainnya",
+    "showLess": "Lihat lebih sedikit",
+    "hideFilters": "Sembunyikan filter",
+    "showFilters": "Tampilkan filter",
+    "allFilters": "Semua filter"
   },
   "productDetail": {
     "wholesalePrice": "Harga Grosir",

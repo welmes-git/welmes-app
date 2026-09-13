@@ -211,7 +211,12 @@
     "verifyBusiness": "Vérifier l'entreprise",
     "quickAdd": "Ajouter au panier",
     "unlockPrice": "Voir le prix de gros",
-    "pendingPrice": "Prix visible après validation"
+    "pendingPrice": "Prix visible après validation",
+    "showMore": "Voir plus",
+    "showLess": "Voir moins",
+    "hideFilters": "Masquer les filtres",
+    "showFilters": "Afficher les filtres",
+    "allFilters": "Tous les filtres"
   },
   "productDetail": {
     "wholesalePrice": "Prix de gros",

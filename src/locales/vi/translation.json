@@ -211,7 +211,12 @@
     "verifyBusiness": "Xác minh doanh nghiệp",
     "quickAdd": "Thêm vào giỏ",
     "unlockPrice": "Xem giá sỉ",
-    "pendingPrice": "Giá hiển thị sau khi được duyệt"
+    "pendingPrice": "Giá hiển thị sau khi được duyệt",
+    "showMore": "Xem thêm",
+    "showLess": "Thu gọn",
+    "hideFilters": "Ẩn bộ lọc",
+    "showFilters": "Hiện bộ lọc",
+    "allFilters": "Tất cả bộ lọc"
   },
   "productDetail": {
     "wholesalePrice": "Giá sỉ",

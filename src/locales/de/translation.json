@@ -211,7 +211,12 @@
     "verifyBusiness": "Unternehmen verifizieren",
     "quickAdd": "In den Warenkorb",
     "unlockPrice": "Großhandelspreis ansehen",
-    "pendingPrice": "Preis nach Freigabe sichtbar"
+    "pendingPrice": "Preis nach Freigabe sichtbar",
+    "showMore": "Mehr anzeigen",
+    "showLess": "Weniger anzeigen",
+    "hideFilters": "Filter ausblenden",
+    "showFilters": "Filter anzeigen",
+    "allFilters": "Alle Filter"
   },
   "productDetail": {
     "wholesalePrice": "Großhandelspreis",

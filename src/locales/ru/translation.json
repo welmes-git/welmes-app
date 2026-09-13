@@ -211,7 +211,12 @@
     "verifyBusiness": "Подтвердить компанию",
     "quickAdd": "В корзину",
     "unlockPrice": "Узнать оптовую цену",
-    "pendingPrice": "Цена откроется после одобрения"
+    "pendingPrice": "Цена откроется после одобрения",
+    "showMore": "Показать ещё",
+    "showLess": "Свернуть",
+    "hideFilters": "Скрыть фильтры",
+    "showFilters": "Показать фильтры",
+    "allFilters": "Все фильтры"
   },
   "productDetail": {
     "wholesalePrice": "Оптовая цена",

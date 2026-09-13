@@ -1,13 +1,13 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { initialProducts, categories } from '../data/products';
-import { brandsByCount } from '../lib/utils';
+import { brandsByCount, hasJapanese } from '../lib/utils';
 import ProductCard from '../components/ProductCard';
 import ProductGridSkeleton from '../components/ProductGridSkeleton';
 import * as db from '../lib/db';
-import { ChevronLeft, ChevronRight, ChevronDown, Search, X } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 type SortOption = 'popular' | 'price-low' | 'price-high' | 'newest' | 'discount';
@@ -36,6 +36,10 @@ export default function ProductList() {
   const [currentPage, setCurrentPage]     = useState(1);
   const [showFilters, setShowFilters]     = useState(false);
   const [inlineSearch, setInlineSearch]   = useState(searchQuery);
+  const [filtersHidden, setFiltersHidden] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showAllBrands, setShowAllBrands] = useState(false);
+  const [brandQuery, setBrandQuery]       = useState('');
 
   // Sync URL → local state; reset page whenever any URL param changes
   useEffect(() => {
@@ -167,142 +171,114 @@ export default function ProductList() {
     ? selectedCategory
     : t('products.allProducts');
 
+  // Faire shows three options per section, then "Show more". Checked options stay visible.
+  const FILTER_PREVIEW = 3;
+  const PILL = 'inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-line-control bg-canvas px-4 text-[14px] leading-5 text-ink-700 transition-colors hover:border-ink-700';
+  const gridCls = filtersHidden ? 'product-grid' : 'grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6';
+  const visibleCategories = categories
+    .filter((c) => c !== 'All')
+    .filter((c, i) => showAllCategories || i < FILTER_PREVIEW || c === selectedCategory);
+  const matchingBrands = brands.filter((b) => b.toLowerCase().includes(brandQuery.trim().toLowerCase()));
+  const visibleBrands = matchingBrands.filter((b, i) => showAllBrands || i < FILTER_PREVIEW || selectedBrands.includes(b));
+
   return (
-    <div className="min-h-screen bg-white">
-      <div className="page-container py-8">
+    <div className="min-h-screen bg-white tracking-[0.15px]">
+      <div className="page-container pb-16">
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-[13px] text-ink-500 mb-6">
-          <Link to="/" className="hover:text-ink-700">{t('common.home')}</Link>
-          <span>&gt;</span>
-          <span className="text-ink-700">
-            {searchQuery
-              ? t('common.search')
-              : selectedCategory !== 'All'
-              ? selectedCategory
-              : t('products.allProducts')}
-          </span>
-        </div>
+        {/* Inline Search Bar — mobile only (the header search is hidden below md) */}
+        <form onSubmit={handleInlineSearch} className="pt-4 md:hidden">
+          <div className="relative">
+            <Search size={16} strokeWidth={1.5} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-700" />
+            <input
+              type="text"
+              value={inlineSearch}
+              onChange={(e) => setInlineSearch(e.target.value)}
+              placeholder={t('nav.searchPlaceholderFull')}
+              className="h-10 w-full rounded-full border border-line-control bg-canvas pl-10 pr-10 text-[14px] leading-5 text-ink-700 placeholder:text-ink-500 focus:border-ink-700 focus:outline-none"
+            />
+            {inlineSearch && (
+              <button type="button" onClick={clearSearch} aria-label={t('common.close')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ink-500 hover:text-ink-900">
+                <X size={16} strokeWidth={1.5} />
+              </button>
+            )}
+          </div>
+        </form>
 
-        {/* Inline Search Bar — mobile only. The header already has a persistent
-            search bar on desktop (hidden below md), so showing this one too
-            duplicated it right above the "Search: X" tag. */}
-        <div className="mb-6">
-          <form onSubmit={handleInlineSearch} className="md:hidden">
-            <div className="relative max-w-[560px]">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300" />
-              <input
-                type="text"
-                value={inlineSearch}
-                onChange={(e) => setInlineSearch(e.target.value)}
-                placeholder={t('nav.searchPlaceholderFull')}
-                className="w-full h-[44px] pl-10 pr-24 border border-line-strong rounded-full bg-canvas text-[14px] text-ink-700 placeholder:text-ink-300 focus:outline-none focus:border-ink-900 transition-colors"
-              />
-              {inlineSearch && (
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="absolute right-16 top-1/2 -translate-y-1/2 text-ink-300 hover:text-ink-500 p-1"
-                >
-                  <X size={15} />
-                </button>
-              )}
-              <button
-                type="submit"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-[36px] px-4 bg-ink-900 text-white text-[13px] font-bold rounded-full hover:shadow-hover transition-shadow"
-              >
-                {t('common.search')}
+        <div className="flex flex-col gap-6 lg:flex-row">
+          {/* Filter bar — measured on faire.com/search (1440px): 220px column, sticky under
+              the header, 16px top padding, 40px "Filters" row, 16px, #dadada rule, then
+              scrolling sections (24px header padding, 14/20 text, 16px checkbox, 8px rows). */}
+          <aside
+            className={`w-full shrink-0 flex-col pt-4 lg:mt-2 lg:sticky lg:top-[108px] lg:h-[calc(100vh-108px)] lg:w-[220px] ${
+              showFilters ? 'flex' : 'hidden'
+            } ${filtersHidden ? 'lg:hidden' : 'lg:flex'}`}
+          >
+            <div className="flex h-10 items-center gap-2">
+              <h2 className="text-[14px] font-medium leading-5 text-ink-700">{t('products.filters')}</h2>
+              <button onClick={clearFilters} className="ml-auto mr-4 text-[14px] leading-5 text-ink-700 underline [text-underline-offset:25%] hover:text-ink-900">
+                {t('products.reset')}
               </button>
             </div>
-          </form>
+            <div className="h-4 shrink-0" />
+            <hr className="m-0 border-0 border-t border-line-control" />
 
-          {/* Active search tag */}
-          {searchQuery && (
-            <div className="flex items-center gap-2 mt-3">
-              <span className="text-[12px] text-ink-500">{t('common.search')}:</span>
-              <span className="inline-flex items-center gap-1.5 border border-ink-900 text-ink-900 text-[12px] font-bold px-2.5 py-1 rounded-md">
-                "{searchQuery}"
-                <button onClick={clearSearch} className="hover:opacity-70">
-                  <X size={12} />
-                </button>
-              </span>
-            </div>
-          )}
-        </div>
+            <div className="filter-scroll min-h-0 flex-1 divide-y divide-line-control overflow-y-auto">
+              <FilterSection title={t('products.category')}>
+                {visibleCategories.map((cat) => (
+                  <FilterCheckbox
+                    key={cat}
+                    label={cat}
+                    checked={selectedCategory === cat}
+                    onChange={() => {
+                      setSelectedCategory(selectedCategory === cat ? 'All' : cat);
+                      setCurrentPage(1);
+                      if (searchQuery) clearSearch();
+                    }}
+                  />
+                ))}
+                {categories.length - 1 > FILTER_PREVIEW && (
+                  <ShowMore expanded={showAllCategories} onClick={() => setShowAllCategories((v) => !v)} />
+                )}
+              </FilterSection>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar Filters */}
-          <aside className={`lg:w-[220px] shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <div className="border border-line rounded-[10px] p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[14px] font-extrabold text-ink-900">{t('products.filters')}</h3>
-                <button onClick={clearFilters} className="text-[12px] text-ink-500 underline underline-offset-2 hover:text-ink-900">
-                  {t('products.reset')}
-                </button>
-              </div>
+              <FilterSection title={t('products.brand')}>
+                <label className="relative flex h-10 items-center rounded-full border border-line-control bg-canvas pr-4 focus-within:border-ink-700">
+                  <Search size={16} strokeWidth={1.5} className="pointer-events-none absolute left-4 text-ink-700" />
+                  <input
+                    type="search"
+                    value={brandQuery}
+                    onChange={(e) => setBrandQuery(e.target.value)}
+                    placeholder={t('common.search')}
+                    aria-label={`${t('products.brand')} ${t('common.search')}`}
+                    className="w-full bg-transparent pl-10 text-[14px] leading-5 text-ink-700 placeholder:text-ink-500 focus:outline-none"
+                  />
+                </label>
+                <div className="h-6" />
+                {visibleBrands.map((brand) => (
+                  <FilterCheckbox
+                    key={brand}
+                    label={brand}
+                    checked={selectedBrands.includes(brand)}
+                    onChange={() => {
+                      toggleBrand(brand);
+                      if (searchQuery) clearSearch();
+                    }}
+                  />
+                ))}
+                {matchingBrands.length > FILTER_PREVIEW && (
+                  <ShowMore expanded={showAllBrands} onClick={() => setShowAllBrands((v) => !v)} />
+                )}
+              </FilterSection>
 
-              {/* Category */}
-              <div className="mb-5">
-                <h4 className="text-[11px] font-bold uppercase tracking-[0.02em] text-ink-500 mb-2">{t('products.category')}</h4>
-                <div className="space-y-1">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => {
-                        setSelectedCategory(cat);
-                        setCurrentPage(1);
-                        // If in search mode, exit search mode and apply category filter
-                        if (searchQuery) clearSearch();
-                      }}
-                      className={`block w-full text-left text-[13px] py-1 px-2 rounded ${
-                        selectedCategory === cat
-                          ? 'bg-sunken font-bold text-ink-900 shadow-[inset_2px_0_0_var(--wm-ink-900)]'
-                          : 'text-ink-700 hover:bg-sunken'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
+              <FilterSection title={t('products.priceRange')}>
+                <div className="flex justify-between pb-3 text-[14px] leading-5 tabular-nums text-ink-700">
+                  <span>{formatPrice(rangeMin)}</span>
+                  <span>{priceRange[1] === Infinity ? `${formatPrice(priceMax)}+` : formatPrice(rangeMax)}</span>
                 </div>
-              </div>
-
-              {/* Brand */}
-              <div className="mb-5">
-                <h4 className="text-[11px] font-bold uppercase tracking-[0.02em] text-ink-500 mb-2">{t('products.brand')}</h4>
-                <div className="space-y-1 max-h-[200px] overflow-y-auto">
-                  {brands.map((brand) => (
-                    <label
-                      key={brand}
-                      className="flex items-center gap-2 text-[12px] text-ink-700 cursor-pointer hover:text-ink-900 py-0.5"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedBrands.includes(brand)}
-                        onChange={() => {
-                          toggleBrand(brand);
-                          if (searchQuery) clearSearch();
-                        }}
-                        className="w-3.5 h-3.5 rounded border-line-strong accent-ink-900"
-                      />
-                      {brand}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Range */}
-              <div>
-                <h4 className="text-[11px] font-bold uppercase tracking-[0.02em] text-ink-500 mb-3">{t('products.priceRange')}</h4>
-                <div className="flex justify-between text-[12px] tabular-nums text-ink-700 mb-3">
-                  <span className="font-medium">{formatPrice(rangeMin)}</span>
-                  <span className="font-medium">
-                    {priceRange[1] === Infinity ? `${formatPrice(priceMax)}+` : formatPrice(rangeMax)}
-                  </span>
-                </div>
-                <div className="relative h-5 flex items-center">
-                  <div className="absolute w-full h-1.5 bg-line rounded-full" />
+                <div className="relative flex h-5 items-center">
+                  <div className="absolute h-[2px] w-full rounded-full bg-line-control" />
                   <div
-                    className="absolute h-1.5 bg-ink-900 rounded-full"
+                    className="absolute h-[2px] rounded-full bg-ink-700"
                     style={{ left: `${rangePercLow}%`, right: `${100 - rangePercHigh}%` }}
                   />
                   <input
@@ -310,11 +286,12 @@ export default function ProductList() {
                     min={priceMin}
                     max={priceMax}
                     value={rangeMin}
+                    aria-label={`${t('products.priceRange')} min`}
                     onChange={(e) => {
                       const val = Number(e.target.value);
                       if (val < rangeMax) { setPriceRange([val, priceRange[1]]); setCurrentPage(1); }
                     }}
-                    className="absolute w-full appearance-none bg-transparent cursor-pointer range-thumb"
+                    className="range-thumb absolute w-full cursor-pointer appearance-none bg-transparent"
                     style={{ zIndex: rangePercLow > 90 ? 5 : 3 }}
                   />
                   <input
@@ -322,90 +299,94 @@ export default function ProductList() {
                     min={priceMin}
                     max={priceMax}
                     value={rangeMax}
+                    aria-label={`${t('products.priceRange')} max`}
                     onChange={(e) => {
                       const val = Number(e.target.value);
                       if (val > rangeMin) { setPriceRange([priceRange[0], val]); setCurrentPage(1); }
                     }}
-                    className="absolute w-full appearance-none bg-transparent cursor-pointer range-thumb"
+                    className="range-thumb absolute w-full cursor-pointer appearance-none bg-transparent"
                     style={{ zIndex: 4 }}
                   />
                 </div>
-                <div className="flex justify-between text-[11px] tabular-nums text-ink-300 mt-2">
-                  <span>{formatPrice(priceMin)}</span>
-                  <span>{formatPrice(priceMax)}</span>
-                </div>
-              </div>
+              </FilterSection>
+              <div className="hidden h-[72px] lg:block" />
             </div>
           </aside>
 
-          {/* Main Content */}
-          <div className="flex-1">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900">{pageTitle}</h1>
-                <p className="text-[13px] tabular-nums text-ink-500">
-                  {filteredProducts.length} {t('products.products')}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden h-9 px-3 border border-line-strong rounded-md text-[13px] font-bold text-ink-700 hover:bg-sunken"
+          {/* Results */}
+          <div className="min-w-0 flex-1">
+            {/* Title row: 30/38 title, 14px count in #6c6a6a, "Hide filters" underline link (Faire) */}
+            <div className="flex flex-wrap items-baseline pt-4">
+              <h1 className="text-[30px] font-normal leading-[38px] text-ink-700">{pageTitle}</h1>
+              <p className="ml-4 text-[14px] leading-5 tabular-nums text-ink-500">
+                {filteredProducts.length} {t('products.products')}
+              </p>
+              <button
+                onClick={() => setFiltersHidden((v) => !v)}
+                className="ml-4 hidden text-[14px] leading-5 text-ink-700 underline [text-underline-offset:25%] hover:text-ink-900 lg:inline"
+              >
+                {filtersHidden ? t('products.showFilters') : t('products.hideFilters')}
+              </button>
+            </div>
+
+            {/* Pill row — 40px pills, 1px #dadada, fully rounded, 16px padding */}
+            <div className="flex items-center gap-2 overflow-x-auto py-4 [scrollbar-width:none]">
+              <button onClick={() => setShowFilters((v) => !v)} className={`${PILL} lg:hidden`} aria-expanded={showFilters}>
+                <SlidersHorizontal size={16} strokeWidth={1.5} />
+                {t('products.allFilters')}
+              </button>
+              {searchQuery && (
+                <span className={PILL}>
+                  &quot;{searchQuery}&quot;
+                  <button onClick={clearSearch} aria-label={t('common.close')} className="text-ink-500 hover:text-ink-900">
+                    <X size={14} strokeWidth={1.5} />
+                  </button>
+                </span>
+              )}
+              <div className="relative ml-auto shrink-0">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  aria-label={t('products.sortBy')}
+                  className={`${PILL} cursor-pointer appearance-none pr-10 focus:outline-none`}
                 >
-                  {t('products.filters')}
-                </button>
-                <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="appearance-none bg-canvas border border-line-strong rounded-md h-9 px-3 pr-8 text-[13px] text-ink-700 focus:outline-none focus:border-ink-900"
-                  >
-                    <option value="popular">{t('products.popular')}</option>
-                    <option value="price-low">{t('products.priceLow')}</option>
-                    <option value="price-high">{t('products.priceHigh')}</option>
-                    <option value="newest">{t('products.newest')}</option>
-                    <option value="discount">{t('products.highestDiscount')}</option>
-                  </select>
-                  <ChevronDown
-                    size={14}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none"
-                  />
-                </div>
+                  <option value="popular">{t('products.popular')}</option>
+                  <option value="price-low">{t('products.priceLow')}</option>
+                  <option value="price-high">{t('products.priceHigh')}</option>
+                  <option value="newest">{t('products.newest')}</option>
+                  <option value="discount">{t('products.highestDiscount')}</option>
+                </select>
+                <ChevronDown size={16} strokeWidth={1.5} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink-700" />
               </div>
             </div>
 
+            <div className="pt-2">
             {productsLoading ? (
-              <ProductGridSkeleton count={10} className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" />
+              <ProductGridSkeleton count={10} className={gridCls} />
             ) : (
               <>
-                {/* No Results */}
                 {filteredProducts.length === 0 && (
-                  <div className="text-center py-16">
-                    <Search size={48} className="mx-auto text-line-strong mb-4" />
-                    <p className="text-[15px] font-bold text-ink-700 mb-1">{t('products.noResults')}</p>
-                    {searchQuery && (
-                      <p className="text-[13px] text-ink-300 mb-4">
-                        "{searchQuery}"
-                      </p>
-                    )}
+                  <div className="py-16 text-center">
+                    <Search size={48} strokeWidth={1} className="mx-auto mb-4 text-line-strong" />
+                    <p className="mb-1 text-[14px] font-medium leading-5 text-ink-700">{t('products.noResults')}</p>
+                    {searchQuery && <p className="mb-4 text-[14px] leading-5 text-ink-500">&quot;{searchQuery}&quot;</p>}
                     <button
                       onClick={() => { clearFilters(); clearSearch(); }}
-                      className="mt-2 h-10 px-5 bg-ink-900 text-white text-[13px] font-bold rounded-lg hover:shadow-hover transition-shadow"
+                      className="mt-2 text-[14px] leading-5 text-ink-700 underline [text-underline-offset:25%] hover:text-ink-900"
                     >
                       {t('products.clearFilters')}
                     </button>
                   </div>
                 )}
 
-                {/* Product Grid */}
-                <div className="grid grid-cols-2 gap-x-2 gap-y-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                <div className={gridCls}>
                   {paginatedProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
               </>
             )}
+            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
@@ -456,6 +437,47 @@ export default function ProductList() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function FilterSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h3 className="py-6 text-[14px] font-medium leading-5 text-ink-700">{title}</h3>
+      <div className="pr-4">{children}</div>
+      <div className="h-4" />
+    </section>
+  );
+}
+
+/** 16px square, 1px #333 border, 2px radius; checked = black fill with an 8px white check (Faire). */
+function FilterCheckbox({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
+  return (
+    <div className="w-full pb-2">
+      <label className="group flex cursor-pointer items-start gap-2 text-[14px] leading-5 text-ink-700 hover:text-ink-900">
+        <span className="relative flex shrink-0">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={onChange}
+            className="peer h-4 w-4 cursor-pointer appearance-none rounded-[2px] border border-ink-700 checked:border-black checked:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900"
+          />
+          <Check size={8} strokeWidth={4} className="pointer-events-none absolute left-1 top-1 hidden text-white peer-checked:block" />
+        </span>
+        <span className={`line-clamp-2 break-words ${hasJapanese(label) ? 'font-jp' : ''}`}>{label}</span>
+      </label>
+    </div>
+  );
+}
+
+function ShowMore({ expanded, onClick }: { expanded: boolean; onClick: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div className="pb-2">
+      <button onClick={onClick} className="block text-[14px] leading-5 text-ink-700 underline [text-underline-offset:25%] hover:text-ink-900">
+        {expanded ? t('products.showLess') : t('products.showMore')}
+      </button>
     </div>
   );
 }

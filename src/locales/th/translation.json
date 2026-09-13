@@ -211,7 +211,12 @@
     "verifyBusiness": "ยืนยันธุรกิจ",
     "quickAdd": "เพิ่มลงตะกร้า",
     "unlockPrice": "ดูราคาส่ง",
-    "pendingPrice": "ราคาจะแสดงหลังได้รับอนุมัติ"
+    "pendingPrice": "ราคาจะแสดงหลังได้รับอนุมัติ",
+    "showMore": "ดูเพิ่มเติม",
+    "showLess": "ดูน้อยลง",
+    "hideFilters": "ซ่อนตัวกรอง",
+    "showFilters": "แสดงตัวกรอง",
+    "allFilters": "ตัวกรองทั้งหมด"
   },
   "productDetail": {
     "wholesalePrice": "ราคาค้าส่ง",

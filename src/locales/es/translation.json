@@ -211,7 +211,12 @@
     "verifyBusiness": "Verificar empresa",
     "quickAdd": "Añadir al carrito",
     "unlockPrice": "Ver precio mayorista",
-    "pendingPrice": "Precio visible tras la aprobación"
+    "pendingPrice": "Precio visible tras la aprobación",
+    "showMore": "Ver más",
+    "showLess": "Ver menos",
+    "hideFilters": "Ocultar filtros",
+    "showFilters": "Mostrar filtros",
+    "allFilters": "Todos los filtros"
   },
   "productDetail": {
     "wholesalePrice": "Precio mayorista",

@@ -211,7 +211,12 @@
     "verifyBusiness": "Verify Business",
     "quickAdd": "Add to Cart",
     "unlockPrice": "Unlock wholesale price",
-    "pendingPrice": "Price visible after approval"
+    "pendingPrice": "Price visible after approval",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "hideFilters": "Hide filters",
+    "showFilters": "Show filters",
+    "allFilters": "All filters"
   },
   "productDetail": {
     "wholesalePrice": "Wholesale Price",

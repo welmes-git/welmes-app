@@ -211,7 +211,12 @@
     "verifyBusiness": "需要企业认证",
     "quickAdd": "加入购物车",
     "unlockPrice": "查看批发价",
-    "pendingPrice": "审核通过后显示价格"
+    "pendingPrice": "审核通过后显示价格",
+    "showMore": "显示更多",
+    "showLess": "收起",
+    "hideFilters": "隐藏筛选",
+    "showFilters": "显示筛选",
+    "allFilters": "全部筛选"
   },
   "productDetail": {
     "wholesalePrice": "批发价",
