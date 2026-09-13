@@ -223,7 +223,7 @@ export default function Home() {
       </section>
 
       {/* Explore categories — faire.com carousel, measured at 375/768/1024/1440/1920px.
-          Mobile: stacked 3.75:1 tiles. md+: 3 per view, 1.4:1, arrows centred 32px outside the track
+          Mobile: swipe one 85%-wide tile at a time, next tile peeking. md+: 3 per view, arrows centred 32px outside the track
           (clipped by the section like Faire's). Photos live in public/categories/<group key>.jpg. */}
       <section className="relative overflow-hidden px-4 pb-4 pt-8 md:p-8 lg:p-12 min-[1920px]:px-20 min-[1920px]:py-12">
         <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 min-[1440px]:text-[30px] min-[1440px]:leading-[38px] min-[1920px]:text-[38px] min-[1920px]:leading-[50px]">
@@ -240,27 +240,26 @@ export default function Home() {
           </button>
           <div
             ref={categoryTrack}
-            className="flex flex-col gap-4 md:snap-x md:snap-mandatory md:flex-row md:overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 md:mx-0 md:scroll-px-0 md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {categoryGroups.map((group) => (
               <Link
                 key={group.key}
                 to={group.link}
-                className="group relative block shrink-0 snap-start overflow-hidden rounded-sm md:w-[calc((100%-32px)/3)]"
+                className="group relative block w-[85%] shrink-0 snap-start overflow-hidden rounded-sm md:w-[calc((100%-32px)/3)]"
               >
                 <img
                   src={`/categories/${group.key}.jpg`}
                   alt=""
                   loading="lazy"
-                  // Oral care props sit low in the frame; keep them inside the 3.75:1 mobile crop
-                  className={`aspect-[3.75/1] w-full bg-sunken object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.17,0.67,0.24,1)] group-hover:scale-110 md:aspect-[1.4/1] ${group.key === 'oralCare' ? 'object-[50%_68%]' : ''}`}
+                  className="aspect-[1.4/1] w-full bg-sunken object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.17,0.67,0.24,1)] group-hover:scale-110"
                 />
                 <div
                   className="absolute inset-0 z-[1]"
                   style={{ background: 'linear-gradient(22.18deg, rgba(0,0,0,0.5) 1.86%, rgba(0,0,0,0) 31.23%)' }}
                   aria-hidden="true"
                 />
-                <span className="absolute bottom-0 left-0 z-[2] pb-2 pl-2 text-[14px] leading-5 tracking-[0.15px] text-white md:p-4 md:font-serif md:text-[22px] md:leading-8 md:tracking-normal">
+                <span className="absolute bottom-0 left-0 z-[2] p-4 font-serif text-[22px] leading-8 text-white">
                   {t(`categoryMenu.${group.key}`)}
                 </span>
               </Link>
