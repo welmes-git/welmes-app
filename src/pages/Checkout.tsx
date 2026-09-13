@@ -129,14 +129,14 @@ export default function Checkout() {
   if (!isAuthenticated) {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-20 text-center">
-        <Package size={48} className="mx-auto text-[#ddd] mb-4" />
-        <h2 className="text-[20px] font-bold mb-2">{t('checkout.loginRequired')}</h2>
-        <p className="text-[14px] text-[#999] mb-6">
+        <Package size={48} className="mx-auto text-line-strong mb-4" />
+        <h2 className="text-[20px] font-extrabold text-ink-900 mb-2">{t('checkout.loginRequired')}</h2>
+        <p className="text-[14px] text-ink-500 mb-6">
           {t('checkout.loginRequiredDesc')}
         </p>
         <button
           onClick={() => navigate('/login')}
-          className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[14px] hover:bg-[#555] transition-colors"
+          className="px-6 py-2.5 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow"
         >
           {t('checkout.goToLogin')}
         </button>
@@ -147,14 +147,14 @@ export default function Checkout() {
   if (cart.length === 0 && step !== 'confirmed') {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-20 text-center">
-        <Package size={48} className="mx-auto text-[#ddd] mb-4" />
-        <h2 className="text-[20px] font-bold mb-2">{t('checkout.cartEmpty')}</h2>
-        <p className="text-[14px] text-[#999] mb-6">
+        <Package size={48} className="mx-auto text-line-strong mb-4" />
+        <h2 className="text-[20px] font-extrabold text-ink-900 mb-2">{t('checkout.cartEmpty')}</h2>
+        <p className="text-[14px] text-ink-500 mb-6">
           {t('checkout.cartEmptyDesc')}
         </p>
         <button
           onClick={() => navigate('/products')}
-          className="px-6 py-2.5 bg-[#333] text-white rounded-lg text-[14px] hover:bg-[#555] transition-colors"
+          className="px-6 py-2.5 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow"
         >
           {t('checkout.browseProducts')}
         </button>
@@ -255,21 +255,21 @@ export default function Checkout() {
   const stepIndex = STEPS.findIndex((s) => s.key === step);
 
   return (
-    <div className="bg-[#f8f8fa] min-h-screen pb-16">
+    <div className="bg-canvas min-h-screen pb-16">
       {/* Page header */}
-      <div className="bg-white border-b border-[#e5e5e5]">
+      <div className="bg-white border-b border-line">
         <div className="max-w-[960px] mx-auto px-4 py-5 flex items-center gap-3">
           {step !== 'confirmed' && (
             <button
               onClick={() =>
                 step === 'review' ? navigate('/products') : setStep('review')
               }
-              className="text-[#999] hover:text-[#333] transition-colors mr-1"
+              className="text-ink-500 hover:text-ink-700 transition-colors mr-1"
             >
               <ArrowLeft size={18} />
             </button>
           )}
-          <h1 className="text-[20px] font-bold text-[#222]">{t('checkout.title')}</h1>
+          <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900">{t('checkout.title')}</h1>
         </div>
 
         {/* Step progress */}
@@ -280,25 +280,23 @@ export default function Checkout() {
                 <div className="flex items-center gap-2">
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors ${
-                      i < stepIndex
-                        ? 'bg-[#4a90e2] text-white'
-                        : i === stepIndex
-                        ? 'bg-[#333] text-white'
-                        : 'bg-[#e5e5e5] text-[#aaa]'
+                      i <= stepIndex
+                        ? 'bg-ink-900 text-white'
+                        : 'border border-line-strong bg-canvas text-ink-500'
                     }`}
                   >
                     {i < stepIndex ? <CheckCircle2 size={14} /> : i + 1}
                   </div>
                   <span
                     className={`text-[12px] font-medium ${
-                      i === stepIndex ? 'text-[#222]' : 'text-[#aaa]'
+                      i === stepIndex ? 'font-bold text-ink-900' : 'text-ink-500'
                     }`}
                   >
                     {t(s.labelKey)}
                   </span>
                 </div>
                 {i < STEPS.length - 1 && (
-                  <ChevronRight size={14} className="text-[#ccc] mx-3" />
+                  <ChevronRight size={14} className="text-ink-300 mx-3" />
                 )}
               </div>
             ))}
@@ -315,15 +313,15 @@ export default function Checkout() {
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Item table */}
             <div className="flex-1">
-              <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
-                <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
-                  <ClipboardList size={16} className="text-[#4a90e2]" />
-                  <h2 className="text-[15px] font-semibold text-[#222]">{t('checkout.orderItems')}</h2>
-                  <span className="text-[12px] text-[#aaa] ml-1">({t('checkout.lines', { count: cart.length })})</span>
+              <div className="bg-white rounded-[10px] border border-line overflow-hidden">
+                <div className="px-5 py-4 border-b border-line flex items-center gap-2">
+                  <ClipboardList size={16} className="text-ink-500" />
+                  <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.orderItems')}</h2>
+                  <span className="text-[12px] text-ink-300 ml-1">({t('checkout.lines', { count: cart.length })})</span>
                 </div>
 
                 {/* Header row */}
-                <div className="hidden md:grid grid-cols-[2fr_1fr_80px_90px] gap-2 px-5 py-2.5 bg-[#f8f8fa] border-b border-[#f0f0f0] text-[11px] font-semibold text-[#aaa] uppercase tracking-wide">
+                <div className="hidden md:grid grid-cols-[2fr_1fr_80px_90px] gap-2 px-5 py-2.5 bg-sunken border-b border-line text-[11px] font-semibold text-ink-300 uppercase tracking-wide">
                   <span>{t('checkout.product')}</span>
                   <span>{t('checkout.setOption')}</span>
                   <span className="text-center">{t('checkout.qty')}</span>
@@ -335,7 +333,7 @@ export default function Checkout() {
                   return (
                     <div
                       key={`${item.product.id}-${item.setOption?.id}`}
-                      className="grid grid-cols-1 md:grid-cols-[2fr_1fr_80px_90px] gap-2 items-center px-5 py-4 border-b border-[#f8f8f8] last:border-0"
+                      className="grid grid-cols-1 md:grid-cols-[2fr_1fr_80px_90px] gap-2 items-center px-5 py-4 border-b border-line last:border-0"
                     >
                       {/* Product */}
                       <div className="flex gap-3 items-center">
@@ -346,16 +344,16 @@ export default function Checkout() {
                             (e.target as HTMLImageElement).src =
                               'https://placehold.co/60x60/f0f0f0/999?text=IMG';
                           }}
-                          className="w-[56px] h-[56px] object-cover rounded-lg border border-[#f0f0f0] shrink-0"
+                          className="w-[56px] h-[56px] object-cover rounded-lg border border-line shrink-0"
                         />
                         <div>
-                          <p className="text-[11px] text-[#aaa] uppercase font-medium">{item.product.brand}</p>
-                          <p className="text-[13px] text-[#222] font-medium leading-tight">{item.product.nameEn ?? item.product.name}</p>
+                          <p className="text-[11px] text-ink-300 uppercase font-medium">{item.product.brand}</p>
+                          <p className="text-[13px] text-ink-900 font-medium leading-tight">{item.product.nameEn ?? item.product.name}</p>
                           {item.product.nameEn && item.product.name !== item.product.nameEn && (
-                            <p className="text-[11px] text-[#bbb] leading-tight">{item.product.name}</p>
+                            <p className="text-[11px] text-ink-300 leading-tight">{item.product.name}</p>
                           )}
-                          <p className="text-[12px] text-[#4a90e2] font-semibold mt-0.5">
-                            {formatPrice(item.product.wholesalePrice)} {t('products.perSet')}
+                          <p className="text-[12px] text-ink-700 font-semibold tabular-nums mt-0.5">
+                            {formatPrice(item.setOption?.wholesalePrice ?? item.product.wholesalePrice)} {t('products.perSet')}
                           </p>
                         </div>
                       </div>
@@ -364,22 +362,22 @@ export default function Checkout() {
                       <div>
                         {item.setOption ? (
                           <div>
-                            <span className="inline-block px-2 py-0.5 bg-[#f0f7ff] text-[#4a90e2] text-[11px] font-bold rounded">
+                            <span className="inline-block rounded-sm border border-line-strong bg-canvas px-[7px] py-[3px] text-[11px] font-bold tracking-[0.02em] text-ink-700">
                               {item.setOption.id}
                             </span>
-                            <p className="text-[11px] text-[#999] mt-0.5">{item.setOption.description}</p>
-                            <p className="text-[11px] text-[#bbb]">{item.setOption.unitsPerSet} {t('productDetail.unitsPerSet')}</p>
+                            <p className="text-[11px] text-ink-500 mt-0.5">{item.setOption.description}</p>
+                            <p className="text-[11px] text-ink-300">{item.setOption.unitsPerSet} {t('productDetail.unitsPerSet')}</p>
                           </div>
                         ) : (
-                          <span className="text-[12px] text-[#bbb]">—</span>
+                          <span className="text-[12px] text-ink-300">—</span>
                         )}
                       </div>
 
                       {/* Qty */}
                       <div className="text-center">
-                        <span className="text-[15px] font-semibold text-[#333]">{item.quantity}</span>
+                        <span className="text-[15px] font-semibold text-ink-700">{item.quantity}</span>
                         {item.setOption && (
-                          <p className="text-[10px] text-[#bbb]">
+                          <p className="text-[10px] text-ink-300">
                             {item.quantity * item.setOption.unitsPerSet} {t('cart.units')}
                           </p>
                         )}
@@ -387,7 +385,7 @@ export default function Checkout() {
 
                       {/* Subtotal */}
                       <div className="text-right">
-                        <p className="text-[14px] font-bold text-[#222]">{formatPrice(lineTotal)}</p>
+                        <p className="text-[14px] font-bold tabular-nums text-ink-900">{formatPrice(lineTotal)}</p>
                       </div>
                     </div>
                   );
@@ -397,39 +395,39 @@ export default function Checkout() {
 
             {/* Summary sidebar */}
             <div className="lg:w-[280px] shrink-0">
-              <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden sticky top-4">
-                <div className="px-5 py-4 border-b border-[#f0f0f0]">
-                  <h2 className="text-[15px] font-semibold text-[#222]">{t('checkout.orderSummary')}</h2>
+              <div className="bg-white rounded-[10px] border border-line overflow-hidden lg:sticky lg:top-[136px]">
+                <div className="px-5 py-4 border-b border-line">
+                  <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.orderSummary')}</h2>
                 </div>
                 <div className="px-5 py-4 space-y-3">
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-[#666]">{t('checkout.totalSets')}</span>
-                    <span className="font-medium">{cart.reduce((s, i) => s + i.quantity, 0)}</span>
+                    <span className="text-ink-500">{t('checkout.totalSets')}</span>
+                    <span className="font-medium tabular-nums">{cart.reduce((s, i) => s + i.quantity, 0)}</span>
                   </div>
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-[#666]">{t('checkout.totalUnits')}</span>
-                    <span className="font-medium">{totalUnits.toLocaleString()}</span>
+                    <span className="text-ink-500">{t('checkout.totalUnits')}</span>
+                    <span className="font-medium tabular-nums">{totalUnits.toLocaleString()}</span>
                   </div>
-                  <div className="border-t border-[#f0f0f0] pt-3 flex justify-between text-[13px]">
-                    <span className="text-[#666]">{t('checkout.subtotal')}</span>
-                    <span className="font-medium">{formatPrice(subtotal)}</span>
+                  <div className="border-t border-line pt-3 flex justify-between text-[13px]">
+                    <span className="text-ink-500">{t('checkout.subtotal')}</span>
+                    <span className="font-medium tabular-nums">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-[#666]">{t('checkout.vat')}</span>
-                    <span className="font-medium">{formatPrice(vat)}</span>
+                    <span className="text-ink-500">{t('checkout.vat')}</span>
+                    <span className="font-medium tabular-nums">{formatPrice(vat)}</span>
                   </div>
-                  <div className="border-t border-[#e5e5e5] pt-3 flex justify-between">
-                    <span className="text-[14px] font-bold text-[#222]">{t('checkout.grandTotal')}</span>
-                    <span className="text-[18px] font-bold text-[#333]">{formatPrice(total)}</span>
+                  <div className="border-t border-line pt-3 flex justify-between">
+                    <span className="text-[14px] font-bold text-ink-900">{t('checkout.grandTotal')}</span>
+                    <span className="text-[18px] font-extrabold tabular-nums text-ink-900">{formatPrice(total)}</span>
                   </div>
-                  <p className="text-[10px] text-[#bbb] leading-relaxed">
+                  <p className="text-[10px] text-ink-300 leading-relaxed">
                     {t('checkout.vatNote')}
                   </p>
                 </div>
                 <div className="px-5 pb-5">
                   <button
                     onClick={() => setStep('shipping')}
-                    className="w-full py-3 bg-[#333] text-white rounded-lg text-[14px] font-semibold hover:bg-[#555] transition-colors flex items-center justify-center gap-2"
+                    className="w-full h-11 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow flex items-center justify-center gap-2"
                   >
                     {t('checkout.proceedToShipping')}
                     <ChevronRight size={16} />
@@ -449,10 +447,10 @@ export default function Checkout() {
             <div className="flex-1 space-y-5">
 
               {/* Delivery Address */}
-              <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
-                <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
-                  <Truck size={16} className="text-[#4a90e2]" />
-                  <h2 className="text-[15px] font-semibold text-[#222]">{t('checkout.deliveryAddress')}</h2>
+              <div className="bg-white rounded-[10px] border border-line overflow-hidden">
+                <div className="px-5 py-4 border-b border-line flex items-center gap-2">
+                  <Truck size={16} className="text-ink-500" />
+                  <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.deliveryAddress')}</h2>
                 </div>
                 <div className="px-5 py-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Field label={`${t('checkout.companyName')} *`} error={errors.company}>
@@ -546,11 +544,11 @@ export default function Checkout() {
               </div>
 
               {/* Order Details */}
-              <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
-                <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
-                  <ClipboardList size={16} className="text-[#4a90e2]" />
-                  <h2 className="text-[15px] font-semibold text-[#222]">{t('checkout.orderDetails')}</h2>
-                  <span className="text-[11px] text-[#bbb]">({t('common.optional')})</span>
+              <div className="bg-white rounded-[10px] border border-line overflow-hidden">
+                <div className="px-5 py-4 border-b border-line flex items-center gap-2">
+                  <ClipboardList size={16} className="text-ink-500" />
+                  <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.orderDetails')}</h2>
+                  <span className="text-[11px] text-ink-300">({t('common.optional')})</span>
                 </div>
                 <div className="px-5 py-5 space-y-4">
                   <Field label={t('checkout.poNumber')}>
@@ -576,58 +574,58 @@ export default function Checkout() {
 
             {/* Summary sidebar */}
             <div className="lg:w-[280px] shrink-0">
-              <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden sticky top-4">
-                <div className="px-5 py-4 border-b border-[#f0f0f0]">
-                  <h2 className="text-[15px] font-semibold text-[#222]">{t('checkout.orderSummary')}</h2>
+              <div className="bg-white rounded-[10px] border border-line overflow-hidden lg:sticky lg:top-[136px]">
+                <div className="px-5 py-4 border-b border-line">
+                  <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.orderSummary')}</h2>
                 </div>
                 <div className="px-5 py-4 space-y-2 max-h-[240px] overflow-y-auto">
                   {cart.map((item) => (
-                    <div key={`${item.product.id}-${item.setOption?.id}`} className="flex justify-between text-[12px] py-1 border-b border-[#f8f8f8] last:border-0">
-                      <span className="text-[#555] truncate pr-2 flex-1">
-                        <span className="font-medium text-[#4a90e2] mr-1">{item.setOption?.id}</span>
+                    <div key={`${item.product.id}-${item.setOption?.id}`} className="flex justify-between text-[12px] py-1 border-b border-line last:border-0">
+                      <span className="text-ink-500 truncate pr-2 flex-1">
+                        <span className="font-bold text-ink-900 mr-1">{item.setOption?.id}</span>
                         {item.product.nameEn ?? item.product.name}
                       </span>
-                      <span className="shrink-0 text-[#222] font-semibold">×{item.quantity}</span>
+                      <span className="shrink-0 text-ink-900 font-semibold">×{item.quantity}</span>
                     </div>
                   ))}
                 </div>
-                <div className="px-5 py-4 border-t border-[#f0f0f0] space-y-2">
+                <div className="px-5 py-4 border-t border-line space-y-2">
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-[#666]">{t('cart.subtotal')}</span>
-                    <span>{formatPrice(subtotal)}</span>
+                    <span className="text-ink-500">{t('cart.subtotal')}</span>
+                    <span className="tabular-nums">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-[#666]">{t('checkout.vat')}</span>
-                    <span>{formatPrice(vat)}</span>
+                    <span className="text-ink-500">{t('checkout.vat')}</span>
+                    <span className="tabular-nums">{formatPrice(vat)}</span>
                   </div>
-                  <div className="flex justify-between font-bold text-[15px] pt-2 border-t border-[#e5e5e5]">
+                  <div className="flex justify-between font-bold text-[15px] pt-2 border-t border-line">
                     <span>{t('cart.total')}</span>
-                    <span>{formatPrice(total)}</span>
+                    <span className="tabular-nums">{formatPrice(total)}</span>
                   </div>
                 </div>
                 <div className="px-5 pb-5 space-y-3">
                   {/* Payment method selector */}
-                  <p className="text-[11px] font-semibold text-[#999] uppercase tracking-wide">{t('checkout.paymentMethod')}</p>
+                  <p className="text-[11px] font-semibold text-ink-500 uppercase tracking-wide">{t('checkout.paymentMethod')}</p>
                   <div className="space-y-2">
                     <button
                       onClick={() => setPaymentMethod('bank_transfer')}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors ${
                         paymentMethod === 'bank_transfer'
-                          ? 'border-[#4a90e2] bg-[#f0f7ff]'
-                          : 'border-[#e5e5e5] hover:border-[#bbb]'
+                          ? 'border-ink-900 bg-sunken'
+                          : 'border-line hover:border-line-strong'
                       }`}
                     >
                       <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                        paymentMethod === 'bank_transfer' ? 'border-[#4a90e2]' : 'border-[#ccc]'
+                        paymentMethod === 'bank_transfer' ? 'border-ink-900' : 'border-line-strong'
                       }`}>
                         {paymentMethod === 'bank_transfer' && (
-                          <div className="w-2 h-2 rounded-full bg-[#4a90e2]" />
+                          <div className="w-2 h-2 rounded-full bg-ink-900" />
                         )}
                       </div>
-                      <Building2 size={15} className={paymentMethod === 'bank_transfer' ? 'text-[#4a90e2]' : 'text-[#aaa]'} />
+                      <Building2 size={15} className={paymentMethod === 'bank_transfer' ? 'text-ink-900' : 'text-ink-300'} />
                       <div>
-                        <p className="text-[13px] font-semibold text-[#222]">{t('checkout.bankTransfer')}</p>
-                        <p className="text-[10px] text-[#888]">{t('checkout.bankTransferDesc')}</p>
+                        <p className="text-[13px] font-semibold text-ink-900">{t('checkout.bankTransfer')}</p>
+                        <p className="text-[10px] text-ink-500">{t('checkout.bankTransferDesc')}</p>
                       </div>
                     </button>
 
@@ -635,28 +633,28 @@ export default function Checkout() {
                       onClick={() => setPaymentMethod('paypal')}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors ${
                         paymentMethod === 'paypal'
-                          ? 'border-[#4a90e2] bg-[#f0f7ff]'
-                          : 'border-[#e5e5e5] hover:border-[#bbb]'
+                          ? 'border-ink-900 bg-sunken'
+                          : 'border-line hover:border-line-strong'
                       }`}
                     >
                       <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                        paymentMethod === 'paypal' ? 'border-[#4a90e2]' : 'border-[#ccc]'
+                        paymentMethod === 'paypal' ? 'border-ink-900' : 'border-line-strong'
                       }`}>
                         {paymentMethod === 'paypal' && (
-                          <div className="w-2 h-2 rounded-full bg-[#4a90e2]" />
+                          <div className="w-2 h-2 rounded-full bg-ink-900" />
                         )}
                       </div>
                       <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" className="w-4 h-4 object-contain" />
                       <div>
-                        <p className="text-[13px] font-semibold text-[#222]">PayPal</p>
-                        <p className="text-[10px] text-[#888]">{t('checkout.paypalDesc')}</p>
+                        <p className="text-[13px] font-semibold text-ink-900">PayPal</p>
+                        <p className="text-[10px] text-ink-500">{t('checkout.paypalDesc')}</p>
                       </div>
                     </button>
                   </div>
 
                   {/* Bank transfer details */}
                   {paymentMethod === 'bank_transfer' && (
-                    <div className="bg-[#f8f8fa] rounded-lg border border-[#e5e5e5] p-3 space-y-2">
+                    <div className="bg-sunken rounded-lg border border-line p-3 space-y-2">
                       <div className="flex gap-1.5">
                         {BANK_ACCOUNTS.map((b) => (
                           <button
@@ -664,8 +662,8 @@ export default function Checkout() {
                             onClick={() => setSelectedBankCurrency(b.currency)}
                             className={`px-3 py-1 rounded text-[11px] font-bold transition-colors ${
                               selectedBankCurrency === b.currency
-                                ? 'bg-[#333] text-white'
-                                : 'bg-white text-[#666] border border-[#ddd] hover:border-[#aaa]'
+                                ? 'bg-ink-700 text-white'
+                                : 'bg-white text-ink-500 border border-line-strong hover:border-ink-300'
                             }`}
                           >
                             {b.currency}
@@ -681,11 +679,11 @@ export default function Checkout() {
                           <BankRow label={t('checkout.routingLabel')} value={selectedBank.routingNumber} field="routing" copiedField={copiedField} onCopy={copyToClipboard} />
                         )}
                       </div>
-                      <p className="text-[10px] text-[#aaa] pt-1">{selectedBank.note}</p>
+                      <p className="text-[10px] text-ink-300 pt-1">{selectedBank.note}</p>
                       {bankNotConfigured && (
-                        <div className="flex items-start gap-2 mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
-                          <AlertTriangle size={13} className="text-amber-600 shrink-0 mt-0.5" />
-                          <p className="text-[10px] text-amber-700 leading-relaxed">{t('checkout.bankNotConfigured')}</p>
+                        <div className="flex items-start gap-2 mt-2 p-2 bg-canvas border border-line-strong rounded-lg">
+                          <AlertTriangle size={13} className="text-signal-error shrink-0 mt-0.5" />
+                          <p className="text-[10px] text-ink-700 leading-relaxed">{t('checkout.bankNotConfigured')}</p>
                         </div>
                       )}
                     </div>
@@ -695,10 +693,10 @@ export default function Checkout() {
                   {paymentMethod === 'paypal' && (
                     <div>
                       {paypalLoading ? (
-                        <div className="w-full h-11 bg-[#f5c542] rounded-lg animate-pulse" />
+                        <div className="w-full h-11 bg-sunken rounded-lg animate-pulse" />
                       ) : (
                         <PayPalButtons
-                          style={{ layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', height: 44 }}
+                          style={{ layout: 'horizontal', color: 'black', shape: 'rect', label: 'paypal', height: 44 }}
                           createOrder={createPayPalOrder}
                           onApprove={onPayPalApprove}
                           onError={() => showToast(t('checkout.paypalFailed'), 'error')}
@@ -712,14 +710,14 @@ export default function Checkout() {
                     <button
                       onClick={() => handlePlaceOrder('bank_transfer')}
                       disabled={placing || bankNotConfigured}
-                      className="w-full py-3 bg-[#4a90e2] text-white rounded-lg text-[14px] font-semibold hover:bg-[#357abd] transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="w-full h-11 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       {placing ? t('common.loading') : t('checkout.placeOrder')}
                       <ChevronRight size={16} />
                     </button>
                   )}
 
-                  <p className="text-[10px] text-[#bbb] text-center">
+                  <p className="text-[10px] text-ink-300 text-center">
                     {t('checkout.terms')}
                   </p>
                 </div>
@@ -734,67 +732,67 @@ export default function Checkout() {
         {step === 'confirmed' && (
           <div className="max-w-[640px] mx-auto">
             {/* Success banner */}
-            <div className="bg-white rounded-xl border border-[#e5e5e5] p-8 text-center mb-5">
-              <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 size={36} className="text-green-500" />
+            <div className="bg-white rounded-[10px] border border-line p-8 text-center mb-5">
+              <div className="w-16 h-16 rounded-full border border-line flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 size={36} className="text-signal-ok" />
               </div>
-              <h2 className="text-[22px] font-bold text-[#222] mb-1">{t('checkout.orderPlaced')}</h2>
-              <p className="text-[14px] text-[#666] mb-4">
+              <h2 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-1">{t('checkout.orderPlaced')}</h2>
+              <p className="text-[14px] text-ink-500 mb-4">
                 {t('checkout.thankYou')}
               </p>
-              <div className="inline-block bg-[#f8f8fa] border border-[#e5e5e5] rounded-lg px-6 py-3">
-                <p className="text-[11px] text-[#aaa] uppercase tracking-wide mb-0.5">{t('checkout.orderNumber')}</p>
-                <p className="text-[20px] font-bold text-[#333] font-mono">{orderId}</p>
+              <div className="inline-block bg-sunken border border-line rounded-lg px-6 py-3">
+                <p className="text-[11px] text-ink-300 uppercase tracking-wide mb-0.5">{t('checkout.orderNumber')}</p>
+                <p className="text-[20px] font-bold text-ink-700 font-mono">{orderId}</p>
               </div>
             </div>
 
             {/* Shipping summary */}
-            <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden mb-5">
-              <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
-                <Truck size={15} className="text-[#4a90e2]" />
-                <h3 className="text-[14px] font-semibold text-[#222]">{t('checkout.shippingTo')}</h3>
+            <div className="bg-white rounded-[10px] border border-line overflow-hidden mb-5">
+              <div className="px-5 py-4 border-b border-line flex items-center gap-2">
+                <Truck size={15} className="text-ink-500" />
+                <h3 className="text-[14px] font-semibold text-ink-900">{t('checkout.shippingTo')}</h3>
               </div>
-              <div className="px-5 py-4 text-[13px] text-[#555] space-y-1">
-                <p className="font-semibold text-[#222]">{shipping.company}</p>
+              <div className="px-5 py-4 text-[13px] text-ink-500 space-y-1">
+                <p className="font-semibold text-ink-900">{shipping.company}</p>
                 <p>{t('checkout.attn')}: {shipping.recipient} · {shipping.phone}</p>
                 <p>{shipping.addressLine1}{shipping.addressLine2 ? `, ${shipping.addressLine2}` : ''}</p>
                 <p>{[shipping.city, shipping.state, shipping.zipCode].filter(Boolean).join(', ')}, {shipping.country}</p>
-                {poNumber && <p className="pt-1 text-[#888]">{t('account.po')}: <span className="font-medium text-[#555]">{poNumber}</span></p>}
-                {notes && <p className="text-[#888]">{t('account.notes')}: <span className="font-medium text-[#555]">{notes}</span></p>}
+                {poNumber && <p className="pt-1 text-ink-500">{t('account.po')}: <span className="font-medium text-ink-500">{poNumber}</span></p>}
+                {notes && <p className="text-ink-500">{t('account.notes')}: <span className="font-medium text-ink-500">{notes}</span></p>}
               </div>
             </div>
 
             {/* Price summary */}
-            <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden mb-6">
-              <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
-                <ClipboardList size={15} className="text-[#4a90e2]" />
-                <h3 className="text-[14px] font-semibold text-[#222]">{t('checkout.paymentSummary')}</h3>
+            <div className="bg-white rounded-[10px] border border-line overflow-hidden mb-6">
+              <div className="px-5 py-4 border-b border-line flex items-center gap-2">
+                <ClipboardList size={15} className="text-ink-500" />
+                <h3 className="text-[14px] font-semibold text-ink-900">{t('checkout.paymentSummary')}</h3>
               </div>
               <div className="px-5 py-4 space-y-2 text-[13px]">
                 <div className="flex justify-between">
-                  <span className="text-[#666]">{t('checkout.subtotal')}</span>
-                  <span>{formatPrice(confirmedTotals.subtotal)}</span>
+                  <span className="text-ink-500">{t('checkout.subtotal')}</span>
+                  <span className="tabular-nums">{formatPrice(confirmedTotals.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#666]">{t('checkout.vat')}</span>
-                  <span>{formatPrice(confirmedTotals.vat)}</span>
+                  <span className="text-ink-500">{t('checkout.vat')}</span>
+                  <span className="tabular-nums">{formatPrice(confirmedTotals.vat)}</span>
                 </div>
-                <div className="flex justify-between font-bold text-[15px] pt-3 border-t border-[#e5e5e5]">
+                <div className="flex justify-between font-bold text-[15px] pt-3 border-t border-line">
                   <span>{t('checkout.grandTotal')}</span>
-                  <span>{formatPrice(confirmedTotals.total)}</span>
+                  <span className="tabular-nums">{formatPrice(confirmedTotals.total)}</span>
                 </div>
               </div>
             </div>
 
             {/* Bank transfer instructions */}
             {paymentMethod === 'bank_transfer' && (
-              <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden mb-5">
-                <div className="px-5 py-4 border-b border-[#f0f0f0] flex items-center gap-2">
-                  <Building2 size={15} className="text-[#4a90e2]" />
-                  <h3 className="text-[14px] font-semibold text-[#222]">{t('checkout.bankInstructions')}</h3>
+              <div className="bg-white rounded-[10px] border border-line overflow-hidden mb-5">
+                <div className="px-5 py-4 border-b border-line flex items-center gap-2">
+                  <Building2 size={15} className="text-ink-500" />
+                  <h3 className="text-[14px] font-semibold text-ink-900">{t('checkout.bankInstructions')}</h3>
                 </div>
                 <div className="px-5 py-4 space-y-3">
-                  <p className="text-[13px] text-[#555]">
+                  <p className="text-[13px] text-ink-500">
                     {t('checkout.bankInstructionsDesc', { orderId })}
                   </p>
                   <div className="flex gap-1.5 mb-2">
@@ -804,15 +802,15 @@ export default function Checkout() {
                         onClick={() => setSelectedBankCurrency(b.currency)}
                         className={`px-3 py-1 rounded text-[11px] font-bold transition-colors ${
                           selectedBankCurrency === b.currency
-                            ? 'bg-[#333] text-white'
-                            : 'bg-[#f5f5f5] text-[#666] border border-[#ddd] hover:border-[#aaa]'
+                            ? 'bg-ink-700 text-white'
+                            : 'bg-sunken text-ink-500 border border-line-strong hover:border-ink-300'
                         }`}
                       >
                         {b.currency}
                       </button>
                     ))}
                   </div>
-                  <div className="bg-[#f8f8fa] rounded-lg border border-[#e5e5e5] p-3 space-y-1.5 text-[12px]">
+                  <div className="bg-sunken rounded-lg border border-line p-3 space-y-1.5 text-[12px]">
                     <BankRow label={t('checkout.bankLabel')} value={selectedBank.bankName} field="c-bank" copiedField={copiedField} onCopy={copyToClipboard} />
                     <BankRow label={t('checkout.accountNameLabel')} value={selectedBank.accountName} field="c-name" copiedField={copiedField} onCopy={copyToClipboard} />
                     <BankRow label={t('checkout.accountNoLabel')} value={selectedBank.accountNumber} field="c-account" copiedField={copiedField} onCopy={copyToClipboard} />
@@ -820,24 +818,24 @@ export default function Checkout() {
                     {selectedBank.routingNumber && (
                       <BankRow label={t('checkout.routingLabel')} value={selectedBank.routingNumber} field="c-routing" copiedField={copiedField} onCopy={copyToClipboard} />
                     )}
-                    <div className="pt-1 flex justify-between items-center border-t border-[#e5e5e5] mt-1">
-                      <span className="text-[#888] font-medium">{t('checkout.amount')}</span>
-                      <span className="font-bold text-[#222] text-[13px]">{formatBankAmount(confirmedTotals.total)}</span>
+                    <div className="pt-1 flex justify-between items-center border-t border-line mt-1">
+                      <span className="text-ink-500 font-medium">{t('checkout.amount')}</span>
+                      <span className="font-bold tabular-nums text-ink-900 text-[13px]">{formatBankAmount(confirmedTotals.total)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[#888] font-medium">{t('checkout.reference')}</span>
-                      <span className="font-mono font-bold text-[#4a90e2]">{orderId}</span>
+                      <span className="text-ink-500 font-medium">{t('checkout.reference')}</span>
+                      <span className="font-mono font-bold text-ink-900">{orderId}</span>
                     </div>
                   </div>
-                  <p className="text-[11px] text-[#aaa]">{t('checkout.bankPaymentNote')}</p>
+                  <p className="text-[11px] text-ink-300">{t('checkout.bankPaymentNote')}</p>
                 </div>
               </div>
             )}
 
             {/* What's next */}
-            <div className="bg-[#f0f7ff] border border-[#4a90e2]/20 rounded-xl px-5 py-4 mb-6 text-[13px] text-[#555] space-y-2">
-              <p className="font-semibold text-[#333]">{t('checkout.whatsNext')}</p>
-              <ol className="list-decimal list-inside space-y-1 text-[#666]">
+            <div className="bg-sunken border border-line rounded-[10px] px-5 py-4 mb-6 text-[13px] text-ink-500 space-y-2">
+              <p className="font-semibold text-ink-700">{t('checkout.whatsNext')}</p>
+              <ol className="list-decimal list-inside space-y-1 text-ink-500">
                 {paymentMethod === 'bank_transfer' ? (
                   <>
                     <li>{t('checkout.bankStep1')}</li>
@@ -860,13 +858,13 @@ export default function Checkout() {
             <div className="flex gap-3">
               <button
                 onClick={() => navigate('/products')}
-                className="flex-1 py-3 border border-[#ddd] rounded-lg text-[14px] text-[#555] hover:bg-[#f5f5f5] transition-colors font-medium"
+                className="flex-1 h-11 border-[1.5px] border-ink-900 rounded-lg text-[14px] text-ink-900 hover:bg-sunken transition-colors font-bold"
               >
                 {t('checkout.continueShopping')}
               </button>
               <button
                 onClick={() => navigate('/')}
-                className="flex-1 py-3 bg-[#333] text-white rounded-lg text-[14px] font-semibold hover:bg-[#555] transition-colors"
+                className="flex-1 h-11 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow"
               >
                 {t('common.backToHome')}
               </button>
@@ -890,18 +888,18 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-[12px] text-[#666] mb-1 font-medium">{label}</label>
+      <label className="block text-[12px] text-ink-500 mb-1 font-medium">{label}</label>
       {children}
-      {error && <p className="text-[11px] text-red-500 mt-1">{error}</p>}
+      {error && <p className="text-[11px] text-signal-error mt-1">{error}</p>}
     </div>
   );
 }
 
 function input(hasError: boolean) {
-  return `w-full px-3 py-2.5 border rounded-lg text-[13px] focus:outline-none transition-colors ${
+  return `w-full px-3 py-2.5 border rounded-lg bg-canvas text-[13px] text-ink-700 placeholder:text-ink-300 focus:outline-none transition-colors ${
     hasError
-      ? 'border-red-400 focus:border-red-500'
-      : 'border-[#e5e5e5] focus:border-[#4a90e2]'
+      ? 'border-signal-error'
+      : 'border-line-strong focus:border-ink-900'
   }`;
 }
 
@@ -921,15 +919,15 @@ function BankRow({
   const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-[#888] shrink-0 w-[90px]">{label}</span>
-      <span className="font-semibold text-[#222] truncate flex-1">{value}</span>
+      <span className="text-ink-500 shrink-0 w-[90px]">{label}</span>
+      <span className="font-semibold text-ink-900 truncate flex-1">{value}</span>
       <button
         onClick={() => onCopy(value, field)}
-        className="shrink-0 text-[#bbb] hover:text-[#4a90e2] transition-colors"
+        className="shrink-0 text-ink-300 hover:text-ink-900 transition-colors"
         title={t('common.copy')}
       >
         {copiedField === field ? (
-          <CheckCircle2 size={13} className="text-green-500" />
+          <CheckCircle2 size={13} className="text-signal-ok" />
         ) : (
           <Copy size={13} />
         )}
