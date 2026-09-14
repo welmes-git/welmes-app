@@ -294,7 +294,7 @@ export default function ProductDetail() {
             </Link>
 
             {/* Name */}
-            <h1 className={`mt-1 text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 ${hasJapanese(product.nameEn) ? 'font-jp' : ''}`}>
+            <h1 className={`mt-1 font-serif text-[30px] font-normal leading-[38px] text-ink-700 ${hasJapanese(product.nameEn) ? 'font-jp' : ''}`}>
               {product.nameEn}
             </h1>
             {product.name !== product.nameEn && (
@@ -350,7 +350,7 @@ export default function ProductDetail() {
                       const unitWholesale = Math.round(opt.wholesalePrice / opt.unitsPerSet);
                       const unitOriginal = Math.round(opt.originalPrice / opt.unitsPerSet);
                       return (
-                        <div key={opt.id} className={`rounded-[10px] border border-line p-3 transition-colors ${qty > 0 ? selectedRow : 'bg-canvas'}`}>
+                        <div key={opt.id} className={`rounded-sm border border-line p-3 transition-colors ${qty > 0 ? selectedRow : 'bg-canvas'}`}>
                           <div className="mb-2 flex items-center gap-2">
                             <span className="rounded-sm border border-line-strong bg-canvas px-[7px] py-[3px] text-[11px] font-bold tracking-[0.02em] text-ink-700">{opt.id}</span>
                             <span className="text-[13px] font-semibold text-ink-700">{opt.description}</span>
@@ -391,7 +391,7 @@ export default function ProductDetail() {
                   </div>
                 ) : (
                   /* Desktop: Table layout */
-                  <div className="overflow-hidden rounded-[10px] border border-line">
+                  <div className="overflow-hidden rounded-sm border border-line">
                     <div className="grid grid-cols-[1fr_92px_112px_auto] gap-x-3 bg-sunken px-3 py-2.5 text-[11px] font-bold uppercase tracking-[0.02em] text-ink-500">
                       <span>Set</span>
                       <span className="text-right">{t('productDetail.unitPrice')}</span>
@@ -469,7 +469,7 @@ export default function ProductDetail() {
                     </div>
                     <div className="flex items-baseline gap-2">
                       <span className="text-[13px] text-ink-500">{t('productDetail.grandTotal')}</span>
-                      <span className="text-[22px] font-extrabold tracking-[-0.01em] tabular-nums text-ink-900">
+                      <span className="text-[22px] font-medium tabular-nums text-ink-700">
                         {formatPrice(grandTotal)}
                       </span>
                     </div>
@@ -518,7 +518,7 @@ export default function ProductDetail() {
               </button>
               <button
                 onClick={handleOrderInquiry}
-                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-ink-900 text-[14px] font-bold text-white transition-shadow hover:shadow-hover"
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-ink-700 text-[14px] text-white transition-colors hover:bg-ink-900"
               >
                 <MessageCircle size={16} />
                 {t('productDetail.orderInquiry')}
@@ -565,7 +565,7 @@ export default function ProductDetail() {
                 }}
               />
               <div className="mt-6 bg-sunken rounded-lg p-6">
-                <h3 className="text-[16px] font-bold text-ink-700 mb-4">
+                <h3 className="text-[16px] font-medium text-ink-700 mb-4">
                   {t('productDetail.productDetails')}
                 </h3>
                 <table className="w-full text-[13px]">
@@ -603,9 +603,9 @@ export default function ProductDetail() {
             <div className="space-y-6">
 
               {/* ── Rating Summary ── */}
-              <div className="bg-sunken rounded-[10px] p-5 flex flex-col sm:flex-row gap-6 items-center">
+              <div className="bg-sunken rounded-sm p-5 flex flex-col sm:flex-row gap-6 items-center">
                 <div className="text-center shrink-0">
-                  <p className="text-[40px] font-extrabold tabular-nums text-ink-900 leading-none">
+                  <p className="text-[40px] font-medium tabular-nums text-ink-700 leading-none">
                     {reviews.length > 0
                       ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
                       : product.rating.toFixed(1)}
@@ -647,8 +647,8 @@ export default function ProductDetail() {
 
               {/* ── Write Review Form ── */}
               {isAuthenticated && isVerified && !alreadyReviewed && (
-                <div className="bg-white border border-line rounded-[10px] p-5">
-                  <h3 className="text-[15px] font-bold text-ink-900 mb-4">{t('review.writeReview')}</h3>
+                <div className="bg-white border border-line rounded-sm p-5">
+                  <h3 className="text-[15px] font-medium text-ink-700 mb-4">{t('review.writeReview')}</h3>
 
                   <div className="mb-4">
                     <p className="text-[12px] text-ink-500 mb-2">{t('review.yourRating')}</p>
@@ -698,7 +698,7 @@ export default function ProductDetail() {
                   <button
                     onClick={submitReview}
                     disabled={reviewSubmitting}
-                    className="px-6 py-2.5 bg-ink-900 text-white rounded-lg text-[13px] font-semibold hover:shadow-hover transition-colors disabled:opacity-50"
+                    className="px-6 py-2.5 bg-ink-700 text-white rounded-lg text-[13px] hover:bg-ink-900 transition-colors disabled:opacity-50"
                   >
                     {reviewSubmitting ? t('review.submitting') : t('review.submit')}
                   </button>
@@ -715,12 +715,12 @@ export default function ProductDetail() {
 
               {/* Login prompt */}
               {!isAuthenticated && (
-                <div className="text-center py-6 border border-line rounded-[10px]">
+                <div className="text-center py-6 border border-line rounded-sm">
                   <Lock size={24} className="mx-auto text-ink-300 mb-2" />
                   <p className="text-[13px] text-ink-500 mb-3">{t('review.loginToReview')}</p>
                   <button
                     onClick={() => navigate('/login')}
-                    className="px-5 py-2 bg-ink-900 text-white rounded-lg text-[13px] font-medium hover:shadow-hover transition-colors"
+                    className="px-5 py-2 bg-ink-700 text-white rounded-lg text-[13px] font-medium hover:bg-ink-900 transition-colors"
                   >
                     {t('common.login')}
                   </button>
@@ -740,7 +740,7 @@ export default function ProductDetail() {
               ) : (
                 <div className="space-y-4">
                   {reviews.map((review) => (
-                    <div key={review.id} className="bg-white border border-line rounded-[10px] p-5">
+                    <div key={review.id} className="bg-white border border-line rounded-sm p-5">
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <p className="text-[14px] font-semibold text-ink-900">{review.memberName}</p>
@@ -765,7 +765,7 @@ export default function ProductDetail() {
 
           {activeTab === 'shipping' && (
             <div className="bg-sunken rounded-lg p-6">
-              <h3 className="text-[16px] font-bold text-ink-700 mb-4">
+              <h3 className="text-[16px] font-medium text-ink-700 mb-4">
                 {t('productDetail.shippingInfo')}
               </h3>
               <div className="space-y-4 text-[13px] text-ink-500">
@@ -792,7 +792,7 @@ export default function ProductDetail() {
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div>
-            <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900 mb-5">
+            <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-5">
               {t('productDetail.relatedProducts')}
             </h2>
             <div className="product-grid">

@@ -24,7 +24,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-50"
+          className="fixed inset-0 bg-[rgba(51,51,51,0.5)] z-50"
           onClick={onClose}
         />
       )}
@@ -39,7 +39,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         <div className="flex items-center justify-between p-4 border-b border-line">
           <div className="flex items-center gap-2">
             <ShoppingBag size={20} />
-            <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900">{t('cart.title')}</h2>
+            <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700">{t('cart.title')}</h2>
             <span className="text-[13px] tabular-nums text-ink-500">
               ({t('cart.items', { count: cart.reduce((s, i) => s + i.quantity, 0) })})
             </span>
@@ -146,7 +146,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           <div className="absolute bottom-0 left-0 right-0 p-4 bg-canvas border-t border-line">
             <div className="flex justify-between items-center mb-3">
               <span className="text-[14px] text-ink-500">{t('cart.total')}</span>
-              <span className="text-[18px] font-extrabold tabular-nums text-ink-900">
+              <span className="text-[18px] font-medium tabular-nums text-ink-700">
                 {formatPrice(total)}
               </span>
             </div>
@@ -160,7 +160,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               <Link
                 to="/checkout"
                 onClick={onClose}
-                className="flex-1 h-11 flex items-center justify-center bg-ink-900 text-white rounded-lg text-[13px] font-bold hover:shadow-hover transition-shadow"
+                className="flex-1 h-11 flex items-center justify-center bg-ink-700 text-white rounded-lg text-[13px] hover:bg-ink-900 transition-colors"
               >
                 {t('cart.checkout')}
               </Link>

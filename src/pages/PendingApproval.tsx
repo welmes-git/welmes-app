@@ -25,13 +25,13 @@ export default function PendingApproval() {
       <div className="w-full max-w-[560px]">
 
         {/* Status card */}
-        <div className="bg-white rounded-[10px] border border-line p-8 text-center mb-5">
+        <div className="bg-white rounded-sm border border-line p-8 text-center mb-5">
           {status === 'pending' ? (
             <>
               <div className="w-16 h-16 rounded-full border border-line flex items-center justify-center mx-auto mb-4">
                 <Clock size={32} className="text-ink-700" />
               </div>
-              <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-2">
+              <h1 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700 mb-2">
                 {t('auth.pendingTitle')}
               </h1>
               <p className="text-[14px] text-ink-500 leading-relaxed mb-4">
@@ -47,7 +47,7 @@ export default function PendingApproval() {
               <div className="w-16 h-16 rounded-full border border-line flex items-center justify-center mx-auto mb-4">
                 <XCircle size={32} className="text-signal-error" />
               </div>
-              <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-2">
+              <h1 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700 mb-2">
                 {t('auth.notApproved')}
               </h1>
               <p className="text-[14px] text-ink-500 leading-relaxed mb-4">
@@ -64,7 +64,7 @@ export default function PendingApproval() {
         {/* Progress stepper — a concrete "where am I" beat instead of a bare
             date-range sentence; the vague wait is what drives abandonment. */}
         {status === 'pending' && (
-          <div className="bg-white rounded-[10px] border border-line p-5 mb-5">
+          <div className="bg-white rounded-sm border border-line p-5 mb-5">
             <div className="flex items-center">
               {[
                 { label: t('auth.stepSubmitted'), done: true },
@@ -92,7 +92,7 @@ export default function PendingApproval() {
         )}
 
         {/* Account info */}
-        <div className="bg-white rounded-[10px] border border-line p-5 mb-5">
+        <div className="bg-white rounded-sm border border-line p-5 mb-5">
           <h2 className="text-[11px] font-bold text-ink-500 uppercase tracking-[0.02em] mb-3">
             {t('auth.yourApplication')}
           </h2>
@@ -120,7 +120,7 @@ export default function PendingApproval() {
 
         {/* What's next */}
         {status === 'pending' && (
-          <div className="bg-white rounded-[10px] border border-line p-5 mb-5">
+          <div className="bg-white rounded-sm border border-line p-5 mb-5">
             <h2 className="text-[11px] font-bold text-ink-500 uppercase tracking-[0.02em] mb-3">
               {t('auth.whatsNext')}
             </h2>
@@ -143,7 +143,7 @@ export default function PendingApproval() {
             not just a rules explanation. No prices here: what pricing gets
             shown to unapproved visitors is a separate, not-yet-decided policy. */}
         {status === 'pending' && (
-          <div className="bg-white rounded-[10px] border border-line p-5 mb-5">
+          <div className="bg-white rounded-sm border border-line p-5 mb-5">
             <h2 className="text-[11px] font-bold text-ink-500 uppercase tracking-[0.02em] mb-3">
               {t('auth.afterApproval')}
             </h2>
@@ -167,7 +167,7 @@ export default function PendingApproval() {
             unapproved visitor), but gives them something to do besides
             leaving the tab open for two days. */}
         {status === 'pending' && previewProducts.length > 0 && (
-          <div className="bg-white rounded-[10px] border border-line p-5 mb-5">
+          <div className="bg-white rounded-sm border border-line p-5 mb-5">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-[11px] font-bold text-ink-500 uppercase tracking-[0.02em]">
                 {t('auth.browseWhileWaitingTitle')}
@@ -185,7 +185,7 @@ export default function PendingApproval() {
         )}
 
         {/* Contact support */}
-        <div className="bg-sunken border border-line rounded-[10px] p-5 mb-6">
+        <div className="bg-sunken border border-line rounded-sm p-5 mb-6">
           <h2 className="text-[11px] font-bold text-ink-500 uppercase tracking-wide mb-3">
             {t('auth.needHelp')}
           </h2>
@@ -224,7 +224,7 @@ export default function PendingApproval() {
           </Link>
           <button
             onClick={logout}
-            className="flex-1 h-11 bg-ink-900 text-white rounded-lg text-[13px] font-bold hover:shadow-hover transition-shadow"
+            className="flex-1 h-11 bg-ink-700 text-white rounded-lg text-[13px] hover:bg-ink-900 transition-colors"
           >
             {t('common.logout')}
           </button>

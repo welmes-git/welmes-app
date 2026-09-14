@@ -130,13 +130,13 @@ export default function Checkout() {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-20 text-center">
         <Package size={48} className="mx-auto text-line-strong mb-4" />
-        <h2 className="text-[20px] font-extrabold text-ink-900 mb-2">{t('checkout.loginRequired')}</h2>
+        <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-2">{t('checkout.loginRequired')}</h2>
         <p className="text-[14px] text-ink-500 mb-6">
           {t('checkout.loginRequiredDesc')}
         </p>
         <button
           onClick={() => navigate('/login')}
-          className="px-6 py-2.5 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow"
+          className="px-6 py-2.5 bg-ink-700 text-white rounded-lg text-[14px] hover:bg-ink-900 transition-colors"
         >
           {t('checkout.goToLogin')}
         </button>
@@ -148,13 +148,13 @@ export default function Checkout() {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-20 text-center">
         <Package size={48} className="mx-auto text-line-strong mb-4" />
-        <h2 className="text-[20px] font-extrabold text-ink-900 mb-2">{t('checkout.cartEmpty')}</h2>
+        <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-2">{t('checkout.cartEmpty')}</h2>
         <p className="text-[14px] text-ink-500 mb-6">
           {t('checkout.cartEmptyDesc')}
         </p>
         <button
           onClick={() => navigate('/products')}
-          className="px-6 py-2.5 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow"
+          className="px-6 py-2.5 bg-ink-700 text-white rounded-lg text-[14px] hover:bg-ink-900 transition-colors"
         >
           {t('checkout.browseProducts')}
         </button>
@@ -269,7 +269,7 @@ export default function Checkout() {
               <ArrowLeft size={18} />
             </button>
           )}
-          <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900">{t('checkout.title')}</h1>
+          <h1 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700">{t('checkout.title')}</h1>
         </div>
 
         {/* Step progress */}
@@ -313,10 +313,10 @@ export default function Checkout() {
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Item table */}
             <div className="flex-1">
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden">
+              <div className="bg-white rounded-sm border border-line overflow-hidden">
                 <div className="px-5 py-4 border-b border-line flex items-center gap-2">
                   <ClipboardList size={16} className="text-ink-500" />
-                  <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.orderItems')}</h2>
+                  <h2 className="text-[16px] font-medium text-ink-700">{t('checkout.orderItems')}</h2>
                   <span className="text-[12px] text-ink-300 ml-1">({t('checkout.lines', { count: cart.length })})</span>
                 </div>
 
@@ -395,9 +395,9 @@ export default function Checkout() {
 
             {/* Summary sidebar */}
             <div className="lg:w-[280px] shrink-0">
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden lg:sticky lg:top-[124px]">
+              <div className="bg-white rounded-sm border border-line overflow-hidden lg:sticky lg:top-[124px]">
                 <div className="px-5 py-4 border-b border-line">
-                  <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.orderSummary')}</h2>
+                  <h2 className="text-[16px] font-medium text-ink-700">{t('checkout.orderSummary')}</h2>
                 </div>
                 <div className="px-5 py-4 space-y-3">
                   <div className="flex justify-between text-[13px]">
@@ -418,7 +418,7 @@ export default function Checkout() {
                   </div>
                   <div className="border-t border-line pt-3 flex justify-between">
                     <span className="text-[14px] font-bold text-ink-900">{t('checkout.grandTotal')}</span>
-                    <span className="text-[18px] font-extrabold tabular-nums text-ink-900">{formatPrice(total)}</span>
+                    <span className="text-[18px] font-medium tabular-nums text-ink-700">{formatPrice(total)}</span>
                   </div>
                   <p className="text-[10px] text-ink-300 leading-relaxed">
                     {t('checkout.vatNote')}
@@ -427,7 +427,7 @@ export default function Checkout() {
                 <div className="px-5 pb-5">
                   <button
                     onClick={() => setStep('shipping')}
-                    className="w-full h-11 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow flex items-center justify-center gap-2"
+                    className="w-full h-11 bg-ink-700 text-white rounded-lg text-[14px] hover:bg-ink-900 transition-colors flex items-center justify-center gap-2"
                   >
                     {t('checkout.proceedToShipping')}
                     <ChevronRight size={16} />
@@ -447,10 +447,10 @@ export default function Checkout() {
             <div className="flex-1 space-y-5">
 
               {/* Delivery Address */}
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden">
+              <div className="bg-white rounded-sm border border-line overflow-hidden">
                 <div className="px-5 py-4 border-b border-line flex items-center gap-2">
                   <Truck size={16} className="text-ink-500" />
-                  <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.deliveryAddress')}</h2>
+                  <h2 className="text-[16px] font-medium text-ink-700">{t('checkout.deliveryAddress')}</h2>
                 </div>
                 <div className="px-5 py-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Field label={`${t('checkout.companyName')} *`} error={errors.company}>
@@ -544,10 +544,10 @@ export default function Checkout() {
               </div>
 
               {/* Order Details */}
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden">
+              <div className="bg-white rounded-sm border border-line overflow-hidden">
                 <div className="px-5 py-4 border-b border-line flex items-center gap-2">
                   <ClipboardList size={16} className="text-ink-500" />
-                  <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.orderDetails')}</h2>
+                  <h2 className="text-[16px] font-medium text-ink-700">{t('checkout.orderDetails')}</h2>
                   <span className="text-[11px] text-ink-300">({t('common.optional')})</span>
                 </div>
                 <div className="px-5 py-5 space-y-4">
@@ -574,9 +574,9 @@ export default function Checkout() {
 
             {/* Summary sidebar */}
             <div className="lg:w-[280px] shrink-0">
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden lg:sticky lg:top-[124px]">
+              <div className="bg-white rounded-sm border border-line overflow-hidden lg:sticky lg:top-[124px]">
                 <div className="px-5 py-4 border-b border-line">
-                  <h2 className="text-[15px] font-semibold text-ink-900">{t('checkout.orderSummary')}</h2>
+                  <h2 className="text-[16px] font-medium text-ink-700">{t('checkout.orderSummary')}</h2>
                 </div>
                 <div className="px-5 py-4 space-y-2 max-h-[240px] overflow-y-auto">
                   {cart.map((item) => (
@@ -710,7 +710,7 @@ export default function Checkout() {
                     <button
                       onClick={() => handlePlaceOrder('bank_transfer')}
                       disabled={placing || bankNotConfigured}
-                      className="w-full h-11 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="w-full h-11 bg-ink-700 text-white rounded-lg text-[14px] hover:bg-ink-900 transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       {placing ? t('common.loading') : t('checkout.placeOrder')}
                       <ChevronRight size={16} />
@@ -732,11 +732,11 @@ export default function Checkout() {
         {step === 'confirmed' && (
           <div className="max-w-[640px] mx-auto">
             {/* Success banner */}
-            <div className="bg-white rounded-[10px] border border-line p-8 text-center mb-5">
+            <div className="bg-white rounded-sm border border-line p-8 text-center mb-5">
               <div className="w-16 h-16 rounded-full border border-line flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 size={36} className="text-signal-ok" />
               </div>
-              <h2 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-1">{t('checkout.orderPlaced')}</h2>
+              <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-1">{t('checkout.orderPlaced')}</h2>
               <p className="text-[14px] text-ink-500 mb-4">
                 {t('checkout.thankYou')}
               </p>
@@ -747,10 +747,10 @@ export default function Checkout() {
             </div>
 
             {/* Shipping summary */}
-            <div className="bg-white rounded-[10px] border border-line overflow-hidden mb-5">
+            <div className="bg-white rounded-sm border border-line overflow-hidden mb-5">
               <div className="px-5 py-4 border-b border-line flex items-center gap-2">
                 <Truck size={15} className="text-ink-500" />
-                <h3 className="text-[14px] font-semibold text-ink-900">{t('checkout.shippingTo')}</h3>
+                <h3 className="text-[14px] font-medium text-ink-700">{t('checkout.shippingTo')}</h3>
               </div>
               <div className="px-5 py-4 text-[13px] text-ink-500 space-y-1">
                 <p className="font-semibold text-ink-900">{shipping.company}</p>
@@ -763,10 +763,10 @@ export default function Checkout() {
             </div>
 
             {/* Price summary */}
-            <div className="bg-white rounded-[10px] border border-line overflow-hidden mb-6">
+            <div className="bg-white rounded-sm border border-line overflow-hidden mb-6">
               <div className="px-5 py-4 border-b border-line flex items-center gap-2">
                 <ClipboardList size={15} className="text-ink-500" />
-                <h3 className="text-[14px] font-semibold text-ink-900">{t('checkout.paymentSummary')}</h3>
+                <h3 className="text-[14px] font-medium text-ink-700">{t('checkout.paymentSummary')}</h3>
               </div>
               <div className="px-5 py-4 space-y-2 text-[13px]">
                 <div className="flex justify-between">
@@ -786,10 +786,10 @@ export default function Checkout() {
 
             {/* Bank transfer instructions */}
             {paymentMethod === 'bank_transfer' && (
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden mb-5">
+              <div className="bg-white rounded-sm border border-line overflow-hidden mb-5">
                 <div className="px-5 py-4 border-b border-line flex items-center gap-2">
                   <Building2 size={15} className="text-ink-500" />
-                  <h3 className="text-[14px] font-semibold text-ink-900">{t('checkout.bankInstructions')}</h3>
+                  <h3 className="text-[14px] font-medium text-ink-700">{t('checkout.bankInstructions')}</h3>
                 </div>
                 <div className="px-5 py-4 space-y-3">
                   <p className="text-[13px] text-ink-500">
@@ -833,7 +833,7 @@ export default function Checkout() {
             )}
 
             {/* What's next */}
-            <div className="bg-sunken border border-line rounded-[10px] px-5 py-4 mb-6 text-[13px] text-ink-500 space-y-2">
+            <div className="bg-sunken border border-line rounded-sm px-5 py-4 mb-6 text-[13px] text-ink-500 space-y-2">
               <p className="font-semibold text-ink-700">{t('checkout.whatsNext')}</p>
               <ol className="list-decimal list-inside space-y-1 text-ink-500">
                 {paymentMethod === 'bank_transfer' ? (
@@ -864,7 +864,7 @@ export default function Checkout() {
               </button>
               <button
                 onClick={() => navigate('/')}
-                className="flex-1 h-11 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow"
+                className="flex-1 h-11 bg-ink-700 text-white rounded-lg text-[14px] hover:bg-ink-900 transition-colors"
               >
                 {t('common.backToHome')}
               </button>

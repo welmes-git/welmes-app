@@ -211,7 +211,7 @@ gap-x: 8px   gap-y: 24px
 
 - 기본 상태의 카드·테이블·패널은 **그림자 없음.** 구분은 `1px solid --line`으로만.
 - 위 그림자는 드롭다운/모달과 버튼 hover에만 쓴다. 상품 타일은 그림자를 쓰지 않는다.
-- radius는 4(배지·상품 이미지·타일 버튼) · 6(작은 버튼) · 8(버튼) · 10(패널) 네 단계만.
+- radius는 Faire처럼 **4px 한 단계**(버튼·입력칸·카드·드롭다운·이미지). 모달·드로어는 0, 알약·배지 카운트만 full. Tailwind `rounded-sm/md/lg/xl`은 모두 4px로 매핑.
 
 ---
 
@@ -266,3 +266,9 @@ gap-x: 8px   gap-y: 24px
 - [x] `ProductDetail.tsx` 세트 테이블 그림자 제거 · 선택 행 스트라이프 (Header도 완료)
 - [ ] 페이지에 하드코딩된 `#4a90e2` / `#ff4d6d` 전량 제거
 - [ ] 관리자 화면 스탯 카드 · 상태 점 표기 적용
+
+## 제목 타이포 (Faire)
+- 페이지 제목(h1): `font-serif text-[30px] leading-[38px] font-normal text-ink-700`
+- 섹션 제목(h2): `font-serif text-[22px] leading-8 font-normal text-ink-700` (메인 Weekly Best Sellers와 동일)
+- 카드 소제목(h3): 산세리프 14–16px medium. 가격도 medium.
+- 기본 버튼: `#333(ink-700)` 채움, 흰 글자, 14px regular, hover 시 ink-900. 그림자·볼드 없음.

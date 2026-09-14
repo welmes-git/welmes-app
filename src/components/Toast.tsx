@@ -25,7 +25,7 @@ export default function Toast() {
 
   return (
     <div className="fixed top-4 right-4 z-[100] animate-slideIn" role={toast.type === 'error' ? 'alert' : 'status'}>
-      <div className="bg-canvas border border-line text-ink-900 px-4 py-3 rounded-[10px] shadow-hover flex items-center gap-3 min-w-[280px] max-w-[calc(100vw-2rem)]">
+      <div className="bg-canvas border border-line text-ink-900 px-4 py-3 rounded-sm shadow-hover flex items-center gap-3 min-w-[280px] max-w-[calc(100vw-2rem)]">
         {icons[toast.type]}
         <span className="text-[13px] font-medium flex-1">{toast.message}</span>
         <button

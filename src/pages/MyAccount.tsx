@@ -70,11 +70,11 @@ export default function MyAccount() {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-20 text-center">
         <User size={48} className="mx-auto text-line-strong mb-4" />
-        <h2 className="text-[20px] font-extrabold text-ink-900 mb-2">{t('account.loginRequired')}</h2>
+        <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-2">{t('account.loginRequired')}</h2>
         <p className="text-[14px] text-ink-500 mb-6">{t('account.loginRequiredDesc')}</p>
         <button
           onClick={() => navigate('/login')}
-          className="px-6 py-2.5 bg-ink-900 text-white rounded-lg text-[14px] hover:shadow-hover transition-shadow font-bold"
+          className="px-6 py-2.5 bg-ink-700 text-white rounded-lg text-[14px] hover:bg-ink-900 transition-colors"
         >
           {t('account.goToLogin')}
         </button>
@@ -162,7 +162,7 @@ export default function MyAccount() {
       {/* Page header */}
       <div className="bg-white border-b border-line">
         <div className="max-w-[960px] mx-auto px-4 py-5">
-          <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900">{t('account.title')}</h1>
+          <h1 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700">{t('account.title')}</h1>
         </div>
       </div>
 
@@ -171,7 +171,7 @@ export default function MyAccount() {
         {/* ── Sidebar ── */}
         <aside className="lg:w-[220px] shrink-0 space-y-3">
           {/* Profile card */}
-          <div className="bg-white rounded-[10px] border border-line p-4">
+          <div className="bg-white rounded-sm border border-line p-4">
             <div className="w-12 h-12 rounded-full border border-line flex items-center justify-center mb-3">
               <User size={22} className="text-ink-700" />
             </div>
@@ -195,7 +195,7 @@ export default function MyAccount() {
           </div>
 
           {/* Nav */}
-          <div className="bg-white rounded-[10px] border border-line overflow-hidden">
+          <div className="bg-white rounded-sm border border-line overflow-hidden">
             {tabs.map((tabItem) => (
               <button
                 key={tabItem.key}
@@ -233,18 +233,18 @@ export default function MyAccount() {
           {tab === 'orders' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900">{t('account.orderHistory')}</h2>
+                <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700">{t('account.orderHistory')}</h2>
                 <span className="text-[13px] text-ink-500">{myOrders.length} {t('account.orders')}</span>
               </div>
 
               {myOrders.length === 0 ? (
-                <div className="bg-white rounded-[10px] border border-line py-16 text-center">
+                <div className="bg-white rounded-sm border border-line py-16 text-center">
                   <Package size={44} className="mx-auto text-line-strong mb-3" />
                   <p className="text-[14px] text-ink-500 mb-1">{t('account.noOrders')}</p>
                   <p className="text-[12px] text-ink-300 mb-5">{t('account.noOrdersDesc')}</p>
                   <Link
                     to="/products"
-                    className="inline-block px-5 py-2 bg-ink-900 text-white text-[13px] rounded-lg hover:shadow-hover transition-shadow font-bold"
+                    className="inline-block px-5 py-2 bg-ink-700 text-white text-[13px] rounded-lg hover:bg-ink-900 transition-colors"
                   >
                     {t('account.startShopping')}
                   </Link>
@@ -254,7 +254,7 @@ export default function MyAccount() {
                   const dotCls = statusDot[order.status] ?? statusDot.pending;
                   const isExpanded = expandedOrder === order.id;
                   return (
-                    <div key={order.id} className="bg-white rounded-[10px] border border-line overflow-hidden">
+                    <div key={order.id} className="bg-white rounded-sm border border-line overflow-hidden">
                       {/* Order header */}
                       <button
                         onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
@@ -360,7 +360,7 @@ export default function MyAccount() {
                                   href={`https://www.17track.net/en/track#nums=${order.trackingNumber}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="shrink-0 h-8 px-4 bg-ink-900 text-white text-[12px] font-bold rounded-lg flex items-center gap-1.5 hover:shadow-hover transition-shadow"
+                                  className="shrink-0 h-8 px-4 bg-ink-700 text-white text-[12px] rounded-lg flex items-center gap-1.5 hover:bg-ink-900 transition-colors"
                                 >
                                   <Truck size={12} />
                                   {t('account.trackPackage')}
@@ -408,13 +408,13 @@ export default function MyAccount() {
           {/* ══ TAB: ACCOUNT INFO ══ */}
           {tab === 'account' && (
             <div className="space-y-5">
-              <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900">{t('account.accountInfo')}</h2>
+              <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700">{t('account.accountInfo')}</h2>
 
               {/* Read-only info */}
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden">
+              <div className="bg-white rounded-sm border border-line overflow-hidden">
                 <div className="px-5 py-4 border-b border-line flex items-center gap-2">
                   <CreditCard size={15} className="text-ink-500" />
-                  <h3 className="text-[14px] font-semibold text-ink-900">{t('account.businessReg')}</h3>
+                  <h3 className="text-[14px] font-medium text-ink-700">{t('account.businessReg')}</h3>
                   <span className="text-[11px] text-ink-300 ml-1">({t('account.readOnly')})</span>
                 </div>
                 <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -435,10 +435,10 @@ export default function MyAccount() {
               </div>
 
               {/* Editable fields */}
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden">
+              <div className="bg-white rounded-sm border border-line overflow-hidden">
                 <div className="px-5 py-4 border-b border-line flex items-center gap-2">
                   <Building2 size={15} className="text-ink-500" />
-                  <h3 className="text-[14px] font-semibold text-ink-900">{t('account.companyDetails')}</h3>
+                  <h3 className="text-[14px] font-medium text-ink-700">{t('account.companyDetails')}</h3>
                 </div>
                 <form onSubmit={handleSaveAccount} className="px-5 py-5 space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -483,7 +483,7 @@ export default function MyAccount() {
                     <button
                       type="submit"
                       disabled={accountSaving}
-                      className="px-6 py-2.5 bg-ink-900 text-white rounded-lg text-[13px] font-bold hover:shadow-hover transition-shadow disabled:opacity-50"
+                      className="px-6 py-2.5 bg-ink-700 text-white rounded-lg text-[13px] hover:bg-ink-900 transition-colors disabled:opacity-50"
                     >
                       {accountSaving ? t('account.saving') : t('account.saveChanges')}
                     </button>
@@ -496,12 +496,12 @@ export default function MyAccount() {
           {/* ══ TAB: SECURITY ══ */}
           {tab === 'security' && (
             <div className="space-y-5">
-              <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900">{t('account.securitySettings')}</h2>
+              <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700">{t('account.securitySettings')}</h2>
 
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden">
+              <div className="bg-white rounded-sm border border-line overflow-hidden">
                 <div className="px-5 py-4 border-b border-line flex items-center gap-2">
                   <Lock size={15} className="text-ink-500" />
-                  <h3 className="text-[14px] font-semibold text-ink-900">{t('account.changePassword')}</h3>
+                  <h3 className="text-[14px] font-medium text-ink-700">{t('account.changePassword')}</h3>
                 </div>
 
                 <form onSubmit={handleChangePassword} className="px-5 py-5 space-y-4 max-w-[400px]">
@@ -539,7 +539,7 @@ export default function MyAccount() {
                     <button
                       type="submit"
                       disabled={pwSaving}
-                      className="px-6 py-2.5 bg-ink-900 text-white rounded-lg text-[13px] font-bold hover:shadow-hover transition-shadow disabled:opacity-50"
+                      className="px-6 py-2.5 bg-ink-700 text-white rounded-lg text-[13px] hover:bg-ink-900 transition-colors disabled:opacity-50"
                     >
                       {pwSaving ? t('account.updating') : t('account.updatePassword')}
                     </button>
@@ -548,10 +548,10 @@ export default function MyAccount() {
               </div>
 
               {/* Login info */}
-              <div className="bg-white rounded-[10px] border border-line overflow-hidden">
+              <div className="bg-white rounded-sm border border-line overflow-hidden">
                 <div className="px-5 py-4 border-b border-line flex items-center gap-2">
                   <User size={15} className="text-ink-500" />
-                  <h3 className="text-[14px] font-semibold text-ink-900">{t('account.loginInfo')}</h3>
+                  <h3 className="text-[14px] font-medium text-ink-700">{t('account.loginInfo')}</h3>
                 </div>
                 <div className="px-5 py-4 space-y-3">
                   <InfoRow label={t('account.loginEmail')} value={currentUser.email} />

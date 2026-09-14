@@ -51,11 +51,11 @@ export default function ResetPassword() {
           <Logo size="auth" />
         </Link>
 
-        <div className="bg-canvas rounded-[10px] border border-line p-8">
+        <div className="bg-canvas rounded-sm border border-line p-8">
           <div className="w-12 h-12 rounded-full border border-line flex items-center justify-center mx-auto mb-4">
             <Lock size={20} className="text-ink-700" />
           </div>
-          <h1 className="text-[20px] font-bold text-ink-700 text-center mb-1">{t('auth.resetTitle')}</h1>
+          <h1 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700 text-center mb-1">{t('auth.resetTitle')}</h1>
           <p className="text-[13px] text-ink-500 text-center mb-6">{t('auth.resetDesc')}</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,7 +90,7 @@ export default function ResetPassword() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full h-[50px] bg-ink-900 text-white rounded-lg font-bold text-[15px] hover:shadow-hover transition-shadow disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full h-[50px] bg-ink-700 text-white rounded-lg text-[15px] hover:bg-ink-900 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {saving ? t('account.updating') : t('auth.resetSubmit')}
             </button>

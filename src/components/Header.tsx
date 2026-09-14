@@ -388,7 +388,7 @@ export default function Header() {
                   </button>
 
                   {showNotifications && (
-                    <div className="absolute right-0 top-full w-[360px] bg-white border border-line rounded-[10px] shadow-hover z-50 overflow-hidden">
+                    <div className="absolute right-0 top-full w-[360px] bg-white border border-line rounded-sm shadow-hover z-50 overflow-hidden">
                       {/* Header */}
                       <div className="flex items-center justify-between px-4 py-3 border-b border-line">
                         <span className="text-[14px] font-bold text-ink-900">

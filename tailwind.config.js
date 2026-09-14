@@ -76,11 +76,13 @@ module.exports = {
         },
       },
       borderRadius: {
-        xl: "calc(var(--radius) + 4px)",
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-        xs: "calc(var(--radius) - 6px)",
+        // Faire uses one 4px radius (--radius-fs-component-default) for buttons, fields, cards and
+        // dropdowns; modals and drawers are square. Every step collapses to it so old classes stay valid.
+        xl: "4px",
+        lg: "4px",
+        md: "4px",
+        sm: "4px",
+        xs: "2px",
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgb(0 0 0 / 0.05)",

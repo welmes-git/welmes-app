@@ -155,7 +155,7 @@ function LiveChat() {
               )}
               <div className={`max-w-[75%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
                 {!isMe && <span className="text-[11px] text-ink-500 px-1">Support Team</span>}
-                <div className={`px-4 py-2.5 rounded-[10px] text-[14px] leading-relaxed ${
+                <div className={`px-4 py-2.5 rounded-sm text-[14px] leading-relaxed ${
                   isMe
                     ? 'bg-ink-900 text-white rounded-br-sm'
                     : 'bg-sunken text-ink-900 rounded-bl-sm'
@@ -255,7 +255,7 @@ export default function CustomerSupport() {
       {/* Hero */}
       <section className="bg-sunken border-b border-line py-16">
         <div className="page-container text-center">
-          <h1 className="text-[30px] font-extrabold tracking-[-0.02em] text-ink-900 mb-3">{t('support.title')}</h1>
+          <h1 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700 mb-3">{t('support.title')}</h1>
           <p className="text-ink-500 text-[15px] max-w-[520px] mx-auto leading-relaxed">
             {t('support.subtitle')}
           </p>
@@ -266,7 +266,7 @@ export default function CustomerSupport() {
       <section className="page-container py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {contactCards.map(({ icon: Icon, label, value, sub }) => (
-            <div key={label} className="border border-line rounded-[10px] p-5">
+            <div key={label} className="border border-line rounded-sm p-5">
               <div className="w-10 h-10 rounded-lg border border-line flex items-center justify-center mb-4">
                 <Icon size={20} className="text-ink-700" />
               </div>
@@ -305,7 +305,7 @@ export default function CustomerSupport() {
       {pageTab === 'faq' && (
         <section className="bg-canvas py-14">
           <div className="page-container">
-            <h2 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-2">{t('support.faqTitle')}</h2>
+            <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-2">{t('support.faqTitle')}</h2>
             <p className="text-[13px] text-ink-500 mb-8">{t('support.faqSubtitle')}</p>
             <div className="flex flex-wrap gap-2 mb-6">
               {faqCategories.map((cat) => (
@@ -334,11 +334,11 @@ export default function CustomerSupport() {
         <section className="page-container py-14">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
             <div>
-              <h2 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-3">{t('support.sendMessage')}</h2>
+              <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-3">{t('support.sendMessage')}</h2>
               <p className="text-[14px] text-ink-500 leading-relaxed mb-6">
                 {t('support.sendMessageDesc')}
               </p>
-              <div className="bg-sunken rounded-[10px] p-5 space-y-3">
+              <div className="bg-sunken rounded-sm p-5 space-y-3">
                 {[
                   { label: t('support.phone'), value: '1544-1234' },
                   { label: t('support.email'), value: 'support@welmes.kr' },
@@ -388,7 +388,7 @@ export default function CustomerSupport() {
                     <label className="block text-[13px] text-ink-500 mb-1.5">{t('support.message')} <span className="text-ink-900">*</span></label>
                     <textarea name="message" value={form.message} onChange={handleChange} placeholder={t('support.messagePlaceholder')} required rows={5} className="w-full px-4 py-3 border border-line-strong rounded-lg bg-canvas text-[14px] text-ink-700 placeholder:text-ink-300 focus:outline-none focus:border-ink-900 transition-colors resize-none" />
                   </div>
-                  <button type="submit" className="w-full h-11 bg-ink-900 text-white rounded-lg font-bold text-[14px] hover:shadow-hover transition-shadow flex items-center justify-center gap-2">
+                  <button type="submit" className="w-full h-11 bg-ink-700 text-white rounded-lg text-[14px] hover:bg-ink-900 transition-colors flex items-center justify-center gap-2">
                     <Send size={16} />
                     {t('support.send')}
                   </button>
@@ -403,7 +403,7 @@ export default function CustomerSupport() {
       {pageTab === 'chat' && (
         <section className="page-container py-14">
           <div className="mb-8">
-            <h2 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900 mb-2">{t('support.liveChatTitle')}</h2>
+            <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-2">{t('support.liveChatTitle')}</h2>
             <p className="text-[13px] text-ink-500">{t('support.liveChatDesc')}</p>
           </div>
           <LiveChat />
@@ -413,8 +413,8 @@ export default function CustomerSupport() {
       {/* Notices */}
       <section className="bg-sunken border-t border-line py-12">
         <div className="page-container">
-          <h2 className="text-[17px] font-extrabold tracking-[-0.01em] text-ink-900 mb-5">{t('support.notices')}</h2>
-          <div className="bg-canvas rounded-[10px] border border-line divide-y divide-line">
+          <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-5">{t('support.notices')}</h2>
+          <div className="bg-canvas rounded-sm border border-line divide-y divide-line">
             {[
               { badge: 'Notice', title: 'System maintenance scheduled – June 10, 2025 (02:00–04:00 KST)', date: '2025-06-03' },
               { badge: 'Update',  title: 'New brands added: AESTURA, Fation, Round Around', date: '2025-05-28' },

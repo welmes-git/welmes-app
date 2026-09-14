@@ -20,9 +20,9 @@ export default function Wishlist() {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-24 text-center">
         <Heart size={48} className="mx-auto text-line-strong mb-4" />
-        <h2 className="text-[20px] font-extrabold text-ink-900 mb-2">{t('wishlist.loginRequired')}</h2>
+        <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-2">{t('wishlist.loginRequired')}</h2>
         <p className="text-[14px] text-ink-500 mb-6">{t('wishlist.loginRequiredDesc')}</p>
-        <button onClick={() => navigate('/login')} className="h-11 px-6 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow">
+        <button onClick={() => navigate('/login')} className="h-11 px-6 bg-ink-700 text-white rounded-lg text-[14px] hover:bg-ink-900 transition-colors">
           {t('wishlist.goToLogin')}
         </button>
       </div>
@@ -41,9 +41,9 @@ export default function Wishlist() {
     return (
       <div className="max-w-[640px] mx-auto px-4 py-24 text-center">
         <Heart size={48} className="mx-auto text-line-strong mb-4" />
-        <h2 className="text-[20px] font-extrabold text-ink-900 mb-2">{t('wishlist.empty')}</h2>
+        <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700 mb-2">{t('wishlist.empty')}</h2>
         <p className="text-[14px] text-ink-500 mb-6">{t('wishlist.emptyDesc')}</p>
-        <button onClick={() => navigate('/products')} className="h-11 px-6 bg-ink-900 text-white rounded-lg text-[14px] font-bold hover:shadow-hover transition-shadow">
+        <button onClick={() => navigate('/products')} className="h-11 px-6 bg-ink-700 text-white rounded-lg text-[14px] hover:bg-ink-900 transition-colors">
           {t('wishlist.browseProducts')}
         </button>
       </div>
@@ -56,7 +56,7 @@ export default function Wishlist() {
         <div className="page-container py-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Heart size={18} className="text-ink-900 fill-ink-900" />
-            <h1 className="text-[22px] font-extrabold tracking-[-0.01em] text-ink-900">{t('wishlist.title')}</h1>
+            <h1 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700">{t('wishlist.title')}</h1>
             <span className="text-[13px] tabular-nums text-ink-500 ml-1">{wishlistProducts.length}</span>
           </div>
           {wishlistProducts.length > 0 && (
