@@ -110,20 +110,39 @@
   }
 }
 
-/* Korean UI: one face for Latin and Hangul (Pretendard, as on most Korean shops) instead of
-   Hanken/Newsreader Latin mixed with Pretendard Hangul; break lines between words, not syllables.
-   Faire's light serif titles read thin in Hangul, so ko titles go semibold with tighter tracking. */
+/* CJK UI: one face for Latin and CJK text per language, instead of Hanken/Newsreader Latin mixed
+   with CJK fallbacks. Kanji share code points across languages but not glyph forms, so each
+   language gets the font drawn for it: ja → Pretendard JP, ko → Pretendard (KR), zh → system SC fonts.
+   Faire's light serif titles read thin in CJK, so those titles go semibold.
+   .font-jp (Japanese product names) is left alone so they keep JP forms on every locale. */
 html:lang(ko) body,
 html:lang(ko) .font-sans,
-html:lang(ko) .font-serif {
-  font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif;
+html:lang(ko) .font-serif:not(.font-jp) {
+  font-family: "Pretendard Variable", "Pretendard JP Variable", system-ui, sans-serif;
+}
+html:lang(ja) body,
+html:lang(ja) .font-sans,
+html:lang(ja) .font-serif {
+  font-family: "Pretendard JP Variable", "Pretendard Variable", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+}
+html:lang(zh) body,
+html:lang(zh) .font-sans,
+html:lang(zh) .font-serif:not(.font-jp) {
+  font-family: "Hanken Grotesk", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
 }
 html:lang(ko) {
-  word-break: keep-all;
+  word-break: keep-all; /* break between words, not syllables */
   overflow-wrap: anywhere;
 }
-html:lang(ko) .font-serif {
+html:lang(ja) {
+  line-break: strict; /* no line may start with 。、ー or small kana */
+}
+html:lang(ko) .font-serif,
+html:lang(ja) .font-serif,
+html:lang(zh) .font-serif {
   font-weight: 600;
+}
+html:lang(ko) .font-serif {
   letter-spacing: -0.02em;
 }
 

@@ -17,8 +17,9 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400&display=swap" />
     <!-- Logo wordmark only: one weight, text limited to the letters it draws -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&text=WELMS&display=swap" />
-    <!-- Japanese product names need JP kanji forms; Pretendard alone renders them Korean-style -->
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-jp.min.css" />
+    <!-- Japanese needs JP kanji/kana forms (Pretendard KR draws them Korean-style and lacks many kanji).
+         Dynamic subset like the KR file; the old static file pulled whole multi-MB weights. -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-jp-dynamic-subset.min.css" />
   </head>
   <body>
     <div id="root"></div>
