@@ -51,6 +51,8 @@ function App() {
       <Routes>
         {/* Admin route without header/footer */}
         <Route path="/admin" element={<AdminDashboard />} />
+        {/* Sign-up is a full-screen flow with its own compact header (Faire) */}
+        <Route path="/register" element={<><Register /><Toast /></>} />
 
         {/* Public routes with header/footer */}
         <Route
@@ -64,7 +66,6 @@ function App() {
                   <Route path="/products" element={<ProductList />} />
                   <Route path="/product/:id" element={<ProductDetail />} />
                   <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
                   <Route path="/support" element={<CustomerSupport />} />
                   <Route path="/pending" element={<PendingApproval />} />
                   <Route path="/reset-password" element={<ResetPassword />} />

@@ -760,5 +760,24 @@
   "signupModal": {
     "email": "E-mail professionnel",
     "cta": "S'inscrire gratuitement"
+  },
+  "signup": {
+    "progress": "Progression de l’inscription",
+    "step1Title": "Bienvenue ! Commençons",
+    "step1Subtitle": "Inscrivez-vous et trouvez le prochain best-seller de votre boutique.",
+    "passwordHint": "8 caractères minimum",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "marketing": "Recevoir par e-mail les nouveautés et offres WELMES. Modifiable à tout moment.",
+    "step2Title": "Parlez-nous de votre entreprise",
+    "step2Subtitle": "Ces informations servent à vérifier votre entreprise pour les prix de gros.",
+    "step3Title": "Vérifiez votre entreprise",
+    "step3Subtitle": "Téléversez votre extrait d’immatriculation pour débloquer les prix de gros.",
+    "agreeTerms": "J’accepte les Conditions d’utilisation",
+    "agreePrivacy": "J’accepte la Politique de confidentialité",
+    "doneTitle": "Votre demande a bien été envoyée",
+    "company": "Entreprise",
+    "businessNo": "N° d’immatriculation",
+    "status": "Statut"
   }
 }

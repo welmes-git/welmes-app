@@ -760,5 +760,24 @@
   "signupModal": {
     "email": "ビジネス用メールアドレス",
     "cta": "無料で登録"
+  },
+  "signup": {
+    "progress": "登録の進捗",
+    "step1Title": "ようこそ！さっそく始めましょう",
+    "step1Subtitle": "今すぐ登録して、お店の次のヒット商品を見つけましょう。",
+    "passwordHint": "8文字以上",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを隠す",
+    "marketing": "WELMESの新商品やお得な情報をメールで受け取る。いつでも変更できます。",
+    "step2Title": "ビジネスについて教えてください",
+    "step2Subtitle": "卸価格を表示するための事業者確認に使用します。",
+    "step3Title": "事業者確認",
+    "step3Subtitle": "事業者登録証をアップロードすると卸価格を確認できます。",
+    "agreeTerms": "利用規約に同意します",
+    "agreePrivacy": "プライバシーポリシーに同意します",
+    "doneTitle": "申請を受け付けました",
+    "company": "会社名",
+    "businessNo": "事業者登録番号",
+    "status": "ステータス"
   }
 }

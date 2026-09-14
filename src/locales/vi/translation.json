@@ -758,5 +758,24 @@
   "signupModal": {
     "email": "Email doanh nghiệp",
     "cta": "Đăng ký miễn phí"
+  },
+  "signup": {
+    "progress": "Tiến trình đăng ký",
+    "step1Title": "Chào mừng! Hãy bắt đầu",
+    "step1Subtitle": "Đăng ký ngay để tìm sản phẩm bán chạy tiếp theo cho cửa hàng của bạn.",
+    "passwordHint": "Tối thiểu 8 ký tự",
+    "showPassword": "Hiện mật khẩu",
+    "hidePassword": "Ẩn mật khẩu",
+    "marketing": "Gửi email cho tôi về sản phẩm mới và ưu đãi của WELMES. Có thể thay đổi bất cứ lúc nào.",
+    "step2Title": "Hãy cho chúng tôi biết về doanh nghiệp của bạn",
+    "step2Subtitle": "Chúng tôi dùng thông tin này để xác minh doanh nghiệp và hiển thị giá sỉ.",
+    "step3Title": "Xác minh doanh nghiệp",
+    "step3Subtitle": "Tải lên giấy đăng ký kinh doanh để mở giá sỉ.",
+    "agreeTerms": "Tôi đồng ý với Điều khoản dịch vụ",
+    "agreePrivacy": "Tôi đồng ý với Chính sách quyền riêng tư",
+    "doneTitle": "Đã nhận đơn đăng ký của bạn",
+    "company": "Công ty",
+    "businessNo": "Số đăng ký",
+    "status": "Trạng thái"
   }
 }

@@ -760,5 +760,24 @@
   "signupModal": {
     "email": "企业邮箱",
     "cta": "免费注册"
+  },
+  "signup": {
+    "progress": "注册进度",
+    "step1Title": "欢迎！我们开始吧",
+    "step1Subtitle": "立即注册，为您的店铺找到下一款畅销品。",
+    "passwordHint": "至少 8 个字符",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "marketing": "通过邮件接收 WELMES 新品和优惠信息。可随时更改。",
+    "step2Title": "介绍一下您的业务",
+    "step2Subtitle": "我们将用这些信息验证您的企业以显示批发价。",
+    "step3Title": "企业认证",
+    "step3Subtitle": "上传营业执照即可查看批发价。",
+    "agreeTerms": "我同意服务条款",
+    "agreePrivacy": "我同意隐私政策",
+    "doneTitle": "申请已提交",
+    "company": "公司名称",
+    "businessNo": "营业执照号码",
+    "status": "状态"
   }
 }

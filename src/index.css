@@ -222,3 +222,8 @@
 @media (max-width: 767px) { .product-grid-2rows > :nth-child(n+5) { display: none; } }
 @media (min-width: 768px) and (max-width: 1023px) { .product-grid-2rows > :nth-child(n+9) { display: none; } }
 @media (min-width: 1024px) and (max-width: 1279px) { .product-grid-2rows > :nth-child(n+11) { display: none; } }
+
+/* Sign-up steps slide in from the right (Faire signup-animate-slide-right) */
+@keyframes signup-slide { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+.signup-slide { animation: signup-slide 0.35s ease-out; }
+@media (prefers-reduced-motion: reduce) { .signup-slide { animation: none; } }

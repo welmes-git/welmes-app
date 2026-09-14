@@ -758,5 +758,24 @@
   "signupModal": {
     "email": "사업자 이메일",
     "cta": "무료로 가입하기"
+  },
+  "signup": {
+    "progress": "가입 진행 상황",
+    "step1Title": "환영합니다! 시작해 볼까요",
+    "step1Subtitle": "지금 가입하고 매장의 다음 베스트셀러를 찾아보세요.",
+    "passwordHint": "8자 이상",
+    "showPassword": "비밀번호 보기",
+    "hidePassword": "비밀번호 숨기기",
+    "marketing": "WELMES의 신상품과 혜택 소식을 이메일로 받을게요. 언제든 변경할 수 있어요.",
+    "step2Title": "사업 정보를 알려주세요",
+    "step2Subtitle": "도매가 확인을 위한 사업자 인증에 사용돼요.",
+    "step3Title": "사업자 인증",
+    "step3Subtitle": "사업자등록증을 올리면 도매가를 확인할 수 있어요.",
+    "agreeTerms": "서비스 이용약관에 동의합니다",
+    "agreePrivacy": "개인정보 처리방침에 동의합니다",
+    "doneTitle": "신청이 접수되었어요",
+    "company": "회사명",
+    "businessNo": "사업자등록번호",
+    "status": "상태"
   }
 }

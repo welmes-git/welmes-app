@@ -758,5 +758,24 @@
   "signupModal": {
     "email": "Email bisnis",
     "cta": "Daftar gratis"
+  },
+  "signup": {
+    "progress": "Progres pendaftaran",
+    "step1Title": "Selamat datang! Ayo mulai",
+    "step1Subtitle": "Daftar sekarang dan temukan produk terlaris berikutnya untuk toko Anda.",
+    "passwordHint": "Minimal 8 karakter",
+    "showPassword": "Tampilkan kata sandi",
+    "hidePassword": "Sembunyikan kata sandi",
+    "marketing": "Kirimi saya email tentang produk baru dan penawaran WELMES. Bisa diubah kapan saja.",
+    "step2Title": "Ceritakan tentang bisnis Anda",
+    "step2Subtitle": "Kami gunakan data ini untuk memverifikasi bisnis Anda agar bisa melihat harga grosir.",
+    "step3Title": "Verifikasi bisnis Anda",
+    "step3Subtitle": "Unggah sertifikat registrasi usaha untuk membuka harga grosir.",
+    "agreeTerms": "Saya menyetujui Ketentuan Layanan",
+    "agreePrivacy": "Saya menyetujui Kebijakan Privasi",
+    "doneTitle": "Pengajuan Anda sudah diterima",
+    "company": "Perusahaan",
+    "businessNo": "No. registrasi",
+    "status": "Status"
   }
 }

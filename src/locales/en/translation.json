@@ -760,5 +760,24 @@
   "signupModal": {
     "email": "Business email",
     "cta": "Sign up for free"
+  },
+  "signup": {
+    "progress": "Sign-up progress",
+    "step1Title": "Welcome! Let’s get started",
+    "step1Subtitle": "Join now to find your store’s next bestseller.",
+    "passwordHint": "8 characters minimum",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "marketing": "Email me about new products and offers from WELMES. You can change this anytime.",
+    "step2Title": "Tell us about your business",
+    "step2Subtitle": "We use these details to verify your business for wholesale pricing.",
+    "step3Title": "Verify your business",
+    "step3Subtitle": "Upload your business registration certificate to unlock wholesale prices.",
+    "agreeTerms": "I agree to the Terms of Service",
+    "agreePrivacy": "I agree to the Privacy Policy",
+    "doneTitle": "Your application is in",
+    "company": "Company",
+    "businessNo": "Business No.",
+    "status": "Status"
   }
 }

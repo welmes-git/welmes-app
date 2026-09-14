@@ -760,5 +760,24 @@
   "signupModal": {
     "email": "Geschäftliche E-Mail",
     "cta": "Kostenlos registrieren"
+  },
+  "signup": {
+    "progress": "Registrierungsfortschritt",
+    "step1Title": "Willkommen! Los geht’s",
+    "step1Subtitle": "Jetzt registrieren und den nächsten Bestseller für Ihr Geschäft finden.",
+    "passwordHint": "Mindestens 8 Zeichen",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen",
+    "marketing": "Senden Sie mir E-Mails zu neuen Produkten und Angeboten von WELMES. Jederzeit änderbar.",
+    "step2Title": "Erzählen Sie uns von Ihrem Unternehmen",
+    "step2Subtitle": "Wir verifizieren damit Ihr Unternehmen für Großhandelspreise.",
+    "step3Title": "Unternehmen verifizieren",
+    "step3Subtitle": "Laden Sie Ihren Gewerbenachweis hoch, um Großhandelspreise freizuschalten.",
+    "agreeTerms": "Ich stimme den Nutzungsbedingungen zu",
+    "agreePrivacy": "Ich stimme der Datenschutzerklärung zu",
+    "doneTitle": "Ihr Antrag ist eingegangen",
+    "company": "Unternehmen",
+    "businessNo": "Registernummer",
+    "status": "Status"
   }
 }

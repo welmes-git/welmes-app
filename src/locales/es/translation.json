@@ -760,5 +760,24 @@
   "signupModal": {
     "email": "Correo electrónico de empresa",
     "cta": "Regístrate gratis"
+  },
+  "signup": {
+    "progress": "Progreso del registro",
+    "step1Title": "¡Bienvenido! Empecemos",
+    "step1Subtitle": "Regístrate y encuentra el próximo éxito de ventas de tu tienda.",
+    "passwordHint": "Mínimo 8 caracteres",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "marketing": "Enviadme correos sobre novedades y ofertas de WELMES. Puedes cambiarlo cuando quieras.",
+    "step2Title": "Cuéntanos sobre tu negocio",
+    "step2Subtitle": "Usamos estos datos para verificar tu negocio y mostrar precios mayoristas.",
+    "step3Title": "Verifica tu negocio",
+    "step3Subtitle": "Sube tu certificado de registro mercantil para ver los precios mayoristas.",
+    "agreeTerms": "Acepto los Términos del servicio",
+    "agreePrivacy": "Acepto la Política de privacidad",
+    "doneTitle": "Hemos recibido tu solicitud",
+    "company": "Empresa",
+    "businessNo": "N.º de registro",
+    "status": "Estado"
   }
 }
