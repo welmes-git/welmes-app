@@ -228,6 +228,56 @@ export default function Header() {
           link: '/account',
         };
       }
+      // Product alerts from scripts/sd-monitor.mjs — only admins receive these
+      case 'product_price_change': {
+        const p = n.payload ?? {};
+        return {
+          icon: <Package size={16} className="text-ink-900" />,
+          title: t('notifications.product_price_change_title'),
+          message: t('notifications.product_price_change_message', {
+            name: String(p.productName ?? '').slice(0, 40),
+            oldPrice: p.oldWholesale ?? '?',
+            newPrice: p.newWholesale ?? '?',
+          }),
+          link: '/admin',
+        };
+      }
+      case 'product_sold_out':
+        return {
+          icon: <XCircle size={16} className="text-signal-error" />,
+          title: t('notifications.product_sold_out_title'),
+          message: t('notifications.product_sold_out_message', {
+            name: String(n.payload?.productName ?? '').slice(0, 40),
+          }),
+          link: '/admin',
+        };
+      case 'product_restock':
+        return {
+          icon: <CheckCircle2 size={16} className="text-signal-ok" />,
+          title: t('notifications.product_restock_title'),
+          message: t('notifications.product_restock_message', {
+            name: String(n.payload?.productName ?? '').slice(0, 40),
+          }),
+          link: '/admin',
+        };
+      case 'product_missing':
+        return {
+          icon: <XCircle size={16} className="text-ink-500" />,
+          title: t('notifications.product_missing_title'),
+          message: t('notifications.product_missing_message', {
+            name: String(n.payload?.productName ?? '').slice(0, 40),
+          }),
+          link: '/admin',
+        };
+      case 'product_registered':
+        return {
+          icon: <Package size={16} className="text-signal-ok" />,
+          title: t('notifications.product_registered_title'),
+          message: t('notifications.product_registered_message', {
+            name: String(n.payload?.productName ?? '').slice(0, 40),
+          }),
+          link: '/admin',
+        };
     }
   }
 

@@ -240,6 +240,7 @@
     "brand": "브랜드",
     "inStock": "재고 있음",
     "outOfStock": "품절",
+    "comingSoon": "출시 예정",
     "status": "상태",
     "shippingInfo": "배송 안내",
     "shippingDesc": "전 세계 배송 가능합니다. 예상 배송 기간은 지역에 따라 다릅니다.",
@@ -673,7 +674,17 @@
     "member_approved_title": "계정이 승인되었습니다!",
     "member_approved_message": "사업자 계정이 승인되었습니다. 이제 도매가를 확인하실 수 있습니다.",
     "member_rejected_title": "계정이 승인되지 않았습니다",
-    "member_rejected_message": "사업자 계정 신청이 승인되지 않았습니다. 자세한 내용은 고객센터로 문의해 주세요."
+    "member_rejected_message": "사업자 계정 신청이 승인되지 않았습니다. 자세한 내용은 고객센터로 문의해 주세요.",
+    "product_price_change_title": "공급가 변동",
+    "product_price_change_message": "{{name}}: ¥{{oldPrice}} → ¥{{newPrice}} — 판매가가 자동 갱신되었습니다.",
+    "product_sold_out_title": "상품 품절",
+    "product_sold_out_message": "{{name}} 상품이 품절되어 자동으로 비활성화되었습니다.",
+    "product_restock_title": "상품 재입고",
+    "product_restock_message": "{{name}} 상품이 재입고되어 자동으로 활성화되었습니다.",
+    "product_missing_title": "상품 페이지 소실",
+    "product_missing_message": "{{name}} 상품이 공급 사이트에서 삭제되어 자동으로 비활성화되었습니다.",
+    "product_registered_title": "품절 상품 자동 등록",
+    "product_registered_message": "{{name}} 상품이 공급 사이트에 재입고되어 자동 등록되었습니다. (비활성 — 검토 후 활성화)"
   },
   "status": {
     "pending": "대기 중",

@@ -37,6 +37,16 @@ import type { SupportRoom, SupportMessage } from '../lib/db';
 type AdminTab = 'dashboard' | 'members' | 'products' | 'orders' | 'support';
 type MemberStatus = 'all' | 'pending' | 'approved' | 'rejected';
 
+/** Supplier (Superdelivery) change badges — populated by scripts/sd-monitor.mjs */
+const CHANGE_META: Record<db.SdProductChange['changeType'], { label: string; className: string }> = {
+  price_up:    { label: 'Price ↑',     className: 'bg-orange-100 text-orange-700' },
+  price_down:  { label: 'Price ↓',     className: 'bg-blue-100 text-blue-700' },
+  sold_out:    { label: 'Sold out',    className: 'bg-red-100 text-red-700' },
+  restock:     { label: 'Restock',     className: 'bg-green-100 text-green-700' },
+  not_trading: { label: 'Not trading', className: 'bg-gray-200 text-gray-600' },
+  missing:     { label: 'Missing',     className: 'bg-gray-200 text-gray-600' },
+};
+
 const menuItems: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'dashboard', label: 'Dashboard',   icon: LayoutDashboard },
   { id: 'members',   label: 'Members',     icon: Users },
@@ -74,6 +84,7 @@ export default function AdminDashboard() {
     addProduct,
     updateProduct,
     deleteProduct,
+    bulkUpdateProductStatus,
     updateOrderStatus,
     updateOrderShipping,
     loadMembers,
@@ -93,6 +104,9 @@ export default function AdminDashboard() {
   const [memberSearch, setMemberSearch] = useState('');
   const [viewMember, setViewMember] = useState<Member | null>(null);
   const [productSearch, setProductSearch] = useState('');
+  const [productChanges, setProductChanges] = useState<db.SdProductChange[]>([]);
+  const [changeFilter, setChangeFilter] = useState<'all' | 'changed'>('all');
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -119,6 +133,22 @@ export default function AdminDashboard() {
     sdDealerId: '',
     sdDealerName: '',
   });
+
+  // Supplier change log (sd-monitor.mjs) for the products tab badges
+  useEffect(() => {
+    db.fetchUnacknowledgedChanges().then(setProductChanges);
+  }, []);
+
+  // Unacknowledged supplier changes grouped by product id
+  const changesByProduct = useMemo(() => {
+    const map = new Map<number, db.SdProductChange[]>();
+    for (const c of productChanges) {
+      const list = map.get(c.productId) ?? [];
+      list.push(c);
+      map.set(c.productId, list);
+    }
+    return map;
+  }, [productChanges]);
 
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -330,6 +360,7 @@ export default function AdminDashboard() {
 
   // Filtered products
   const filteredProducts = allProducts.filter((p) => {
+    if (changeFilter === 'changed' && !changesByProduct.has(p.id)) return false;
     if (productSearch) {
       const q = productSearch.toLowerCase();
       return (
@@ -340,6 +371,35 @@ export default function AdminDashboard() {
     }
     return true;
   });
+
+  const handleAckChanges = async (productId: number) => {
+    const { error } = await db.acknowledgeProductChanges(productId);
+    if (error) { showToast(`Update failed: ${error.message}`, 'error'); return; }
+    setProductChanges((prev) => prev.filter((c) => c.productId !== productId));
+    showToast('Supplier changes marked as reviewed', 'success');
+  };
+
+  // ── Multi-select bulk status change ─────────────────────────────
+  const toggleSelectProduct = (id: number) =>
+    setSelectedProducts((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+
+  const allFilteredSelected =
+    filteredProducts.length > 0 && filteredProducts.every((p) => selectedProducts.includes(p.id));
+
+  const toggleSelectAllProducts = () =>
+    setSelectedProducts(allFilteredSelected ? [] : filteredProducts.map((p) => p.id));
+
+  const handleBulkStatus = async (status: 'active' | 'inactive') => {
+    const result = await bulkUpdateProductStatus(selectedProducts, status);
+    if (result && 'error' in result && result.error) {
+      showToast(`Update failed: ${result.error.message}`, 'error');
+      return;
+    }
+    showToast(`${selectedProducts.length} product${selectedProducts.length !== 1 ? 's' : ''} set to ${status}`, 'success');
+    setSelectedProducts([]);
+  };
 
   const handleAddProduct = () => {
     setEditingProduct(null);
@@ -870,6 +930,14 @@ export default function AdminDashboard() {
                     className="w-full h-10 pl-9 pr-4 border border-[#e5e5e5] rounded-lg text-[13px] focus:outline-none focus:border-[#333]"
                   />
                 </div>
+                <select
+                  value={changeFilter}
+                  onChange={(e) => setChangeFilter(e.target.value as 'all' | 'changed')}
+                  className="h-10 px-3 border border-[#e5e5e5] rounded-lg text-[13px] text-[#666] focus:outline-none focus:border-[#333]"
+                >
+                  <option value="all">All products</option>
+                  <option value="changed">Supplier changes ({productChanges.length})</option>
+                </select>
                 <button
                   onClick={handleAddProduct}
                   className="h-10 px-4 bg-[#4a90e2] text-white rounded-lg text-[13px] font-medium flex items-center gap-2 hover:bg-[#357abd]"
@@ -881,10 +949,44 @@ export default function AdminDashboard() {
 
               {/* Products Table */}
               <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                {selectedProducts.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-3 bg-[#f0f6ff] border-b border-[#4a90e2]/30 px-4 py-2.5">
+                    <span className="text-[13px] font-medium text-[#333]">
+                      {selectedProducts.length} selected
+                    </span>
+                    <button
+                      onClick={() => handleBulkStatus('active')}
+                      className="h-8 px-3 bg-green-600 text-white text-[12px] rounded hover:bg-green-700"
+                    >
+                      Set Active
+                    </button>
+                    <button
+                      onClick={() => handleBulkStatus('inactive')}
+                      className="h-8 px-3 bg-[#666] text-white text-[12px] rounded hover:bg-[#555]"
+                    >
+                      Set Inactive
+                    </button>
+                    <button
+                      onClick={() => setSelectedProducts([])}
+                      className="h-8 px-3 border border-[#ddd] text-[12px] text-[#666] rounded hover:bg-[#f5f5f5]"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
                 <div className="overflow-x-auto">
                   <table className="w-full text-[13px]">
                     <thead className="bg-[#f8f8fa] text-[#666]">
                       <tr>
+                        <th className="px-4 py-3 w-10">
+                          <input
+                            type="checkbox"
+                            checked={allFilteredSelected}
+                            onChange={toggleSelectAllProducts}
+                            aria-label="Select all filtered products"
+                            className="w-4 h-4 accent-[#4a90e2]"
+                          />
+                        </th>
                         <th className="px-4 py-3 text-left font-medium">
                           Image
                         </th>
@@ -915,6 +1017,15 @@ export default function AdminDashboard() {
                           className="border-t border-[#f5f5f5] hover:bg-[#fafafa]"
                         >
                           <td className="px-4 py-3">
+                            <input
+                              type="checkbox"
+                              checked={selectedProducts.includes(product.id)}
+                              onChange={() => toggleSelectProduct(product.id)}
+                              aria-label={`Select ${product.nameEn}`}
+                              className="w-4 h-4 accent-[#4a90e2]"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
                             <img
                               src={product.image}
                               alt={product.nameEn}
@@ -929,6 +1040,18 @@ export default function AdminDashboard() {
                               <p className="text-[11px] text-[#aaa] truncate">
                                 {product.name}
                               </p>
+                            )}
+                            {(changesByProduct.get(product.id) ?? []).length > 0 && (
+                              <div className="mt-1 flex flex-wrap gap-1">
+                                {(changesByProduct.get(product.id) ?? []).map((c) => (
+                                  <span
+                                    key={c.id}
+                                    className={`text-[10px] px-1.5 py-0.5 rounded ${CHANGE_META[c.changeType].className}`}
+                                  >
+                                    {CHANGE_META[c.changeType].label}
+                                  </span>
+                                ))}
+                              </div>
                             )}
                           </td>
                           <td className="px-4 py-3 text-[#666] hidden md:table-cell">
@@ -963,6 +1086,15 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex gap-1">
+                              {(changesByProduct.get(product.id) ?? []).length > 0 && (
+                                <button
+                                  onClick={() => handleAckChanges(product.id)}
+                                  className="w-7 h-7 flex items-center justify-center bg-green-50 text-green-600 rounded hover:bg-green-100"
+                                  title="Mark supplier changes as reviewed"
+                                >
+                                  <Check size={14} />
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleEditProduct(product)}
                                 className="w-7 h-7 flex items-center justify-center bg-blue-50 text-blue-600 rounded hover:bg-blue-100"

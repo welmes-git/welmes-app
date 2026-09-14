@@ -588,8 +588,12 @@ export default function ProductDetail() {
                       <td className="py-2.5 text-ink-500">{t('productDetail.status')}</td>
                       <td className="py-2.5">
                         <span className="inline-flex items-center gap-1.5 text-[12px] text-ink-700">
-                          <span className={`h-1.5 w-1.5 rounded-full ${product.status === 'active' ? 'bg-signal-ok' : 'bg-signal-error'}`} />
-                          {product.status === 'active' ? t('productDetail.inStock') : t('productDetail.outOfStock')}
+                          <span className={`h-1.5 w-1.5 rounded-full ${product.stock <= 0 ? 'bg-signal-error' : product.status === 'active' ? 'bg-signal-ok' : 'bg-ink-300'}`} />
+                          {/* Availability follows stock; imported-but-unreviewed
+                              (inactive, in stock) products show as coming soon */}
+                          {product.stock <= 0
+                            ? t('productDetail.outOfStock')
+                            : product.status === 'active' ? t('productDetail.inStock') : t('productDetail.comingSoon')}
                         </span>
                       </td>
                     </tr>

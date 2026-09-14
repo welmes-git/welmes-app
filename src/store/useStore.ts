@@ -7,7 +7,9 @@ import { emailOrderPlaced, emailMemberRegistered, emailMemberApproved, emailMemb
 export interface AppNotification {
   id: string;
   memberId: string;
-  type: 'order_status' | 'order_shipped' | 'member_approved' | 'member_rejected';
+  type: 'order_status' | 'order_shipped' | 'member_approved' | 'member_rejected'
+    | 'product_price_change' | 'product_sold_out' | 'product_restock' | 'product_missing'
+    | 'product_registered';
   read: boolean;
   createdAt: string;
   // payload varies by type
@@ -15,6 +17,8 @@ export interface AppNotification {
   orderStatus?: string;
   carrier?: string;
   trackingNumber?: string;
+  /** Product alerts from sd-monitor.mjs — productId, productName, before/after values */
+  payload?: Record<string, unknown>;
 }
 
 export interface SetOption {
@@ -126,6 +130,7 @@ interface AppState {
   addProduct: (product: Omit<Product, 'id'>) => Promise<Product | null>;
   updateProduct: (id: number, updates: Partial<Product>) => Promise<{ error: any } | void>;
   deleteProduct: (id: number) => Promise<void>;
+  bulkUpdateProductStatus: (ids: number[], status: Product['status']) => Promise<{ error?: { message: string } } | void>;
 
   // Members
   members: Member[];
@@ -277,6 +282,16 @@ export const useStore = create<AppState>()(
         set((state) => ({
           products: state.products.map((p) =>
             p.id === id ? { ...p, ...updates } : p
+          ),
+        }));
+      },
+
+      bulkUpdateProductStatus: async (ids, status) => {
+        const { error } = await db.bulkUpdateProductStatusByIds(ids, status);
+        if (error) return { error: { message: error.message } };
+        set((state) => ({
+          products: state.products.map((p) =>
+            ids.includes(p.id) ? { ...p, status } : p
           ),
         }));
       },

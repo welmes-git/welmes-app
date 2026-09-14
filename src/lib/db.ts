@@ -141,6 +141,11 @@ export async function updateProductById(id: number, p: Partial<Product>) {
   return supabase.from('products').update(productToRow(p as Product)).eq('id', id);
 }
 
+/** Bulk status change from the admin products list (checkbox multi-select). */
+export async function bulkUpdateProductStatusByIds(ids: number[], status: Product['status']) {
+  return supabase.from('products').update({ status }).in('id', ids);
+}
+
 export async function deleteProductById(id: number) {
   return supabase.from('products').delete().eq('id', id);
 }
@@ -321,6 +326,7 @@ export function rowToNotification(r: Record<string, unknown>): AppNotification {
     orderStatus:    (r.order_status as string) || undefined,
     carrier:        (r.carrier as string) || undefined,
     trackingNumber: (r.tracking_number as string) || undefined,
+    payload:        (r.payload as Record<string, unknown>) || undefined,
   };
 }
 
@@ -350,6 +356,7 @@ export async function insertNotification(
       order_status:    n.orderStatus ?? null,
       carrier:         n.carrier ?? null,
       tracking_number: n.trackingNumber ?? null,
+      payload:         n.payload ?? null,
     }])
     .select()
     .single();
@@ -370,6 +377,48 @@ export async function markAllNotificationsReadByMemberId(memberId: string) {
 
 export async function deleteNotificationsByMemberId(memberId: string) {
   return supabase.from('notifications').delete().eq('member_id', memberId);
+}
+
+// ── SD product change log (admin-only, RLS-guarded) ──────────────
+// Populated by scripts/sd-monitor.mjs when an imported product's price,
+// stock or trading status changes on Superdelivery.
+
+export interface SdProductChange {
+  id: string;
+  productId: number;
+  changeType: 'price_up' | 'price_down' | 'sold_out' | 'restock' | 'not_trading' | 'missing';
+  oldValue: Record<string, unknown> | null;
+  newValue: Record<string, unknown> | null;
+  acknowledged: boolean;
+  createdAt: string;
+}
+
+function rowToChange(r: Record<string, unknown>): SdProductChange {
+  return {
+    id:          r.id as string,
+    productId:   Number(r.product_id),
+    changeType:  r.change_type as SdProductChange['changeType'],
+    oldValue:    (r.old_value as Record<string, unknown>) ?? null,
+    newValue:    (r.new_value as Record<string, unknown>) ?? null,
+    acknowledged: !!r.acknowledged,
+    createdAt:   r.created_at as string,
+  };
+}
+
+export async function fetchUnacknowledgedChanges(): Promise<SdProductChange[]> {
+  const { data, error } = await supabase
+    .from('sd_product_changes')
+    .select('*')
+    .eq('acknowledged', false)
+    .order('created_at', { ascending: false })
+    .limit(500);
+  if (error || !data) return [];
+  return data.map(rowToChange);
+}
+
+/** Mark every unacknowledged change of one product as reviewed. */
+export async function acknowledgeProductChanges(productId: number) {
+  return supabase.from('sd_product_changes').update({ acknowledged: true }).eq('product_id', productId);
 }
 
 // ── Search trends ────────────────────────────────────────────────

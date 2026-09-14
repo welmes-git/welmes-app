@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "import:sd": "node scripts/sd-import.mjs"
+    "import:sd": "node scripts/sd-import.mjs",
+    "monitor:sd": "node scripts/sd-monitor.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

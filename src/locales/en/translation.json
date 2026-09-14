@@ -240,6 +240,7 @@
     "brand": "Brand",
     "inStock": "In Stock",
     "outOfStock": "Out of Stock",
+    "comingSoon": "Coming Soon",
     "status": "Status",
     "shippingInfo": "Shipping Information",
     "shippingDesc": "We ship worldwide. Estimated delivery time varies by destination.",
@@ -675,7 +676,17 @@
     "member_approved_title": "Account Approved!",
     "member_approved_message": "Your business account has been approved. You can now access wholesale prices.",
     "member_rejected_title": "Account Not Approved",
-    "member_rejected_message": "Your business account application was not approved. Please contact support for details."
+    "member_rejected_message": "Your business account application was not approved. Please contact support for details.",
+    "product_price_change_title": "Supplier Price Changed",
+    "product_price_change_message": "{{name}}: ¥{{oldPrice}} → ¥{{newPrice}}. The store price has been updated.",
+    "product_sold_out_title": "Product Sold Out",
+    "product_sold_out_message": "{{name}} is sold out and was set to inactive.",
+    "product_restock_title": "Product Back in Stock",
+    "product_restock_message": "{{name}} is back in stock and was set to active.",
+    "product_missing_title": "Product Page Missing",
+    "product_missing_message": "{{name}} is no longer available on the supplier site and was set to inactive.",
+    "product_registered_title": "Sold-out Product Auto-registered",
+    "product_registered_message": "{{name}} is back in stock on the supplier site and was auto-registered (inactive — review to activate)."
   },
   "status": {
     "pending": "Pending",
