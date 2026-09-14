@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowRight, Heart, ShoppingCart } from 'lucide-react';
 import { BADGE_TAGS, hasJapanese, maskDigits } from '../lib/utils';
 import SignUpModal from './SignUpModal';
+import SignInModal from './SignIn';
 
 interface ProductCardProps {
   /** Use the shared Product type so this card can't drift from the model */
@@ -20,7 +21,7 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
   const { isAuthenticated, currentUser, addToCart, showToast, toggleWishlist, isWishlisted } = useStore();
   const { formatPrice, currencyInfo } = useCurrency();
   // Faire: signed-out visitors get the sign-up sheet instead of the product page
-  const [showSignUp, setShowSignUp] = useState(false);
+  const [authModal, setAuthModal] = useState<'signup' | 'signin' | null>(null);
 
   const isVerified = currentUser?.status === 'approved';
   const canSeePrice = isAuthenticated && isVerified;
@@ -45,7 +46,7 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
     e.preventDefault();
     e.stopPropagation();
     // Signed in but unverified: the button is disabled, so this only runs signed out.
-    setShowSignUp(true);
+    setAuthModal('signup');
   };
 
   const handleQuickAdd = (e: React.MouseEvent) => {
@@ -77,11 +78,14 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
       onClick={(e) => {
         if (isAuthenticated) return;
         e.preventDefault();
-        setShowSignUp(true);
+        setAuthModal('signup');
       }}
       className="group flex h-full flex-col tracking-[0.15px]"
     >
-      {showSignUp && <SignUpModal image={product.image} onClose={() => setShowSignUp(false)} />}
+      {authModal === 'signup' && (
+        <SignUpModal image={product.image} onClose={() => setAuthModal(null)} onSignIn={() => setAuthModal('signin')} />
+      )}
+      {authModal === 'signin' && <SignInModal onClose={() => setAuthModal(null)} />}
       {/* Image — 1:1, 4px radius, no border; a 2% black wash separates white packshots from the page */}
       <div className="relative">
         <img

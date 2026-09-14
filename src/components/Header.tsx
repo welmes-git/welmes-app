@@ -13,6 +13,7 @@ import { useOutsideClick } from '../hooks/useOutsideClick';
 import { CURRENCIES } from '../lib/currency';
 import type { CurrencyCode } from '../lib/currency';
 import * as db from '../lib/db';
+import SignInModal from './SignIn';
 import {
   ShoppingBag,
   Heart,
@@ -173,6 +174,7 @@ export default function Header() {
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
 
   useOutsideClick(notifRef, showNotifications, () => setShowNotifications(false));
 
@@ -490,9 +492,10 @@ export default function Header() {
 
               {!isAuthenticated && (
                 <>
-                  <Link to="/login" className="hidden h-full items-center px-4 text-[14px] leading-5 text-ink-700 transition-colors hover:text-ink-900 lg:flex">
+                  {/* Faire opens sign-in as a sheet over the current page */}
+                  <button type="button" onClick={() => setShowSignIn(true)} className="hidden h-full items-center px-4 text-[14px] leading-5 text-ink-700 transition-colors hover:text-ink-900 lg:flex">
                     {t('common.login')}
-                  </Link>
+                  </button>
                   {/* Faire "Sign up to buy": 36px, #333 fill, 4px radius, 20px padding. Wishlist/cart icons stay hidden on desktop until signed in, like Faire */}
                   <Link to="/register" className="ml-3 hidden h-9 items-center whitespace-nowrap rounded-sm border border-ink-700 bg-ink-700 px-5 text-[14px] leading-5 text-white transition-colors hover:bg-ink-900 lg:inline-flex">
                     {t('homeHero.cta')}
@@ -945,6 +948,7 @@ export default function Header() {
 
       {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      {showSignIn && <SignInModal onClose={() => setShowSignIn(false)} />}
     </>
   );
 }

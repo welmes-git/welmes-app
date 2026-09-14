@@ -1,0 +1,179 @@
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Eye, EyeOff, X } from 'lucide-react';
+import { useStore } from '../store/useStore';
+import Logo from './Logo';
+import * as db from '../lib/db';
+
+// Faire Slate form field: 14/20 label, 40px field, 1px #dadada, 4px radius, 16px padding
+const labelCls = 'text-[14px] leading-5 text-ink-700';
+const fieldCls =
+  'h-10 w-full rounded-sm border border-line-control bg-white px-4 text-[14px] text-ink-700 placeholder:text-ink-500 focus:border-ink-700 focus:outline-none';
+
+/**
+ * Faire sign-in sheet, measured on faire.com (1440px): 420px column, 40px padding (24/40/64 on mobile),
+ * 88px logo on desktop, 32 → 30/38 serif title, 24 → email, 16 → password, a 20px slot that reveals
+ * the secondary action once an email is typed, 16 → 48px Sign in, "or" divider, 48px outlined Sign up.
+ * Faire's Google/Apple buttons are omitted — those sign-in providers aren't set up.
+ *
+ * `inModal`: signed-in approved buyers stay on the page they were browsing (Faire), instead of going home.
+ */
+export function SignInForm({ inModal = false, onDone }: { inModal?: boolean; onDone?: () => void }) {
+  const navigate = useNavigate();
+  const { login, showToast } = useStore();
+  const { t } = useTranslation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password.trim() || !(await login(email, password))) {
+      showToast(t('auth.loginFailed'), 'error');
+      return;
+    }
+    onDone?.();
+    // Send the signed-in user wherever their account state belongs
+    const user = useStore.getState().currentUser;
+    if (user?.isAdmin) navigate('/admin');
+    else if (user && user.status !== 'approved') navigate('/pending');
+    else if (!inModal) navigate('/');
+  };
+
+  const handleForgotPassword = async () => {
+    setSendingReset(true);
+    const { error } = await db.sendPasswordReset(email.trim());
+    setSendingReset(false);
+    if (error) {
+      showToast(error.message, 'error');
+      return;
+    }
+    showToast(t('auth.resetSent', { email: email.trim() }), 'success');
+  };
+
+  const hasEmail = email.trim() !== '';
+
+  return (
+    <div className="flex flex-col bg-white px-6 pb-16 pt-10 tracking-[0.15px] text-ink-700 md:min-h-[480px] md:p-10">
+      <Link to="/" onClick={onDone} aria-label="WELMES Business" className="hidden self-start pl-1 md:flex">
+        <Logo />
+      </Link>
+      <h1 id="signin-title" className="font-serif text-[30px] font-normal leading-[38px] tracking-normal md:mt-8">{t('signin.title')}</h1>
+
+      <form onSubmit={handleSubmit} className="contents">
+        <div className="mt-6 flex flex-col">
+          <label htmlFor="signin-email" className={labelCls}>{t('signin.emailLabel')}</label>
+          <input
+            id="signin-email"
+            type="email"
+            autoComplete="email"
+            placeholder="name@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={fieldCls}
+          />
+        </div>
+        <div className="mt-4 flex flex-col">
+          <label htmlFor="signin-password" className={labelCls}>{t('auth.password')}</label>
+          <div className="relative">
+            <input
+              id="signin-password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              spellCheck={false}
+              placeholder={t('signin.passwordPlaceholder')}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`${fieldCls} pr-11`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={t(showPassword ? 'signup.hidePassword' : 'signup.showPassword')}
+              className="absolute right-3 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center text-ink-700"
+            >
+              {showPassword ? <EyeOff size={16} strokeWidth={1.5} /> : <Eye size={16} strokeWidth={1.5} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Faire reveals its secondary action once an email is typed */}
+        <div
+          className={`mt-4 flex h-5 justify-center transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none ${
+            hasEmail ? 'visible translate-y-0 opacity-100' : 'invisible translate-y-1 opacity-0'
+          }`}
+        >
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            disabled={!hasEmail || sendingReset}
+            className="text-[14px] leading-5 text-ink-700 underline underline-offset-[0.25em] hover:text-ink-900"
+          >
+            {sendingReset ? t('common.loading') : t('auth.forgotPassword')}
+          </button>
+        </div>
+
+        <button type="submit" className="mt-4 h-12 w-full rounded-sm bg-ink-700 px-5 text-[14px] leading-5 text-white transition-colors hover:bg-ink-900">
+          {t('signin.signIn')}
+        </button>
+      </form>
+
+      <div className="mt-4 flex items-center gap-4">
+        <hr className="w-full border-line-control" />
+        <p className="text-[14px] leading-5">{t('signin.or')}</p>
+        <hr className="w-full border-line-control" />
+      </div>
+      <Link
+        to="/register"
+        onClick={onDone}
+        className="mt-4 flex h-12 w-full items-center justify-center rounded-sm border border-line-control bg-white px-5 text-[14px] leading-5 text-ink-700 transition-colors hover:border-ink-700"
+      >
+        {t('signin.signUp')}
+      </Link>
+    </div>
+  );
+}
+
+/**
+ * Faire opens sign-in as a 420px sheet over the current page (full screen on mobile), with a
+ * 24px close button 16px from the corner over rgba(51,51,51,.5). Native <dialog>, portalled.
+ */
+export default function SignInModal({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
+  const ref = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    ref.current?.showModal();
+  }, []);
+
+  const close = () => ref.current?.close();
+
+  return createPortal(
+    <dialog
+      ref={ref}
+      onClose={onClose}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (e.target === e.currentTarget) close(); // backdrop click
+      }}
+      aria-labelledby="signin-title"
+      className="m-0 h-full max-h-none w-full max-w-none bg-white backdrop:bg-[rgba(51,51,51,0.5)] md:m-auto md:h-fit md:max-h-[calc(100vh-32px)] md:w-[420px]"
+    >
+      <div className="relative h-full overflow-y-auto">
+        <button
+          type="button"
+          onClick={close}
+          aria-label={t('common.close')}
+          className="absolute right-4 top-4 z-[1] flex size-6 items-center justify-center text-ink-700"
+        >
+          <X size={20} strokeWidth={1.25} />
+        </button>
+        <SignInForm inModal onDone={close} />
+      </div>
+    </dialog>,
+    document.body,
+  );
+}

@@ -10,7 +10,7 @@ import { X } from 'lucide-react';
  * 14/20 label over a 40px #dadada field, 48px #333 button, then a #f7f7f7 footer with 12/16 links.
  * Native <dialog> gives the focus trap, Esc and backdrop; it is portalled so clicks never reach the card link.
  */
-export default function SignUpModal({ image, onClose }: { image?: string; onClose: () => void }) {
+export default function SignUpModal({ image, onClose, onSignIn }: { image?: string; onClose: () => void; onSignIn: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const ref = useRef<HTMLDialogElement>(null);
@@ -81,7 +81,7 @@ export default function SignUpModal({ image, onClose }: { image?: string; onClos
           </p>
           <p>
             {t('auth.alreadyHaveAccount')}{' '}
-            <Link to="/login" className="underline underline-offset-[0.25em]">{t('common.login')}</Link>
+            <button type="button" onClick={onSignIn} className="underline underline-offset-[0.25em]">{t('common.login')}</button>
           </p>
         </div>
       </div>
