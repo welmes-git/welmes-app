@@ -779,5 +779,13 @@
     "company": "公司名称",
     "businessNo": "营业执照号码",
     "status": "状态"
+  },
+  "signin": {
+    "title": "登录 WELMES",
+    "emailLabel": "电子邮箱",
+    "passwordPlaceholder": "请输入密码",
+    "signIn": "登录",
+    "or": "或",
+    "signUp": "注册"
   }
 }

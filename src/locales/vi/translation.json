@@ -777,5 +777,13 @@
     "company": "Công ty",
     "businessNo": "Số đăng ký",
     "status": "Trạng thái"
+  },
+  "signin": {
+    "title": "Đăng nhập WELMES",
+    "emailLabel": "Địa chỉ email",
+    "passwordPlaceholder": "Nhập mật khẩu",
+    "signIn": "Đăng nhập",
+    "or": "hoặc",
+    "signUp": "Đăng ký"
   }
 }

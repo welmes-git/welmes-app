@@ -6,6 +6,17 @@ import Logo from '../components/Logo';
 import { Eye, EyeOff } from 'lucide-react';
 import * as db from '../lib/db';
 
+// Faire Slate form field: 14/20 label, 40px field, 1px #dadada, 4px radius, 16px padding
+const labelCls = 'text-[14px] leading-5 text-ink-700';
+const fieldCls =
+  'h-10 w-full rounded-sm border border-line-control bg-white px-4 text-[14px] text-ink-700 placeholder:text-ink-500 focus:border-ink-700 focus:outline-none';
+
+/**
+ * Faire sign-in sheet, measured on faire.com (1440px): 420px column, 40px padding (24/40/64 on mobile),
+ * 88px logo on desktop, 32 → 30/38 serif title, 24 → email, 16 → password, a 20px slot that reveals
+ * the secondary action once an email is typed, 16 → 48px Sign in, "or" divider, 48px outlined Sign up.
+ * Faire's Google/Apple buttons are omitted — those sign-in providers aren't set up.
+ */
 export default function Login() {
   const navigate = useNavigate();
   const { login, showToast } = useStore();
@@ -38,10 +49,6 @@ export default function Login() {
   };
 
   const handleForgotPassword = async () => {
-    if (!email.trim()) {
-      showToast(t('auth.resetEmailRequired'), 'info');
-      return;
-    }
     setSendingReset(true);
     const { error } = await db.sendPasswordReset(email.trim());
     setSendingReset(false);
@@ -52,70 +59,85 @@ export default function Login() {
     showToast(t('auth.resetSent', { email: email.trim() }), 'success');
   };
 
+  const hasEmail = email.trim() !== '';
+
   return (
-    <div className="min-h-screen bg-canvas flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-[420px]">
-        <Link to="/" aria-label="WELMES Business" className="mb-8 flex justify-center">
-          <Logo size="auth" />
-        </Link>
+    <div className="mb-16 flex flex-col bg-white px-6 pb-16 pt-10 tracking-[0.15px] text-ink-700 md:m-auto md:min-h-[480px] md:w-[420px] md:p-10">
+      <Link to="/" aria-label="WELMES Business" className="hidden self-start pl-1 md:flex">
+        <Logo />
+      </Link>
+      <h1 className="font-serif text-[30px] font-normal leading-[38px] tracking-normal md:mt-8">{t('signin.title')}</h1>
 
-        <div className="bg-canvas rounded-[10px] border border-line p-8">
-          <h1 className="text-[20px] font-bold text-ink-700 text-center mb-1">{t('auth.loginTitle')}</h1>
-          <p className="text-[13px] text-ink-500 text-center mb-6">{t('auth.loginSubtitle')}</p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-[13px] text-ink-500 mb-1.5">{t('auth.email')}</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t('auth.email')}
-                className="w-full h-[46px] px-4 border border-line-strong rounded-lg bg-canvas text-[14px] text-ink-700 placeholder:text-ink-300 focus:outline-none focus:border-ink-900 transition-colors"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[13px] text-ink-500 mb-1.5">{t('auth.password')}</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder={t('auth.password')}
-                  className="w-full h-[46px] px-4 pr-11 border border-line-strong rounded-lg bg-canvas text-[14px] text-ink-700 placeholder:text-ink-300 focus:outline-none focus:border-ink-900 transition-colors"
-                />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-500">
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            {/* "Remember me" was a no-op — Supabase already persists the
-                session across reloads, so the checkbox only misled users. */}
-            <div className="flex items-center justify-end">
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                disabled={sendingReset}
-                className="text-[13px] text-ink-700 underline underline-offset-2 hover:text-ink-900 disabled:opacity-50"
-              >
-                {sendingReset ? t('common.loading') : t('auth.forgotPassword')}
-              </button>
-            </div>
-
-            <button type="submit" className="w-full h-[50px] bg-ink-900 text-white rounded-lg font-bold text-[15px] hover:shadow-hover transition-shadow">
-              {t('auth.loginButton')}
-            </button>
-          </form>
-
-
-          <p className="text-[13px] text-ink-500 text-center mt-6">
-            {t('auth.noAccount')}{' '}
-            <Link to="/register" className="text-ink-900 font-bold underline underline-offset-2">{t('auth.registerHere')}</Link>
-          </p>
+      <form onSubmit={handleSubmit} className="contents">
+        <div className="mt-6 flex flex-col">
+          <label htmlFor="signin-email" className={labelCls}>{t('signin.emailLabel')}</label>
+          <input
+            id="signin-email"
+            type="email"
+            autoComplete="email"
+            placeholder="name@company.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={fieldCls}
+          />
         </div>
+        <div className="mt-4 flex flex-col">
+          <label htmlFor="signin-password" className={labelCls}>{t('auth.password')}</label>
+          <div className="relative">
+            <input
+              id="signin-password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              spellCheck={false}
+              placeholder={t('signin.passwordPlaceholder')}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`${fieldCls} pr-11`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={t(showPassword ? 'signup.hidePassword' : 'signup.showPassword')}
+              className="absolute right-3 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center text-ink-700"
+            >
+              {showPassword ? <EyeOff size={16} strokeWidth={1.5} /> : <Eye size={16} strokeWidth={1.5} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Faire reveals its secondary action once an email is typed */}
+        <div
+          aria-hidden={!hasEmail}
+          className={`mt-4 flex h-5 justify-center transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none ${
+            hasEmail ? 'visible translate-y-0 opacity-100' : 'invisible translate-y-1 opacity-0'
+          }`}
+        >
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            disabled={!hasEmail || sendingReset}
+            className="text-[14px] leading-5 text-ink-700 underline underline-offset-[0.25em] hover:text-ink-900"
+          >
+            {sendingReset ? t('common.loading') : t('auth.forgotPassword')}
+          </button>
+        </div>
+
+        <button type="submit" className="mt-4 h-12 w-full rounded-sm bg-ink-700 px-5 text-[14px] leading-5 text-white transition-colors hover:bg-ink-900">
+          {t('signin.signIn')}
+        </button>
+      </form>
+
+      <div className="mt-4 flex items-center gap-4">
+        <hr className="w-full border-line-control" />
+        <p className="text-[14px] leading-5">{t('signin.or')}</p>
+        <hr className="w-full border-line-control" />
       </div>
+      <Link
+        to="/register"
+        className="mt-4 flex h-12 w-full items-center justify-center rounded-sm border border-line-control bg-white px-5 text-[14px] leading-5 text-ink-700 transition-colors hover:border-ink-700"
+      >
+        {t('signin.signUp')}
+      </Link>
     </div>
   );
 }

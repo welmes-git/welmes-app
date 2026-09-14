@@ -777,5 +777,13 @@
     "company": "บริษัท",
     "businessNo": "เลขทะเบียน",
     "status": "สถานะ"
+  },
+  "signin": {
+    "title": "เข้าสู่ระบบ WELMES",
+    "emailLabel": "ที่อยู่อีเมล",
+    "passwordPlaceholder": "กรอกรหัสผ่าน",
+    "signIn": "เข้าสู่ระบบ",
+    "or": "หรือ",
+    "signUp": "สมัครสมาชิก"
   }
 }

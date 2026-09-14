@@ -779,5 +779,13 @@
     "company": "Entreprise",
     "businessNo": "N° d’immatriculation",
     "status": "Statut"
+  },
+  "signin": {
+    "title": "Se connecter à WELMES",
+    "emailLabel": "Adresse e-mail",
+    "passwordPlaceholder": "Saisissez votre mot de passe",
+    "signIn": "Se connecter",
+    "or": "ou",
+    "signUp": "S’inscrire"
   }
 }

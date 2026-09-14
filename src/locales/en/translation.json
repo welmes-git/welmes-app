@@ -779,5 +779,13 @@
     "company": "Company",
     "businessNo": "Business No.",
     "status": "Status"
+  },
+  "signin": {
+    "title": "Sign in to WELMES",
+    "emailLabel": "Email address",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign in",
+    "or": "or",
+    "signUp": "Sign up"
   }
 }

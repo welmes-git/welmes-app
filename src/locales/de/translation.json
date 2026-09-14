@@ -779,5 +779,13 @@
     "company": "Unternehmen",
     "businessNo": "Registernummer",
     "status": "Status"
+  },
+  "signin": {
+    "title": "Bei WELMES anmelden",
+    "emailLabel": "E-Mail-Adresse",
+    "passwordPlaceholder": "Passwort eingeben",
+    "signIn": "Anmelden",
+    "or": "oder",
+    "signUp": "Registrieren"
   }
 }

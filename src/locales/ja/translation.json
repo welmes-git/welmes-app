@@ -779,5 +779,13 @@
     "company": "会社名",
     "businessNo": "事業者登録番号",
     "status": "ステータス"
+  },
+  "signin": {
+    "title": "WELMESにログイン",
+    "emailLabel": "メールアドレス",
+    "passwordPlaceholder": "パスワードを入力",
+    "signIn": "ログイン",
+    "or": "または",
+    "signUp": "新規登録"
   }
 }

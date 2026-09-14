@@ -783,5 +783,13 @@
     "company": "Компания",
     "businessNo": "Рег. номер",
     "status": "Статус"
+  },
+  "signin": {
+    "title": "Вход в WELMES",
+    "emailLabel": "Электронная почта",
+    "passwordPlaceholder": "Введите пароль",
+    "signIn": "Войти",
+    "or": "или",
+    "signUp": "Зарегистрироваться"
   }
 }

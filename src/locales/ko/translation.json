@@ -777,5 +777,13 @@
     "company": "회사명",
     "businessNo": "사업자등록번호",
     "status": "상태"
+  },
+  "signin": {
+    "title": "WELMES 로그인",
+    "emailLabel": "이메일 주소",
+    "passwordPlaceholder": "비밀번호를 입력하세요",
+    "signIn": "로그인",
+    "or": "또는",
+    "signUp": "회원가입"
   }
 }

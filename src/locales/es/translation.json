@@ -779,5 +779,13 @@
     "company": "Empresa",
     "businessNo": "N.º de registro",
     "status": "Estado"
+  },
+  "signin": {
+    "title": "Inicia sesión en WELMES",
+    "emailLabel": "Correo electrónico",
+    "passwordPlaceholder": "Introduce tu contraseña",
+    "signIn": "Iniciar sesión",
+    "or": "o",
+    "signUp": "Regístrate"
   }
 }

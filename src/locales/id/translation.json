@@ -777,5 +777,13 @@
     "company": "Perusahaan",
     "businessNo": "No. registrasi",
     "status": "Status"
+  },
+  "signin": {
+    "title": "Masuk ke WELMES",
+    "emailLabel": "Alamat email",
+    "passwordPlaceholder": "Masukkan kata sandi",
+    "signIn": "Masuk",
+    "or": "atau",
+    "signUp": "Daftar"
   }
 }
