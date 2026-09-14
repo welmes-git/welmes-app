@@ -29,6 +29,7 @@ import {
   MessageCircle,
   Send,
   Loader2,
+  Truck,
 } from 'lucide-react';
 import * as db from '../lib/db';
 import type { SupportRoom, SupportMessage } from '../lib/db';
@@ -522,6 +523,14 @@ export default function AdminDashboard() {
             );
           })}
         </nav>
+
+        <Link
+          to="/admin/supply"
+          className="mt-2 flex w-full items-center gap-3 border-l-[3px] border-transparent px-4 py-3 text-[14px] transition-colors hover:bg-white/5"
+        >
+          <Truck size={18} />
+          {sidebarOpen && <span>Brand supply</span>}
+        </Link>
 
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <button

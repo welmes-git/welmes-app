@@ -11,6 +11,7 @@ import ProductDetail from './pages/ProductDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminSupply from './pages/AdminSupply';
 import CustomerSupport from './pages/CustomerSupport';
 import Checkout from './pages/Checkout';
 import MyAccount from './pages/MyAccount';
@@ -51,6 +52,7 @@ function App() {
       <Routes>
         {/* Admin route without header/footer */}
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/supply" element={<><AdminSupply /><Toast /></>} />
         {/* Sign-up is a full-screen flow with its own compact header (Faire) */}
         <Route path="/register" element={<><Register /><Toast /></>} />
 
