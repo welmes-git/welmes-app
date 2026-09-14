@@ -156,27 +156,39 @@ export function inferBrandFromName(name, brands) {
 
 // ── Playwright 세션 ──────────────────────────────────────────────────
 
-/** Turnstile 자동 로그인. 세션 만료 시에만 호출 — headful 창이 뜬다. */
+/** Turnstile 자동 로그인. 세션 만료 시에만 호출 — headful 창이 뜬다. 챌린지로 폼이 늦게 뜰 수 있어 3회 재시도. */
 async function loginHeadful(chromium) {
   console.log('🔑 세션 만료 — 로그인 브라우저를 띄웁니다 (Turnstile 자동 처리, 최대 90초)...');
-  const browser = await chromium.launch({ headless: false });
-  const ctx = await browser.newContext();
-  const page = await ctx.newPage();
-  await page.goto(`${BASE}/p/do/clickMemberLogin`, { waitUntil: 'domcontentloaded' });
-  await page.fill('input[name="identification"]', process.env.SD_EMAIL);
-  await page.fill('input[name="password"]', process.env.SD_PASSWORD);
-  await page.click('.turnstile-form input[type="submit"]');
-  // turnstile_manager.js: 검증 완료 or 최대 10초 후 자동 제출. 간혹 체크박스가 뜨면 클릭 시도.
-  try {
-    await page.waitForURL(u => !String(u).includes('clickMemberLogin') && !String(u).includes('login.do'), { timeout: 90_000 });
-  } catch {
-    try { await page.frameLocator('.cf-turnstile iframe').locator('body').click({ timeout: 5_000 }); } catch {}
-    await page.waitForURL(u => !String(u).includes('clickMemberLogin') && !String(u).includes('login.do'), { timeout: 30_000 });
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const browser = await chromium.launch({ headless: false });
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    try {
+      await page.goto(`${BASE}/p/do/clickMemberLogin`, { waitUntil: 'domcontentloaded' });
+      // Turnstile 챌린지가 폼 앞을 가로막을 수 있다 — 폼이 뜰 때까지 기다린다
+      await page.waitForSelector('input[name="identification"]', { timeout: 45_000 });
+      await page.fill('input[name="identification"]', process.env.SD_EMAIL);
+      await page.fill('input[name="password"]', process.env.SD_PASSWORD);
+      await page.click('.turnstile-form input[type="submit"]');
+      // turnstile_manager.js: 검증 완료 or 최대 10초 후 자동 제출. 간혹 체크박스가 뜨면 클릭 시도.
+      try {
+        await page.waitForURL(u => !String(u).includes('clickMemberLogin') && !String(u).includes('login.do'), { timeout: 90_000 });
+      } catch {
+        try { await page.frameLocator('.cf-turnstile iframe').locator('body').click({ timeout: 5_000 }); } catch {}
+        await page.waitForURL(u => !String(u).includes('clickMemberLogin') && !String(u).includes('login.do'), { timeout: 30_000 });
+      }
+      if (String(page.url()).includes('login')) throw new Error('로그인 후에도 login 페이지 — 아이디/비밀번호 확인');
+      await ctx.storageState({ path: SESSION_FILE });
+      console.log('✅ 로그인 성공, 세션 저장');
+      await browser.close();
+      return;
+    } catch (e) {
+      await browser.close().catch(() => {});
+      if (attempt === 3) throw new Error(`로그인 실패 (${3}회 시도) — 아이디/비밀번호 또는 Turnstile 확인 필요: ${e.message?.slice(0, 80)}`);
+      console.log(`   ⚠ 로그인 시도 ${attempt}/3 실패 — 5초 후 재시도 (${e.message?.slice(0, 60)})`);
+      await new Promise(r => setTimeout(r, 5000));
+    }
   }
-  if (String(page.url()).includes('login')) throw new Error('로그인 실패 — 아이디/비밀번호 또는 Turnstile 확인 필요');
-  await ctx.storageState({ path: SESSION_FILE });
-  console.log('✅ 로그인 성공, 세션 저장');
-  await browser.close();
 }
 
 const isLoggedInPage = (page) =>

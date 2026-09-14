@@ -66,8 +66,9 @@ console.log(`🎯 대상 상품 ${products.length}개${DRY_RUN ? ' (dry-run — 
 
 // ── 스크래퍼 세션 ────────────────────────────────────────────────────
 const sd = await createSdSession(chromium);
-const page = sd.page();
+let page = sd.page();
 await sd.ensure();
+page = sd.page(); // ensure()가 재로그인하면 컨텍스트가 교체되므로 다시 받는다
 console.log(`✅ 슈퍼딜리버리 세션 확인 완료\n`);
 
 let checked = 0, changedProducts = 0, errors = 0;
@@ -89,12 +90,29 @@ for (const row of products) {
   if (!resp) { errors++; continue; }
   if (String(page.url()).includes('login')) {
     await sd.ensure();
+page = sd.page();
     resp = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
   }
+  // domcontentloaded 직후에는 세트표가 아직 안 그려질 수 있다 — import와 동일하게 대기 후 파싱
+  await page.waitForTimeout(1500);
 
   // 페이지 소실 — 404 응답 또는 상품 URL에서 벗어난 리다이렉트
   const gone = resp.status() === 404 || !/pd_p\/\d+/.test(page.url());
-  const parsed = gone ? null : await parseProductPage(page, url);
+  let parsed = gone ? null : await parseProductPage(page, url);
+
+  // 세트/가격을 못 읽었으면 일시적 렌더링 지연·세션 이슈일 수 있다 — 세션 확인 + 재시도 3회 후 판정
+  if (parsed?.error) {
+    for (let attempt = 0; attempt < 3 && parsed?.error; attempt++) {
+      await page.waitForTimeout(3000);
+      await sd.ensure();
+page = sd.page();
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+      await page.waitForTimeout(2500);
+      if (!/pd_p\/\d+/.test(page.url())) break; // 소실 판정은 gone 로직이 담당
+      const reparsed = await parseProductPage(page, page.url());
+      if (!reparsed.error) parsed = reparsed;
+    }
+  }
   checked++;
 
   // ── 변동 감지 ──────────────────────────────────────────────────────
@@ -196,7 +214,12 @@ for (const row of products) {
     }
   }
 
-  await page.waitForTimeout(1200);
+  // 스로틀 방지 — 60개마다 휴식 (SD가 장기 연속 요청 시 회원가 정보를 빼고 응답함)
+  if (checked % 60 === 0) {
+    console.log(`⏳ ${checked}개 처리 — 스로틀 방지 휴식 90초`);
+    await page.waitForTimeout(90_000);
+  }
+  await page.waitForTimeout(3000);
 }
 
 const statLine = Object.entries(stats).filter(([, v]) => v > 0).map(([k, v]) => `${k} ${v}`).join(' / ') || '변동 없음';
@@ -229,6 +252,7 @@ for (const w of watchlist) {
   if (!wResp) { watchErrors++; continue; }
   if (String(page.url()).includes('login')) {
     await sd.ensure();
+page = sd.page();
     wResp = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
   }
 
@@ -240,7 +264,19 @@ for (const w of watchlist) {
     continue;
   }
 
-  const wParsed = await parseProductPage(page, url);
+  const wParsedRaw = await parseProductPage(page, url);
+  // 일시적 렌더링 지연·세션 이슈 보호 — 세션 확인 + 재시도 3회
+  let wParsed = wParsedRaw;
+  for (let attempt = 0; attempt < 3 && wParsed.error; attempt++) {
+    await page.waitForTimeout(3000);
+    await sd.ensure();
+page = sd.page();
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await page.waitForTimeout(2500);
+    if (!/pd_p\/\d+/.test(page.url())) break;
+    const wReparsed = await parseProductPage(page, page.url());
+    if (!wReparsed.error) wParsed = wReparsed;
+  }
   if (wParsed.error) {
     stillOut++;
     if (!DRY_RUN) await supabase.from('sd_watchlist').update({ last_checked_at: new Date().toISOString() }).eq('id', w.id);
