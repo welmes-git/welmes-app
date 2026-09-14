@@ -30,3 +30,4 @@ scripts/.sd-session.json
 .env
 .env.*
 !.env.example
+scripts/.tmp-*
