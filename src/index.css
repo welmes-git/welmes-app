@@ -110,6 +110,23 @@
   }
 }
 
+/* Korean UI: one face for Latin and Hangul (Pretendard, as on most Korean shops) instead of
+   Hanken/Newsreader Latin mixed with Pretendard Hangul; break lines between words, not syllables.
+   Faire's light serif titles read thin in Hangul, so ko titles go semibold with tighter tracking. */
+html:lang(ko) body,
+html:lang(ko) .font-sans,
+html:lang(ko) .font-serif {
+  font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif;
+}
+html:lang(ko) {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+html:lang(ko) .font-serif {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
 /* Toast slide-in animation */
 @keyframes slideIn {
   from {

@@ -192,7 +192,7 @@
   },
   "products": {
     "allProducts": "Alle Produkte",
-    "products": "Produkte",
+    "products": "{{count}} Produkte",
     "filters": "Filter",
     "reset": "Zurücksetzen",
     "category": "Kategorie",
@@ -227,7 +227,7 @@
     "units": "Stück",
     "setOptions": "Set-Optionen",
     "quantity": "Menge (Sets)",
-    "unitsPerSet": "Stück/Set",
+    "unitsPerSet": "{{count}} Stück/Set",
     "grandTotal": "Gesamtsumme",
     "addToCart": "In den Warenkorb",
     "loginToOrder": "Zum Bestellen anmelden",
@@ -284,7 +284,7 @@
     "remove": "Entfernen",
     "loginRequired": "Anmeldung zum Bestellen erforderlich",
     "sets": "Sets",
-    "units": "Stück"
+    "units": "{{count}} Stück"
   },
   "checkout": {
     "title": "Kasse",
@@ -447,7 +447,7 @@
     "pendingReview": "In Prüfung",
     "notApproved": "Nicht genehmigt",
     "orderHistory": "Bestellverlauf",
-    "orders": "Bestellungen",
+    "orders": "{{count}} Bestellungen",
     "noOrders": "Noch keine Bestellungen",
     "noOrdersDesc": "Ihre Bestellungen erscheinen hier, sobald Sie welche aufgeben.",
     "startShopping": "Jetzt einkaufen",
@@ -694,7 +694,7 @@
     "alreadyReviewed": "Sie haben dieses Produkt bereits bewertet.",
     "loginToReview": "Zum Bewerten anmelden",
     "noReviews": "Noch keine Bewertungen. Seien Sie der Erste!",
-    "basedOn": "Bewertungen",
+    "basedOn": "{{count}} Bewertungen",
     "poor": "Mangelhaft",
     "fair": "Ausreichend",
     "good": "Gut",

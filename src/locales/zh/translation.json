@@ -192,7 +192,7 @@
   },
   "products": {
     "allProducts": "全部商品",
-    "products": "件商品",
+    "products": "{{count}}件商品",
     "filters": "筛选",
     "reset": "重置",
     "category": "分类",
@@ -227,7 +227,7 @@
     "units": "件",
     "setOptions": "套装选项",
     "quantity": "数量（套）",
-    "unitsPerSet": "件/套",
+    "unitsPerSet": "每套{{count}}件",
     "grandTotal": "总计",
     "addToCart": "加入购物车",
     "loginToOrder": "登录后下单",
@@ -284,7 +284,7 @@
     "remove": "删除",
     "loginRequired": "结算需要登录",
     "sets": "套",
-    "units": "件"
+    "units": "{{count}}件"
   },
   "checkout": {
     "title": "结算",
@@ -447,7 +447,7 @@
     "pendingReview": "审核中",
     "notApproved": "未通过审核",
     "orderHistory": "订单历史",
-    "orders": "个订单",
+    "orders": "{{count}}个订单",
     "noOrders": "暂无订单",
     "noOrdersDesc": "下单后，订单将在此处显示。",
     "startShopping": "开始购物",
@@ -694,7 +694,7 @@
     "alreadyReviewed": "您已经评价过这款商品。",
     "loginToReview": "登录后写评价",
     "noReviews": "暂无评价，快来写第一条评价吧！",
-    "basedOn": "条评价",
+    "basedOn": "{{count}}条评价",
     "poor": "差",
     "fair": "一般",
     "good": "好",

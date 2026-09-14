@@ -366,7 +366,7 @@ export default function Checkout() {
                               {item.setOption.id}
                             </span>
                             <p className="text-[11px] text-ink-500 mt-0.5">{item.setOption.description}</p>
-                            <p className="text-[11px] text-ink-300">{item.setOption.unitsPerSet} {t('productDetail.unitsPerSet')}</p>
+                            <p className="text-[11px] text-ink-300">{t('productDetail.unitsPerSet', { count: item.setOption.unitsPerSet })}</p>
                           </div>
                         ) : (
                           <span className="text-[12px] text-ink-300">—</span>
@@ -378,7 +378,7 @@ export default function Checkout() {
                         <span className="text-[15px] font-semibold text-ink-700">{item.quantity}</span>
                         {item.setOption && (
                           <p className="text-[10px] text-ink-300">
-                            {item.quantity * item.setOption.unitsPerSet} {t('cart.units')}
+                            {t('cart.units', { count: item.quantity * item.setOption.unitsPerSet })}
                           </p>
                         )}
                       </div>

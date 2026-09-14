@@ -192,7 +192,7 @@
   },
   "products": {
     "allProducts": "Tất cả sản phẩm",
-    "products": "sản phẩm",
+    "products": "{{count}} sản phẩm",
     "filters": "Bộ lọc",
     "reset": "Đặt lại",
     "category": "Danh mục",
@@ -227,7 +227,7 @@
     "units": "sản phẩm",
     "setOptions": "Tùy chọn set",
     "quantity": "SL (set)",
-    "unitsPerSet": "sản phẩm/set",
+    "unitsPerSet": "{{count}} sản phẩm/set",
     "grandTotal": "Tổng cộng",
     "addToCart": "Thêm vào giỏ",
     "loginToOrder": "Đăng nhập để đặt hàng",
@@ -283,7 +283,7 @@
     "remove": "Xóa",
     "loginRequired": "Cần đăng nhập để thanh toán",
     "sets": "set",
-    "units": "sản phẩm"
+    "units": "{{count}} sản phẩm"
   },
   "checkout": {
     "title": "Thanh toán",
@@ -445,7 +445,7 @@
     "pendingReview": "Đang chờ duyệt",
     "notApproved": "Chưa được duyệt",
     "orderHistory": "Lịch sử đơn hàng",
-    "orders": "đơn hàng",
+    "orders": "{{count}} đơn hàng",
     "noOrders": "Chưa có đơn hàng",
     "noOrdersDesc": "Đơn hàng của bạn sẽ hiển thị ở đây sau khi đặt.",
     "startShopping": "Bắt đầu mua sắm",
@@ -692,7 +692,7 @@
     "alreadyReviewed": "Bạn đã đánh giá sản phẩm này rồi.",
     "loginToReview": "Đăng nhập để viết đánh giá",
     "noReviews": "Chưa có đánh giá. Hãy là người đầu tiên!",
-    "basedOn": "đánh giá",
+    "basedOn": "{{count}} đánh giá",
     "poor": "Kém",
     "fair": "Tạm được",
     "good": "Tốt",

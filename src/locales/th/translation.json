@@ -192,7 +192,7 @@
   },
   "products": {
     "allProducts": "สินค้าทั้งหมด",
-    "products": "รายการ",
+    "products": "{{count}} รายการ",
     "filters": "ตัวกรอง",
     "reset": "รีเซ็ต",
     "category": "หมวดหมู่",
@@ -227,7 +227,7 @@
     "units": "ชิ้น",
     "setOptions": "ตัวเลือกเซ็ต",
     "quantity": "จำนวน (เซ็ต)",
-    "unitsPerSet": "ชิ้น/เซ็ต",
+    "unitsPerSet": "{{count}} ชิ้น/เซ็ต",
     "grandTotal": "ยอดรวมทั้งหมด",
     "addToCart": "เพิ่มลงตะกร้า",
     "loginToOrder": "เข้าสู่ระบบเพื่อสั่งซื้อ",
@@ -283,7 +283,7 @@
     "remove": "ลบ",
     "loginRequired": "ต้องเข้าสู่ระบบเพื่อชำระเงิน",
     "sets": "เซ็ต",
-    "units": "ชิ้น"
+    "units": "{{count}} ชิ้น"
   },
   "checkout": {
     "title": "ชำระเงิน",
@@ -445,7 +445,7 @@
     "pendingReview": "รอการตรวจสอบ",
     "notApproved": "ไม่ได้รับอนุมัติ",
     "orderHistory": "ประวัติคำสั่งซื้อ",
-    "orders": "คำสั่งซื้อ",
+    "orders": "{{count}} คำสั่งซื้อ",
     "noOrders": "ยังไม่มีคำสั่งซื้อ",
     "noOrdersDesc": "คำสั่งซื้อของคุณจะแสดงที่นี่เมื่อคุณสั่งซื้อ",
     "startShopping": "เริ่มช้อปปิ้ง",
@@ -692,7 +692,7 @@
     "alreadyReviewed": "คุณรีวิวสินค้านี้แล้ว",
     "loginToReview": "เข้าสู่ระบบเพื่อเขียนรีวิว",
     "noReviews": "ยังไม่มีรีวิว มาเป็นคนแรกกัน!",
-    "basedOn": "รีวิว",
+    "basedOn": "{{count}} รีวิว",
     "poor": "แย่",
     "fair": "พอใช้",
     "good": "ดี",

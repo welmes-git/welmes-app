@@ -192,7 +192,7 @@
   },
   "products": {
     "allProducts": "全商品",
-    "products": "件",
+    "products": "{{count}}件",
     "filters": "絞り込み",
     "reset": "リセット",
     "category": "カテゴリー",
@@ -227,7 +227,7 @@
     "units": "個",
     "setOptions": "セットオプション",
     "quantity": "数量（セット）",
-    "unitsPerSet": "個/セット",
+    "unitsPerSet": "{{count}}個/セット",
     "grandTotal": "合計",
     "addToCart": "カートに追加",
     "loginToOrder": "注文するにはログイン",
@@ -284,7 +284,7 @@
     "remove": "削除",
     "loginRequired": "チェックアウトにはログインが必要です",
     "sets": "セット",
-    "units": "個"
+    "units": "{{count}}個"
   },
   "checkout": {
     "title": "チェックアウト",
@@ -447,7 +447,7 @@
     "pendingReview": "審査中",
     "notApproved": "未承認",
     "orderHistory": "注文履歴",
-    "orders": "件",
+    "orders": "{{count}}件",
     "noOrders": "注文履歴がありません",
     "noOrdersDesc": "注文するとここに表示されます。",
     "startShopping": "ショッピングを始める",
@@ -694,7 +694,7 @@
     "alreadyReviewed": "この商品はすでにレビュー済みです。",
     "loginToReview": "レビューを書くにはログイン",
     "noReviews": "まだレビューがありません。最初のレビューを書いてみましょう！",
-    "basedOn": "件のレビュー",
+    "basedOn": "{{count}}件のレビュー",
     "poor": "悪い",
     "fair": "普通",
     "good": "良い",

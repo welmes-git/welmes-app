@@ -192,7 +192,7 @@
   },
   "products": {
     "allProducts": "Semua Produk",
-    "products": "produk",
+    "products": "{{count}} produk",
     "filters": "Filter",
     "reset": "Atur Ulang",
     "category": "Kategori",
@@ -227,7 +227,7 @@
     "units": "unit",
     "setOptions": "Pilihan Set",
     "quantity": "Jml (set)",
-    "unitsPerSet": "unit/set",
+    "unitsPerSet": "{{count}} unit/set",
     "grandTotal": "Total Keseluruhan",
     "addToCart": "Tambah ke Keranjang",
     "loginToOrder": "Masuk untuk Memesan",
@@ -283,7 +283,7 @@
     "remove": "Hapus",
     "loginRequired": "Masuk diperlukan untuk checkout",
     "sets": "set",
-    "units": "unit"
+    "units": "{{count}} unit"
   },
   "checkout": {
     "title": "Checkout",
@@ -445,7 +445,7 @@
     "pendingReview": "Menunggu Peninjauan",
     "notApproved": "Tidak Disetujui",
     "orderHistory": "Riwayat Pesanan",
-    "orders": "pesanan",
+    "orders": "{{count}} pesanan",
     "noOrders": "Belum ada pesanan",
     "noOrdersDesc": "Pesanan Anda akan muncul di sini setelah Anda membuatnya.",
     "startShopping": "Mulai Belanja",
@@ -692,7 +692,7 @@
     "alreadyReviewed": "Anda sudah mengulas produk ini.",
     "loginToReview": "Masuk untuk menulis ulasan",
     "noReviews": "Belum ada ulasan. Jadilah yang pertama!",
-    "basedOn": "ulasan",
+    "basedOn": "{{count}} ulasan",
     "poor": "Buruk",
     "fair": "Cukup",
     "good": "Baik",

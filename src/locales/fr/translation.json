@@ -192,7 +192,7 @@
   },
   "products": {
     "allProducts": "Tous les produits",
-    "products": "produits",
+    "products": "{{count}} produits",
     "filters": "Filtres",
     "reset": "Réinitialiser",
     "category": "Catégorie",
@@ -227,7 +227,7 @@
     "units": "unités",
     "setOptions": "Options de lot",
     "quantity": "Qté (lots)",
-    "unitsPerSet": "unités/lot",
+    "unitsPerSet": "{{count}} unités/lot",
     "grandTotal": "Total général",
     "addToCart": "Ajouter au panier",
     "loginToOrder": "Connectez-vous pour commander",
@@ -284,7 +284,7 @@
     "remove": "Supprimer",
     "loginRequired": "Connexion requise pour commander",
     "sets": "lots",
-    "units": "unités"
+    "units": "{{count}} unités"
   },
   "checkout": {
     "title": "Commande",
@@ -447,7 +447,7 @@
     "pendingReview": "En attente d'examen",
     "notApproved": "Non approuvée",
     "orderHistory": "Historique des commandes",
-    "orders": "commandes",
+    "orders": "{{count}} commandes",
     "noOrders": "Aucune commande pour le moment",
     "noOrdersDesc": "Vos commandes apparaîtront ici une fois passées.",
     "startShopping": "Commencer mes achats",
@@ -694,7 +694,7 @@
     "alreadyReviewed": "Vous avez déjà laissé un avis sur ce produit.",
     "loginToReview": "Connectez-vous pour écrire un avis",
     "noReviews": "Aucun avis pour le moment. Soyez le premier !",
-    "basedOn": "avis",
+    "basedOn": "{{count}} avis",
     "poor": "Médiocre",
     "fair": "Passable",
     "good": "Bien",

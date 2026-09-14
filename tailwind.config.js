@@ -7,8 +7,8 @@ module.exports = {
       fontFamily: {
         // Graphik / Nantes first: if licensed files are ever added via @font-face under those
         // names they take over automatically; until then the free stand-ins render.
-        sans: ["Graphik", '"Hanken Grotesk"', "Pretendard", "Pretendard Variable", "system-ui", "sans-serif"],
-        serif: ["Nantes", "Newsreader", "Pretendard", "Georgia", "serif"],
+        sans: ["Graphik", '"Hanken Grotesk"', "Pretendard Variable", "Pretendard", "system-ui", "sans-serif"],
+        serif: ["Nantes", "Newsreader", "Pretendard Variable", "Pretendard", "Georgia", "serif"],
         jp: ["Pretendard JP", "Pretendard", "system-ui", "sans-serif"],
         logo: ['"Cormorant Garamond"', "Georgia", "serif"],
       },

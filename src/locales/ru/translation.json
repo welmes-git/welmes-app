@@ -192,7 +192,7 @@
   },
   "products": {
     "allProducts": "Все товары",
-    "products": "товаров",
+    "products": "{{count}} товаров",
     "filters": "Фильтры",
     "reset": "Сбросить",
     "category": "Категория",
@@ -227,7 +227,7 @@
     "units": "шт.",
     "setOptions": "Варианты наборов",
     "quantity": "Кол-во (наборов)",
-    "unitsPerSet": "шт./набор",
+    "unitsPerSet": "{{count}} шт./набор",
     "grandTotal": "Итого",
     "addToCart": "В корзину",
     "loginToOrder": "Войдите для заказа",
@@ -286,7 +286,7 @@
     "remove": "Удалить",
     "loginRequired": "Для оформления заказа требуется вход",
     "sets": "наборов",
-    "units": "шт."
+    "units": "{{count}} шт."
   },
   "checkout": {
     "title": "Оформление заказа",
@@ -451,7 +451,7 @@
     "pendingReview": "На рассмотрении",
     "notApproved": "Не одобрено",
     "orderHistory": "История заказов",
-    "orders": "заказов",
+    "orders": "{{count}} заказов",
     "noOrders": "Пока нет заказов",
     "noOrdersDesc": "Ваши заказы появятся здесь после оформления.",
     "startShopping": "Начать покупки",
@@ -698,7 +698,7 @@
     "alreadyReviewed": "Вы уже оставили отзыв на этот товар.",
     "loginToReview": "Войдите, чтобы написать отзыв",
     "noReviews": "Отзывов пока нет. Будьте первым!",
-    "basedOn": "отзывов",
+    "basedOn": "{{count}} отзывов",
     "poor": "Плохо",
     "fair": "Удовлетворительно",
     "good": "Хорошо",

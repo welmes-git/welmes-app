@@ -320,7 +320,7 @@ export default function ProductList() {
             <div className="flex flex-wrap items-baseline pt-4">
               <h1 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700">{pageTitle}</h1>
               <p className="ml-4 text-[14px] leading-5 tabular-nums text-ink-500">
-                {filteredProducts.length} {t('products.products')}
+                {t('products.products', { count: filteredProducts.length })}
               </p>
               <button
                 onClick={() => setFiltersHidden((v) => !v)}

@@ -323,7 +323,7 @@ export default function ProductDetail() {
                 {product.rating}
               </span>
               <span className="text-[13px] text-ink-500">
-                ({product.reviews.toLocaleString()} {t('review.basedOn')})
+                ({t('review.basedOn', { count: product.reviews })})
               </span>
             </div>
 
@@ -355,7 +355,7 @@ export default function ProductDetail() {
                             <span className="rounded-sm border border-line-strong bg-canvas px-[7px] py-[3px] text-[11px] font-bold tracking-[0.02em] text-ink-700">{opt.id}</span>
                             <span className="text-[13px] font-semibold text-ink-700">{opt.description}</span>
                           </div>
-                          <p className="mb-2 text-[11px] text-ink-500">{opt.unitsPerSet} {t('productDetail.units')} / {t('productDetail.setOptions').toLowerCase()}</p>
+                          <p className="mb-2 text-[11px] text-ink-500">{t('productDetail.unitsPerSet', { count: opt.unitsPerSet })}</p>
                           <div className="mb-2.5 flex items-end justify-between">
                             <div>
                               <p className="text-[10px] font-semibold text-ink-500">{t('productDetail.unitPrice')}</p>
@@ -407,7 +407,7 @@ export default function ProductDetail() {
                           <div key={opt.id} className={`grid grid-cols-[1fr_92px_112px_auto] gap-x-3 items-center px-3 py-3 transition-colors ${qty > 0 ? selectedRow : 'hover:bg-sunken'}`}>
                             <div className="min-w-0">
                               <p className="text-[13px] font-medium text-ink-700"><span className="mr-1.5 font-bold text-ink-900">{opt.id}</span>{opt.description}</p>
-                              <p className="mt-0.5 text-[11px] text-ink-500">{opt.unitsPerSet} {t('productDetail.units')} / set</p>
+                              <p className="mt-0.5 text-[11px] text-ink-500">{t('productDetail.unitsPerSet', { count: opt.unitsPerSet })}</p>
                             </div>
                             <div className="text-right">
                               {canSeePrice ? (
@@ -581,7 +581,7 @@ export default function ProductDetail() {
                     <tr className="border-b border-line">
                       <td className="py-2.5 text-ink-500">{t('productDetail.stock')}</td>
                       <td className="py-2.5 text-ink-700">
-                        {product.stock} {t('productDetail.units')}
+                        {t('cart.units', { count: product.stock })}
                       </td>
                     </tr>
                     <tr>
@@ -625,7 +625,7 @@ export default function ProductDetail() {
                       );
                     })}
                   </div>
-                  <p className="text-[13px] text-ink-500">{reviews.length} {t('review.basedOn')}</p>
+                  <p className="text-[13px] text-ink-500">{t('review.basedOn', { count: reviews.length })}</p>
                 </div>
 
                 <div className="flex-1 w-full space-y-1.5">

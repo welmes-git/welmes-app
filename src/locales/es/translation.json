@@ -192,7 +192,7 @@
   },
   "products": {
     "allProducts": "Todos los productos",
-    "products": "productos",
+    "products": "{{count}} productos",
     "filters": "Filtros",
     "reset": "Restablecer",
     "category": "Categoría",
@@ -227,7 +227,7 @@
     "units": "unidades",
     "setOptions": "Opciones de set",
     "quantity": "Cant. (sets)",
-    "unitsPerSet": "unidades/set",
+    "unitsPerSet": "{{count}} unidades/set",
     "grandTotal": "Total",
     "addToCart": "Añadir al carrito",
     "loginToOrder": "Inicia sesión para pedir",
@@ -284,7 +284,7 @@
     "remove": "Eliminar",
     "loginRequired": "Inicia sesión para tramitar el pedido",
     "sets": "sets",
-    "units": "unidades"
+    "units": "{{count}} unidades"
   },
   "checkout": {
     "title": "Tramitar pedido",
@@ -447,7 +447,7 @@
     "pendingReview": "Pendiente de revisión",
     "notApproved": "No aprobada",
     "orderHistory": "Historial de pedidos",
-    "orders": "pedidos",
+    "orders": "{{count}} pedidos",
     "noOrders": "Aún no hay pedidos",
     "noOrdersDesc": "Tus pedidos aparecerán aquí cuando los realices.",
     "startShopping": "Empezar a comprar",
@@ -694,7 +694,7 @@
     "alreadyReviewed": "Ya has escrito una reseña de este producto.",
     "loginToReview": "Inicia sesión para escribir una reseña",
     "noReviews": "Aún no hay reseñas. ¡Sé el primero!",
-    "basedOn": "reseñas",
+    "basedOn": "{{count}} reseñas",
     "poor": "Malo",
     "fair": "Regular",
     "good": "Bueno",

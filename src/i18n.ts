@@ -14,6 +14,11 @@ import th from './locales/th/translation.json';
 import id from './locales/id/translation.json';
 import ru from './locales/ru/translation.json';
 
+// Keeps <html lang> in step with the UI language so :lang(ko) typography rules apply
+i18n.on('languageChanged', (lng) => {
+  document.documentElement.lang = lng;
+});
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)

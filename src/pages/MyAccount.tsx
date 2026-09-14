@@ -234,7 +234,7 @@ export default function MyAccount() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="font-serif text-[22px] font-normal leading-8 text-ink-700">{t('account.orderHistory')}</h2>
-                <span className="text-[13px] text-ink-500">{myOrders.length} {t('account.orders')}</span>
+                <span className="text-[13px] text-ink-500">{t('account.orders', { count: myOrders.length })}</span>
               </div>
 
               {myOrders.length === 0 ? (
