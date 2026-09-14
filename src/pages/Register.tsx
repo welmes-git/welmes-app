@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTranslation } from 'react-i18next';
 import Logo from '../components/Logo';
@@ -15,7 +15,9 @@ export default function Register() {
   const [step, setStep] = useState<Step>(1);
   const [showPassword, setShowPassword] = useState(false);
 
-  const [email, setEmail] = useState('');
+  // Prefilled from the product sign-up modal (router state)
+  const location = useLocation();
+  const [email, setEmail] = useState((location.state as { email?: string } | null)?.email ?? '');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [companyName, setCompanyName] = useState('');

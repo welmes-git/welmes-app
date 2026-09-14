@@ -756,5 +756,9 @@
     "tail1": "WELMESで",
     "tail2": "今すぐ見つけよう。",
     "moreToExplore": "もっと見る"
+  },
+  "signupModal": {
+    "email": "ビジネス用メールアドレス",
+    "cta": "無料で登録"
   }
 }

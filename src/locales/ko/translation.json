@@ -754,5 +754,9 @@
     "tail1": "지금 WELMES에서",
     "tail2": "바로 만나보세요.",
     "moreToExplore": "더 둘러보기"
+  },
+  "signupModal": {
+    "email": "사업자 이메일",
+    "cta": "무료로 가입하기"
   }
 }

@@ -756,5 +756,9 @@
     "tail1": "尽在 WELMES，",
     "tail2": "立即探索。",
     "moreToExplore": "更多探索"
+  },
+  "signupModal": {
+    "email": "企业邮箱",
+    "cta": "免费注册"
   }
 }

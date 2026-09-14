@@ -754,5 +754,9 @@
     "tail1": "cho cửa hàng của bạn,",
     "tail2": "ngay tại đây.",
     "moreToExplore": "Khám phá thêm"
+  },
+  "signupModal": {
+    "email": "Email doanh nghiệp",
+    "cta": "Đăng ký miễn phí"
   }
 }

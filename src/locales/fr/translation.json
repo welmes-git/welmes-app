@@ -756,5 +756,9 @@
     "tail1": "pour votre boutique,",
     "tail2": "juste ici.",
     "moreToExplore": "Découvrir plus"
+  },
+  "signupModal": {
+    "email": "E-mail professionnel",
+    "cta": "S'inscrire gratuitement"
   }
 }

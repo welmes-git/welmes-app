@@ -754,5 +754,9 @@
     "tail1": "untuk toko Anda,",
     "tail2": "ada di sini.",
     "moreToExplore": "Jelajahi lainnya"
+  },
+  "signupModal": {
+    "email": "Email bisnis",
+    "cta": "Daftar gratis"
   }
 }

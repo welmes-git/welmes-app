@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import type { Product } from '../store/useStore';
@@ -5,6 +6,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Heart, ShoppingCart } from 'lucide-react';
 import { BADGE_TAGS, hasJapanese, maskDigits } from '../lib/utils';
+import SignUpModal from './SignUpModal';
 
 interface ProductCardProps {
   /** Use the shared Product type so this card can't drift from the model */
@@ -17,6 +19,8 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
   const { t } = useTranslation();
   const { isAuthenticated, currentUser, addToCart, showToast, toggleWishlist, isWishlisted } = useStore();
   const { formatPrice, currencyInfo } = useCurrency();
+  // Faire: signed-out visitors get the sign-up sheet instead of the product page
+  const [showSignUp, setShowSignUp] = useState(false);
 
   const isVerified = currentUser?.status === 'approved';
   const canSeePrice = isAuthenticated && isVerified;
@@ -40,8 +44,8 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
   const handleUnlock = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Signed in but unverified: the price is gated on approval, not on login.
-    navigate(isAuthenticated ? '/register' : '/login');
+    // Signed in but unverified: the button is disabled, so this only runs signed out.
+    setShowSignUp(true);
   };
 
   const handleQuickAdd = (e: React.MouseEvent) => {
@@ -68,7 +72,16 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
     'inline-flex w-full min-[361px]:w-max max-w-full items-center justify-start gap-2 rounded-sm border border-line-control bg-canvas p-2 text-left text-[12px] leading-4 text-ink-700 transition-colors hover:border-ink-700 disabled:text-ink-300 disabled:hover:border-line-control';
 
   return (
-    <Link to={`/product/${product.id}`} className="group flex h-full flex-col tracking-[0.15px]">
+    <Link
+      to={`/product/${product.id}`}
+      onClick={(e) => {
+        if (isAuthenticated) return;
+        e.preventDefault();
+        setShowSignUp(true);
+      }}
+      className="group flex h-full flex-col tracking-[0.15px]"
+    >
+      {showSignUp && <SignUpModal image={product.image} onClose={() => setShowSignUp(false)} />}
       {/* Image — 1:1, 4px radius, no border; a 2% black wash separates white packshots from the page */}
       <div className="relative">
         <img
