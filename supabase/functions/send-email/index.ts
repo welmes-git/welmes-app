@@ -3,8 +3,23 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') ?? 'WELMES <onboarding@resend.dev>'
 const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') ?? 'admin@welmes.kr'
+/**
+ * Where humans should land when they reply, and the address shown in the
+ * footer. FROM_EMAIL sends from a Resend-verified domain that has no mailbox
+ * behind it, so without this every customer reply would bounce into a void.
+ */
+const SUPPORT_EMAIL = Deno.env.get('SUPPORT_EMAIL') ?? 'welmes0001@gmail.com'
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
+/**
+ * Public site origin used for every link in the outgoing emails. Kept in one
+ * place (and overridable per environment) so a domain change never means
+ * hunting down hardcoded URLs across the templates again.
+ */
+const SITE_URL = (Deno.env.get('SITE_URL') ?? 'https://www.welmes.business').replace(/\/+$/, '')
+/** Same origin without the scheme, for display as link text in the footer. */
+const SITE_HOST = SITE_URL.replace(/^https?:\/\//, '')
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -67,13 +82,43 @@ async function sendEmail(to: string, subject: string, html: string) {
       Authorization: `Bearer ${RESEND_API_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ from: FROM_EMAIL, to, subject, html }),
+    body: JSON.stringify({ from: FROM_EMAIL, reply_to: SUPPORT_EMAIL, to, subject, html }),
   })
   if (!res.ok) throw new Error(`Resend error: ${await res.text()}`)
   return res.json()
 }
 
 // ── HTML Templates ───────────────────────────────────────────────────────────
+
+/**
+ * WELMES palette (src/index.css / DESIGN.md). Mail clients can't read CSS
+ * variables, so the token values are mirrored here as literals.
+ */
+const INK_900 = '#141414' // CTA fills, strongest emphasis
+const INK_700 = '#333333' // body copy
+const INK_500 = '#6c6a6a' // secondary copy, labels
+const INK_300 = '#a8a6a6' // footer, faintest copy
+const LINE = '#e5e3e3'    // hairline rules
+const SUNKEN = '#f5f4f4'  // inset panels
+
+/** Body face. Pretendard/Graphik aren't loadable in mail, so degrade to system. */
+const SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif"
+/** Wordmark face — same stack as the `font-logo` Tailwind token. */
+const LOGO_FACE = "'Cormorant Garamond',Georgia,'Times New Roman',serif"
+
+/**
+ * The Logo component (src/components/Logo.tsx) as table-safe HTML: Cormorant
+ * Garamond over a small, widely tracked BUSINESS line. Letter-spacing also adds
+ * space after the final letter, so each line carries a negative right margin of
+ * the same amount to stay optically centred — same trick as the React version.
+ */
+function wordmark() {
+  return `
+    <div style="text-align:center;line-height:1;">
+      <div style="font-family:${LOGO_FACE};font-weight:500;font-size:26px;letter-spacing:0.32em;color:${INK_900};margin:0 -0.32em 6px 0;">WELMES</div>
+      <div style="font-family:${SANS};font-size:10px;letter-spacing:0.5em;color:${INK_500};margin:0 -0.5em 0 0;">BUSINESS</div>
+    </div>`
+}
 
 function base(content: string) {
   return `<!DOCTYPE html>
@@ -83,27 +128,22 @@ function base(content: string) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WELMES</title>
 </head>
-<body style="margin:0;padding:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f7;padding:32px 16px;">
-    <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e5e5;">
-        <!-- Header -->
-        <tr>
-          <td style="background:#1a1a1a;padding:24px 32px;">
-            <span style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">WELMES</span>
-            <span style="font-size:11px;font-weight:600;color:#ffffff;background:#4a90e2;padding:2px 8px;border-radius:4px;margin-left:8px;">Business</span>
-          </td>
-        </tr>
-        <!-- Body -->
-        <tr><td style="padding:32px;">${content}</td></tr>
+<body style="margin:0;padding:0;background:#ffffff;font-family:${SANS};-webkit-font-smoothing:antialiased;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+    <tr><td align="center" style="padding:40px 16px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;">
+        <!-- Wordmark -->
+        <tr><td style="padding:0 0 32px;">${wordmark()}</td></tr>
+        <!-- Body, fenced by hairlines instead of a card border -->
+        <tr><td style="border-top:1px solid ${INK_900};border-bottom:1px solid ${LINE};padding:36px 4px 40px;">${content}</td></tr>
         <!-- Footer -->
         <tr>
-          <td style="background:#f8f8fa;border-top:1px solid #e5e5e5;padding:20px 32px;">
-            <p style="margin:0;font-size:12px;color:#aaa;line-height:1.6;">
+          <td style="padding:20px 4px 0;">
+            <p style="margin:0;font-size:11px;color:${INK_300};line-height:1.8;letter-spacing:0.02em;">
               WELMES Co., Ltd. · 123 Teheran-ro, Gangnam-gu, Seoul<br />
-              <a href="mailto:support@welmes.kr" style="color:#4a90e2;text-decoration:none;">support@welmes.kr</a>
-              &nbsp;·&nbsp;
-              <a href="https://welmes-app.vercel.app" style="color:#4a90e2;text-decoration:none;">welmes-app.vercel.app</a>
+              <a href="mailto:${SUPPORT_EMAIL}" style="color:${INK_500};text-decoration:none;border-bottom:1px solid ${LINE};">${SUPPORT_EMAIL}</a>
+              &nbsp;&nbsp;·&nbsp;&nbsp;
+              <a href="${SITE_URL}" style="color:${INK_500};text-decoration:none;border-bottom:1px solid ${LINE};">${SITE_HOST}</a>
             </p>
           </td>
         </tr>
@@ -114,16 +154,41 @@ function base(content: string) {
 </html>`
 }
 
-function badge(color: string, text: string) {
-  return `<span style="display:inline-block;background:${color}15;color:${color};font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;border:1px solid ${color}40;">${text}</span>`
+/**
+ * Status line above the headline. The old version used a tinted pill per state;
+ * monochrome tracked capitals carry the same signal without importing five
+ * accent colours into a black-and-white layout.
+ */
+function label(text: string) {
+  return `<p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:0.18em;color:${INK_500};text-transform:uppercase;">${text}</p>`
 }
 
 function divider() {
-  return `<hr style="border:none;border-top:1px solid #f0f0f0;margin:24px 0;" />`
+  return `<hr style="border:none;border-top:1px solid ${LINE};margin:28px 0;" />`
 }
 
-function button(href: string, text: string, color = '#333333') {
-  return `<a href="${href}" style="display:inline-block;background:${color};color:#ffffff;font-size:13px;font-weight:600;padding:11px 28px;border-radius:8px;text-decoration:none;">${text}</a>`
+function button(href: string, text: string) {
+  return `<a href="${href}" style="display:inline-block;background:${INK_900};color:#ffffff;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:14px 32px;text-decoration:none;">${text}</a>`
+}
+
+/** Secondary action — outlined rather than filled, for non-primary links. */
+function buttonGhost(href: string, text: string) {
+  return `<a href="${href}" style="display:inline-block;background:#ffffff;color:${INK_900};font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:13px 31px;text-decoration:none;border:1px solid ${INK_900};">${text}</a>`
+}
+
+/** Inset panel for order/company detail tables. */
+function panel(inner: string) {
+  return `<div style="background:${SUNKEN};padding:20px;margin-bottom:28px;">${inner}</div>`
+}
+
+/** Small uppercase caption used above lists and tables. */
+function caption(text: string) {
+  return `<p style="margin:0 0 12px;font-size:10px;font-weight:700;letter-spacing:0.14em;color:${INK_500};text-transform:uppercase;">${text}</p>`
+}
+
+/** Absolute link into the app's hash router, e.g. url('/account'). */
+function url(path: string) {
+  return `${SITE_URL}/#${path}`
 }
 
 // ── 1. Order Placed (buyer) ──────────────────────────────────────────────────
@@ -139,44 +204,44 @@ function orderPlacedBuyerHtml(d: OrderPlacedData) {
   const cur = esc(d.currency)
   const rows = (d.items ?? []).map(i => `
     <tr>
-      <td style="padding:10px 0;border-bottom:1px solid #f5f5f5;">
-        <p style="margin:0;font-size:13px;font-weight:600;color:#222;">${esc(i.name)}</p>
-        <p style="margin:2px 0 0;font-size:11px;color:#aaa;">${esc(i.brand)} · ${esc(i.setDescription)}</p>
+      <td style="padding:14px 0;border-bottom:1px solid ${LINE};">
+        <p style="margin:0;font-size:13px;font-weight:600;color:${INK_900};">${esc(i.name)}</p>
+        <p style="margin:3px 0 0;font-size:11px;color:${INK_500};">${esc(i.brand)} · ${esc(i.setDescription)}</p>
       </td>
-      <td style="padding:10px 0;border-bottom:1px solid #f5f5f5;text-align:center;font-size:13px;color:#555;">×${num(i.quantity)}</td>
-      <td style="padding:10px 0;border-bottom:1px solid #f5f5f5;text-align:right;font-size:13px;font-weight:600;color:#222;">${cur} ${num(i.price).toLocaleString()}</td>
+      <td style="padding:14px 0;border-bottom:1px solid ${LINE};text-align:center;font-size:13px;color:${INK_500};">×${num(i.quantity)}</td>
+      <td style="padding:14px 0;border-bottom:1px solid ${LINE};text-align:right;font-size:13px;font-weight:600;color:${INK_900};">${cur} ${num(i.price).toLocaleString()}</td>
     </tr>`).join('')
 
   return base(`
-    <p style="margin:0 0 6px;font-size:13px;color:#999;">Order Confirmed</p>
-    <h1 style="margin:0 0 4px;font-size:22px;font-weight:800;color:#1a1a1a;">Thank you, ${esc(d.memberName)}!</h1>
-    <p style="margin:0 0 24px;font-size:14px;color:#666;">Your order has been received and is being processed.</p>
+    ${label('Order Confirmed')}
+    <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:${INK_900};letter-spacing:-0.01em;">Thank you, ${esc(d.memberName)}.</h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${INK_500};line-height:1.7;">Your order has been received and is being processed.</p>
 
-    <div style="background:#f8f8fa;border-radius:8px;padding:16px;margin-bottom:24px;">
+    ${panel(`
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
-          <td><p style="margin:0;font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;">Order ID</p><p style="margin:4px 0 0;font-size:14px;font-weight:700;font-family:monospace;color:#333;">${esc(d.orderId)}</p></td>
-          <td align="right"><p style="margin:0;font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;">Date</p><p style="margin:4px 0 0;font-size:14px;color:#333;">${esc(d.date)}</p></td>
+          <td><p style="margin:0;font-size:10px;color:${INK_500};text-transform:uppercase;letter-spacing:.14em;">Order ID</p><p style="margin:6px 0 0;font-size:14px;font-weight:700;font-family:monospace;color:${INK_900};">${esc(d.orderId)}</p></td>
+          <td align="right"><p style="margin:0;font-size:10px;color:${INK_500};text-transform:uppercase;letter-spacing:.14em;">Date</p><p style="margin:6px 0 0;font-size:14px;color:${INK_900};">${esc(d.date)}</p></td>
         </tr>
-      </table>
-    </div>
+      </table>`)}
 
-    <h3 style="margin:0 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#aaa;">Items Ordered</h3>
-    <table width="100%" cellpadding="0" cellspacing="0">${rows}</table>
+    ${caption('Items Ordered')}
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${LINE};">${rows}</table>
 
-    ${divider()}
-
-    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
-      <tr><td style="padding:3px 0;color:#666;">Subtotal (excl. VAT)</td><td align="right" style="color:#555;">${cur} ${num(d.subtotal).toLocaleString()}</td></tr>
-      <tr><td style="padding:3px 0;color:#666;">VAT (10%)</td><td align="right" style="color:#555;">${cur} ${num(d.vat).toLocaleString()}</td></tr>
-      <tr><td style="padding:8px 0 0;font-size:15px;font-weight:800;color:#1a1a1a;">Total</td><td align="right" style="padding:8px 0 0;font-size:15px;font-weight:800;color:#1a1a1a;">${cur} ${num(d.total).toLocaleString()}</td></tr>
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;margin-top:18px;">
+      <tr><td style="padding:4px 0;color:${INK_500};">Subtotal (excl. VAT)</td><td align="right" style="color:${INK_700};">${cur} ${num(d.subtotal).toLocaleString()}</td></tr>
+      <tr><td style="padding:4px 0;color:${INK_500};">VAT (10%)</td><td align="right" style="color:${INK_700};">${cur} ${num(d.vat).toLocaleString()}</td></tr>
+      <tr>
+        <td style="padding:14px 0 0;border-top:1px solid ${INK_900};font-size:15px;font-weight:700;color:${INK_900};">Total</td>
+        <td align="right" style="padding:14px 0 0;border-top:1px solid ${INK_900};font-size:15px;font-weight:700;color:${INK_900};">${cur} ${num(d.total).toLocaleString()}</td>
+      </tr>
     </table>
 
     ${divider()}
-    <p style="margin:0 0 20px;font-size:13px;color:#666;line-height:1.7;">
+    <p style="margin:0 0 24px;font-size:13px;color:${INK_500};line-height:1.8;">
       Our team will review your order and send a proforma invoice. Goods will be dispatched after payment confirmation.
     </p>
-    ${button('https://welmes-app.vercel.app/#/account', 'View My Orders')}
+    ${button(url('/account'), 'View My Orders')}
   `)
 }
 
@@ -185,20 +250,25 @@ function orderPlacedBuyerHtml(d: OrderPlacedData) {
 function orderPlacedAdminHtml(d: OrderPlacedData) {
   const cur = esc(d.currency)
   return base(`
-    <p style="margin:0 0 6px;">${badge('#ff9500', 'NEW ORDER')}</p>
-    <h1 style="margin:8px 0 4px;font-size:20px;font-weight:800;color:#1a1a1a;">New order from ${esc(d.memberName)}</h1>
-    <p style="margin:0 0 24px;font-size:13px;color:#666;">Order ID: <strong style="font-family:monospace;">${esc(d.orderId)}</strong> · ${esc(d.date)}</p>
+    ${label('New Order')}
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${INK_900};letter-spacing:-0.01em;">New order from ${esc(d.memberName)}</h1>
+    <p style="margin:0 0 28px;font-size:13px;color:${INK_500};">Order ID <strong style="font-family:monospace;color:${INK_700};">${esc(d.orderId)}</strong> · ${esc(d.date)}</p>
 
-    <div style="background:#f8f8fa;border-radius:8px;padding:16px;margin-bottom:24px;font-size:13px;">
-      <p style="margin:0 0 4px;color:#888;">Total Amount</p>
-      <p style="margin:0;font-size:22px;font-weight:800;color:#1a1a1a;">${cur} ${num(d.total).toLocaleString()}</p>
-    </div>
+    ${panel(`
+      <p style="margin:0 0 6px;font-size:10px;color:${INK_500};text-transform:uppercase;letter-spacing:.14em;">Total Amount</p>
+      <p style="margin:0;font-size:24px;font-weight:700;color:${INK_900};">${cur} ${num(d.total).toLocaleString()}</p>`)}
 
-    <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#aaa;">${(d.items ?? []).length} item type(s)</p>
-    ${(d.items ?? []).map(i => `<p style="margin:0 0 6px;font-size:13px;color:#444;">· ${esc(i.name)} — ×${num(i.quantity)}</p>`).join('')}
+    ${caption(`${(d.items ?? []).length} item type(s)`)}
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${LINE};margin-bottom:8px;">
+      ${(d.items ?? []).map(i => `
+      <tr>
+        <td style="padding:11px 0;border-bottom:1px solid ${LINE};font-size:13px;color:${INK_700};">${esc(i.name)}</td>
+        <td style="padding:11px 0;border-bottom:1px solid ${LINE};text-align:right;font-size:13px;color:${INK_500};">×${num(i.quantity)}</td>
+      </tr>`).join('')}
+    </table>
 
     ${divider()}
-    ${button('https://welmes-app.vercel.app/#/admin', 'Open Admin Dashboard', '#4a90e2')}
+    ${button(url('/admin'), 'Open Admin Dashboard')}
   `)
 }
 
@@ -213,52 +283,59 @@ interface MemberRegisteredData {
   representative: string; phone: string; date: string
 }
 
+/** Key/value rows for the detail panels, so every panel aligns identically. */
+function rows(pairs: [string, string][]) {
+  return `<table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
+    ${pairs.map(([k, v]) => `
+    <tr>
+      <td style="padding:5px 0;color:${INK_500};">${esc(k)}</td>
+      <td align="right" style="padding:5px 0;color:${INK_900};font-weight:600;">${esc(v)}</td>
+    </tr>`).join('')}
+  </table>`
+}
+
 function memberRegisteredBuyerHtml(d: MemberRegisteredData) {
   return base(`
-    <p style="margin:0 0 6px;">${badge('#4a90e2', 'APPLICATION RECEIVED')}</p>
-    <h1 style="margin:8px 0 8px;font-size:22px;font-weight:800;color:#1a1a1a;">Thanks for applying, ${esc(d.companyName)}!</h1>
-    <p style="margin:0 0 24px;font-size:14px;color:#666;line-height:1.7;">
+    ${label('Application Received')}
+    <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:${INK_900};letter-spacing:-0.01em;">Thanks for applying, ${esc(d.companyName)}.</h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${INK_500};line-height:1.8;">
       We've received your business registration and our team is reviewing it now.
-      Approval typically takes <strong>1–2 business days</strong> — we'll email you
-      the moment a decision is made.
+      Approval typically takes <strong style="color:${INK_900};">1–2 business days</strong> — we'll
+      email you the moment a decision is made.
     </p>
 
-    <div style="background:#f8f8fa;border-radius:8px;padding:16px;margin-bottom:24px;font-size:13px;">
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="padding:3px 0;color:#888;">Company</td><td align="right" style="color:#222;font-weight:600;">${esc(d.companyName)}</td></tr>
-        <tr><td style="padding:3px 0;color:#888;">Business Reg. No.</td><td align="right" style="color:#222;font-weight:600;">${esc(d.businessNumber)}</td></tr>
-        <tr><td style="padding:3px 0;color:#888;">Submitted</td><td align="right" style="color:#222;font-weight:600;">${esc(d.date)}</td></tr>
-      </table>
-    </div>
+    ${panel(rows([
+      ['Company', d.companyName],
+      ['Business Reg. No.', d.businessNumber],
+      ['Submitted', d.date],
+    ]))}
 
-    <p style="margin:0 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#aaa;">While you wait</p>
-    <p style="margin:0 0 20px;font-size:13px;color:#666;line-height:1.7;">
+    ${caption('While you wait')}
+    <p style="margin:0 0 24px;font-size:13px;color:${INK_500};line-height:1.8;">
       You can already browse our full catalogue and save items to your wishlist —
       wholesale pricing unlocks automatically the moment you're approved.
     </p>
-    ${button('https://welmes-app.vercel.app/#/products', 'Browse Products')}
+    ${button(url('/products'), 'Browse Products')}
   `)
 }
 
 function memberRegisteredAdminHtml(d: MemberRegisteredData) {
   return base(`
-    <p style="margin:0 0 6px;">${badge('#ff9500', 'NEW APPLICATION')}</p>
-    <h1 style="margin:8px 0 4px;font-size:20px;font-weight:800;color:#1a1a1a;">${esc(d.companyName)} applied for a business account</h1>
-    <p style="margin:0 0 24px;font-size:13px;color:#666;">Submitted ${esc(d.date)}</p>
+    ${label('New Application')}
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:${INK_900};letter-spacing:-0.01em;">${esc(d.companyName)} applied for a business account</h1>
+    <p style="margin:0 0 28px;font-size:13px;color:${INK_500};">Submitted ${esc(d.date)}</p>
 
-    <div style="background:#f8f8fa;border-radius:8px;padding:16px;margin-bottom:24px;font-size:13px;">
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="padding:3px 0;color:#888;">Representative</td><td align="right" style="color:#222;font-weight:600;">${esc(d.representative)}</td></tr>
-        <tr><td style="padding:3px 0;color:#888;">Business Reg. No.</td><td align="right" style="color:#222;font-weight:600;">${esc(d.businessNumber)}</td></tr>
-        <tr><td style="padding:3px 0;color:#888;">Email</td><td align="right" style="color:#222;font-weight:600;">${esc(d.email)}</td></tr>
-        <tr><td style="padding:3px 0;color:#888;">Phone</td><td align="right" style="color:#222;font-weight:600;">${esc(d.phone)}</td></tr>
-      </table>
-    </div>
+    ${panel(rows([
+      ['Representative', d.representative],
+      ['Business Reg. No.', d.businessNumber],
+      ['Email', d.email],
+      ['Phone', d.phone],
+    ]))}
 
-    <p style="margin:0 0 20px;font-size:13px;color:#666;line-height:1.7;">
+    <p style="margin:0 0 24px;font-size:13px;color:${INK_500};line-height:1.8;">
       The site promises a 1–2 business day review — please action this application soon.
     </p>
-    ${button('https://welmes-app.vercel.app/#/admin', 'Review in Admin Dashboard', '#4a90e2')}
+    ${button(url('/admin'), 'Review in Admin Dashboard')}
   `)
 }
 
@@ -267,24 +344,31 @@ function memberRegisteredAdminHtml(d: MemberRegisteredData) {
 interface MemberData { email: string; companyName: string }
 
 function memberApprovedHtml(d: MemberData) {
+  const perks = [
+    'Access to wholesale prices',
+    'Bulk order capability',
+    'Multi-currency support (JPY, USD, EUR and more)',
+    'Dedicated business support',
+  ]
   return base(`
-    <p style="margin:0 0 6px;">${badge('#22c55e', 'APPROVED')}</p>
-    <h1 style="margin:8px 0 8px;font-size:22px;font-weight:800;color:#1a1a1a;">Your account has been approved!</h1>
-    <p style="margin:0 0 24px;font-size:14px;color:#666;line-height:1.7;">
-      Congratulations, <strong>${esc(d.companyName)}</strong>! Your WELMES business account has been verified.
-      You can now access wholesale pricing and place bulk orders.
+    ${label('Approved')}
+    <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:${INK_900};letter-spacing:-0.01em;">Your account has been approved.</h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${INK_500};line-height:1.8;">
+      Congratulations, <strong style="color:${INK_900};">${esc(d.companyName)}</strong>. Your WELMES
+      business account has been verified. You can now access wholesale pricing and
+      place bulk orders.
     </p>
 
-    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin-bottom:24px;">
-      <p style="margin:0;font-size:13px;color:#166534;line-height:1.7;">
-        ✓ Access to wholesale prices<br/>
-        ✓ Bulk order capability<br/>
-        ✓ Multi-currency support (JPY, USD, EUR and more)<br/>
-        ✓ Dedicated business support
-      </p>
-    </div>
+    ${caption("What's now unlocked")}
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${LINE};margin-bottom:28px;">
+      ${perks.map(p => `
+      <tr>
+        <td width="18" style="padding:11px 0;border-bottom:1px solid ${LINE};font-size:13px;color:${INK_900};vertical-align:top;">—</td>
+        <td style="padding:11px 0;border-bottom:1px solid ${LINE};font-size:13px;color:${INK_700};">${esc(p)}</td>
+      </tr>`).join('')}
+    </table>
 
-    ${button('https://welmes-app.vercel.app/#/products', 'Start Shopping', '#22c55e')}
+    ${button(url('/products'), 'Start Shopping')}
   `)
 }
 
@@ -292,21 +376,22 @@ function memberApprovedHtml(d: MemberData) {
 
 function memberRejectedHtml(d: MemberData) {
   return base(`
-    <p style="margin:0 0 6px;">${badge('#ef4444', 'APPLICATION UPDATE')}</p>
-    <h1 style="margin:8px 0 8px;font-size:22px;font-weight:800;color:#1a1a1a;">Update on your application</h1>
-    <p style="margin:0 0 24px;font-size:14px;color:#666;line-height:1.7;">
-      Dear <strong>${esc(d.companyName)}</strong>,<br/><br/>
-      We were unable to approve your WELMES business account at this time.
-      This may be due to incomplete documentation or eligibility requirements.
+    ${label('Application Update')}
+    <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:${INK_900};letter-spacing:-0.01em;">Update on your application</h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${INK_500};line-height:1.8;">
+      Dear <strong style="color:${INK_900};">${esc(d.companyName)}</strong>,<br /><br />
+      We were unable to approve your WELMES business account at this time. This may
+      be due to incomplete documentation or eligibility requirements.
     </p>
 
-    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;margin-bottom:24px;">
-      <p style="margin:0;font-size:13px;color:#991b1b;line-height:1.7;">
-        If you believe this is an error or would like to re-apply with updated information, please contact our support team.
+    <div style="border-left:2px solid ${INK_900};padding:2px 0 2px 16px;margin-bottom:28px;">
+      <p style="margin:0;font-size:13px;color:${INK_700};line-height:1.8;">
+        If you believe this is an error or would like to re-apply with updated
+        information, please contact our support team.
       </p>
     </div>
 
-    ${button('https://welmes-app.vercel.app/#/support', 'Contact Support', '#ef4444')}
+    ${buttonGhost(url('/support'), 'Contact Support')}
   `)
 }
 
@@ -320,35 +405,114 @@ interface ShippedData {
 function orderShippedHtml(d: ShippedData) {
   const trackUrl = `https://www.17track.net/en/track#nums=${encodeURIComponent(String(d.trackingNumber ?? ''))}`
   return base(`
-    <p style="margin:0 0 6px;">${badge('#7c3aed', 'SHIPPED')}</p>
-    <h1 style="margin:8px 0 8px;font-size:22px;font-weight:800;color:#1a1a1a;">Your order is on its way!</h1>
-    <p style="margin:0 0 24px;font-size:14px;color:#666;">
-      Hi <strong>${esc(d.memberName)}</strong>, your order has been dispatched.
+    ${label('Shipped')}
+    <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:${INK_900};letter-spacing:-0.01em;">Your order is on its way.</h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${INK_500};line-height:1.8;">
+      Hi <strong style="color:${INK_900};">${esc(d.memberName)}</strong>, your order has been dispatched.
     </p>
 
-    <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:10px;padding:20px;margin-bottom:24px;">
-      <p style="margin:0 0 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7c3aed;">Tracking Details</p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
-        <tr><td style="padding:4px 0;color:#6b7280;width:120px;">Order ID</td><td style="font-family:monospace;font-weight:700;color:#1a1a1a;">${esc(d.orderId)}</td></tr>
-        <tr><td style="padding:4px 0;color:#6b7280;">Carrier</td><td style="font-weight:600;color:#1a1a1a;">${esc(d.trackingCarrier)}</td></tr>
-        <tr><td style="padding:4px 0;color:#6b7280;">Tracking No.</td><td style="font-family:monospace;font-size:15px;font-weight:700;color:#7c3aed;">${esc(d.trackingNumber)}</td></tr>
-        <tr><td style="padding:4px 0;color:#6b7280;">Shipped On</td><td style="color:#1a1a1a;">${esc(d.trackingShippedAt)}</td></tr>
-      </table>
-    </div>
+    ${caption('Tracking Details')}
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${LINE};margin-bottom:28px;font-size:13px;">
+      <tr><td style="padding:11px 0;border-bottom:1px solid ${LINE};color:${INK_500};width:120px;">Order ID</td><td style="padding:11px 0;border-bottom:1px solid ${LINE};font-family:monospace;font-weight:700;color:${INK_900};">${esc(d.orderId)}</td></tr>
+      <tr><td style="padding:11px 0;border-bottom:1px solid ${LINE};color:${INK_500};">Carrier</td><td style="padding:11px 0;border-bottom:1px solid ${LINE};font-weight:600;color:${INK_900};">${esc(d.trackingCarrier)}</td></tr>
+      <tr><td style="padding:11px 0;border-bottom:1px solid ${LINE};color:${INK_500};">Tracking No.</td><td style="padding:11px 0;border-bottom:1px solid ${LINE};font-family:monospace;font-size:15px;font-weight:700;color:${INK_900};">${esc(d.trackingNumber)}</td></tr>
+      <tr><td style="padding:11px 0;border-bottom:1px solid ${LINE};color:${INK_500};">Shipped On</td><td style="padding:11px 0;border-bottom:1px solid ${LINE};color:${INK_900};">${esc(d.trackingShippedAt)}</td></tr>
+    </table>
 
-    ${button(trackUrl, '📦 Track My Package', '#7c3aed')}
+    ${button(trackUrl, 'Track My Package')}
 
     ${divider()}
-    <p style="margin:0;font-size:12px;color:#aaa;line-height:1.6;">
-      You can also track your shipment on <a href="${trackUrl}" style="color:#4a90e2;">${esc(trackUrl)}</a>
+    <p style="margin:0;font-size:11px;color:${INK_300};line-height:1.7;word-break:break-all;">
+      You can also track your shipment at <a href="${trackUrl}" style="color:${INK_500};">${esc(trackUrl)}</a>
     </p>
+  `)
+}
+
+// ── 7. Order lifecycle: payment confirmed / completed / cancelled ────────────
+// Admin drives these from the status dropdown. Previously a status change only
+// wrote an in-app notification, so a buyer whose order was cancelled had no way
+// to find out unless they happened to open the site again.
+
+interface OrderStatusData {
+  buyerEmail: string; orderId: string; memberName: string
+  total: number; currency: string; date: string
+  /** Optional free-text note from the admin; the section is omitted when absent. */
+  reason?: string
+}
+
+/** Shared order summary block so the three status emails stay visually consistent. */
+function orderSummary(d: OrderStatusData) {
+  return panel(`
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
+      <tr><td style="padding:5px 0;color:${INK_500};">Order ID</td><td align="right" style="padding:5px 0;font-family:monospace;font-weight:700;color:${INK_900};">${esc(d.orderId)}</td></tr>
+      <tr><td style="padding:5px 0;color:${INK_500};">Order Date</td><td align="right" style="padding:5px 0;color:${INK_900};font-weight:600;">${esc(d.date)}</td></tr>
+      <tr><td style="padding:5px 0;color:${INK_500};">Total</td><td align="right" style="padding:5px 0;color:${INK_900};font-weight:700;">${esc(d.currency)} ${num(d.total).toLocaleString()}</td></tr>
+    </table>`)
+}
+
+function orderPaymentConfirmedHtml(d: OrderStatusData) {
+  return base(`
+    ${label('Payment Confirmed')}
+    <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:${INK_900};letter-spacing:-0.01em;">We've received your payment.</h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${INK_500};line-height:1.8;">
+      Thank you, <strong style="color:${INK_900};">${esc(d.memberName)}</strong>. Your payment has been
+      confirmed and your order is now being prepared for dispatch. We'll email you
+      again with tracking details the moment it ships.
+    </p>
+
+    ${orderSummary(d)}
+
+    ${button(url(`/order/${encodeURIComponent(d.orderId)}/print`), 'View Order Document')}
+  `)
+}
+
+function orderCompletedHtml(d: OrderStatusData) {
+  return base(`
+    ${label('Completed')}
+    <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:${INK_900};letter-spacing:-0.01em;">Your order is complete.</h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${INK_500};line-height:1.8;">
+      Hi <strong style="color:${INK_900};">${esc(d.memberName)}</strong>, this order is now closed. We hope
+      the goods arrived in perfect condition — if anything is missing or damaged,
+      reply to this email and we'll sort it out.
+    </p>
+
+    ${orderSummary(d)}
+
+    ${buttonGhost(url('/products'), 'Order Again')}
+  `)
+}
+
+function orderCancelledHtml(d: OrderStatusData) {
+  return base(`
+    ${label('Cancelled')}
+    <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:${INK_900};letter-spacing:-0.01em;">Your order has been cancelled.</h1>
+    <p style="margin:0 0 28px;font-size:14px;color:${INK_500};line-height:1.8;">
+      Dear <strong style="color:${INK_900};">${esc(d.memberName)}</strong>, the order below has been
+      cancelled. Any payment already received for it will be refunded.
+    </p>
+
+    ${orderSummary(d)}
+
+    ${d.reason ? `
+    <div style="border-left:2px solid ${INK_900};padding:2px 0 2px 16px;margin-bottom:28px;">
+      <p style="margin:0 0 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:${INK_500};">Reason</p>
+      <p style="margin:0;font-size:13px;color:${INK_700};line-height:1.8;">${esc(d.reason)}</p>
+    </div>` : ''}
+
+    <p style="margin:0 0 24px;font-size:13px;color:${INK_500};line-height:1.8;">
+      If this was unexpected, reply to this email and we'll look into it right away.
+    </p>
+    ${buttonGhost(url('/support'), 'Contact Support')}
   `)
 }
 
 // ── Main handler ─────────────────────────────────────────────────────────────
 
 /** Email types only an admin may trigger. */
-const ADMIN_ONLY = new Set(['member_approved', 'member_rejected', 'order_shipped'])
+const ADMIN_ONLY = new Set([
+  'member_approved', 'member_rejected', 'order_shipped',
+  'order_payment_confirmed', 'order_completed', 'order_cancelled',
+])
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -402,6 +566,15 @@ Deno.serve(async (req) => {
         break
       case 'order_shipped':
         await sendEmail(data.buyerEmail, `Your order has been shipped — ${data.orderId}`, orderShippedHtml(data))
+        break
+      case 'order_payment_confirmed':
+        await sendEmail(data.buyerEmail, `Payment confirmed — ${data.orderId}`, orderPaymentConfirmedHtml(data))
+        break
+      case 'order_completed':
+        await sendEmail(data.buyerEmail, `Order completed — ${data.orderId}`, orderCompletedHtml(data))
+        break
+      case 'order_cancelled':
+        await sendEmail(data.buyerEmail, `Order cancelled — ${data.orderId}`, orderCancelledHtml(data))
         break
       default:
         throw new Error(`Unknown email type: ${type}`)

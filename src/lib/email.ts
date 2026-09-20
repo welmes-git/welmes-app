@@ -74,3 +74,34 @@ export function emailOrderShipped(
     trackingShippedAt,
   });
 }
+
+/**
+ * Status-change mails for the rest of the order lifecycle. Only the statuses a
+ * buyer needs to hear about get one: `pending` is the state an order is created
+ * in (already covered by emailOrderPlaced) and `shipped` has its own mail with
+ * tracking details, so both are deliberately absent from this map.
+ */
+const STATUS_EMAIL_TYPE: Partial<Record<Order['status'], string>> = {
+  processing: 'order_payment_confirmed',
+  completed: 'order_completed',
+  cancelled: 'order_cancelled',
+};
+
+export function emailOrderStatusChanged(
+  order: Order,
+  buyerEmail: string,
+  reason?: string,
+) {
+  const type = STATUS_EMAIL_TYPE[order.status];
+  if (!type) return;
+  invoke(type, {
+    buyerEmail,
+    orderId: order.id,
+    memberName: order.memberName,
+    total: order.total,
+    // Order amounts are stored in JPY — see emailOrderPlaced.
+    currency: 'JPY',
+    date: order.date,
+    reason,
+  });
+}

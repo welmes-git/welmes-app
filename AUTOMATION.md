@@ -47,9 +47,12 @@ npm run import:sd -- <상품URL>                    # 상품 1개 등록 (/p/r/p
 npm run import:sd -- <목록URL>                    # 그 페이지의 상품 전부 등록
 npm run import:sd -- <목록URL> --all              # 페이지네이션 끝까지 전부 등록
 npm run import:sd -- <목록URL> --brand=小林製薬   # 브랜드 refine 후 전부 등록 (--all 자동)
+npm run import:sd -- <상품URL> --dry-run          # 파싱만 검증 (DB/Storage 변경 없음)
 ```
 
-옵션: `--pages=N` (최대 페이지 수, 기본 무제한) · `--limit=N` (최대 상품 수) · `--active` (active 등록, 기본 inactive)
+옵션: `--pages=N` (최대 페이지 수, 기본 무제한) · `--limit=N` (최대 상품 수) · `--active` (active 등록, 기본 inactive) · `--dry-run` (파싱·변환만, DB/Storage/감시 목록 미변경)
+
+입력 URL은 보안을 위해 `https://www.superdelivery.com` 또는 `https://superdelivery.com`만 허용한다.
 
 ### 등록 시 자동 처리
 
@@ -84,12 +87,13 @@ npm run monitor:sd -- --ids=12,34   # 특정 상품만
 |---|---|---|---|---|
 | 🔺 가격 인상 / 🔻 가격 인하 | 세트 卸단가 변동 (첫 세트 기준) | 판매가·정가·할인율·세트 구성 **즉시 갱신** | ✅ | ✅ `product_price_change` |
 | ⛔ 품절 | 재고 0 (残り 0 / 품절 표기) | 재고 0 + **status `inactive` 자동 전환** | ✅ | ✅ `product_sold_out` |
-| ♻️ 재고 회복 | 재고 0 → N | 재고 갱신 + **status `active` 자동 복귀** | ✅ | ✅ `product_restock` |
-| 🚫 거래 중단 | 미거래 전환 / 도매가 비공개 | **status `inactive`** | ✅ | ✅ `product_sold_out` |
-| ❓ 페이지 소실 | 404 / 리다이렉트 | **status `inactive`** | ✅ (미확인 건 재알림 없음) | ✅ `product_missing` |
+| ♻️ 재고 회복 | 재고 0 → N | 재고 갱신, **status는 그대로 유지** (관리자 확인 후 활성화) | ✅ | ✅ `product_restock` |
+| 🚫 거래 중단 | 미거래 전환 / 도매가 비공개 | 재고 0 + **status `inactive`** | ✅ | ✅ `product_sold_out` |
+| ❓ 페이지 소실 | 404 / 리다이렉트 | 재고 0 + **status `inactive`** | ✅ (미확인 건 재알림 없음) | ✅ `product_missing` |
 | (재고 수치 변동) | 0-crossing 아님 | 재고 수치만 조용히 갱신 | — | — |
 
 - 가격·재고는 **관리자 승인 없이 즉시 반영**된다 (승인 대기 방식 아님).
+- 단, 재입고 시 자동 `active` 전환은 하지 않는다. 수동으로 숨겨둔 상품이 의도치 않게 공개되는 것을 막기 위해 관리자 알림 후 직접 활성화한다.
 - 모든 변동은 `sd_product_changes` 테이블에 before/after와 함께 기록되고,
   관리자(is_admin 전원)의 알림 벨에 표시된다.
 - `--dry-run`으로 실제 반영 전 감지 결과를 미리 확인 가능.
@@ -137,7 +141,10 @@ tail -50 scripts/.sd-monitor.log
 
 - **세션/재로그인**: 슈퍼딜리버리(클라우드플레어)가 연속 스크래핑을 봇으로 판단해
   약 90개 요청마다 세션을 끊는다 — 만료를 감지하면 모니터가 자동 재로그인(headful 창)한다.
-  - 매일 자동 실행은 `--limit=80` (오래된 체크 순) — 전체 227개가 약 3일 주기로 커버되고
+  - **launchd 실행 시 세션이 만료돼 있으면 GUI 브라우저 시작이 타임아웃될 수 있다.** 로그에
+    `browserType.launch: Timeout`이 보이면 터미널에서 `npm run monitor:sd -- --dry-run --limit=1`을
+    한 번 실행해 로그인 세션을 갱신한다. 이 명령은 DB를 변경하지 않는다.
+  - 매일 자동 실행은 `--limit=80` (오래된 체크 순) — 전체 196개가 약 3일 주기로 커버되고
     세션 수명 안에 끝나 **로그인 창은 하루 0~1회** (10:00 시작 직후).
   - 전체 일괄 스캔(`npm run monitor:sd`)은 세션을 2~3번 갱신하므로 로그인 창이 2~3번 뜬다 —
     화면 앞에 있을 때 실행할 것.

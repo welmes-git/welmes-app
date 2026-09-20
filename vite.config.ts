@@ -16,6 +16,12 @@ export default defineConfig(({ isSsrBuild }) => ({
   } : {
     rollupOptions: {
       output: {
+        entryFileNames: 'assets/app.js',
+        assetFileNames(assetInfo) {
+          return assetInfo.name?.endsWith('.css')
+            ? 'assets/app.css'
+            : 'assets/[name]-[hash][extname]';
+        },
         manualChunks(id) {
           if (id.includes('/src/locales/')) return 'app-locales';
           if (!id.includes('node_modules')) return undefined;

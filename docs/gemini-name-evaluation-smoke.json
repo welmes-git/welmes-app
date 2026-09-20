@@ -1,0 +1,63 @@
+{
+  "createdAt": "2026-09-20T08:53:54.640Z",
+  "mode": "grounded-where-supported",
+  "providers": [
+    "gemini"
+  ],
+  "fixtureCount": 3,
+  "models": {
+    "gemini": "gemini-3.8-flash"
+  },
+  "results": [],
+  "failures": [
+    {
+      "provider": "gemini",
+      "id": "biore-uv-essence",
+      "error": "gemini HTTP 401: {\n  \"error\": {\n    \"code\": 401,\n    \"message\": \"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.\",\n    \"status\": \"UNAUTHENTICATED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"ACCESS_TOKEN_TYPE_UNSUPPORTED\",\n        \"metadata\": {\n          \"method\": \"google.ai.generativelanguage"
+    },
+    {
+      "provider": "gemini",
+      "id": "biore-uv-gel",
+      "error": "gemini HTTP 401: {\n  \"error\": {\n    \"code\": 401,\n    \"message\": \"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.\",\n    \"status\": \"UNAUTHENTICATED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"ACCESS_TOKEN_TYPE_UNSUPPORTED\",\n        \"metadata\": {\n          \"method\": \"google.ai.generativelanguage"
+    },
+    {
+      "provider": "gemini",
+      "id": "biore-kids-milk",
+      "error": "gemini HTTP 401: {\n  \"error\": {\n    \"code\": 401,\n    \"message\": \"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.\",\n    \"status\": \"UNAUTHENTICATED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"ACCESS_TOKEN_TYPE_UNSUPPORTED\",\n        \"metadata\": {\n          \"method\": \"google.ai.generativelanguage"
+    }
+  ],
+  "reports": {
+    "gemini": {
+      "summary": {
+        "totalFixtures": 3,
+        "completed": 0,
+        "missing": 3,
+        "autoApproved": 0,
+        "qualityPassed": 0,
+        "contractPassed": 0,
+        "reviewRequired": 0,
+        "meanConfidence": null,
+        "meanReferenceSimilarity": null,
+        "p50LatencyMs": null,
+        "p95LatencyMs": null,
+        "totalEstimatedCostUsd": null,
+        "errorCounts": {},
+        "contractMissingCounts": {}
+      },
+      "rows": [
+        {
+          "id": "biore-uv-essence",
+          "missing": true
+        },
+        {
+          "id": "biore-uv-gel",
+          "missing": true
+        },
+        {
+          "id": "biore-kids-milk",
+          "missing": true
+        }
+      ]
+    }
+  }
+}
