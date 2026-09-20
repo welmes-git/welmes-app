@@ -19,7 +19,8 @@
     "enrich:names": "node scripts/enrich-product-names.mjs",
     "backfill:names": "node scripts/backfill-product-names.mjs",
     "import:sd": "node scripts/sd-import.mjs",
-    "monitor:sd": "node scripts/sd-monitor.mjs"
+    "monitor:sd": "node scripts/sd-monitor.mjs",
+    "translate:desc": "node scripts/translate-product-descriptions.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

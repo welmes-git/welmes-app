@@ -8,7 +8,6 @@ import { createHash } from 'node:crypto';
 export const TRANSLATION_PROMPT_VERSION = 'product-desc-i18n-v1';
 export const DEFAULT_TARGET_LANGS = ['en', 'zh', 'ko'];
 export const SOURCE_LANG = 'ja';
-
 /** Canonical section keys in template order (mirror of DESCRIPTION_SECTION_TEMPLATE). */
 export const SECTION_KEYS = ['overview', 'usage', 'size', 'spec', 'shipping'];
 
@@ -171,4 +170,60 @@ export function validateTranslations(source, translations = {}) {
   }
 
   return { status: anyReview ? 'review_required' : 'auto_approved', i18n, violations };
+}
+
+// ── Job build + enqueue ──────────────────────────────────────────────
+
+/**
+ * Build a translation job from a product with normalized description sections.
+ * Returns null when there is nothing to translate (no non-empty sections).
+ *
+ * @param {{id:number, sd_product_id?:string, descriptionSections:{key,label,value}[]}} product
+ * @param {object} [opts] provider/model/env/targetLangs/priority/maxAttempts/force
+ */
+export function buildTranslationJob(product, opts = {}) {
+  const provider = opts.provider || 'gemini';
+  const model = opts.model || (opts.env && opts.env.GEMINI_MODEL) || 'gemini-3.8-flash';
+  const targetLangs = opts.targetLangs || DEFAULT_TARGET_LANGS;
+  const source = buildTranslationSource(product.descriptionSections || [], targetLangs);
+  if (!source.sections.length) return null;
+  const inputHash = hashTranslationInput(source, TRANSLATION_PROMPT_VERSION);
+  return {
+    provider,
+    model,
+    promptVersion: TRANSLATION_PROMPT_VERSION,
+    inputHash,
+    targetLangs,
+    source,
+    sourcePayload: { sections: source.sections, sourceLang: source.sourceLang, targetLangs },
+    rpcParams: {
+      p_product_id: Number(product.id),
+      p_provider: provider,
+      p_model: model,
+      p_prompt_version: TRANSLATION_PROMPT_VERSION,
+      p_input_hash: inputHash,
+      p_target_langs: targetLangs,
+      p_source_payload: { sections: source.sections, sourceLang: source.sourceLang, targetLangs },
+      p_priority: opts.priority ?? 0,
+      p_max_attempts: opts.maxAttempts ?? 3,
+      p_force: Boolean(opts.force),
+    },
+  };
+}
+
+/**
+ * Enqueue a translation job for a product. Never throws on queue/API failure —
+ * registration must succeed even if translation cannot be queued (mirrors the
+ * name-enrichment guarantee). Returns { queued, id?, reason? }.
+ */
+export async function enqueueTranslationForProduct(supabase, product, opts = {}) {
+  try {
+    const job = buildTranslationJob(product, opts);
+    if (!job) return { queued: false, reason: 'no_translatable_sections' };
+    const { data, error } = await supabase.rpc('enqueue_product_description_translation', job.rpcParams);
+    if (error) return { queued: false, reason: error.message };
+    return { queued: true, id: data };
+  } catch (error) {
+    return { queued: false, reason: error.message };
+  }
 }

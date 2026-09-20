@@ -370,6 +370,38 @@ export function buildProductDescription(overview = '', sections = [], opts = {})
   return { description, sections: structured };
 }
 
+/**
+ * Reverse of buildProductDescription's serialization: split a stored (already
+ * cleaned, template-ordered) description string back into canonical sections.
+ * Used when re-queuing translation for products stored before structured
+ * sections were persisted. Blocks are separated by a blank line; the first
+ * block without a known label is treated as overview.
+ *
+ * @param {string} description
+ * @returns {{key: string|null, label: string, value: string}[]}
+ */
+export function parseStoredDescription(description = '') {
+  const text = String(description || '').trim();
+  if (!text) return [];
+  const blocks = text.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+  const out = [];
+  blocks.forEach((block, i) => {
+    const firstLine = block.split('\n')[0].trim();
+    const key = canonicalSectionKey(firstLine);
+    if (key) {
+      const value = block.split('\n').slice(1).join('\n').trim();
+      if (value) out.push({ key, label: KEY_JA_LABEL.get(key), value });
+    } else if (i === 0) {
+      // first unlabeled block = overview
+      out.push({ key: 'overview', label: KEY_JA_LABEL.get('overview'), value: block });
+    } else {
+      // unlabeled trailing block — keep as an extra
+      out.push({ key: null, label: '', value: block });
+    }
+  });
+  return out;
+}
+
 // ── 상품 이미지 정규화 ───────────────────────────────────────────────
 /**
  * 갤러리에서 수집한 원시 이미지 후보 문자열(src/data-src/srcset)을
