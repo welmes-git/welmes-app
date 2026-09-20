@@ -237,6 +237,7 @@
     "reviews": "Đánh giá",
     "shipping": "Vận chuyển",
     "productDetails": "Chi tiết sản phẩm",
+    "section": { "overview": "Mô tả", "usage": "Cách dùng", "size": "Kích thước & dung tích", "spec": "Thành phần & thông số", "shipping": "Vận chuyển" },
     "brand": "Thương hiệu",
     "inStock": "Còn hàng",
     "outOfStock": "Hết hàng",

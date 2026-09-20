@@ -566,6 +566,7 @@ function rowToProduct(row: Record<string, unknown>): Product {
     rating:         Number(row.rating),
     reviews:        Number(row.reviews),
     description:    (row.description as string) || '',
+    descriptionI18n: (row.description_i18n as Product['descriptionI18n']) || undefined,
     stock:          Number(row.stock),
     status:         (row.status as 'active' | 'inactive') || 'active',
     setOptions:     (row.set_options as Product['setOptions']) ?? [],
@@ -600,6 +601,7 @@ function productToRow(p: Partial<Product>): Record<string, unknown> {
   if (p.rating !== undefined)         row.rating = p.rating;
   if (p.reviews !== undefined)        row.reviews = p.reviews;
   if (p.description !== undefined)    row.description = p.description;
+  if (p.descriptionI18n !== undefined) row.description_i18n = p.descriptionI18n ?? null;
   if (p.stock !== undefined)          row.stock = p.stock;
   if (p.status !== undefined)         row.status = p.status;
   if (p.setOptions !== undefined)     row.set_options = p.setOptions ?? null;

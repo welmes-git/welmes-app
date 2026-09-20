@@ -237,6 +237,7 @@
     "reviews": "리뷰",
     "shipping": "배송",
     "productDetails": "상품 상세",
+    "section": { "overview": "상품 설명", "usage": "사용 방법", "size": "사이즈·용량", "spec": "규격·성분", "shipping": "배송" },
     "brand": "브랜드",
     "inStock": "재고 있음",
     "outOfStock": "품절",

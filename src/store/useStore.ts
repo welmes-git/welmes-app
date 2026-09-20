@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CurrencyCode } from '../lib/currency';
+import type { DescriptionI18n } from '../lib/productDescription';
 import * as db from '../lib/db';
 import { emailOrderPlaced, emailMemberRegistered, emailMemberApproved, emailMemberRejected, emailOrderShipped, emailOrderStatusChanged } from '../lib/email';
 
@@ -67,6 +68,8 @@ export interface Product {
   rating: number;
   reviews: number;
   description: string;
+  /** AI-translated description sections keyed by language, e.g. { en: { overview, ... } } */
+  descriptionI18n?: Record<string, DescriptionI18n>;
   stock: number;
   status: 'active' | 'inactive';
   setOptions?: SetOption[];

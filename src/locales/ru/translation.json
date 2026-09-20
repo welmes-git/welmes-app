@@ -237,6 +237,7 @@
     "reviews": "Отзывы",
     "shipping": "Доставка",
     "productDetails": "Описание товара",
+    "section": { "overview": "Описание", "usage": "Применение", "size": "Размер и объём", "spec": "Состав и характеристики", "shipping": "Доставка" },
     "brand": "Бренд",
     "inStock": "В наличии",
     "outOfStock": "Нет в наличии",

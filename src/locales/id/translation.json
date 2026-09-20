@@ -237,6 +237,7 @@
     "reviews": "Ulasan",
     "shipping": "Pengiriman",
     "productDetails": "Detail Produk",
+    "section": { "overview": "Ikhtisar", "usage": "Cara Pakai", "size": "Ukuran & Volume", "spec": "Bahan & Spesifikasi", "shipping": "Pengiriman" },
     "brand": "Merek",
     "inStock": "Stok Tersedia",
     "outOfStock": "Stok Habis",

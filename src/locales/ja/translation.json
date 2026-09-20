@@ -237,6 +237,7 @@
     "reviews": "レビュー",
     "shipping": "配送",
     "productDetails": "商品詳細",
+    "section": { "overview": "商品説明", "usage": "使用方法", "size": "サイズ・容量", "spec": "規格・成分", "shipping": "出荷" },
     "brand": "ブランド",
     "inStock": "在庫あり",
     "outOfStock": "在庫切れ",

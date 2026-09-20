@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import type { SetOption } from '../store/useStore';
 import { initialProducts } from '../data/products';
 import { productSlug } from '../lib/productUrl';
+import { localizedSections, sectionLabelKey } from '../lib/productDescription';
 import { SsrProductContext } from '../lib/ssrProductContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
@@ -27,7 +28,7 @@ import {
 export default function ProductDetail() {
   const { id, slug } = useParams<{ id: string; slug?: string }>();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { products, productsLoading, addToCart, isAuthenticated, currentUser, showToast, toggleWishlist, isWishlisted } =
     useStore();
   const { formatPrice, currencyInfo } = useCurrency();
@@ -575,16 +576,48 @@ export default function ProductDetail() {
         <div className="mb-16">
           {activeTab === 'info' && (
             <div className="prose max-w-none">
-              <div
-                className="text-[14px] text-ink-500 leading-relaxed"
-                dangerouslySetInnerHTML={{
-                  __html: (product.description || '')
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/\r?\n/g, '<br />'),
-                }}
-              />
+              {(() => {
+                const sections = localizedSections(product.descriptionI18n, i18n.language);
+                if (sections) {
+                  // Localized, template-ordered sections (overview, usage, size, spec, shipping, extras)
+                  return (
+                    <div className="space-y-5">
+                      {sections.map((s, idx) => (
+                        <div key={s.key ?? `extra-${idx}`}>
+                          {s.key && (
+                            <h4 className="text-[15px] font-medium text-ink-700 mb-1.5">
+                              {t(sectionLabelKey(s.key))}
+                            </h4>
+                          )}
+                          <div
+                            className="text-[14px] text-ink-500 leading-relaxed"
+                            dangerouslySetInnerHTML={{
+                              __html: s.value
+                                .replace(/&/g, '&amp;')
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;')
+                                .replace(/\r?\n/g, '<br />'),
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  );
+                }
+                // Fallback: raw source (Japanese) description
+                return (
+                  <div
+                    className="text-[14px] text-ink-500 leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: (product.description || '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/\r?\n/g, '<br />'),
+                    }}
+                  />
+                );
+              })()}
               <div className="mt-6 bg-sunken rounded-lg p-6">
                 <h3 className="text-[16px] font-medium text-ink-700 mb-4">
                   {t('productDetail.productDetails')}

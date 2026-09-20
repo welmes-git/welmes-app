@@ -237,6 +237,7 @@
     "reviews": "Avis",
     "shipping": "Livraison",
     "productDetails": "Détails du produit",
+    "section": { "overview": "Aperçu", "usage": "Utilisation", "size": "Taille et volume", "spec": "Ingrédients et spécifications", "shipping": "Expédition" },
     "brand": "Marque",
     "inStock": "En stock",
     "outOfStock": "Rupture de stock",

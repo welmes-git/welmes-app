@@ -237,6 +237,7 @@
     "reviews": "Reviews",
     "shipping": "Shipping",
     "productDetails": "Product Details",
+    "section": { "overview": "Overview", "usage": "How to Use", "size": "Size & Volume", "spec": "Ingredients & Specs", "shipping": "Shipping" },
     "brand": "Brand",
     "inStock": "In Stock",
     "outOfStock": "Out of Stock",

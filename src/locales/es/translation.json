@@ -237,6 +237,7 @@
     "reviews": "Reseñas",
     "shipping": "Envío",
     "productDetails": "Detalles del producto",
+    "section": { "overview": "Descripción", "usage": "Modo de uso", "size": "Tamaño y volumen", "spec": "Ingredientes y especificaciones", "shipping": "Envío" },
     "brand": "Marca",
     "inStock": "En stock",
     "outOfStock": "Agotado",
