@@ -239,6 +239,73 @@ export async function createSdSession(chromium) {
   };
 }
 
+// ── 상품 설명 정제·구조화 ────────────────────────────────────────────
+// 슈퍼딜리버리 詳細情報의 「注意事項」에는 공급사↔SD 간 도매 규약(이미지 사용
+// 감수, 드롭시핑/購入前販売 금지, 재고 변동 고지 등)이 들어간다. 이는 welmes
+// 바이어 대상 정보가 아니므로 제외한다. 반면 出荷(배송)·サイズ・容量·規格(성분)
+// 은 바이어에게 유용하므로 라벨과 함께 유지한다.
+
+/** 바이어 노출용 설명에서 제외할 도매 섹션 라벨(정확 일치, 공백 무시) */
+const DEALER_ONLY_SECTION_LABELS = new Set(['注意事項']);
+
+/** overview(商品説明) 본문에서 제거할 도매 규약성 라인 패턴 */
+const DEALER_BOILERPLATE_PATTERNS = [
+  /画像の使用/,           // 画像の使用について…版元様の監修
+  /版元様の監修/,
+  /広告文責/,
+  /ドロップシッピング/,
+  /購入前(の)?販売/,
+  /転載(禁止|不可)/,
+  /Amazon\s*\.?\s*co\s*\.?\s*jp/i,  // 「Amazon.co.jpでの販売はご遠慮ください」
+  /^[＝=]{3,}$/,          // ＝＝＝＝ 구분선
+];
+
+function isDealerBoilerplateLine(line) {
+  const t = line.trim();
+  if (!t) return false;
+  return DEALER_BOILERPLATE_PATTERNS.some((re) => re.test(t));
+}
+
+/**
+ * 원시 섹션 데이터를 바이어 노출용 설명으로 정제한다. 순수 함수(브라우저 비의존).
+ *
+ * @param {string} overview 商品説明 본문(使用方法 포함)
+ * @param {{label: string, value: string}[]} sections 詳細情報 dt/dd 쌍
+ * @param {object} [opts]
+ * @param {number} [opts.maxLength=5000]
+ * @returns {{ description: string, sections: {label: string, value: string}[] }}
+ *   description: 라벨 포함 정제 텍스트(기존 단일 컬럼 호환)
+ *   sections: 도매 규약 제외 후의 구조화 섹션(overview 포함)
+ */
+export function buildProductDescription(overview = '', sections = [], opts = {}) {
+  const maxLength = opts.maxLength ?? 5000;
+
+  // overview에서 도매 규약성 라인 제거 (제품 정보 라인은 보존)
+  const cleanedOverview = String(overview || '')
+    .split(/\r?\n/)
+    .filter((line) => !isDealerBoilerplateLine(line))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+  // 詳細情報 섹션에서 도매 전용 섹션(注意事項) 제외
+  const keptSections = (sections || [])
+    .map((s) => ({ label: String(s.label || '').trim(), value: String(s.value || '').trim() }))
+    .filter((s) => s.label && s.value && !DEALER_ONLY_SECTION_LABELS.has(s.label.replace(/\s+/g, '')));
+
+  const structured = [];
+  if (cleanedOverview) structured.push({ label: '商品説明', value: cleanedOverview });
+  structured.push(...keptSections);
+
+  // 기존 description 컬럼 호환: 라벨 포함 텍스트로 직렬화
+  const description = structured
+    .map((s) => (s.label === '商品説明' ? s.value : `${s.label}\n${s.value}`))
+    .join('\n\n')
+    .slice(0, maxLength);
+
+  return { description, sections: structured };
+}
+
 // ── 상품 이미지 정규화 ───────────────────────────────────────────────
 /**
  * 갤러리에서 수집한 원시 이미지 후보 문자열(src/data-src/srcset)을
@@ -346,25 +413,38 @@ export async function parseProductPage(page, productUrl) {
       + '.detail-modal-thum-box img, #product_image_detail img'
     )].flatMap(el => [el.getAttribute('src') || '', el.getAttribute('data-src') || '', el.getAttribute('srcset') || '']);
 
-    // 상품설명 — 본문 설명 + 세트 표를 제외한 물류/규격 정보
-    const parts = [];
-    const more = document.querySelector('.product-more-txt');
-    if (more) parts.push(clean(more.innerText));
-    const info = document.querySelector('.info-list-wrap');
-    if (info) {
-      const clone = info.cloneNode(true);
-      clone.querySelectorAll('table.set-list, script, style').forEach(e => e.remove());
-      const t = clean(clone.innerText);
-      if (t) parts.push(t);
+    // 상품설명 — 본문(商品説明)과 詳細情報(dt/dd) 섹션을 원시 수집.
+    // 정제·도매규약 필터·직렬화는 브라우저 밖 순수 함수 buildProductDescription()가 담당.
+    const overviewEl = document.querySelector('.product-more-txt .product-comment, .product-more-txt');
+    const overviewRaw = overviewEl ? overviewEl.innerText : '';
+
+    const descSections = [];
+    const dl = document.querySelector('.product-detail-infolist');
+    if (dl) {
+      const nodes = [...dl.children];
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].tagName !== 'DT') continue;
+        const label = nodes[i].innerText.trim();
+        const dd = nodes[i + 1] && nodes[i + 1].tagName === 'DD' ? nodes[i + 1] : null;
+        if (!dd) continue;
+        // 商品説明 섹션은 overviewRaw로 이미 잡으므로 중복 회피
+        if (label.replace(/\s+/g, '') === '商品説明') continue;
+        const value = dd.innerText.trim();
+        if (label && value) descSections.push({ label, value });
+      }
     }
-    const description = parts.join('\n\n').slice(0, 5000);
 
     const isNotTrading = !!document.querySelector('.product-information-box.not-trading');
-    return { name, setBlocks, brandLink, dealerFallback, dealerUrl, genres, imageCandidates, description, isNotTrading };
+    return { name, setBlocks, brandLink, dealerFallback, dealerUrl, genres, imageCandidates, overviewRaw, descSections, isNotTrading };
   });
 
   // 이미지 필터·정규화·중복 제거 (브라우저 밖 순수 로직, 단위 테스트 대상)
   data.images = normalizeProductImages(data.imageCandidates, sdId);
+
+  // 설명 정제·구조화 (도매 규약 제외, 브라우저 밖 순수 로직, 단위 테스트 대상)
+  const built = buildProductDescription(data.overviewRaw, data.descSections);
+  data.description = built.description;
+  data.descriptionSections = built.sections;
 
   // 세트 블록 텍스트 → SetOption 변환 (라벨·콜론·금액 사이에 개행/탭이 끼므로 \s 허용)
   const setOptions = [];
@@ -397,7 +477,8 @@ export async function parseProductPage(page, productUrl) {
   if (!setOptions.length) {
     return {
       sdId, name: data.name, setOptions: [], stock: 0, jan, images: data.images,
-      description: data.description, brandLink: data.brandLink, dealerFallback: data.dealerFallback,
+      description: data.description, descriptionSections: data.descriptionSections,
+      brandLink: data.brandLink, dealerFallback: data.dealerFallback,
       dealerUrl: data.dealerUrl, genres: data.genres, discount: 0,
       error: {
         kind: data.isNotTrading ? 'not_trading' : 'no_sets',
@@ -419,6 +500,7 @@ export async function parseProductPage(page, productUrl) {
     jan,
     images: data.images,
     description: data.description,
+    descriptionSections: data.descriptionSections,
     brandLink: data.brandLink,
     dealerFallback: data.dealerFallback,
     dealerUrl: data.dealerUrl,
