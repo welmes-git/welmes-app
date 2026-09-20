@@ -26,7 +26,7 @@ export default function OrderPrint() {
   // can still find its order (the store only holds them in-session otherwise)
   useEffect(() => {
     if (isAuthenticated) loadMyOrders().finally(() => setLoaded(true));
-    else setLoaded(true);
+    else queueMicrotask(() => setLoaded(true));
   }, [isAuthenticated, loadMyOrders]);
 
   useEffect(() => {

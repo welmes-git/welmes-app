@@ -6,6 +6,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Heart, ShoppingCart } from 'lucide-react';
 import { BADGE_TAGS, hasJapanese, maskDigits } from '../lib/utils';
+import { productPath } from '../lib/productUrl';
 import SignUpModal from './SignUpModal';
 import SignInModal from './SignIn';
 
@@ -59,7 +60,7 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
     // Products sold in sets must be configured on the detail page — adding them
     // here would silently bill the single-unit price.
     if (hasSetOptions) {
-      navigate(`/product/${product.id}`);
+      navigate(productPath(product));
       return;
     }
     addToCart(product);
@@ -74,7 +75,7 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
 
   return (
     <Link
-      to={`/product/${product.id}`}
+      to={productPath(product)}
       onClick={(e) => {
         if (isAuthenticated) return;
         e.preventDefault();

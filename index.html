@@ -3,11 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--default-head-start-->
     <title>WELMES - Japanese Cosmetics Wholesale Platform</title>
     <meta name="description" content="WELMES - Japanese Cosmetics Wholesale Platform for global B2B buyers." />
     <meta property="og:title" content="WELMES - Japanese Cosmetics Wholesale Platform" />
     <meta property="og:description" content="WELMES - Japanese Cosmetics Wholesale Platform for global B2B buyers." />
     <meta property="og:site_name" content="WELMES" />
+    <!--default-head-end-->
+    <!--ssr-head-->
     <!-- Pretendard: the de facto Korean e-commerce UI face. Dynamic subset only fetches the Hangul blocks a page uses -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,7 +25,7 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-jp-dynamic-subset.min.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="root"><!--ssr-outlet--></div>
+    <script type="module" src="/src/entry-client.tsx"></script>
   </body>
 </html>

@@ -1,0 +1,87 @@
+{
+  "asOf": "2026-09-19",
+  "notes": [
+    "Prices are provider list prices per 1M text tokens and can change.",
+    "Qwen prices are recorded in CNY because the official regional pricing page quotes CNY.",
+    "Generation-only is the fair five-provider track. Grounded evaluation is a separate capability track.",
+    "Model quality is not inferred from price; run the fixture benchmark before production selection."
+  ],
+  "providers": {
+    "gemini": {
+      "model": "gemini-3.8-flash",
+      "envKey": "GEMINI_API_KEY",
+      "currency": "USD",
+      "inputPerMillion": 0.75,
+      "outputPerMillion": 3.75,
+      "structuredOutput": "json_schema",
+      "grounding": "google_search",
+      "groundingPrice": "5,000 search requests/month free across Gemini 3.x, then USD 14/1,000 requests",
+      "docs": [
+        "https://ai.google.dev/gemini-api/docs/pricing",
+        "https://ai.google.dev/gemini-api/docs/structured-output",
+        "https://ai.google.dev/gemini-api/docs/google-search"
+      ]
+    },
+    "openai": {
+      "model": "gpt-5.6-luna",
+      "envKey": "OPENAI_API_KEY",
+      "currency": "USD",
+      "inputPerMillion": 0.2,
+      "outputPerMillion": 1.2,
+      "structuredOutput": "json_schema",
+      "grounding": "web_search",
+      "groundingPrice": "USD 10/1,000 calls plus model token charges",
+      "docs": [
+        "https://developers.openai.com/api/docs/pricing",
+        "https://developers.openai.com/api/docs/guides/structured-outputs",
+        "https://developers.openai.com/api/docs/guides/tools-web-search"
+      ]
+    },
+    "anthropic": {
+      "model": "claude-sonnet-5",
+      "envKey": "ANTHROPIC_API_KEY",
+      "currency": "USD",
+      "inputPerMillion": 2,
+      "outputPerMillion": 10,
+      "structuredOutput": "json_schema",
+      "grounding": "web_search",
+      "groundingPrice": "USD 10/1,000 searches plus model token charges",
+      "docs": [
+        "https://docs.anthropic.com/en/docs/about-claude/pricing",
+        "https://docs.anthropic.com/en/docs/build-with-claude/structured-outputs",
+        "https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/web-search-tool"
+      ]
+    },
+    "qwen": {
+      "model": "qwen3.8-flash",
+      "envKey": "QWEN_API_KEY",
+      "currency": "CNY",
+      "inputPerMillion": 1.094,
+      "outputPerMillion": 3.427,
+      "structuredOutput": "json_object",
+      "grounding": "not_used_in_fair_track",
+      "groundingPrice": null,
+      "regionNote": "Singapore international deployment price used by the default dashscope-intl endpoint; global/Japan prices differ.",
+      "docs": [
+        "https://help.aliyun.com/en/model-studio/model-pricing",
+        "https://help.aliyun.com/en/model-studio/qwen-api-via-openai",
+        "https://help.aliyun.com/en/model-studio/first-api-call-to-qwen"
+      ]
+    },
+    "deepseek": {
+      "model": "deepseek-flash",
+      "envKey": "DEEPSEEK_API_KEY",
+      "currency": "USD",
+      "inputPerMillion": 0.3,
+      "outputPerMillion": 1.2,
+      "structuredOutput": "json_object",
+      "grounding": "not_available_in_official_api_docs",
+      "groundingPrice": null,
+      "priceNote": "Conservative peak cache-miss price; official off-peak price is USD 0.15 input / 0.60 output.",
+      "docs": [
+        "https://api-docs.deepseek.com/quick_start/pricing",
+        "https://api-docs.deepseek.com/guides/json_mode"
+      ]
+    }
+  }
+}

@@ -119,17 +119,31 @@ export async function updateMemberById(id: string, fields: Partial<Member>) {
 // ── Products ─────────────────────────────────────────────────────
 
 export async function fetchProducts(): Promise<Product[]> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const member = session?.user ? await fetchMemberByAuthId(session.user.id) : null;
+  const source = member?.isAdmin ? 'products_admin' : 'products_public';
   const { data, error } = await supabase
-    .from('products')
+    .from(source)
     .select('*')
     .order('created_at', { ascending: false });
   if (error || !data) return [];
-  return data.map(rowToProduct);
+
+  let rows = data as Record<string, unknown>[];
+  if (member && !member.isAdmin && member.status === 'approved' && rows.length) {
+    const { data: prices, error: priceError } = await supabase
+      .from('product_prices_approved')
+      .select('id,original_price,wholesale_price,discount,set_options');
+    if (!priceError && prices) {
+      const byId = new Map(prices.map((row) => [Number(row.id), row]));
+      rows = rows.map((row) => ({ ...row, ...(byId.get(Number(row.id)) ?? {}) }));
+    }
+  }
+  return rows.map(rowToProduct);
 }
 
 export async function insertProduct(p: Omit<Product, 'id'>): Promise<Product | null> {
   const { data, error } = await supabase
-    .from('products')
+    .from('products_admin')
     .insert([productToRow(p)])
     .select()
     .single();
@@ -138,16 +152,16 @@ export async function insertProduct(p: Omit<Product, 'id'>): Promise<Product | n
 }
 
 export async function updateProductById(id: number, p: Partial<Product>) {
-  return supabase.from('products').update(productToRow(p as Product)).eq('id', id);
+  return supabase.from('products_admin').update(productToRow(p as Product)).eq('id', id);
 }
 
 /** Bulk status change from the admin products list (checkbox multi-select). */
 export async function bulkUpdateProductStatusByIds(ids: number[], status: Product['status']) {
-  return supabase.from('products').update({ status }).in('id', ids);
+  return supabase.from('products_admin').update({ status }).in('id', ids);
 }
 
 export async function deleteProductById(id: number) {
-  return supabase.from('products').delete().eq('id', id);
+  return supabase.from('products_admin').delete().eq('id', id);
 }
 
 // ── Stock ────────────────────────────────────────────────────────
@@ -528,21 +542,33 @@ function rowToProduct(row: Record<string, unknown>): Product {
     id:             Number(row.id),
     name:           row.name as string,
     nameEn:         (row.name_en as string) || (row.name as string),
+    nameEnStatus:   (row.name_en_status as Product['nameEnStatus']) || undefined,
+    nameEnConfidence: row.name_en_confidence == null ? undefined : Number(row.name_en_confidence),
+    nameEnSource:   (row.name_en_source as Product['nameEnSource']) || undefined,
+    nameEnGeneratedAt: (row.name_en_generated_at as string) || undefined,
+    nameEnApprovedAt: (row.name_en_approved_at as string) || undefined,
+    nameEnApprovedBy: (row.name_en_approved_by as string) || undefined,
+    seoSlug:        (row.seo_slug as string) || undefined,
+    seoTitle:       (row.seo_title as string) || undefined,
+    seoDescription: (row.seo_description as string) || undefined,
+    searchAliases:  (row.search_aliases as string[]) || [],
+    jan:            (row.jan as string) || undefined,
+    updatedAt:      (row.updated_at as string) || (row.created_at as string) || undefined,
     brand:          row.brand as string,
     category:       row.category as string,
     subcategory:    (row.subcategory as string) || undefined,
     image:          (row.image as string) || '',
     images:         (row.images as string[]) || [],
-    originalPrice:  Number(row.original_price),
-    wholesalePrice: Number(row.wholesale_price),
-    discount:       Number(row.discount),
+    originalPrice:  Number(row.original_price ?? 0),
+    wholesalePrice: Number(row.wholesale_price ?? 0),
+    discount:       Number(row.discount ?? 0),
     tags:           (row.tags as string[]) || [],
     rating:         Number(row.rating),
     reviews:        Number(row.reviews),
     description:    (row.description as string) || '',
     stock:          Number(row.stock),
     status:         (row.status as 'active' | 'inactive') || 'active',
-    setOptions:     row.set_options as Product['setOptions'],
+    setOptions:     (row.set_options as Product['setOptions']) ?? [],
     sdDealerId:     (row.sd_dealer_id as string) || undefined,
     sdDealerName:   (row.sd_dealer_name as string) || undefined,
   };
@@ -552,6 +578,16 @@ function productToRow(p: Partial<Product>): Record<string, unknown> {
   const row: Record<string, unknown> = {};
   if (p.name !== undefined)           row.name = p.name;
   if (p.nameEn !== undefined)         row.name_en = p.nameEn;
+  if (p.nameEnStatus !== undefined)   row.name_en_status = p.nameEnStatus;
+  if (p.nameEnConfidence !== undefined) row.name_en_confidence = p.nameEnConfidence;
+  if (p.nameEnSource !== undefined)   row.name_en_source = p.nameEnSource;
+  if (p.nameEnGeneratedAt !== undefined) row.name_en_generated_at = p.nameEnGeneratedAt;
+  if (p.nameEnApprovedAt !== undefined) row.name_en_approved_at = p.nameEnApprovedAt;
+  if (p.nameEnApprovedBy !== undefined) row.name_en_approved_by = p.nameEnApprovedBy || null;
+  if (p.seoSlug !== undefined)        row.seo_slug = p.seoSlug || null;
+  if (p.seoTitle !== undefined)       row.seo_title = p.seoTitle || null;
+  if (p.seoDescription !== undefined) row.seo_description = p.seoDescription || null;
+  if (p.searchAliases !== undefined)  row.search_aliases = p.searchAliases;
   if (p.brand !== undefined)          row.brand = p.brand;
   if (p.category !== undefined)       row.category = p.category;
   if (p.subcategory !== undefined)    row.subcategory = p.subcategory || null;
@@ -714,4 +750,185 @@ function rowToMessage(r: Record<string, unknown>): SupportMessage {
     content: r.content as string,
     createdAt: r.created_at as string,
   };
+}
+
+// ── English-name enrichment review (Task 7) ──────────────────────
+// Admin-only. The audit table `product_name_enrichment_runs` is RLS-guarded so
+// only admins can read AI inputs, evidence, warnings and validation details.
+
+export interface NameEvidence {
+  citationUrl: string;
+  resolvedUrl: string | null;
+  title?: string;
+  officialDomain: string | null;
+  verified: boolean;
+  matchedBy: string[];
+  error?: string;
+}
+
+export interface NameValidationError { code: string; message: string; value?: string }
+
+export interface NameEnrichmentRun {
+  id: string;
+  productId: number;
+  provider: string;
+  model: string;
+  status: 'queued' | 'running' | 'succeeded' | 'review_required' | 'failed' | 'skipped';
+  candidateName?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  searchAliases: string[];
+  sourceType?: string;
+  confidence?: number;
+  evidence: NameEvidence[];
+  warnings: string[];
+  errors: NameValidationError[];
+  /** Deterministic facts/qualifiers extracted from the source name (validation payload). */
+  extracted: {
+    brand?: string;
+    facts?: unknown;
+    qualifiers?: unknown;
+  };
+  errorMessage?: string;
+  createdAt: string;
+}
+
+function rowToNameRun(r: Record<string, unknown>): NameEnrichmentRun {
+  const result = (r.result_payload as Record<string, unknown>) ?? {};
+  const validation = (r.validation_payload as Record<string, unknown>) ?? {};
+  return {
+    id:            r.id as string,
+    productId:     Number(r.product_id),
+    provider:      (r.provider as string) || '',
+    model:         (r.model as string) || '',
+    status:        (r.status as NameEnrichmentRun['status']) || 'queued',
+    candidateName: (result.candidateName as string) || undefined,
+    seoTitle:      (result.seoTitle as string) || undefined,
+    seoDescription: (result.seoDescription as string) || undefined,
+    searchAliases: (result.searchAliases as string[]) || [],
+    sourceType:    (result.sourceType as string) || undefined,
+    confidence:    r.confidence == null ? (validation.confidence as number) : Number(r.confidence),
+    evidence:      (result.evidence as NameEvidence[]) || [],
+    warnings:      (result.warnings as string[]) || [],
+    errors:        (validation.errors as NameValidationError[]) || [],
+    extracted: {
+      brand:       (validation.brand as string) || undefined,
+      facts:       validation.facts,
+      qualifiers:  validation.qualifiers,
+    },
+    errorMessage:  (r.error_message as string) || undefined,
+    createdAt:     r.created_at as string,
+  };
+}
+
+/** Products needing English-name review, most recently generated first. */
+export async function fetchProductsForNameReview(
+  statuses: Product['nameEnStatus'][] = ['review_required'],
+): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from('products_admin')
+    .select('*')
+    .in('name_en_status', statuses as string[])
+    .order('name_en_generated_at', { ascending: false, nullsFirst: false })
+    .limit(500);
+  if (error || !data) return [];
+  return data.map(rowToProduct);
+}
+
+/** Most recent enrichment run for one product (candidate, evidence, warnings). */
+export async function fetchLatestNameRun(productId: number): Promise<NameEnrichmentRun | null> {
+  const { data, error } = await supabase
+    .from('product_name_enrichment_runs')
+    .select('*')
+    .eq('product_id', productId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !data) return null;
+  return rowToNameRun(data);
+}
+
+/** Full run history for one product (admin audit view). */
+export async function fetchNameRunHistory(productId: number): Promise<NameEnrichmentRun[]> {
+  const { data, error } = await supabase
+    .from('product_name_enrichment_runs')
+    .select('*')
+    .eq('product_id', productId)
+    .order('created_at', { ascending: false })
+    .limit(50);
+  if (error || !data) return [];
+  return data.map(rowToNameRun);
+}
+
+export type { NameApprovalInput } from './nameReview';
+export type { ApprovalConcurrency } from './nameReview';
+import { buildApprovalPatch, validateApprovalName } from './nameReview';
+import type { ApprovalConcurrency } from './nameReview';
+export { buildApprovalPatch };
+
+/**
+ * Human approval (approve as-is or approve after edit) via the
+ * `approve_product_name_review` RPC. The RPC is admin-guarded and runs a
+ * latest-run + generated-timestamp optimistic-concurrency check so a stale
+ * candidate is never stamped over a fresher worker run. It also rejects empty
+ * and Japanese-containing names server-side (defence in depth). The stable-URL
+ * policy (slug assigned only once) lives inside the RPC, so we pass the desired
+ * slug and let the DB keep any existing one.
+ */
+export async function approveProductName(
+  productId: number,
+  reviewerId: string,
+  input: import('./nameReview').NameApprovalInput,
+  concurrency: ApprovalConcurrency,
+) {
+  const validation = validateApprovalName(input.nameEn);
+  if (!validation.ok) {
+    return { data: null, error: { message: validation.message, code: validation.code } };
+  }
+  const { data, error } = await supabase.rpc('approve_product_name_review', {
+    p_product_id: productId,
+    p_reviewer_id: reviewerId,
+    p_name_en: input.nameEn.trim(),
+    p_seo_slug: input.seoSlug ?? null,
+    p_seo_title: input.seoTitle ?? null,
+    p_seo_description: input.seoDescription ?? null,
+    p_search_aliases: input.searchAliases ?? [],
+    p_name_source: input.source,
+    p_expected_run_id: concurrency.expectedRunId,
+    p_expected_generated_at: concurrency.expectedGeneratedAt,
+  });
+  return { data, error };
+}
+
+/**
+ * Put a product back into the review queue (hold). Keeps any existing candidate
+ * data intact; only the workflow status changes so it resurfaces in the filter.
+ */
+export async function holdProductNameReview(productId: number) {
+  return updateProductById(productId, { nameEnStatus: 'review_required' });
+}
+
+/**
+ * Request a fresh enrichment run for one product via the atomic
+ * `request_product_name_regeneration` RPC.
+ *
+ * The RPC supersedes any queued/running run and resets name_en_status to
+ * `pending` in a single transaction, guarded by the same latest-run +
+ * generated-timestamp optimistic-concurrency check as approval. The enrichment
+ * worker (`enrich:names`) remains the single source of truth for the immutable
+ * job snapshot + input hash (it rebuilds and verifies them, per its
+ * INPUT_HASH_MISMATCH guard), so we intentionally do NOT fabricate a hash here.
+ * The next worker pass (`npm run enrich:names -- --ids=<id>`) enqueues a
+ * correctly-hashed job. Existing human approvals are left untouched.
+ */
+export async function regenerateProductName(
+  productId: number,
+  concurrency: ApprovalConcurrency,
+) {
+  const { data, error } = await supabase.rpc('request_product_name_regeneration', {
+    p_product_id: productId,
+    p_expected_run_id: concurrency.expectedRunId,
+    p_expected_generated_at: concurrency.expectedGeneratedAt,
+  });
+  return { data, error };
 }

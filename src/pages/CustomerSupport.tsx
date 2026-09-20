@@ -41,7 +41,7 @@ function LiveChat() {
 
   useEffect(() => {
     if (!isAuthenticated || !currentUser) return;
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     db.getOrCreateRoom(
       currentUser.authId ?? currentUser.id,
       currentUser.companyName || currentUser.email,

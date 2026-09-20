@@ -1,25 +1,40 @@
-import { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { useEffect, lazy, Suspense } from 'react';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { useStore } from './store/useStore';
 import { supabase } from './lib/supabase';
+import { productPath } from './lib/productUrl';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
-import Home from './pages/Home';
-import ProductList from './pages/ProductList';
 import ProductDetail from './pages/ProductDetail';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminSupply from './pages/AdminSupply';
-import CustomerSupport from './pages/CustomerSupport';
-import Checkout from './pages/Checkout';
-import MyAccount from './pages/MyAccount';
-import Wishlist from './pages/Wishlist';
-import PendingApproval from './pages/PendingApproval';
 import ProtectedRoute from './components/ProtectedRoute';
-import OrderPrint from './pages/OrderPrint';
-import ResetPassword from './pages/ResetPassword';
+
+const Home = lazy(() => import('./pages/Home'));
+const ProductList = lazy(() => import('./pages/ProductList'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminSupply = lazy(() => import('./pages/AdminSupply'));
+const CustomerSupport = lazy(() => import('./pages/CustomerSupport'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const MyAccount = lazy(() => import('./pages/MyAccount'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+const PendingApproval = lazy(() => import('./pages/PendingApproval'));
+const OrderPrint = lazy(() => import('./pages/OrderPrint'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+
+/**
+ * Legacy `/product/:id` → canonical `/products/{id}/{slug}` redirect.
+ * The id is the authoritative key; we look the product up to build a slug and
+ * replace the history entry so the old URL never stays in the address bar.
+ */
+function LegacyProductRedirect() {
+  const { id } = useParams<{ id: string }>();
+  const { products } = useStore();
+  const product = products.find((p) => String(p.id) === id);
+  if (!product) return <Navigate to={`/products/${id}`} replace />;
+  return <Navigate to={productPath(product)} replace />;
+}
 
 function App() {
   const { initAuth, loadProducts } = useStore();
@@ -40,16 +55,17 @@ function App() {
       if (event === 'PASSWORD_RECOVERY') {
         // Supabase has consumed the recovery token from the URL and given us a
         // session — send the user somewhere they can actually set a password.
-        window.location.hash = '#/reset-password';
+        window.history.replaceState(null, '', '/reset-password');
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [initAuth, loadProducts]);
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Routes>
+      <Suspense fallback={<main className="min-h-[50vh] flex items-center justify-center" aria-busy="true">Loading…</main>}>
+        <Routes>
         {/* Admin route without header/footer */}
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/supply" element={<><AdminSupply /><Toast /></>} />
@@ -66,7 +82,10 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/products" element={<ProductList />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
+                  {/* Canonical product path: /products/{id}/{stable-slug} */}
+                  <Route path="/products/:id/:slug?" element={<ProductDetail />} />
+                  {/* Legacy /product/:id → canonical redirect (server rewrite serves the SPA) */}
+                  <Route path="/product/:id" element={<LegacyProductRedirect />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/support" element={<CustomerSupport />} />
                   <Route path="/pending" element={<PendingApproval />} />
@@ -91,7 +110,8 @@ function App() {
             </>
           }
         />
-      </Routes>
+        </Routes>
+      </Suspense>
     </div>
   );
 }

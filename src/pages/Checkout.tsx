@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PayPalButtons, usePayPalScriptReducer, DISPATCH_ACTION } from '@paypal/react-paypal-js';
+import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer, DISPATCH_ACTION } from '@paypal/react-paypal-js';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '../store/useStore';
 import type { ShippingAddress } from '../store/useStore';
@@ -66,7 +66,7 @@ function genOrderId() {
   return `ORD-${date}-${rand}`;
 }
 
-export default function Checkout() {
+function CheckoutContent() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { cart, currentUser, addOrder, clearCart, isAuthenticated, showToast } = useStore();
@@ -933,5 +933,17 @@ function BankRow({
         )}
       </button>
     </div>
+  );
+}
+
+export default function Checkout() {
+  return (
+    <PayPalScriptProvider options={{
+      clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test',
+      currency: 'JPY',
+      intent: 'capture',
+    }}>
+      <CheckoutContent />
+    </PayPalScriptProvider>
   );
 }

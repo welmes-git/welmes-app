@@ -14,8 +14,8 @@
  * 감지: price_up/price_down(세트 卸단가 변동), sold_out(재고 0), restock(재고 회복),
  *       not_trading(미거래/가격 비공개 전환), missing(상품 페이지 소실)
  * 반영: 가격·재고는 즉시 자동 갱신, 품절/미거래/소실 → inactive 자동 전환,
- *       재고 회복 → active 자동 복귀. 모든 변동은 sd_product_changes 에 기록되고
- *       관리자 전원에게 알림(notifications)이 전송된다.
+ *       재고 회복은 알림만 보내고 inactive 유지(관리자 확인 후 활성화).
+ *       모든 변동은 sd_product_changes에 기록되고 관리자 전원에게 알림(notifications)이 전송된다.
  * 감시: sd_watchlist — 수집 당시 품절/미거래로 등록 못 한 상품. 재입고(가격 정보 등장)를
  *       확인하면 자동 등록(inactive)하고 관리자에게 product_registered 알림을 보낸다.
  * 세션: sd-import.mjs 와 동일 — scripts/.sd-session.json 재사용, 만료 시 headful 로그인 창.
@@ -25,7 +25,7 @@ const { chromium } = await import('playwright');
 const { createClient } = await import('@supabase/supabase-js');
 import {
   loadEnvFiles, createSupabase, createSdSession, parseProductPage,
-  buildProduct, insertProduct, BASE,
+  buildProduct, insertProduct, loadOfficialSources, buildEnrichmentOptions, BASE,
 } from './lib/sd-core.mjs';
 
 loadEnvFiles();
@@ -36,6 +36,8 @@ const DRY_RUN = args.includes('--dry-run');
 const LIMIT = args.find(a => a.startsWith('--limit=')) ? Number(args.find(a => a.startsWith('--limit=')).split('=')[1]) : Infinity;
 const IDS_ARG = args.find(a => a.startsWith('--ids='));
 const IDS = IDS_ARG ? IDS_ARG.split('=')[1].split(',').map(Number).filter(Boolean) : null;
+const NO_ENRICH = args.includes('--no-enrich');   // 재입고 자동등록 시 영문명 큐잉 비활성화
+const ENRICH_PROVIDER = args.find(a => a.startsWith('--provider=')) ? args.find(a => a.startsWith('--provider=')).split('=')[1] : 'gemini';
 
 const supabase = createSupabase(createClient);
 
@@ -55,7 +57,7 @@ const adminIds = (adminRows ?? []).map(r => r.id);
 console.log(`✅ WELMES 로그인 성공 — 알림 대상 관리자 ${adminIds.length}명`);
 
 // ── 대상 상품 조회 (sd_product_id 있는 것, 마지막 체크 오래된 순) ────
-let query = supabase.from('products')
+let query = supabase.from('products_admin')
   .select('id, name, wholesale_price, original_price, stock, status, set_options, sd_product_id, sd_last_checked_at')
   .not('sd_product_id', 'is', null);
 if (IDS) query = query.in('id', IDS);
@@ -90,7 +92,7 @@ for (const row of products) {
   if (!resp) { errors++; continue; }
   if (String(page.url()).includes('login')) {
     await sd.ensure();
-page = sd.page();
+    page = sd.page();
     resp = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
   }
   // domcontentloaded 직후에는 세트표가 아직 안 그려질 수 있다 — import와 동일하게 대기 후 파싱
@@ -105,7 +107,7 @@ page = sd.page();
     for (let attempt = 0; attempt < 3 && parsed?.error; attempt++) {
       await page.waitForTimeout(3000);
       await sd.ensure();
-page = sd.page();
+    page = sd.page();
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
       await page.waitForTimeout(2500);
       if (!/pd_p\/\d+/.test(page.url())) break; // 소실 판정은 gone 로직이 담당
@@ -120,14 +122,18 @@ page = sd.page();
   const updates = { sd_last_checked_at: new Date().toISOString() };
 
   if (gone) {
+    // A missing supplier page is not purchasable inventory. Zeroing stock also
+    // gives the recovery path a reliable 0→N signal if the page later returns.
+    if (row.stock !== 0) updates.stock = 0;
     if (row.status === 'active') {
-      changes.push({ type: 'missing', old: { status: 'active' }, new: { status: 'inactive', sdProductPage: url } });
+      changes.push({ type: 'missing', old: { status: 'active', stock: row.stock }, new: { status: 'inactive', stock: 0, sdProductPage: url } });
       updates.status = 'inactive';
     }
   } else if (parsed.error) {
-    // 미거래 전환 / 가격 비공개 — 구매 불가 상태
+    // No visible wholesale price means the item cannot be purchased right now.
+    if (row.stock !== 0) updates.stock = 0;
     if (row.status === 'active') {
-      changes.push({ type: 'not_trading', old: { status: 'active', stock: row.stock }, new: { note: parsed.error.message } });
+      changes.push({ type: 'not_trading', old: { status: 'active', stock: row.stock }, new: { status: 'inactive', stock: 0, note: parsed.error.message } });
       updates.status = 'inactive';
     }
   } else {
@@ -161,8 +167,9 @@ page = sd.page();
       changes.push({ type: 'sold_out', old: { stock: row.stock }, new: { stock: 0 } });
       updates.status = 'inactive';
     } else if (row.stock === 0 && parsed.stock > 0) {
-      changes.push({ type: 'restock', old: { stock: 0 }, new: { stock: parsed.stock } });
-      updates.status = 'active';
+      changes.push({ type: 'restock', old: { stock: 0, status: row.status }, new: { stock: parsed.stock, status: row.status } });
+      // Never override an administrator's inactive choice. A restock notification
+      // is created below; activation remains an explicit admin action.
     }
     if (row.stock !== parsed.stock) updates.stock = parsed.stock;
   }
@@ -188,7 +195,7 @@ page = sd.page();
   if (DRY_RUN) continue;
 
   // ── 반영: 상품 갱신 → 변동 로그 → 관리자 알림 ─────────────────────
-  const { error: uErr } = await supabase.from('products').update(updates).eq('id', row.id);
+  const { error: uErr } = await supabase.from('products_admin').update(updates).eq('id', row.id);
   if (uErr) { errors++; console.log(`  ✗ DB 갱신 실패: ${uErr.message}`); continue; }
 
   if (hasChange) {
@@ -234,10 +241,20 @@ if (!watchlist.length) { console.log(`👁 감시 목록 비어 있음 — 종�
 if (!DRY_RUN) console.log(`👁 감시 목록 ${watchlist.length}개 — 재입고 확인 중...`);
 
 // 브랜드 추론용 DB 기존 브랜드
-const { data: wBrandRows } = await supabase.from('products').select('brand');
+const { data: wBrandRows } = await supabase.from('products_admin').select('brand');
 const knownBrands = [...new Set((wBrandRows ?? []).map(r => r.brand).filter(Boolean))];
 
-let registered = 0, stillOut = 0, watchGone = 0, watchErrors = errors;
+// 재입고 자동등록도 sd-import와 동일한 영문명 enrichment 파이프라인을 사용한다.
+const OFFICIAL_SOURCES = NO_ENRICH ? [] : await loadOfficialSources(supabase);
+const ENRICHMENT = buildEnrichmentOptions({
+  enabled: !NO_ENRICH,
+  officialSources: OFFICIAL_SOURCES,
+  provider: ENRICH_PROVIDER,
+  env: process.env,
+});
+if (!DRY_RUN && !NO_ENRICH) console.log(`🌐 공식 도메인 레지스트리 ${OFFICIAL_SOURCES.length}행 로드 — 재입고 영문명 자동 큐잉 활성화 (provider: ${ENRICH_PROVIDER})`);
+
+let registered = 0, stillOut = 0, watchGone = 0, watchErrors = errors, enrichQueued = 0, enrichFailed = 0;
 for (const w of watchlist) {
   const url = `${BASE}/p/r/pd_p/${w.sd_product_id}/`;
   let wResp = null;
@@ -252,7 +269,7 @@ for (const w of watchlist) {
   if (!wResp) { watchErrors++; continue; }
   if (String(page.url()).includes('login')) {
     await sd.ensure();
-page = sd.page();
+    page = sd.page();
     wResp = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
   }
 
@@ -270,7 +287,7 @@ page = sd.page();
   for (let attempt = 0; attempt < 3 && wParsed.error; attempt++) {
     await page.waitForTimeout(3000);
     await sd.ensure();
-page = sd.page();
+    page = sd.page();
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
     await page.waitForTimeout(2500);
     if (!/pd_p\/\d+/.test(page.url())) break;
@@ -292,13 +309,18 @@ page = sd.page();
   }
   try {
     const p = await buildProduct(page, wParsed, { knownBrands, status: 'inactive' });
-    const r = await insertProduct(supabase, p);
+    const r = await insertProduct(supabase, p, { enrichment: ENRICHMENT });
     if (r.skipped) {
       console.log(`↷ [SD ${w.sd_product_id}] 이미 등록됨 — 감시 해제`);
       await supabase.from('sd_watchlist').delete().eq('id', w.id);
     } else {
       registered++;
       console.log(`✓ [SD ${w.sd_product_id}] 재입고 감지 — 자동 등록 (#${r.id}, ¥${p.wholesalePrice}, inactive — 검토 후 활성화)`);
+      // 영문명 enrichment 큐잉 — 등록 성공이 우선, 실패는 별도 집계
+      if (r.enrichment) {
+        if (r.enrichment.enqueued) { enrichQueued++; console.log(`  🌐 영문명 작업 큐잉 (run ${String(r.enrichment.runId).slice(0, 8)}, grounding: ${r.enrichment.grounding ? 'on' : 'off'})`); }
+        else if (r.enrichment.error) { enrichFailed++; console.log(`  ⚠ 영문명 큐잉 실패 (등록은 유지): ${r.enrichment.error}`); }
+      }
       await supabase.from('sd_watchlist').delete().eq('id', w.id);
       if (adminIds.length) {
         const { error: nErr } = await supabase.from('notifications').insert(adminIds.map(member_id => ({
@@ -318,5 +340,5 @@ page = sd.page();
 
 // 감시 행별 last_checked_at은 루프 안에서 갱신됨
 await sd.close();
-console.log(`👁 감시 완료: 자동 등록 ${registered} / 여전히 품절 ${stillOut} / 소실 제거 ${watchGone} / 오류 ${watchErrors}`);
+console.log(`👁 감시 완료: 자동 등록 ${registered} / 여전히 품절 ${stillOut} / 소실 제거 ${watchGone} / 오류 ${watchErrors}${!NO_ENRICH && !DRY_RUN ? ` | 영문명 큐잉 ${enrichQueued} / 큐잉 실패 ${enrichFailed}` : ''}`);
 process.exit(0);

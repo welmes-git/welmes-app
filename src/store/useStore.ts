@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CurrencyCode } from '../lib/currency';
 import * as db from '../lib/db';
-import { emailOrderPlaced, emailMemberRegistered, emailMemberApproved, emailMemberRejected, emailOrderShipped } from '../lib/email';
+import { emailOrderPlaced, emailMemberRegistered, emailMemberApproved, emailMemberRejected, emailOrderShipped, emailOrderStatusChanged } from '../lib/email';
 
 export interface AppNotification {
   id: string;
@@ -29,12 +29,30 @@ export interface SetOption {
   originalPrice: number;
 }
 
+export type ProductNameStatus = 'pending' | 'auto_approved' | 'review_required' | 'human_approved' | 'failed';
+export type ProductNameSource = 'official' | 'grounded' | 'generated' | 'manual';
+
 export interface Product {
   id: number;
   /** Original name as entered by the manufacturer/supplier (e.g. Japanese) */
   name: string;
   /** Canonical English/romanized name — shown as the primary heading site-wide */
   nameEn: string;
+  /** English-name workflow is independent from the storefront active/inactive status. */
+  nameEnStatus?: ProductNameStatus;
+  nameEnConfidence?: number;
+  nameEnSource?: ProductNameSource;
+  nameEnGeneratedAt?: string;
+  nameEnApprovedAt?: string;
+  nameEnApprovedBy?: string;
+  /** Stable SEO metadata; slug must not silently change when a title is edited. */
+  seoSlug?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  searchAliases?: string[];
+  /** Verified JAN/GTIN candidate; emitted in JSON-LD only when format-valid. */
+  jan?: string;
+  updatedAt?: string;
   brand: string;
   /** Top-level category — one of the 19 mega-menu groups (e.g. "Skincare") */
   category: string;
@@ -128,7 +146,7 @@ interface AppState {
   productsLoading: boolean;
   loadProducts: () => Promise<void>;
   addProduct: (product: Omit<Product, 'id'>) => Promise<Product | null>;
-  updateProduct: (id: number, updates: Partial<Product>) => Promise<{ error: any } | void>;
+  updateProduct: (id: number, updates: Partial<Product>) => Promise<{ error: { message: string } } | void>;
   deleteProduct: (id: number) => Promise<void>;
   bulkUpdateProductStatus: (ids: number[], status: Product['status']) => Promise<{ error?: { message: string } } | void>;
 
@@ -214,6 +232,7 @@ export const useStore = create<AppState>()(
             isAdmin: member.isAdmin,
             authLoading: false,
           });
+          await get().loadProducts();
           await get().syncCart();
           get().loadNotifications();
         } else {
@@ -239,6 +258,7 @@ export const useStore = create<AppState>()(
           isAuthenticated: true,
           isAdmin: member.isAdmin,
         });
+        await get().loadProducts();
         await get().syncCart();
         get().loadNotifications();
         return true;
@@ -257,6 +277,7 @@ export const useStore = create<AppState>()(
           cart: [],
           wishlist: [],
         });
+        await get().loadProducts();
       },
 
       // ── Products ──────────────────────────────────────────────
@@ -579,6 +600,12 @@ export const useStore = create<AppState>()(
             orderId: id,
             orderStatus: status,
           });
+          // An in-app notification alone is invisible until the buyer next
+          // opens the site, which is no good for a cancellation.
+          const member = get().members.find((m) => m.id === order.memberId);
+          if (member?.email) {
+            emailOrderStatusChanged(order, member.email);
+          }
         }
       },
 
@@ -671,6 +698,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'welmes-store',
+      skipHydration: true,
       partialize: (state) => ({
         cart: state.cart,
         wishlist: state.wishlist,

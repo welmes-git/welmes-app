@@ -1,10 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback, useContext } from 'react';
+import { useParams, Link, useNavigate, Navigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import type { SetOption } from '../store/useStore';
 import { initialProducts } from '../data/products';
+import { productSlug } from '../lib/productUrl';
+import { SsrProductContext } from '../lib/ssrProductContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
+import ProductSeo from '../components/ProductSeo';
 import ProductCard from '../components/ProductCard';
 import { BADGE_TAGS, hasJapanese, maskDigits } from '../lib/utils';
 import * as db from '../lib/db';
@@ -22,7 +25,7 @@ import {
 } from 'lucide-react';
 
 export default function ProductDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { id, slug } = useParams<{ id: string; slug?: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { products, productsLoading, addToCart, isAuthenticated, currentUser, showToast, toggleWishlist, isWishlisted } =
@@ -31,7 +34,7 @@ export default function ProductDetail() {
   const [setQty, setSetQty] = useState<Record<string, number>>({});
   const [activeTab, setActiveTab] = useState<'info' | 'reviews' | 'shipping'>('info');
   const [activeImageIdx, setActiveImageIdx] = useState(0);
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
+  const [isMobile, setIsMobile] = useState(false);
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -62,7 +65,7 @@ export default function ProductDetail() {
   }, [productId, currentUser]);
 
   useEffect(() => {
-    if (activeTab === 'reviews') loadReviews();
+    if (activeTab === 'reviews') queueMicrotask(() => { void loadReviews(); });
   }, [activeTab, loadReviews]);
 
   async function submitReview() {
@@ -96,7 +99,11 @@ export default function ProductDetail() {
   // and come back empty — otherwise a real product can flash as "not found"
   // (or briefly show an unrelated demo product at the same id) while the
   // real Supabase fetch is still in flight.
-  const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
+  const ssrProduct = useContext(SsrProductContext);
+  const storeProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
+  const allProducts = ssrProduct && ssrProduct.id === productId
+    ? [ssrProduct, ...storeProducts.filter((item) => item.id !== ssrProduct.id)]
+    : storeProducts;
   const product = allProducts.find((p) => p.id === productId);
 
   const isVerified = currentUser?.status === 'approved';
@@ -180,6 +187,13 @@ export default function ProductDetail() {
     );
   }
 
+  // Canonical slug redirect: the id is authoritative, so a missing or stale slug
+  // is corrected with a single replace navigation to /products/{id}/{slug}.
+  const canonicalSlug = productSlug(product);
+  if (slug !== canonicalSlug) {
+    return <Navigate to={`/products/${product.id}/${canonicalSlug}`} replace />;
+  }
+
   // Locked price: currency symbol stays crisp, only digits blur (DESIGN.md §4 가격 게이팅)
   const lockedPrice = (amount: number) => (
     <span className="inline-flex items-baseline gap-[2px]">
@@ -219,6 +233,7 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-white">
+      <ProductSeo product={product} />
       <div className="page-container py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-[13px] text-ink-500 mb-6">
@@ -247,7 +262,7 @@ export default function ProductDetail() {
                   <div className="aspect-square bg-canvas border border-line rounded-md overflow-hidden mb-3 relative">
                     <img
                       src={current}
-                      alt={product.nameEn}
+                      alt={`${product.nameEn} wholesale product image`}
                       className="w-full h-full object-cover"
                     />
                     {imgs.length > 1 && (
@@ -303,6 +318,12 @@ export default function ProductDetail() {
               </p>
             )}
             {product.name === product.nameEn && <div className="mb-3" />}
+
+            {product.seoDescription && (
+              <p className="mb-4 max-w-2xl text-[14px] leading-6 text-ink-500" lang="en">
+                {product.seoDescription}
+              </p>
+            )}
 
             {/* Rating */}
             <div className="flex items-center gap-2 mb-4">

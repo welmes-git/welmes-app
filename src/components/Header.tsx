@@ -109,7 +109,7 @@ export default function Header() {
 
   // Reset to the first group each time the overlay opens
   useEffect(() => {
-    if (showMobileCategory) setActiveGroupKey(allCategoryGroups[0]?.key);
+    if (showMobileCategory) queueMicrotask(() => setActiveGroupKey(allCategoryGroups[0]?.key));
   }, [showMobileCategory, allCategoryGroups]);
 
   // Scrollspy: walk the sections in order and take the last one whose top has
@@ -282,11 +282,11 @@ export default function Header() {
   }
 
   function formatRelativeTime(iso: string): string {
-    const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-    if (diff < 60) return t('notifications.justNow');
-    if (diff < 3600) return t('notifications.minutesAgo', { count: Math.floor(diff / 60) });
-    if (diff < 86400) return t('notifications.hoursAgo', { count: Math.floor(diff / 3600) });
-    return t('notifications.daysAgo', { count: Math.floor(diff / 86400) });
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return '';
+    return new Intl.DateTimeFormat(i18n.language || 'en', {
+      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    }).format(date);
   }
 
   const handleSearch = (e: React.FormEvent) => {

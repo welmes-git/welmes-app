@@ -1,28 +1,22 @@
 {
+  "outputDirectory": "dist/client",
+  "functions": {
+    "api/ssr.mjs": {
+      "includeFiles": ["dist/server/**", "dist/client/index.html"]
+    }
+  },
   "headers": [
     {
-      "source": "/index.html",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
-    },
-    {
       "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }
   ],
   "rewrites": [
-    {
-      "source": "/((?!assets/).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/products/:id/:slug", "destination": "/api/ssr?path=/products/:id/:slug" },
+    { "source": "/products/:id", "destination": "/api/ssr?path=/products/:id" },
+    { "source": "/product/:id", "destination": "/api/ssr?path=/product/:id" },
+    { "source": "/sitemap.xml", "destination": "/api/ssr?path=/sitemap.xml" },
+    { "source": "/robots.txt", "destination": "/api/ssr?path=/robots.txt" },
+    { "source": "/((?!api/|assets/).*)", "destination": "/index.html" }
   ]
 }

@@ -33,6 +33,9 @@ import {
 } from 'lucide-react';
 import * as db from '../lib/db';
 import type { SupportRoom, SupportMessage } from '../lib/db';
+import NameReviewPanel from '../components/NameReviewPanel';
+import { matchesSearch } from '../lib/productSearch';
+import type { ProductNameStatus } from '../store/useStore';
 
 type AdminTab = 'dashboard' | 'members' | 'products' | 'orders' | 'support';
 type MemberStatus = 'all' | 'pending' | 'approved' | 'rejected';
@@ -45,6 +48,15 @@ const CHANGE_META: Record<db.SdProductChange['changeType'], { label: string; cla
   restock:     { label: 'Restock',     className: 'bg-green-100 text-green-700' },
   not_trading: { label: 'Not trading', className: 'bg-gray-200 text-gray-600' },
   missing:     { label: 'Missing',     className: 'bg-gray-200 text-gray-600' },
+};
+
+/** English-name review status badges (Task 7). */
+const NAME_STATUS_META: Record<ProductNameStatus, { label: string; className: string }> = {
+  pending:         { label: 'Name: pending',  className: 'bg-gray-100 text-gray-600' },
+  auto_approved:   { label: 'Name: auto',     className: 'bg-green-100 text-green-700' },
+  review_required: { label: 'Name: review',   className: 'bg-yellow-100 text-yellow-700' },
+  human_approved:  { label: 'Name: approved', className: 'bg-green-100 text-green-700' },
+  failed:          { label: 'Name: failed',   className: 'bg-red-100 text-red-700' },
 };
 
 const menuItems: { id: AdminTab; label: string; icon: React.ElementType }[] = [
@@ -89,6 +101,7 @@ export default function AdminDashboard() {
     updateOrderShipping,
     loadMembers,
     loadOrders,
+    loadProducts,
     logout,
     showToast,
   } = useStore();
@@ -96,7 +109,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     loadMembers();
     loadOrders();
-  }, []);
+  }, [loadMembers, loadOrders]);
 
   const { formatPrice } = useCurrency();
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
@@ -106,6 +119,7 @@ export default function AdminDashboard() {
   const [productSearch, setProductSearch] = useState('');
   const [productChanges, setProductChanges] = useState<db.SdProductChange[]>([]);
   const [changeFilter, setChangeFilter] = useState<'all' | 'changed'>('all');
+  const [nameReviewFilter, setNameReviewFilter] = useState<'all' | ProductNameStatus>('all');
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<number | null>(null);
@@ -126,7 +140,7 @@ export default function AdminDashboard() {
     stock: 0,
     description: '',
     tags: '',
-    status: 'active' as 'active' | 'inactive',
+    status: 'inactive' as 'active' | 'inactive',
     setOptions: [] as SetOption[],
     image: '',
     images: [] as string[],
@@ -173,9 +187,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!activeRoom) return;
     db.fetchMessages(activeRoom.id).then(setChatMessages);
-    db.markRoomRead(activeRoom.id);
-    setSupportRooms((prev) => prev.map((r) => r.id === activeRoom.id ? { ...r, unreadAdmin: 0 } : r));
-    setSupportUnread((prev) => Math.max(0, prev - activeRoom.unreadAdmin));
+    void db.markRoomRead(activeRoom.id);
+    queueMicrotask(() => {
+      setSupportRooms((prev) => prev.map((r) => r.id === activeRoom.id ? { ...r, unreadAdmin: 0 } : r));
+      setSupportUnread((prev) => Math.max(0, prev - activeRoom.unreadAdmin));
+    });
 
     const channel = supabase
       .channel(`admin:room:${activeRoom.id}`)
@@ -329,11 +345,9 @@ export default function AdminDashboard() {
   // brands that aren't in the demo list). The brand field itself is a free
   // text input with this datalist — a select would silently reset imported
   // brands to brands[0] ('SK-II') when the value isn't in the option list.
-  const brandSuggestions = useMemo(() => {
-    const set = new Set<string>(brands);
-    for (const p of allProducts) if (p.brand) set.add(p.brand);
-    return [...set].sort();
-  }, [allProducts]);
+  const brandSuggestionSet = new Set<string>(brands);
+  for (const p of allProducts) if (p.brand) brandSuggestionSet.add(p.brand);
+  const brandSuggestions = [...brandSuggestionSet].sort();
 
   // Stats — all derived from live data
   const totalMembers = members.length;
@@ -361,13 +375,11 @@ export default function AdminDashboard() {
   // Filtered products
   const filteredProducts = allProducts.filter((p) => {
     if (changeFilter === 'changed' && !changesByProduct.has(p.id)) return false;
+    if (nameReviewFilter !== 'all' && (p.nameEnStatus ?? 'pending') !== nameReviewFilter) return false;
     if (productSearch) {
-      const q = productSearch.toLowerCase();
-      return (
-        p.nameEn.toLowerCase().includes(q) ||
-        p.name.toLowerCase().includes(q) ||
-        p.brand.toLowerCase().includes(q)
-      );
+      // Reuse the storefront matcher so admin search shares the same
+      // NFKD/accent/punctuation normalization (e.g. "Bioré" ↔ "biore").
+      return matchesSearch(p, productSearch);
     }
     return true;
   });
@@ -415,7 +427,7 @@ export default function AdminDashboard() {
       stock: 0,
       description: '',
       tags: '',
-      status: 'active',
+      status: 'inactive',
       setOptions: [],
       image: '',
       images: [],
@@ -938,6 +950,19 @@ export default function AdminDashboard() {
                   <option value="all">All products</option>
                   <option value="changed">Supplier changes ({productChanges.length})</option>
                 </select>
+                <select
+                  value={nameReviewFilter}
+                  onChange={(e) => setNameReviewFilter(e.target.value as 'all' | ProductNameStatus)}
+                  className="h-10 px-3 border border-[#e5e5e5] rounded-lg text-[13px] text-[#666] focus:outline-none focus:border-[#333]"
+                  aria-label="Filter by English-name review status"
+                >
+                  <option value="all">All name statuses</option>
+                  <option value="review_required">Review required</option>
+                  <option value="auto_approved">Auto-approved</option>
+                  <option value="human_approved">Human-approved</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                </select>
                 <button
                   onClick={handleAddProduct}
                   className="h-10 px-4 bg-[#4a90e2] text-white rounded-lg text-[13px] font-medium flex items-center gap-2 hover:bg-[#357abd]"
@@ -1053,6 +1078,18 @@ export default function AdminDashboard() {
                                 ))}
                               </div>
                             )}
+                            {product.nameEnStatus && product.nameEnStatus !== 'human_approved' && (
+                              <div className="mt-1 flex flex-wrap items-center gap-1">
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded ${NAME_STATUS_META[product.nameEnStatus].className}`}>
+                                  {NAME_STATUS_META[product.nameEnStatus].label}
+                                </span>
+                                {product.nameEnConfidence != null && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#f0f0f0] text-[#666]">
+                                    {(product.nameEnConfidence * 100).toFixed(0)}%
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </td>
                           <td className="px-4 py-3 text-[#666] hidden md:table-cell">
                             {product.brand}
@@ -1136,6 +1173,18 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                     <div className="p-5 space-y-4">
+                      {(() => {
+                        const editing = editingProduct != null ? allProducts.find((p) => p.id === editingProduct) : null;
+                        if (!editing || !editing.nameEnStatus) return null;
+                        return (
+                          <NameReviewPanel
+                            product={editing}
+                            reviewerId={currentUser?.id ?? ''}
+                            showToast={showToast}
+                            onApplied={() => { loadProducts(); setShowProductModal(false); }}
+                          />
+                        );
+                      })()}
                       <div>
                         <label className="block text-[12px] text-[#666] mb-1">
                           Product Name (English) *

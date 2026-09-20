@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { initialProducts, categories } from '../data/products';
 import { brandsByCount, hasJapanese } from '../lib/utils';
+import { matchesSearch } from '../lib/productSearch';
 import ProductCard from '../components/ProductCard';
 import ProductGridSkeleton from '../components/ProductGridSkeleton';
 import SignUpBanner from '../components/SignUpBanner';
@@ -23,7 +24,10 @@ export default function ProductList() {
   // Only fall back to the demo catalogue once loading has actually finished
   // and come back empty — otherwise this briefly flashes demo products before
   // the real Supabase fetch replaces them a moment later.
-  const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
+  const allProducts = useMemo(
+    () => products.length > 0 ? products : productsLoading ? [] : initialProducts,
+    [products, productsLoading],
+  );
   const brands = brandsByCount(allProducts).map(([brand]) => brand);
 
   const categoryFilter = searchParams.get('category') || 'All';
@@ -44,22 +48,24 @@ export default function ProductList() {
 
   // Sync URL → local state; reset page whenever any URL param changes
   useEffect(() => {
-    setSelectedBrands(brandFilter ? [brandFilter] : []);
-    setSelectedCategory(categoryFilter);
-    setSortBy(sortParam as SortOption);
-    setCurrentPage(1);
+    queueMicrotask(() => {
+      setSelectedBrands(brandFilter ? [brandFilter] : []);
+      setSelectedCategory(categoryFilter);
+      setSortBy(sortParam as SortOption);
+      setCurrentPage(1);
+    });
   }, [brandFilter, categoryFilter, sortParam]);
 
   // Separate effect for searchQuery so page resets when search changes
   useEffect(() => {
-    setInlineSearch(searchQuery);
-    setCurrentPage(1);
-    // Clear sidebar brand/category filter when user performs a new text search
-    // so results aren't accidentally empty from stale sidebar state
-    if (searchQuery) {
-      setSelectedBrands([]);
-      setSelectedCategory('All');
-    }
+    queueMicrotask(() => {
+      setInlineSearch(searchQuery);
+      setCurrentPage(1);
+      if (searchQuery) {
+        setSelectedBrands([]);
+        setSelectedCategory('All');
+      }
+    });
   }, [searchQuery]);
 
   const itemsPerPage = 60;
@@ -71,18 +77,9 @@ export default function ProductList() {
   const filteredProducts = useMemo(() => {
     let result = [...allProducts];
 
-    // Text search — name, brand, category, tags, description (first 200 chars)
+    // Text search — name, brand, category (product type), tags, aliases, description
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.nameEn.toLowerCase().includes(q) ||
-          p.name.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.tags.some((tag) => tag.toLowerCase().includes(q)) ||
-          p.description.slice(0, 200).toLowerCase().includes(q)
-      );
+      result = result.filter((p) => matchesSearch(p, searchQuery));
     } else {
       // Only apply sidebar filters when NOT in search mode
       if (selectedCategory !== 'All') {

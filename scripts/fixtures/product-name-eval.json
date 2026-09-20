@@ -1,0 +1,450 @@
+[
+  {
+    "id": "biore-uv-essence",
+    "brand": "Biore",
+    "sourceName": "ビオレ UV アクアリッチ ウォータリーエッセンス 70g",
+    "sourceDescription": "日焼け止め SPF50+ PA++++",
+    "referenceName": "Biore UV Aqua Rich Watery Essence SPF50+ PA++++ 70g",
+    "category": "Sun Care",
+    "exactTokens": [
+      "Biore",
+      "70g",
+      "UV",
+      "SPF50+",
+      "PA++++"
+    ],
+    "allowedAlternatives": {
+      "UV": [
+        "Aqua Rich"
+      ]
+    }
+  },
+  {
+    "id": "biore-uv-gel",
+    "brand": "Biore",
+    "sourceName": "ビオレ UV アクアリッチ ウォータリージェル 70ml",
+    "sourceDescription": "日焼け止め SPF50+ PA++++",
+    "referenceName": "Biore UV Aqua Rich Watery Gel SPF50+ PA++++ 70ml",
+    "category": "Sun Care",
+    "exactTokens": [
+      "Biore",
+      "70ml",
+      "SPF50+",
+      "PA++++"
+    ]
+  },
+  {
+    "id": "biore-kids-milk",
+    "brand": "Biore",
+    "sourceName": "ビオレUV キッズ ピュアミルク 70ml",
+    "sourceDescription": "SPF50 PA+++",
+    "referenceName": "Biore UV Kids Pure Milk SPF50 PA+++ 70ml",
+    "category": "Sun Care",
+    "exactTokens": [
+      "Biore",
+      "70ml",
+      "SPF50",
+      "PA+++"
+    ]
+  },
+  {
+    "id": "biore-face-deep-moist",
+    "brand": "Biore",
+    "sourceName": "ビオレ ザフェイス 泡洗顔 ディープモイスト 本体 200ml",
+    "sourceDescription": "ポンプタイプの泡洗顔料",
+    "referenceName": "Biore The Face Foaming Facial Wash Deep Moist Pump 200ml",
+    "category": "Cleansing",
+    "exactTokens": [
+      "Biore",
+      "200ml",
+      "Pump"
+    ]
+  },
+  {
+    "id": "biore-perfect-oil-refill",
+    "brand": "Biore",
+    "sourceName": "ビオレ パーフェクトオイル つめかえ用 210ml",
+    "sourceDescription": "メイク落とし",
+    "referenceName": "Biore Perfect Cleansing Oil Refill 210ml",
+    "category": "Cleansing",
+    "exactTokens": [
+      "Biore",
+      "210ml",
+      "Refill"
+    ],
+    "allowedAlternatives": {
+      "Refill": [
+        "Replacement",
+        "Refill Pack"
+      ]
+    }
+  },
+  {
+    "id": "mens-biore-face-sheets",
+    "brand": "Men's Biore",
+    "sourceName": "メンズビオレ フェイスシート クールタイプ 34枚",
+    "sourceDescription": "顔用ふきとりシート",
+    "referenceName": "Men's Biore Face Sheets Cool Type 34 Sheets",
+    "category": "Skincare",
+    "exactTokens": [
+      "Men's Biore",
+      "34"
+    ]
+  },
+  {
+    "id": "hada-labo-premium-lotion",
+    "brand": "Hada Labo",
+    "sourceName": "肌ラボ 極潤プレミアム ヒアルロン液 170ml",
+    "sourceDescription": "化粧水 本体",
+    "referenceName": "Hada Labo Gokujyun Premium Hyaluronic Lotion 170ml",
+    "category": "Skincare",
+    "exactTokens": [
+      "Hada Labo",
+      "170ml"
+    ]
+  },
+  {
+    "id": "melano-cc-premium",
+    "brand": "Melano CC",
+    "sourceName": "メラノCC 薬用しみ集中対策 プレミアム美容液 20ml",
+    "sourceDescription": "医薬部外品 美白美容液",
+    "referenceName": "Melano CC Premium Medicated Brightening Essence 20ml",
+    "category": "Skincare",
+    "exactTokens": [
+      "Melano CC",
+      "20ml",
+      "Medicated"
+    ]
+  },
+  {
+    "id": "anessa-perfect-uv",
+    "brand": "Anessa",
+    "sourceName": "アネッサ パーフェクトUV スキンケアミルク N 60ml",
+    "sourceDescription": "SPF50+ PA++++ ウォータープルーフ",
+    "referenceName": "Anessa Perfect UV Sunscreen Skincare Milk N SPF50+ PA++++ Waterproof 60ml",
+    "category": "Sun Care",
+    "exactTokens": [
+      "Anessa",
+      "60ml",
+      "Waterproof",
+      "SPF50+",
+      "PA++++"
+    ]
+  },
+  {
+    "id": "senka-perfect-whip",
+    "brand": "Senka",
+    "sourceName": "専科 パーフェクトホイップ 120g",
+    "sourceDescription": "洗顔料",
+    "referenceName": "Senka Perfect Whip Facial Cleanser 120g",
+    "category": "Cleansing",
+    "exactTokens": [
+      "Senka",
+      "120g"
+    ]
+  },
+  {
+    "id": "dhc-cleansing-oil",
+    "brand": "DHC",
+    "sourceName": "DHC 薬用ディープクレンジングオイル 200ml",
+    "sourceDescription": "医薬部外品 メイク落とし",
+    "referenceName": "DHC Medicated Deep Cleansing Oil 200ml",
+    "category": "Cleansing",
+    "exactTokens": [
+      "DHC",
+      "200ml",
+      "Medicated"
+    ]
+  },
+  {
+    "id": "curel-face-cream",
+    "brand": "Curel",
+    "sourceName": "キュレル 潤浸保湿 フェイスクリーム 40g",
+    "sourceDescription": "医薬部外品",
+    "referenceName": "Curel Intensive Moisture Medicated Facial Cream 40g",
+    "category": "Skincare",
+    "exactTokens": [
+      "Curel",
+      "40g",
+      "Medicated"
+    ]
+  },
+  {
+    "id": "canmake-cream-cheek",
+    "brand": "CANMAKE",
+    "sourceName": "キャンメイク クリームチーク No.16 アーモンドテラコッタ 2.3g",
+    "sourceDescription": "クリームチーク",
+    "referenceName": "CANMAKE Cream Cheek No. 16 Almond Terracotta 2.3g",
+    "category": "Makeup",
+    "exactTokens": [
+      "CANMAKE",
+      "2.3g",
+      "16"
+    ],
+    "allowedAlternatives": {
+      "16": [
+        "No. 16",
+        "No.16"
+      ]
+    }
+  },
+  {
+    "id": "heroine-make-mascara",
+    "brand": "Heroine Make",
+    "sourceName": "ヒロインメイク ロング＆カールマスカラ アドバンストフィルム 01 6g",
+    "sourceDescription": "ブラック マスカラ",
+    "referenceName": "Heroine Make Long & Curl Mascara Advanced Film 01 Black 6g",
+    "category": "Makeup",
+    "exactTokens": [
+      "Heroine Make",
+      "6g"
+    ]
+  },
+  {
+    "id": "softymo-speedy-refill",
+    "brand": "Softymo",
+    "sourceName": "ソフティモ スピーディ クレンジングオイル つめかえ 200ml",
+    "sourceDescription": "メイク落とし",
+    "referenceName": "Softymo Speedy Cleansing Oil Refill 200ml",
+    "category": "Cleansing",
+    "allowedAlternatives": {
+      "Refill": [
+        "Replacement",
+        "Refill Pack"
+      ]
+    },
+    "exactTokens": [
+      "Softymo",
+      "200ml",
+      "Refill"
+    ]
+  },
+  {
+    "id": "saborino-morning-mask",
+    "brand": "Saborino",
+    "sourceName": "サボリーノ 目ざまシート 32枚入",
+    "sourceDescription": "朝用フェイスマスク",
+    "referenceName": "Saborino Morning Face Mask 32 Sheets",
+    "category": "Mask Pack",
+    "exactTokens": [
+      "Saborino",
+      "32"
+    ]
+  },
+  {
+    "id": "utena-golden-jelly",
+    "brand": "Utena",
+    "sourceName": "ウテナ プレミアムプレサ ゴールデンジュレマスク ヒアルロン酸 3枚入",
+    "sourceDescription": "シートマスク",
+    "referenceName": "Utena Premium Puresa Golden Jelly Mask Hyaluronic Acid 3 Sheets",
+    "category": "Mask Pack",
+    "exactTokens": [
+      "Utena",
+      "3"
+    ]
+  },
+  {
+    "id": "pigeon-baby-lotion",
+    "brand": "Pigeon",
+    "sourceName": "ピジョン ベビーミルクローション うるおいプラス 300g",
+    "sourceDescription": "無香料",
+    "referenceName": "Pigeon Baby Milk Lotion Moisture Plus Fragrance-Free 300g",
+    "category": "Body Care",
+    "allowedAlternatives": {
+      "Unscented": [
+        "Fragrance-Free",
+        "Fragrance Free"
+      ]
+    },
+    "exactTokens": [
+      "Pigeon",
+      "300g",
+      "Unscented"
+    ]
+  },
+  {
+    "id": "clinica-toothpaste",
+    "brand": "Clinica",
+    "sourceName": "クリニカアドバンテージ ハミガキ クールミント 130g",
+    "sourceDescription": "薬用歯みがき 医薬部外品",
+    "referenceName": "Clinica Advantage Medicated Toothpaste Cool Mint 130g",
+    "category": "Oral Care",
+    "exactTokens": [
+      "Clinica",
+      "130g",
+      "Medicated",
+      "Cool Mint"
+    ]
+  },
+  {
+    "id": "megrhythm-lavender",
+    "brand": "MegRhythm",
+    "sourceName": "めぐりズム 蒸気でホットアイマスク ラベンダーの香り 12枚入",
+    "sourceDescription": "アイマスク",
+    "referenceName": "MegRhythm Steam Eye Mask Lavender Scent 12 Sheets",
+    "category": "Health · Wellness Goods",
+    "exactTokens": [
+      "MegRhythm",
+      "12",
+      "Lavender"
+    ]
+  },
+  {
+    "id": "kobayashi-cooling-sheets",
+    "brand": "Kobayashi Pharmaceutical",
+    "sourceName": "小林製薬 熱さまシート 大人用 16枚",
+    "sourceDescription": "冷却ジェルシート",
+    "referenceName": "Kobayashi Pharmaceutical Cooling Gel Sheets for Adults 16 Sheets",
+    "category": "Health · Wellness Goods",
+    "exactTokens": [
+      "Kobayashi Pharmaceutical",
+      "16"
+    ]
+  },
+  {
+    "id": "muji-sensitive-toner",
+    "brand": "MUJI",
+    "sourceName": "無印良品 敏感肌用化粧水 高保湿 400ml",
+    "sourceDescription": "化粧水",
+    "referenceName": "MUJI Sensitive Skin Toning Water High Moisture 400ml",
+    "category": "Skincare",
+    "exactTokens": [
+      "MUJI",
+      "400ml"
+    ]
+  },
+  {
+    "id": "nivea-water-gel",
+    "brand": "Nivea Sun",
+    "sourceName": "ニベアUV ウォータージェル SPF50 140g",
+    "sourceDescription": "PA+++ 日焼け止め",
+    "referenceName": "Nivea Sun Protect Water Gel SPF50 PA+++ 140g",
+    "category": "Sun Care",
+    "exactTokens": [
+      "Nivea Sun",
+      "140g",
+      "SPF50",
+      "PA+++"
+    ]
+  },
+  {
+    "id": "meiji-amino-collagen",
+    "brand": "Meiji",
+    "sourceName": "明治 アミノコラーゲン プレミアム 196g",
+    "sourceDescription": "粉末タイプ",
+    "referenceName": "Meiji Amino Collagen Premium Powder 196g",
+    "category": "Health Food",
+    "exactTokens": [
+      "Meiji",
+      "196g",
+      "Powder"
+    ]
+  },
+  {
+    "id": "itoen-oi-ocha",
+    "brand": "ITO EN",
+    "sourceName": "伊藤園 お～いお茶 さらさら抹茶入り緑茶 40g",
+    "sourceDescription": "インスタント緑茶",
+    "referenceName": "ITO EN Oi Ocha Instant Green Tea with Matcha 40g",
+    "category": "Food",
+    "exactTokens": [
+      "ITO EN",
+      "40g"
+    ]
+  },
+  {
+    "id": "silcot-sponge-cotton",
+    "brand": "Silcot",
+    "sourceName": "シルコット うるうるコットン スポンジ仕立て 40枚",
+    "sourceDescription": "化粧用コットン",
+    "referenceName": "Silcot Uruuru Sponge Cotton Pads 40 Sheets",
+    "category": "Beauty Tools",
+    "exactTokens": [
+      "Silcot",
+      "40"
+    ]
+  },
+  {
+    "id": "biore-hand-soap-refill",
+    "brand": "Biore u",
+    "sourceName": "【医薬部外品】ビオレu 泡ハンドソープ フルーツの香り つめかえ用 430ml",
+    "sourceDescription": "薬用泡ハンドソープ",
+    "referenceName": "Biore u Medicated Foaming Hand Soap Fruit Scent Refill 430ml",
+    "category": "Hygiene Goods",
+    "allowedAlternatives": {
+      "Refill": [
+        "Replacement",
+        "Refill Pack"
+      ],
+      "Fruit": [
+        "Fruity"
+      ]
+    },
+    "exactTokens": [
+      "Biore u",
+      "430ml",
+      "Refill",
+      "Medicated",
+      "Fruit"
+    ]
+  },
+  {
+    "id": "biore-zero-sheets",
+    "brand": "Biore Zero",
+    "sourceName": "ビオレZeroシート 無香性 20枚",
+    "sourceDescription": "ボディシート",
+    "referenceName": "Biore Zero Body Sheets Unscented 20 Sheets",
+    "category": "Body Care",
+    "allowedAlternatives": {
+      "Unscented": [
+        "Fragrance-Free",
+        "Fragrance Free"
+      ]
+    },
+    "exactTokens": [
+      "Biore Zero",
+      "20",
+      "Unscented"
+    ]
+  },
+  {
+    "id": "mens-biore-roll-on",
+    "brand": "Men's Biore",
+    "sourceName": "【医薬部外品】メンズビオレ 薬用デオドラント ロールオンPRO 無香性 55ml",
+    "sourceDescription": "デオドラント",
+    "referenceName": "Men's Biore Medicated Deodorant Roll-On PRO Unscented 55ml",
+    "category": "Body Care",
+    "allowedAlternatives": {
+      "Unscented": [
+        "Fragrance-Free",
+        "Fragrance Free"
+      ]
+    },
+    "exactTokens": [
+      "Men's Biore",
+      "55ml",
+      "Medicated",
+      "Unscented"
+    ]
+  },
+  {
+    "id": "biore-guard-refill",
+    "brand": "Biore Guard",
+    "sourceName": "【指定医薬部外品】ビオレガード 薬用泡で出る消毒液 つめかえ用 700ml",
+    "sourceDescription": "泡タイプ手指消毒液",
+    "referenceName": "Biore Guard Medicated Foaming Hand Sanitizer Refill 700ml",
+    "category": "Hygiene Goods",
+    "allowedAlternatives": {
+      "Refill": [
+        "Replacement",
+        "Refill Pack"
+      ]
+    },
+    "exactTokens": [
+      "Biore Guard",
+      "700ml",
+      "Refill",
+      "Medicated"
+    ]
+  }
+]

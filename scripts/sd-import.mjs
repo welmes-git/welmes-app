@@ -12,7 +12,8 @@
  *   --brand=名前   브랜드 refine (목록 페이지의 브랜드 refine 링크 중 이름 일치 항목)
  *   --pages=N      최대 페이지 수 (기본 무제한)
  *   --limit=N      최대 상품 수 (기본 무제한)
- *   --active       inactive 대신 active 등록
+ *   --active       inactive 대신 active 등록 (dry-run에서는 미적용)
+ *   --dry-run      페이지 파싱·상품 변환까지만 수행 (DB/Storage 변경 없음)
  *
  * 필수 .env.local (git 제외): SD_EMAIL, SD_PASSWORD, WELMES_ADMIN_EMAIL, WELMES_ADMIN_PASSWORD
  * 필수 .env: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
@@ -32,7 +33,7 @@ const { chromium } = await import('playwright');
 const { createClient } = await import('@supabase/supabase-js');
 import {
   loadEnvFiles, createSupabase, createSdSession, parseProductPage,
-  buildProduct, insertProduct, BASE, DELAY_MS,
+  buildProduct, insertProduct, loadOfficialSources, buildEnrichmentOptions, BASE, DELAY_MS,
 } from './lib/sd-core.mjs';
 
 loadEnvFiles();
@@ -46,7 +47,19 @@ const FOLLOW_ALL = args.includes('--all') || Boolean(BRAND); // --brand 지정 �
 const MAX_PAGES = opt('pages') ? Number(opt('pages')) : Infinity;
 const MAX_PRODUCTS = opt('limit') ? Number(opt('limit')) : Infinity;
 const IMPORT_ACTIVE = args.includes('--active');
-if (!urlArg) { console.error('사용법: npm run import:sd -- <상품 또는 목록 URL> [--brand=名前] [--pages=N] [--limit=N] [--active]'); process.exit(1); }
+const DRY_RUN = args.includes('--dry-run');
+const NO_ENRICH = args.includes('--no-enrich');   // 영문명 enrichment 큐잉 비활성화
+const ENRICH_PROVIDER = opt('provider', 'gemini'); // 영문명 생성 AI 공급자
+if (!urlArg) { console.error('사용법: npm run import:sd -- <상품 또는 목록 URL> [--brand=名前] [--pages=N] [--limit=N] [--active] [--provider=gemini] [--no-enrich] [--dry-run]'); process.exit(1); }
+
+// Never navigate an authenticated scraper to an arbitrary host supplied on the
+// command line. It would not receive Superdelivery cookies (host-scoped), but it
+// could still feed attacker-controlled data into product creation.
+const inputUrl = new URL(urlArg, BASE);
+if (inputUrl.protocol !== 'https:' || !['superdelivery.com', 'www.superdelivery.com'].includes(inputUrl.hostname)) {
+  console.error(`❌ Superdelivery URL만 허용됩니다: ${inputUrl.href}`);
+  process.exit(1);
+}
 
 // DB 기존 브랜드 — 상품명 기반 추론의 2차 후보이자 신규 브랜드 판정 기준. WELMES 로그인 후 로드.
 let KNOWN_BRANDS = [];
@@ -126,7 +139,7 @@ async function collectProductUrls(page, listingUrl) {
 }
 
 // ── 메인 ─────────────────────────────────────────────────────────────
-const mainUrl = new URL(urlArg, BASE).href;
+const mainUrl = inputUrl.href;
 const isProductUrl = /pd_p\/\d+/.test(mainUrl);
 
 console.log(`📦 WELMES 관리자 로그인...`);
@@ -136,14 +149,28 @@ console.log(`✅ WELMES 로그인 성공`);
 
 // DB 기존 브랜드 로드 — 상품명 기반 추론 2차 후보. brand는 free text라
 // 여기 없던 브랜드가 추론되면 그대로 insert 되어 아래 목록에도 추가된다.
-const { data: brandRows } = await supabase.from('products').select('brand');
+const { data: brandRows } = await supabase.from('products_admin').select('brand');
 KNOWN_BRANDS = [...new Set((brandRows ?? []).map(r => r.brand).filter(Boolean))];
 console.log(`🏷 DB 기존 브랜드 ${KNOWN_BRANDS.length}개 로드`);
 
+// 브랜드 공식 도메인 레지스트리 — 영문명 enrichment grounding 근거 검증에 사용.
+// (테이블 미적용 시 빈 배열 반환 → generated 경로로만 처리, 수집은 계속)
+const OFFICIAL_SOURCES = NO_ENRICH ? [] : await loadOfficialSources(supabase);
+const ENRICHMENT = buildEnrichmentOptions({
+  enabled: !NO_ENRICH,
+  officialSources: OFFICIAL_SOURCES,
+  provider: ENRICH_PROVIDER,
+  env: process.env,
+});
+if (!NO_ENRICH) console.log(`🌐 공식 도메인 레지스트리 ${OFFICIAL_SOURCES.length}행 로드 — 영문명 자동 큐잉 활성화 (provider: ${ENRICH_PROVIDER})`);
+else console.log('⏭ --no-enrich: 영문명 enrichment 큐잉을 건너뜁니다');
+
 const sd = await createSdSession(chromium);
-const page = sd.page();
+let page = sd.page();
 await sd.ensure();
-console.log(`✅ 슈퍼딜리버리 세션 확인 완료`);
+// ensure() may replace the browser/context when the cached session expired.
+page = sd.page();
+console.log(`✅ 슈퍼딜리버리 세션 확인 완료${DRY_RUN ? ' (dry-run — DB/Storage 미변경)' : ''}`);
 
 let listingUrl = mainUrl;
 if (BRAND && !isProductUrl) listingUrl = await resolveBrandUrl(page, mainUrl, BRAND);
@@ -151,27 +178,58 @@ if (BRAND && !isProductUrl) listingUrl = await resolveBrandUrl(page, mainUrl, BR
 const productUrls = isProductUrl ? [mainUrl] : await collectProductUrls(page, listingUrl);
 console.log(`🎯 대상 상품 ${productUrls.length}개${BRAND ? ` (브랜드: ${BRAND})` : ''}${isFinite(MAX_PAGES) || isFinite(MAX_PRODUCTS) ? ` (제한: 페이지 ${isFinite(MAX_PAGES) ? MAX_PAGES : '∞'}, 상품 ${isFinite(MAX_PRODUCTS) ? MAX_PRODUCTS : '∞'})` : ''}`);
 
-let ok = 0, skip = 0, fail = 0;
+let ok = 0, skip = 0, fail = 0, enrichQueued = 0, enrichFailed = 0;
 for (const u of productUrls) {
   await page.goto(u, { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await page.waitForTimeout(1200);
-  if (String(page.url()).includes('login')) { await sd.ensure(); await page.goto(u, { waitUntil: 'domcontentloaded' }); await page.waitForTimeout(1200); }
+  if (String(page.url()).includes('login')) {
+    await sd.ensure();
+    page = sd.page();
+    await page.goto(u, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1200);
+  }
 
   const parsed = await parseProductPage(page, u);
   if (parsed.error) {
     fail++;
     console.log(`✗ [SD ${parsed.sdId}] ${parsed.error.message}`);
     // 품절/미거래 상품도 놓치지 않도록 감시 목록에 등록 — 재입고 시 자동 등록
-    await addWatchlist(parsed);
+    if (!DRY_RUN) await addWatchlist(parsed);
+    else console.log(`  ↳ dry-run: 감시 목록에는 기록하지 않음`);
     continue;
   }
-  const p = await buildProduct(page, parsed, { brandOption: BRAND, knownBrands: KNOWN_BRANDS, status: IMPORT_ACTIVE ? 'active' : 'inactive' });
+  // Publication is centrally gated: every newly collected product starts
+  // inactive regardless of --active. It can be activated only after its English
+  // name is approved (and automated publication additionally passes the pilot gate).
+  const p = await buildProduct(page, parsed, { brandOption: BRAND, knownBrands: KNOWN_BRANDS, status: 'inactive' });
+  if (IMPORT_ACTIVE) console.log('  ↷ --active ignored: naming/publication gate requires initial inactive status');
+  if (DRY_RUN) {
+    // Mirror insertProduct's duplicate decision without uploading or inserting.
+    const { data: dup, error: dupErr } = await supabase.from('products_admin').select('id').eq('sd_product_id', p.sdId).maybeSingle();
+    if (dupErr) {
+      fail++;
+      console.log(`✗ [SD ${p.sdId}] 중복 확인 실패: ${dupErr.message}`);
+    } else if (dup) {
+      skip++;
+      console.log(`↷ [SD ${p.sdId}] 이미 등록됨 (#${dup.id}) — dry-run skip: ${p.name.slice(0, 40)}`);
+    } else {
+      ok++;
+      console.log(`◇ [SD ${p.sdId}] 등록 예정: ${p.name.slice(0, 50)} (¥${p.wholesalePrice}, 이미지 ${p.images.length}, ${p.status})`);
+    }
+    await page.waitForTimeout(DELAY_MS);
+    continue;
+  }
   try {
-    const r = await insertProduct(supabase, p);
+    const r = await insertProduct(supabase, p, { enrichment: ENRICHMENT });
     if (r.skipped) { skip++; console.log(`↷ [SD ${p.sdId}] 이미 등록됨 — skip: ${p.name.slice(0, 40)}`); }
     else {
       ok++;
       console.log(`✓ [SD ${p.sdId}] ${p.name.slice(0, 50)} → 등록 (#${r.id}, ¥${p.wholesalePrice}, 이미지 ${r.images}, ${p.status})`);
+      // 영문명 enrichment 큐잉 결과 — 등록은 이미 성공했으므로 실패는 별도 집계만 한다
+      if (r.enrichment) {
+        if (r.enrichment.enqueued) { enrichQueued++; console.log(`  🌐 영문명 작업 큐잉 (run ${String(r.enrichment.runId).slice(0, 8)}, grounding: ${r.enrichment.grounding ? 'on' : 'off'})`); }
+        else if (r.enrichment.error) { enrichFailed++; console.log(`  ⚠ 영문명 큐잉 실패 (등록은 유지): ${r.enrichment.error}`); }
+      }
       if (p.brand && p.brand !== 'Unknown' && !KNOWN_BRANDS.includes(p.brand)) {
         KNOWN_BRANDS.push(p.brand);
         console.log(`  🆕 신규 브랜드 등록: ${p.brand} — 관리자 대시보드 브랜드 목록에 자동 반영`);
@@ -184,5 +242,5 @@ for (const u of productUrls) {
   await page.waitForTimeout(DELAY_MS);
 }
 
-console.log(`\n📊 완료: 등록 ${ok} / skip ${skip} / 실패 ${fail}`);
+console.log(`\n📊 완료${DRY_RUN ? ' (dry-run — 미등록)' : ''}: ${DRY_RUN ? '등록 예정' : '등록'} ${ok} / skip ${skip} / 실패 ${fail}${!NO_ENRICH && !DRY_RUN ? ` | 영문명 큐잉 ${enrichQueued} / 큐잉 실패 ${enrichFailed}` : ''}`);
 await sd.close();

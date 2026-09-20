@@ -253,7 +253,7 @@ export default function Home() {
                   src={`/categories/${group.key}.jpg`}
                   alt=""
                   loading="lazy"
-                  className="aspect-[1.4/1] w-full bg-sunken object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.17,0.67,0.24,1)] group-hover:scale-110"
+                  className="aspect-[1.4/1] w-full bg-sunken object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
                 />
                 <div
                   className="absolute inset-0 z-[1]"

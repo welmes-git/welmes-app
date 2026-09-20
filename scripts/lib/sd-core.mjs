@@ -7,6 +7,7 @@
  * 순수 로직/유틸만 두고 CLI 플로우와 Supabase 쓰기는 각 스크립트가 담당한다.
  */
 import fs from 'node:fs';
+import { enqueueEnrichmentForProduct } from './product-name-enrichment.mjs';
 
 // ── 설정 ─────────────────────────────────────────────────────────────
 export const MARGIN = 1.1;             // 卸単価 × 1.1 → WELMES 회원 판매가(wholesale)
@@ -20,9 +21,14 @@ export const SESSION_FILE = 'scripts/.sd-session.json';
 export function loadEnvFiles() {
   for (const file of ['.env.local', '.env']) {
     if (!fs.existsSync(file)) continue;
-    for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
-      const m = line.match(/^([A-Z_]+)=(.*)$/);
-      if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
+    for (const rawLine of fs.readFileSync(file, 'utf8').split('\n')) {
+      const line = rawLine.replace(/\r$/, '');
+      const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
+      if (!m || process.env[m[1]]) continue;
+      // dotenv's common single/double-quoted form, without trying to interpret
+      // escapes (credentials must be passed byte-for-byte).
+      const value = m[2].trim();
+      process.env[m[1]] = (/^(["']).*\1$/.test(value)) ? value.slice(1, -1) : value;
     }
   }
 }
@@ -191,8 +197,13 @@ async function loginHeadful(chromium) {
   }
 }
 
-const isLoggedInPage = (page) =>
-  page.locator('.com-name, #header-nav .nav-history').first().isVisible().catch(() => false);
+// Logged-in-only navigation is present in the DOM even when its dropdown is
+// closed. The old visibility check targeted removed/hidden selectors and
+// falsely declared every saved session expired, forcing a headful login on
+// every run (which then timed out under launchd).
+const isLoggedInPage = async (page) =>
+  !String(page.url()).includes('login')
+  && await page.locator('a[href*="/logout.do"], a[href*="memberManage"]').count().then(n => n > 0).catch(() => false);
 
 /** 저장된 세션으로 headless 컨텍스트. 유효하지 않으면 재로그인 후 재생성. */
 async function getScraperContext(chromium) {
@@ -283,10 +294,15 @@ export async function parseProductPage(page, productUrl) {
       .filter(Boolean);
     const seen = new Set(); const images = [];
     for (const p of imgs) {
-      const key = p.replace(/\.webp$/, '');
+      // The regex starts at `c.superdelivery.com`, so build an explicit
+      // absolute URL. Use a `.webp`-less key only for deduplication (the gallery
+      // commonly exposes both foo.jpg and foo.jpg.webp), but fetch the original
+      // URL including its real extension.
+      const path = p.replace(/^https?:\/\//, '').replace(/^\/\//, '');
+      const key = path.replace(/\.webp(?=($|\?))/, '');
       if (seen.has(key)) continue;
       seen.add(key);
-      images.push(`https:${key}`);
+      images.push(`https://${path}`);
     }
 
     // 상품설명 — 본문 설명 + 세트 표를 제외한 물류/규격 정보
@@ -417,9 +433,9 @@ export async function uploadProductImages(supabase, images) {
  * 수집 당시 품절/미거래로 감시 목록에 있던 상품이 다른 경로(import 재실행 등)로
  * 등록됐다면 감시할 필요가 없다. sd_watchlist 테이블이 없으면 조용히 무시.
  */
-export async function insertProduct(supabase, p) {
-  const { data: dup } = await supabase.from('products').select('id').eq('sd_product_id', p.sdId).maybeSingle();
-  if (dup) return { skipped: true };
+export async function insertProduct(supabase, p, options = {}) {
+  const { data: dup } = await supabase.from('products_admin').select('id').eq('sd_product_id', p.sdId).maybeSingle();
+  if (dup) return { skipped: true }; // 중복 상품은 enrichment job도 생성하지 않는다
 
   const images = await uploadProductImages(supabase, p.images);
   const row = {
@@ -427,17 +443,45 @@ export async function insertProduct(supabase, p) {
     image: images[0] || p.image, images,
     original_price: p.originalPrice, wholesale_price: p.wholesalePrice, discount: p.discount,
     tags: p.tags, description: p.description, stock: p.stock, status: p.status,
-    set_options: p.setOptions, sd_product_id: p.sdId,
+    set_options: p.setOptions, sd_product_id: p.sdId, jan: p.jan || null,
     sd_dealer_id: p.dealerId, sd_dealer_name: p.dealerName,
   };
-  const { data, error } = await supabase.from('products').insert([row]).select('id').single();
+  const { data, error } = await supabase.from('products_admin').insert([row]).select('id').single();
   if (error) {
     if (String(error.message).includes('sd_product_id'))
       throw new Error(`sd_product_id 컬럼 없음 — Supabase SQL Editor에서 supabase/migrations/20260912_sd_source.sql 실행 후 재시도 (${error.message})`);
     throw new Error(error.message);
   }
   await supabase.from('sd_watchlist').delete().eq('sd_product_id', p.sdId); // 실패해도 등록에는 지장 없음
-  return { id: data.id, images: images.length };
+
+  // 영문명 enrichment 작업 큐잉 — 등록 성공이 최우선이므로 실패해도 throw하지 않는다.
+  // (성공 기준: "API 장애가 Super Delivery 수집 성공에 미치는 영향 0건")
+  let enrichment = null;
+  const enrichOptions = options.enrichment;
+  if (enrichOptions?.enabled) {
+    enrichment = await enqueueEnrichmentForProduct(
+      supabase,
+      {
+        id: data.id,
+        name: p.name,
+        brand: p.brand,
+        category: p.category,
+        description: p.description,
+        sd_product_id: p.sdId,
+        jan: p.jan || null,
+      },
+      enrichOptions.officialSources || [],
+      {
+        provider: enrichOptions.provider,
+        model: enrichOptions.model,
+        env: enrichOptions.env,
+        grounding: enrichOptions.grounding,
+        priority: enrichOptions.priority,
+        maxAttempts: enrichOptions.maxAttempts,
+      },
+    );
+  }
+  return { id: data.id, images: images.length, enrichment };
 }
 
 /**
@@ -466,6 +510,7 @@ export async function buildProduct(page, parsed, { brandOption = '', knownBrands
   // genre, JAN code, and source name aren't marketing tags and rendered as raw gray badges.
   return {
     sdId: parsed.sdId,
+    jan: parsed.jan || null,
     name: parsed.name,
     nameEn: parsed.name, // 일본어 원명 그대로 — 관리자 화면에서 영문명 수정 권장
     brand,
@@ -484,4 +529,32 @@ export async function buildProduct(page, parsed, { brandOption = '', knownBrands
     dealerId: parsed.dealerUrl.match(/dpsl\/(\d+)/)?.[1] ?? null,
     dealerName: parsed.dealerFallback || null,
   };
+}
+
+/**
+ * 활성 브랜드 공식 도메인 레지스트리(brand_official_sources)를 로드한다.
+ * enrichment worker가 grounding 근거를 검증할 때 사용한다. 테이블이 아직
+ * 없거나(20260920 마이그레이션 미적용) 조회가 실패해도 수집을 막지 않도록
+ * 빈 배열을 반환하고 경고만 남긴다.
+ */
+export async function loadOfficialSources(supabase) {
+  try {
+    const { data, error } = await supabase.from('brand_official_sources').select('*').eq('active', true);
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.log(`  ⚠ 공식 도메인 레지스트리 로드 실패 — 영문명은 생성(generated) 경로로만 처리됩니다 (${e.message})`);
+    return [];
+  }
+}
+
+/**
+ * insertProduct 로 넘길 enrichment 옵션 묶음을 만든다. --no-enrich 등으로
+ * 비활성화하면 enabled=false 가 되어 기존 등록 동작을 그대로 유지한다.
+ */
+export function buildEnrichmentOptions({
+  enabled = true, officialSources = [], provider = 'gemini', model = '',
+  env = process.env, grounding = true, priority = 0, maxAttempts = 3,
+} = {}) {
+  return { enabled, officialSources, provider, model, env, grounding, priority, maxAttempts };
 }
