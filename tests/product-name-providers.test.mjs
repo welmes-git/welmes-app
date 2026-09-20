@@ -82,6 +82,13 @@ test('Gemini rejects OAuth/subscription tokens before any network request', () =
   );
 });
 
+test('Gemini accepts AI Studio Developer API keys (AIza and AQ. formats)', () => {
+  const aiza = buildProviderRequest('gemini', input, { env: { GEMINI_API_KEY: 'AIzaSyExampleKey' } });
+  assert.match(aiza.url, /\?key=AIzaSyExampleKey$/);
+  const aq = buildProviderRequest('gemini', input, { env: { GEMINI_API_KEY: 'AQ.Ab8ExampleKey' } });
+  assert.match(aq.url, /\?key=AQ\.Ab8ExampleKey$/);
+});
+
 test('missing credentials fail before any network request', () => {
   assert.throws(
     () => buildProviderRequest('gemini', input, { env: {} }),

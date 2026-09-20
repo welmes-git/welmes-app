@@ -98,10 +98,15 @@ export function buildProviderRequest(provider, input, options = {}) {
     error.code = 'MISSING_API_KEY';
     throw error;
   }
-  if (provider === 'gemini' && !String(apiKey).startsWith('AIza')) {
-    const error = new Error('GEMINI_API_KEY must be a Google AI Studio Developer API key (AIza…), not an OAuth or subscription token');
-    error.code = 'INVALID_API_KEY_TYPE';
-    throw error;
+  if (provider === 'gemini') {
+    const trimmedKey = String(apiKey).trim();
+    // Reject real OAuth 2.0 access tokens (ya29.) and login/refresh tokens.
+    // Accept AI Studio Developer API keys: legacy `AIza…` and newer `AQ.…` formats.
+    if (!trimmedKey || trimmedKey.startsWith('ya29.')) {
+      const error = new Error('GEMINI_API_KEY must be a Google AI Studio Developer API key (AIza… or AQ.…), not an OAuth or subscription token');
+      error.code = 'INVALID_API_KEY_TYPE';
+      throw error;
+    }
   }
   const model = options.model || config.model;
   const grounding = Boolean(options.grounding && config.supportsGrounding);
