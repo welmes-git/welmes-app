@@ -248,6 +248,42 @@ export async function createSdSession(chromium) {
 /** 바이어 노출용 설명에서 제외할 도매 섹션 라벨(정확 일치, 공백 무시) */
 const DEALER_ONLY_SECTION_LABELS = new Set(['注意事項']);
 
+/**
+ * 정규 섹션 템플릿. 모든 상품이 동일한 키·동일한 순서로 등록되도록 한다.
+ * key: 코드/데이터 공용 정규 키 (i18n 라벨은 프론트에서 이 키로 조회)
+ * ja:  UI 폴백용 일본어 라벨
+ * order: 템플릿 표시 순서
+ * match: 이 정규 키로 흡수할 슈퍼딜리버리 원본 라벨(공백 무시 정확 일치)
+ */
+export const DESCRIPTION_SECTION_TEMPLATE = [
+  { key: 'overview', ja: '商品説明', order: 1, match: ['商品説明'] },
+  { key: 'usage', ja: '使用方法', order: 2, match: ['使用方法'] },
+  { key: 'size', ja: 'サイズ・容量', order: 3, match: ['サイズ・容量', 'サイズ', '容量', 'サイズ/容量'] },
+  { key: 'spec', ja: '規格', order: 4, match: ['規格', '成分', '素材・成分', '仕様'] },
+  { key: 'shipping', ja: '出荷', order: 5, match: ['出荷', '納期', '発送'] },
+];
+
+const LABEL_TO_KEY = new Map(
+  DESCRIPTION_SECTION_TEMPLATE.flatMap((t) => t.match.map((label) => [label.replace(/\s+/g, ''), t.key])),
+);
+const KEY_ORDER = new Map(DESCRIPTION_SECTION_TEMPLATE.map((t) => [t.key, t.order]));
+const KEY_JA_LABEL = new Map(DESCRIPTION_SECTION_TEMPLATE.map((t) => [t.key, t.ja]));
+
+/** 원본 SD 라벨 → 정규 키 (매핑 없으면 null) */
+function canonicalSectionKey(label) {
+  return LABEL_TO_KEY.get(String(label || '').replace(/\s+/g, '')) ?? null;
+}
+
+/** overview 본문 안의 「使用方法…」 이하를 usage 섹션으로 분리 */
+function splitOverviewAndUsage(overview) {
+  const lines = String(overview || '').split(/\r?\n/);
+  const idx = lines.findIndex((l) => /^\s*(使用方法|ご使用方法|使い方)\s*$/.test(l.trim()));
+  if (idx === -1) return { overview: overview.trim(), usage: '' };
+  const head = lines.slice(0, idx).join('\n').trim();
+  const usage = lines.slice(idx + 1).join('\n').trim();
+  return { overview: head, usage };
+}
+
 /** overview(商品説明) 본문에서 제거할 도매 규약성 라인 패턴 */
 const DEALER_BOILERPLATE_PATTERNS = [
   /画像の使用/,           // 画像の使用について…版元様の監修
@@ -267,15 +303,20 @@ function isDealerBoilerplateLine(line) {
 }
 
 /**
- * 원시 섹션 데이터를 바이어 노출용 설명으로 정제한다. 순수 함수(브라우저 비의존).
+ * 원시 섹션 데이터를 바이어 노출용 설명으로 정제·정규화한다. 순수 함수.
+ *
+ * - 슈퍼딜리버리의 다양한 라벨을 정규 키(overview/usage/size/spec/shipping)로
+ *   흡수하고, 항상 동일한 템플릿 순서로 재배열한다.
+ * - 도매 전용 섹션(注意事項)과 overview에 새어든 도매 규약 라인은 제거한다.
+ * - 정규 템플릿에 없는 라벨은 그대로 뒤에 유지한다(정보 손실 방지).
  *
  * @param {string} overview 商品説明 본문(使用方法 포함)
  * @param {{label: string, value: string}[]} sections 詳細情報 dt/dd 쌍
  * @param {object} [opts]
  * @param {number} [opts.maxLength=5000]
- * @returns {{ description: string, sections: {label: string, value: string}[] }}
+ * @returns {{ description: string, sections: {key: string|null, label: string, value: string}[] }}
  *   description: 라벨 포함 정제 텍스트(기존 단일 컬럼 호환)
- *   sections: 도매 규약 제외 후의 구조화 섹션(overview 포함)
+ *   sections: 정규화·정렬된 구조화 섹션(각 항목에 정규 key 포함, 번역 입력용)
  */
 export function buildProductDescription(overview = '', sections = [], opts = {}) {
   const maxLength = opts.maxLength ?? 5000;
@@ -288,18 +329,41 @@ export function buildProductDescription(overview = '', sections = [], opts = {})
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
-  // 詳細情報 섹션에서 도매 전용 섹션(注意事項) 제외
-  const keptSections = (sections || [])
-    .map((s) => ({ label: String(s.label || '').trim(), value: String(s.value || '').trim() }))
-    .filter((s) => s.label && s.value && !DEALER_ONLY_SECTION_LABELS.has(s.label.replace(/\s+/g, '')));
+  // overview 본문에서 使用方法 분리
+  const { overview: overviewBody, usage: usageFromOverview } = splitOverviewAndUsage(cleanedOverview);
 
-  const structured = [];
-  if (cleanedOverview) structured.push({ label: '商品説明', value: cleanedOverview });
-  structured.push(...keptSections);
+  // 후보 섹션을 정규 키로 매핑 (도매 전용 섹션 제외)
+  const byKey = new Map();       // key -> value (정규 섹션)
+  const extras = [];             // 템플릿에 없는 섹션 (원본 라벨 유지)
 
-  // 기존 description 컬럼 호환: 라벨 포함 텍스트로 직렬화
+  const pushKey = (key, value) => {
+    const v = String(value || '').trim();
+    if (!key || !v) return;
+    byKey.set(key, byKey.has(key) ? `${byKey.get(key)}\n${v}` : v);
+  };
+
+  if (overviewBody) pushKey('overview', overviewBody);
+  if (usageFromOverview) pushKey('usage', usageFromOverview);
+
+  for (const s of sections || []) {
+    const label = String(s.label || '').trim();
+    const value = String(s.value || '').trim();
+    if (!label || !value) continue;
+    if (DEALER_ONLY_SECTION_LABELS.has(label.replace(/\s+/g, ''))) continue;
+    const key = canonicalSectionKey(label);
+    if (key) pushKey(key, value);
+    else extras.push({ key: null, label, value });
+  }
+
+  // 정규 섹션을 템플릿 순서로 정렬
+  const structured = [...byKey.entries()]
+    .map(([key, value]) => ({ key, label: KEY_JA_LABEL.get(key), value }))
+    .sort((a, b) => (KEY_ORDER.get(a.key) ?? 99) - (KEY_ORDER.get(b.key) ?? 99));
+  structured.push(...extras);
+
+  // 기존 description 컬럼 호환: 라벨 포함 텍스트로 직렬화 (overview는 라벨 생략)
   const description = structured
-    .map((s) => (s.label === '商品説明' ? s.value : `${s.label}\n${s.value}`))
+    .map((s) => (s.key === 'overview' ? s.value : `${s.label}\n${s.value}`))
     .join('\n\n')
     .slice(0, maxLength);
 
