@@ -39,6 +39,23 @@ grant select on public.products_public to anon, authenticated;
 comment on view public.products_public is
   'Public catalogue projection with no prices, set pricing, supplier metadata or AI audit details. Includes description_i18n translations.';
 
+-- products_admin is a `select *` view, but a SELECT * view freezes its column
+-- list at creation time and does NOT pick up columns added to products later.
+-- Recreate it so the new description_i18n* columns become visible to scripts
+-- and the admin UI. CREATE OR REPLACE re-expands `*` to the full current table.
+drop view if exists public.products_admin;
+create view public.products_admin
+as
+select * from public.products
+where public.is_admin()
+with local check option;
+
+revoke all on public.products_admin from public;
+grant select, insert, update, delete on public.products_admin to authenticated;
+
+comment on view public.products_admin is
+  'Owner-rights admin projection used by authenticated administration and ingestion scripts.';
+
 -- products_admin is `select *`, so description_i18n columns are already visible.
 
 -- ── Queue table ──────────────────────────────────────────────────────

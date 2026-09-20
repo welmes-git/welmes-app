@@ -22,6 +22,13 @@ test('exposes description_i18n on the public catalogue view', () => {
   assert.match(sql, /grant select on public\.products_public to anon, authenticated/);
 });
 
+test('recreates products_admin so SELECT * picks up the new columns', () => {
+  assert.match(sql, /drop view if exists public\.products_admin/);
+  assert.match(sql, /create view public\.products_admin\s+as\s+select \* from public\.products/s);
+  assert.match(sql, /with local check option/);
+  assert.match(sql, /grant select, insert, update, delete on public\.products_admin to authenticated/);
+});
+
 test('queue table mirrors the enrichment worker machinery', () => {
   assert.match(sql, /create table if not exists public\.product_description_translation_runs/);
   for (const col of ['target_langs', 'source_payload', 'result_payload', 'validation_payload', 'lease_owner', 'lease_expires_at', 'available_at', 'priority', 'max_attempts']) {
