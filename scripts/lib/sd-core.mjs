@@ -239,6 +239,51 @@ export async function createSdSession(chromium) {
   };
 }
 
+// ── 상품 이미지 정규화 ───────────────────────────────────────────────
+/**
+ * 갤러리에서 수집한 원시 이미지 후보 문자열(src/data-src/srcset)을
+ * 상품 대표 이미지 URL 목록으로 정규화한다. 순수 함수(브라우저 비의존)라
+ * 단위 테스트 대상이다.
+ *
+ * 규칙:
+ *  1) `c.superdelivery.com/…/product_image/…` CDN 경로만 추출.
+ *  2) sdId가 있으면 파일명이 해당 SD ID로 시작하는 이미지만 허용 →
+ *     この企業の関連商品 / よく一緒にチェックされている商品 등 추천 섹션의
+ *     다른 상품 이미지를 배제(2차 방어).
+ *  3) 같은 원본 이미지의 `.webp`/`.jpg` 및 CDN 변환 prefix(`sa`/`sap`) 차이는
+ *     동일 이미지로 보고 중복 제거하되, 원본(non-webp) URL을 우선 보존.
+ *
+ * @param {string[]} candidates 원시 후보 문자열 배열
+ * @param {string|null} sdId 이 상품의 SD 품번
+ * @returns {string[]} `https://…` 절대 URL 목록(문서 순서 유지)
+ */
+export function normalizeProductImages(candidates, sdId = null) {
+  const idFilter = sdId ? new RegExp(`product_image/[^\\s"')]*/${sdId}[_.]`) : null;
+  const paths = (candidates || [])
+    .map(s => String(s).match(/c\.superdelivery\.com\/[^\s"')]*product_image\/[^\s"')]+/)?.[0] || '')
+    .filter(Boolean)
+    .filter(p => !idFilter || idFilter.test(p));
+
+  const seen = new Map();
+  const images = [];
+  for (const p of paths) {
+    const path = p.replace(/^https?:\/\//, '').replace(/^\/\//, '');
+    const sourcePath = path.match(/product_image\/.*$/)?.[0] ?? path;
+    const key = sourcePath.replace(/\.webp(?=($|\?))/, '');
+    const isWebp = /\.webp(?=($|\?))/.test(path);
+    const url = `https://${path}`;
+    if (seen.has(key)) {
+      const idx = seen.get(key);
+      // 원본(non-webp) URL을 우선 보존
+      if (!isWebp && /\.webp(?=($|\?))/.test(images[idx])) images[idx] = url;
+      continue;
+    }
+    seen.set(key, images.length);
+    images.push(url);
+  }
+  return images;
+}
+
 // ── 상품 페이지 파싱 ─────────────────────────────────────────────────
 /**
  * 상품 페이지(/p/r/pd_p/…)를 파싱해 세트 가격·재고·이미지·breadcrumb 등을 반환.
@@ -287,23 +332,19 @@ export async function parseProductPage(page, productUrl) {
       if (c.text) genres.push(c.text);
     }
 
-    // 이미지 — 갤러리 썸네일에서 CDN 전체 경로 수집 (.webp 중복 제거, https 정규화)
-    const imgs = [...document.querySelectorAll('.detail-modal-thum-box img, #product_image_detail img, img')]
-      .flatMap(img => [img.getAttribute('src') || '', img.getAttribute('data-src') || '', img.getAttribute('srcset') || ''])
-      .map(s => s.match(/c\.superdelivery\.com\/[^\s"')]*product_image\/[^\s"')]+/)?.[0] || '')
-      .filter(Boolean);
-    const seen = new Set(); const images = [];
-    for (const p of imgs) {
-      // The regex starts at `c.superdelivery.com`, so build an explicit
-      // absolute URL. Use a `.webp`-less key only for deduplication (the gallery
-      // commonly exposes both foo.jpg and foo.jpg.webp), but fetch the original
-      // URL including its real extension.
-      const path = p.replace(/^https?:\/\//, '').replace(/^\/\//, '');
-      const key = path.replace(/\.webp(?=($|\?))/, '');
-      if (seen.has(key)) continue;
-      seen.add(key);
-      images.push(`https://${path}`);
-    }
+    // 이미지 — 메인 상품 갤러리(product_image_preview)에서만 CDN 경로 수집.
+    // 하단 추천 섹션(この企業の関連商品 / よく一緒にチェックされている商品 /
+    // 最近チェックした商品)은 `recommend-img` 클래스를 쓰므로 셀렉터에서 제외된다.
+    // 과거에는 페이지 전체 `img`를 긁어 추천 상품 이미지까지 등록되는 버그가 있었다.
+    // DOM에서는 원시 후보 문자열만 수집하고, 필터·정규화·중복 제거는
+    // 순수 함수 normalizeProductImages()가 처리한다(단위 테스트 대상).
+    const imageCandidates = [...document.querySelectorAll(
+      'picture.product_image_preview img, picture.product_image_preview source, '
+      + 'img.product_image_preview, source.product_image_preview, '
+      + '.thum-image-box-wrapper .product_image_preview_thumbnail img, '
+      + '.thum-image-box-wrapper .product_image_preview_thumbnail source, '
+      + '.detail-modal-thum-box img, #product_image_detail img'
+    )].flatMap(el => [el.getAttribute('src') || '', el.getAttribute('data-src') || '', el.getAttribute('srcset') || '']);
 
     // 상품설명 — 본문 설명 + 세트 표를 제외한 물류/규격 정보
     const parts = [];
@@ -319,8 +360,11 @@ export async function parseProductPage(page, productUrl) {
     const description = parts.join('\n\n').slice(0, 5000);
 
     const isNotTrading = !!document.querySelector('.product-information-box.not-trading');
-    return { name, setBlocks, brandLink, dealerFallback, dealerUrl, genres, images, description, isNotTrading };
+    return { name, setBlocks, brandLink, dealerFallback, dealerUrl, genres, imageCandidates, description, isNotTrading };
   });
+
+  // 이미지 필터·정규화·중복 제거 (브라우저 밖 순수 로직, 단위 테스트 대상)
+  data.images = normalizeProductImages(data.imageCandidates, sdId);
 
   // 세트 블록 텍스트 → SetOption 변환 (라벨·콜론·금액 사이에 개행/탭이 끼므로 \s 허용)
   const setOptions = [];
