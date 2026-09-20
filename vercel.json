@@ -1,8 +1,9 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "outputDirectory": "dist/client",
   "functions": {
     "api/ssr.mjs": {
-      "includeFiles": ["dist/server/**", "dist/client/index.html"]
+      "includeFiles": "dist/**"
     }
   },
   "headers": [
