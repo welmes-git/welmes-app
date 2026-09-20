@@ -16,7 +16,8 @@ test('adds description_i18n columns with a bounded status check', () => {
 });
 
 test('exposes description_i18n on the public catalogue view', () => {
-  assert.match(sql, /create or replace view public\.products_public/);
+  assert.match(sql, /drop view if exists public\.products_public/);
+  assert.match(sql, /create view public\.products_public/);
   assert.match(sql, /description, description_i18n, stock/);
   assert.match(sql, /grant select on public\.products_public to anon, authenticated/);
 });

@@ -20,7 +20,11 @@ create index if not exists products_description_i18n_status_idx
   on public.products (description_i18n_status, created_at desc);
 
 -- Expose translations on the public catalogue (safe: no prices/supplier data).
-create or replace view public.products_public
+-- CREATE OR REPLACE VIEW cannot insert a column in the middle of an existing
+-- view (only append at the end), so drop and recreate. No other view depends on
+-- products_public, so a plain DROP is safe.
+drop view if exists public.products_public;
+create view public.products_public
 as
 select
   id, name, name_en, brand, category, subcategory, image, images, discount,
@@ -29,7 +33,11 @@ select
   search_aliases, name_en_status, jan
 from public.products;
 
+revoke all on public.products_public from public;
 grant select on public.products_public to anon, authenticated;
+
+comment on view public.products_public is
+  'Public catalogue projection with no prices, set pricing, supplier metadata or AI audit details. Includes description_i18n translations.';
 
 -- products_admin is `select *`, so description_i18n columns are already visible.
 
