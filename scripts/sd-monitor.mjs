@@ -25,7 +25,7 @@ const { chromium } = await import('playwright');
 const { createClient } = await import('@supabase/supabase-js');
 import {
   loadEnvFiles, createSupabase, createSdSession, parseProductPage,
-  buildProduct, insertProduct, loadOfficialSources, buildEnrichmentOptions, BASE,
+  buildProduct, insertProduct, loadOfficialSources, buildEnrichmentOptions, buildTranslationOptions, BASE,
 } from './lib/sd-core.mjs';
 
 loadEnvFiles();
@@ -37,6 +37,7 @@ const LIMIT = args.find(a => a.startsWith('--limit=')) ? Number(args.find(a => a
 const IDS_ARG = args.find(a => a.startsWith('--ids='));
 const IDS = IDS_ARG ? IDS_ARG.split('=')[1].split(',').map(Number).filter(Boolean) : null;
 const NO_ENRICH = args.includes('--no-enrich');   // 재입고 자동등록 시 영문명 큐잉 비활성화
+const NO_TRANSLATE = args.includes('--no-translate'); // 재입고 자동등록 시 설명 번역 큐잉 비활성화
 const ENRICH_PROVIDER = args.find(a => a.startsWith('--provider=')) ? args.find(a => a.startsWith('--provider=')).split('=')[1] : 'gemini';
 
 const supabase = createSupabase(createClient);
@@ -254,6 +255,13 @@ const ENRICHMENT = buildEnrichmentOptions({
 });
 if (!DRY_RUN && !NO_ENRICH) console.log(`🌐 공식 도메인 레지스트리 ${OFFICIAL_SOURCES.length}행 로드 — 재입고 영문명 자동 큐잉 활성화 (provider: ${ENRICH_PROVIDER})`);
 
+const TRANSLATION = buildTranslationOptions({
+  enabled: !NO_TRANSLATE,
+  provider: ENRICH_PROVIDER,
+  env: process.env,
+});
+if (!DRY_RUN && !NO_TRANSLATE) console.log('🌏 재입고 상품 설명 다국어 번역 자동 큐잉 활성화 (EN/ZH/KO)');
+
 let registered = 0, stillOut = 0, watchGone = 0, watchErrors = errors, enrichQueued = 0, enrichFailed = 0;
 for (const w of watchlist) {
   const url = `${BASE}/p/r/pd_p/${w.sd_product_id}/`;
@@ -309,7 +317,7 @@ for (const w of watchlist) {
   }
   try {
     const p = await buildProduct(page, wParsed, { knownBrands, status: 'inactive' });
-    const r = await insertProduct(supabase, p, { enrichment: ENRICHMENT });
+    const r = await insertProduct(supabase, p, { enrichment: ENRICHMENT, translation: TRANSLATION });
     if (r.skipped) {
       console.log(`↷ [SD ${w.sd_product_id}] 이미 등록됨 — 감시 해제`);
       await supabase.from('sd_watchlist').delete().eq('id', w.id);

@@ -33,7 +33,7 @@ const { chromium } = await import('playwright');
 const { createClient } = await import('@supabase/supabase-js');
 import {
   loadEnvFiles, createSupabase, createSdSession, parseProductPage,
-  buildProduct, insertProduct, loadOfficialSources, buildEnrichmentOptions, BASE, DELAY_MS,
+  buildProduct, insertProduct, loadOfficialSources, buildEnrichmentOptions, buildTranslationOptions, BASE, DELAY_MS,
 } from './lib/sd-core.mjs';
 
 loadEnvFiles();
@@ -49,8 +49,9 @@ const MAX_PRODUCTS = opt('limit') ? Number(opt('limit')) : Infinity;
 const IMPORT_ACTIVE = args.includes('--active');
 const DRY_RUN = args.includes('--dry-run');
 const NO_ENRICH = args.includes('--no-enrich');   // 영문명 enrichment 큐잉 비활성화
+const NO_TRANSLATE = args.includes('--no-translate'); // 설명 다국어 번역 큐잉 비활성화
 const ENRICH_PROVIDER = opt('provider', 'gemini'); // 영문명 생성 AI 공급자
-if (!urlArg) { console.error('사용법: npm run import:sd -- <상품 또는 목록 URL> [--brand=名前] [--pages=N] [--limit=N] [--active] [--provider=gemini] [--no-enrich] [--dry-run]'); process.exit(1); }
+if (!urlArg) { console.error('사용법: npm run import:sd -- <상품 또는 목록 URL> [--brand=名前] [--pages=N] [--limit=N] [--active] [--provider=gemini] [--no-enrich] [--no-translate] [--dry-run]'); process.exit(1); }
 
 // Never navigate an authenticated scraper to an arbitrary host supplied on the
 // command line. It would not receive Superdelivery cookies (host-scoped), but it
@@ -165,6 +166,14 @@ const ENRICHMENT = buildEnrichmentOptions({
 if (!NO_ENRICH) console.log(`🌐 공식 도메인 레지스트리 ${OFFICIAL_SOURCES.length}행 로드 — 영문명 자동 큐잉 활성화 (provider: ${ENRICH_PROVIDER})`);
 else console.log('⏭ --no-enrich: 영문명 enrichment 큐잉을 건너뜁니다');
 
+const TRANSLATION = buildTranslationOptions({
+  enabled: !NO_TRANSLATE,
+  provider: ENRICH_PROVIDER,
+  env: process.env,
+});
+if (!NO_TRANSLATE) console.log('🌏 상품 설명 다국어 번역 자동 큐잉 활성화 (EN/ZH/KO)');
+else console.log('⏭ --no-translate: 설명 번역 큐잉을 건너뜁니다');
+
 const sd = await createSdSession(chromium);
 let page = sd.page();
 await sd.ensure();
@@ -178,7 +187,7 @@ if (BRAND && !isProductUrl) listingUrl = await resolveBrandUrl(page, mainUrl, BR
 const productUrls = isProductUrl ? [mainUrl] : await collectProductUrls(page, listingUrl);
 console.log(`🎯 대상 상품 ${productUrls.length}개${BRAND ? ` (브랜드: ${BRAND})` : ''}${isFinite(MAX_PAGES) || isFinite(MAX_PRODUCTS) ? ` (제한: 페이지 ${isFinite(MAX_PAGES) ? MAX_PAGES : '∞'}, 상품 ${isFinite(MAX_PRODUCTS) ? MAX_PRODUCTS : '∞'})` : ''}`);
 
-let ok = 0, skip = 0, fail = 0, enrichQueued = 0, enrichFailed = 0;
+let ok = 0, skip = 0, fail = 0, enrichQueued = 0, enrichFailed = 0, translateQueued = 0, translateFailed = 0;
 for (const u of productUrls) {
   await page.goto(u, { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await page.waitForTimeout(1200);
@@ -220,7 +229,7 @@ for (const u of productUrls) {
     continue;
   }
   try {
-    const r = await insertProduct(supabase, p, { enrichment: ENRICHMENT });
+    const r = await insertProduct(supabase, p, { enrichment: ENRICHMENT, translation: TRANSLATION });
     if (r.skipped) { skip++; console.log(`↷ [SD ${p.sdId}] 이미 등록됨 — skip: ${p.name.slice(0, 40)}`); }
     else {
       ok++;
@@ -229,6 +238,11 @@ for (const u of productUrls) {
       if (r.enrichment) {
         if (r.enrichment.enqueued) { enrichQueued++; console.log(`  🌐 영문명 작업 큐잉 (run ${String(r.enrichment.runId).slice(0, 8)}, grounding: ${r.enrichment.grounding ? 'on' : 'off'})`); }
         else if (r.enrichment.error) { enrichFailed++; console.log(`  ⚠ 영문명 큐잉 실패 (등록은 유지): ${r.enrichment.error}`); }
+      }
+      // 설명 번역 큐잉 결과 — 마찬가지로 실패해도 등록은 유지
+      if (r.translation) {
+        if (r.translation.queued) { translateQueued++; console.log(`  🌏 설명 번역 작업 큐잉 (run ${String(r.translation.id).slice(0, 8)})`); }
+        else if (r.translation.reason && r.translation.reason !== 'no_translatable_sections') { translateFailed++; console.log(`  ⚠ 설명 번역 큐잉 실패 (등록은 유지): ${r.translation.reason}`); }
       }
       if (p.brand && p.brand !== 'Unknown' && !KNOWN_BRANDS.includes(p.brand)) {
         KNOWN_BRANDS.push(p.brand);
@@ -242,5 +256,5 @@ for (const u of productUrls) {
   await page.waitForTimeout(DELAY_MS);
 }
 
-console.log(`\n📊 완료${DRY_RUN ? ' (dry-run — 미등록)' : ''}: ${DRY_RUN ? '등록 예정' : '등록'} ${ok} / skip ${skip} / 실패 ${fail}${!NO_ENRICH && !DRY_RUN ? ` | 영문명 큐잉 ${enrichQueued} / 큐잉 실패 ${enrichFailed}` : ''}`);
+console.log(`\n📊 완료${DRY_RUN ? ' (dry-run — 미등록)' : ''}: ${DRY_RUN ? '등록 예정' : '등록'} ${ok} / skip ${skip} / 실패 ${fail}${!NO_ENRICH && !DRY_RUN ? ` | 영문명 큐잉 ${enrichQueued} / 큐잉 실패 ${enrichFailed}` : ''}${!NO_TRANSLATE && !DRY_RUN ? ` | 번역 큐잉 ${translateQueued} / 큐잉 실패 ${translateFailed}` : ''}`);
 await sd.close();

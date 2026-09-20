@@ -8,6 +8,7 @@
  */
 import fs from 'node:fs';
 import { enqueueEnrichmentForProduct } from './product-name-enrichment.mjs';
+import { enqueueTranslationForProduct } from './product-description-i18n.mjs';
 
 // ── 설정 ─────────────────────────────────────────────────────────────
 export const MARGIN = 1.1;             // 卸単価 × 1.1 → WELMES 회원 판매가(wholesale)
@@ -703,7 +704,26 @@ export async function insertProduct(supabase, p, options = {}) {
       },
     );
   }
-  return { id: data.id, images: images.length, enrichment };
+
+  // 상품 설명 다국어 번역 작업 큐잉 — 이름 enrichment와 동일하게 등록 성공이
+  // 최우선이므로 실패해도 throw하지 않는다(enqueueTranslationForProduct는 never-throw).
+  let translation = null;
+  const translationOptions = options.translation;
+  if (translationOptions?.enabled) {
+    translation = await enqueueTranslationForProduct(
+      supabase,
+      { id: data.id, sd_product_id: p.sdId, descriptionSections: p.descriptionSections || [] },
+      {
+        provider: translationOptions.provider,
+        model: translationOptions.model,
+        env: translationOptions.env,
+        targetLangs: translationOptions.targetLangs,
+        priority: translationOptions.priority,
+        maxAttempts: translationOptions.maxAttempts,
+      },
+    );
+  }
+  return { id: data.id, images: images.length, enrichment, translation };
 }
 
 /**
@@ -745,6 +765,7 @@ export async function buildProduct(page, parsed, { brandOption = '', knownBrands
     discount: parsed.discount,
     tags: parsed.discount > 0 ? ['Sale'] : [],
     description: parsed.description,
+    descriptionSections: parsed.descriptionSections || [],
     stock: parsed.stock,
     status,
     setOptions: parsed.setOptions,
@@ -779,4 +800,15 @@ export function buildEnrichmentOptions({
   env = process.env, grounding = true, priority = 0, maxAttempts = 3,
 } = {}) {
   return { enabled, officialSources, provider, model, env, grounding, priority, maxAttempts };
+}
+
+/**
+ * 등록 시 상품 설명 다국어 번역 큐잉 옵션. 번역은 official-source grounding이
+ * 불필요하므로 enrichment보다 단순하다. enabled=false면 기존 동작 유지.
+ */
+export function buildTranslationOptions({
+  enabled = true, provider = 'gemini', model = '', env = process.env,
+  targetLangs, priority = 0, maxAttempts = 3,
+} = {}) {
+  return { enabled, provider, model, env, targetLangs, priority, maxAttempts };
 }
