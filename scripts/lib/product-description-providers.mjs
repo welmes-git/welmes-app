@@ -90,17 +90,21 @@ export function parseTranslationResponse(provider, data) {
   if (!translations || typeof translations !== 'object') {
     throw new Error('translation response is not a JSON object');
   }
+  // thoughtsTokenCount is billed but reported separately from candidatesTokenCount.
+  // Capturing it is what makes estimateTranslationCost agree with the billing page.
   const usage = {
     inputTokens: data.usageMetadata?.promptTokenCount ?? null,
     outputTokens: data.usageMetadata?.candidatesTokenCount ?? null,
+    thinkingTokens: data.usageMetadata?.thoughtsTokenCount ?? 0,
   };
   return { translations, usage };
 }
 
-/** Estimate USD cost for a translation call. */
+/** Estimate USD cost for a translation call (includes billed thinking tokens). */
 export function estimateTranslationCost(provider, usage, env = process.env) {
   const config = getProviderConfig(provider, env);
-  const amount = ((usage.inputTokens || 0) * config.inputRate + (usage.outputTokens || 0) * config.outputRate) / 1_000_000;
+  const billedOutput = (usage.outputTokens || 0) + (usage.thinkingTokens || 0);
+  const amount = ((usage.inputTokens || 0) * config.inputRate + billedOutput * config.outputRate) / 1_000_000;
   const rounded = Number(amount.toFixed(8));
   const cnyToUsd = Number(env.QWEN_CNY_TO_USD || 0);
   return config.currency === 'USD' ? rounded : cnyToUsd > 0 ? Number((rounded * cnyToUsd).toFixed(8)) : null;

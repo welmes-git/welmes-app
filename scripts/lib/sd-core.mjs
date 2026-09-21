@@ -256,12 +256,15 @@ const DEALER_ONLY_SECTION_LABELS = new Set(['注意事項']);
  * order: 템플릿 표시 순서
  * match: 이 정규 키로 흡수할 슈퍼딜리버리 원본 라벨(공백 무시 정확 일치)
  */
+// match: 실제 라이브 데이터에서 관찰된 라벨 변형을 모두 흡수한다. 라벨이 매핑되지
+// 않으면 그 블록은 라벨 없는 extra가 되어 화면에 라벨 없이 노출되고 번역 비용도
+// 발생하므로, 관찰된 표기는 빠짐없이 등록한다.
 export const DESCRIPTION_SECTION_TEMPLATE = [
-  { key: 'overview', ja: '商品説明', order: 1, match: ['商品説明'] },
-  { key: 'usage', ja: '使用方法', order: 2, match: ['使用方法'] },
-  { key: 'size', ja: 'サイズ・容量', order: 3, match: ['サイズ・容量', 'サイズ', '容量', 'サイズ/容量'] },
-  { key: 'spec', ja: '規格', order: 4, match: ['規格', '成分', '素材・成分', '仕様'] },
-  { key: 'shipping', ja: '出荷', order: 5, match: ['出荷', '納期', '発送'] },
+  { key: 'overview', ja: '商品説明', order: 1, match: ['商品説明', '【商品説明】', '商品詳細', '商品情報'] },
+  { key: 'usage', ja: '使用方法', order: 2, match: ['使用方法', 'ご使用方法', 'お手入れ方法', '使い方', 'ご使用上の注意', '用法・用量'] },
+  { key: 'size', ja: 'サイズ・容量', order: 3, match: ['サイズ・容量', 'サイズ', '容量', 'サイズ/容量', '内容量', '内容量・サイズ'] },
+  { key: 'spec', ja: '規格', order: 4, match: ['規格', '成分', '素材・成分', '仕様', '全成分', '原材料', '品質表示'] },
+  { key: 'shipping', ja: '出荷', order: 5, match: ['出荷', '納期', '発送', '出荷目安'] },
 ];
 
 const LABEL_TO_KEY = new Map(
@@ -295,12 +298,30 @@ const DEALER_BOILERPLATE_PATTERNS = [
   /転載(禁止|不可)/,
   /Amazon\s*\.?\s*co\s*\.?\s*jp/i,  // 「Amazon.co.jpでの販売はご遠慮ください」
   /^[＝=]{3,}$/,          // ＝＝＝＝ 구분선
+  /^[-‐‑‒–—―ー_*＊・#~]{3,}$/,  // ----- / ――― 등 구분선 (바이어 정보 아님, 번역 낭비)
+  // 제조사 리뉴얼 고지 — 모든 상품에 반복되는 정형 문구로 바이어 정보가 아니다
+  /メーカーリニューアル/,
+  /パッケージ・内容等.*変更/,
+  /予めご了承/,
 ];
 
 function isDealerBoilerplateLine(line) {
   const t = line.trim();
   if (!t) return false;
   return DEALER_BOILERPLATE_PATTERNS.some((re) => re.test(t));
+}
+
+/**
+ * 섹션 값을 왕복(round-trip) 안전하게 만든다.
+ *
+ * `description` 컬럼은 섹션을 `\n\n`으로 이어 직렬화하고, parseStoredDescription()
+ * 은 `\n{2,}`로 되쪼갠다. 따라서 섹션 값 자체에 빈 줄이 남아 있으면 재파싱 때
+ * 그 조각이 라벨 없는 별도 블록(extras)으로 오인된다. 실제로 이 때문에 구분선
+ * 블록이 유령 extra 섹션으로 잡혀 화면에 노출되고 번역 비용까지 발생했다.
+ * 내부 빈 줄을 단일 줄바꿈으로 접어 경계를 모호하지 않게 만든다.
+ */
+function collapseBlankLines(value) {
+  return String(value || '').replace(/\n{2,}/g, '\n').trim();
 }
 
 /**
@@ -356,11 +377,15 @@ export function buildProductDescription(overview = '', sections = [], opts = {})
     else extras.push({ key: null, label, value });
   }
 
-  // 정규 섹션을 템플릿 순서로 정렬
+  // 정규 섹션을 템플릿 순서로 정렬. 값은 왕복 안전하게 접는다(빈 줄 제거) —
+  // 그렇지 않으면 재파싱 시 섹션 내부 빈 줄이 유령 extra 블록으로 오인된다.
   const structured = [...byKey.entries()]
-    .map(([key, value]) => ({ key, label: KEY_JA_LABEL.get(key), value }))
+    .map(([key, value]) => ({ key, label: KEY_JA_LABEL.get(key), value: collapseBlankLines(value) }))
+    .filter((s) => s.value)
     .sort((a, b) => (KEY_ORDER.get(a.key) ?? 99) - (KEY_ORDER.get(b.key) ?? 99));
-  structured.push(...extras);
+  structured.push(...extras
+    .map((s) => ({ ...s, value: collapseBlankLines(s.value) }))
+    .filter((s) => s.value));
 
   // 기존 description 컬럼 호환: 라벨 포함 텍스트로 직렬화 (overview는 라벨 생략)
   const description = structured
@@ -385,21 +410,35 @@ export function parseStoredDescription(description = '') {
   const text = String(description || '').trim();
   if (!text) return [];
   const blocks = text.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
-  const out = [];
+
+  // Merge by canonical key: a stored description can legitimately contain more
+  // than one block mapping to the same key (e.g. an unlabeled lead paragraph
+  // followed by a 【商品説明】 block, or 使用方法 split across blocks). Emitting
+  // duplicates would produce repeated sections on the page and duplicate keys in
+  // the translation payload, so same-key blocks are concatenated and the result
+  // is returned in canonical template order, with extras last in document order.
+  const byKey = new Map();
+  const extras = [];
   blocks.forEach((block, i) => {
-    const firstLine = block.split('\n')[0].trim();
+    const lines = block.split('\n');
+    const firstLine = lines[0].trim();
     const key = canonicalSectionKey(firstLine);
     if (key) {
-      const value = block.split('\n').slice(1).join('\n').trim();
-      if (value) out.push({ key, label: KEY_JA_LABEL.get(key), value });
+      const value = lines.slice(1).join('\n').trim();
+      if (value) byKey.set(key, byKey.has(key) ? `${byKey.get(key)}\n${value}` : value);
     } else if (i === 0) {
       // first unlabeled block = overview
-      out.push({ key: 'overview', label: KEY_JA_LABEL.get('overview'), value: block });
+      byKey.set('overview', byKey.has('overview') ? `${byKey.get('overview')}\n${block}` : block);
     } else {
-      // unlabeled trailing block — keep as an extra
-      out.push({ key: null, label: '', value: block });
+      // unlabeled trailing block — keep as an extra (no data loss)
+      extras.push({ key: null, label: '', value: block });
     }
   });
+
+  const out = [...byKey.entries()]
+    .map(([key, value]) => ({ key, label: KEY_JA_LABEL.get(key), value }))
+    .sort((a, b) => (KEY_ORDER.get(a.key) ?? 99) - (KEY_ORDER.get(b.key) ?? 99));
+  out.push(...extras);
   return out;
 }
 

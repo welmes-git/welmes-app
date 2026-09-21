@@ -227,3 +227,94 @@ export async function enqueueTranslationForProduct(supabase, product, opts = {})
     return { queued: false, reason: error.message };
   }
 }
+
+// ── Backfill target selection ────────────────────────────────────────
+// Pure helpers for the description-translation backfill (mirrors the
+// name-enrichment backfill selection, but keyed on description_i18n_status).
+// No network/DB deps so they are unit-testable.
+
+/** Statuses that must never be re-enqueued by the backfill. */
+export const DESCRIPTION_BACKFILL_TERMINAL_STATUSES = new Set(['auto_approved', 'review_required', 'human_locked']);
+
+/**
+ * Is this product eligible for a description-translation backfill?
+ *
+ * Rules (idempotent + safe to re-run):
+ *   - Never touch admin-locked rows (description_i18n_manual_locked or
+ *     description_i18n_status === 'human_locked').
+ *   - Only 'pending' and 'failed' are eligible; already auto_approved/
+ *     review_required rows are left alone (re-running is a no-op for them).
+ *   - A product with no translatable description text is still "eligible" here;
+ *     the worker's buildTranslationJob() will skip it (no_translatable_sections),
+ *     so we do not need the raw text at selection time.
+ *
+ * @param {{description_i18n_status?:string, descriptionI18nStatus?:string,
+ *          description_i18n_manual_locked?:boolean, descriptionI18nManualLocked?:boolean}} product
+ */
+export function isDescriptionBackfillTarget(product = {}) {
+  const locked = product.description_i18n_manual_locked ?? product.descriptionI18nManualLocked ?? false;
+  if (locked) return false;
+  const status = product.description_i18n_status ?? product.descriptionI18nStatus ?? 'pending';
+  if (DESCRIPTION_BACKFILL_TERMINAL_STATUSES.has(status)) return false;
+  return status === 'pending' || status === 'failed';
+}
+
+/**
+ * Select and order description-backfill targets.
+ *
+ * Ordering mirrors the name backfill: active products first (validate against
+ * live inventory), then the rest, each phase in ascending id order so an
+ * `--after` resume cursor is stable. Supports id allowlist, a resume cursor,
+ * and a limit.
+ *
+ * @param {Array<object>} products
+ * @param {{ids?:number[]|null, afterId?:number, activeFirst?:boolean, limit?:number,
+ *          cursor?:{activeDone:boolean, afterId:number}|null}} [opts]
+ */
+export function selectDescriptionBackfillTargets(products = [], {
+  ids = null, afterId = 0, activeFirst = true, limit = Infinity, cursor = null,
+} = {}) {
+  const allow = Array.isArray(ids) && ids.length ? new Set(ids.map(Number)) : null;
+  const isActive = (p) => (p.status ?? 'inactive') === 'active';
+
+  const filtered = products.filter((p) => {
+    if (allow && !allow.has(Number(p.id))) return false;
+    if (!isDescriptionBackfillTarget(p)) return false;
+    if (cursor && activeFirst) {
+      const active = isActive(p);
+      if (cursor.activeDone) {
+        if (active) return false;
+        return Number(p.id) > Number(cursor.afterId || 0);
+      }
+      if (active) return Number(p.id) > Number(cursor.afterId || 0);
+      return true;
+    }
+    if (Number(p.id) <= Number(afterId)) return false;
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    if (activeFirst) {
+      const aActive = isActive(a) ? 0 : 1;
+      const bActive = isActive(b) ? 0 : 1;
+      if (aActive !== bActive) return aActive - bActive;
+    }
+    return Number(a.id) - Number(b.id);
+  });
+
+  return Number.isFinite(limit) ? filtered.slice(0, limit) : filtered;
+}
+
+/**
+ * Compute the resume cursor from the batch that was just processed. Active-phase
+ * aware: while the last processed row is active we are still in the active
+ * phase; once an inactive row is processed the active phase is fully drained.
+ * (Same semantics as the name backfill's nextBackfillCursor.)
+ */
+export function nextDescriptionBackfillCursor(processedBatch = [], previous = null) {
+  if (!processedBatch.length) return previous;
+  const isActive = (p) => (p.status ?? 'inactive') === 'active';
+  const last = processedBatch[processedBatch.length - 1];
+  if (isActive(last)) return { activeDone: false, afterId: Number(last.id) };
+  return { activeDone: true, afterId: Number(last.id) };
+}

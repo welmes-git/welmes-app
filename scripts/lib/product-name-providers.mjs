@@ -292,9 +292,20 @@ export function parseProviderResponse(provider, data) {
   return { output: normalizeProviderOutput(text, citations), usage: { inputTokens, outputTokens } };
 }
 
+/**
+ * Estimate provider cost.
+ *
+ * `thinkingTokens` (Gemini `usageMetadata.thoughtsTokenCount`) MUST be included:
+ * reasoning models bill them, but they are reported separately from
+ * candidatesTokenCount. Omitting them underestimated real spend by roughly 2x on
+ * gemini-3.8-flash (observed: prompt 10 + candidates 27 + thoughts 220 = total 257),
+ * so estimates disagreed with the AI Studio billing page. They are charged at the
+ * output rate.
+ */
 export function estimateProviderCost(provider, usage, env = process.env) {
   const config = getProviderConfig(provider, env);
-  const amount = ((usage.inputTokens || 0) * config.inputRate + (usage.outputTokens || 0) * config.outputRate) / 1_000_000;
+  const billedOutput = (usage.outputTokens || 0) + (usage.thinkingTokens || 0);
+  const amount = ((usage.inputTokens || 0) * config.inputRate + billedOutput * config.outputRate) / 1_000_000;
   const rounded = Number(amount.toFixed(8));
   const cnyToUsd = Number(env.QWEN_CNY_TO_USD || 0);
   return {

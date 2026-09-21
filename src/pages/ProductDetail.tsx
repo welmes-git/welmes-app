@@ -4,7 +4,7 @@ import { useStore } from '../store/useStore';
 import type { SetOption } from '../store/useStore';
 import { initialProducts } from '../data/products';
 import { productSlug } from '../lib/productUrl';
-import { localizedSections, sectionLabelKey } from '../lib/productDescription';
+import { displaySections, sectionLabelKey } from '../lib/productDescription';
 import { SsrProductContext } from '../lib/ssrProductContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
@@ -577,7 +577,10 @@ export default function ProductDetail() {
           {activeTab === 'info' && (
             <div className="prose max-w-none">
               {(() => {
-                const sections = localizedSections(product.descriptionI18n, i18n.language);
+                // Translation for the active language when available, otherwise the
+                // parsed Japanese source — so section headings show in every
+                // language (description_i18n never carries a `ja` entry).
+                const sections = displaySections(product.descriptionI18n, i18n.language, product.description);
                 if (sections) {
                   // Localized, template-ordered sections (overview, usage, size, spec, shipping, extras)
                   return (

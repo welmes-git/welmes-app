@@ -31,3 +31,7 @@ scripts/.sd-session.json
 .env.*
 !.env.example
 scripts/.tmp-*
+
+# Local refresh backups (pre-change image/description snapshots, product data)
+scripts/.image-backup-*.json
+scripts/.desc-backup-*.json
