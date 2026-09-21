@@ -1,18 +1,50 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadPublicProduct, listIndexableProducts } from './catalog.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 let templatePromise;
 let rendererPromise;
 
+// The renderer is the Vite-built SSR bundle, loaded at RUNTIME on purpose.
+//
+// It must never be inlined by a bundler. Vite's SSR build leaves `react-dom/server`
+// as an external ESM import, which Node resolves correctly; but if a bundler
+// (esbuild, as used to package Vercel Functions) re-bundles that CJS module into
+// ESM, its internal `require('util')` becomes a "Dynamic require of \"util\" is
+// not supported" error thrown at module-init time — taking down every SSR route
+// with FUNCTION_INVOCATION_FAILED before any handler code runs.
+//
+// Building the specifier as a runtime value keeps it un-analyzable, so bundlers
+// leave the import alone and Node loads the real file from disk (Vercel ships it
+// via the `includeFiles: "dist/**"` entry in vercel.json).
+//
+// `here` moves when this module is bundled into a function, so dist/ is searched
+// rather than assumed at a fixed depth.
+const DIST_CANDIDATES = [
+  path.resolve(here, '../dist'),
+  path.resolve(here, './dist'),
+  path.resolve(here, '../../dist'),
+  path.resolve(process.cwd(), 'dist'),
+];
+
+async function distDir() {
+  for (const candidate of DIST_CANDIDATES) {
+    try {
+      await fs.access(path.join(candidate, 'server/entry-server.js'));
+      return candidate;
+    } catch { /* try the next candidate */ }
+  }
+  throw new Error(`Built SSR bundle not found. Looked in: ${DIST_CANDIDATES.join(', ')}`);
+}
+
 function template() {
-  templatePromise ??= fs.readFile(path.resolve(here, '../dist/client/index.html'), 'utf8');
+  templatePromise ??= distDir().then((dir) => fs.readFile(path.join(dir, 'client/index.html'), 'utf8'));
   return templatePromise;
 }
 function renderer() {
-  rendererPromise ??= import('../dist/server/entry-server.js');
+  rendererPromise ??= distDir().then((dir) => import(pathToFileURL(path.join(dir, 'server/entry-server.js')).href));
   return rendererPromise;
 }
 function xmlEscape(value) {
