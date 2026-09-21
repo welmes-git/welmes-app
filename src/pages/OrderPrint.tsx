@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+import { localizedName } from '../lib/productName';
 import { useEffect, useState } from 'react';
 import Logo from '../components/Logo';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -12,6 +14,7 @@ import { Printer, ArrowLeft, Loader2 } from 'lucide-react';
 const formatPrice = (amount: number) => `¥${Math.round(amount).toLocaleString('en-US')}`;
 
 export default function OrderPrint() {
+  const { i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { orders, members, currentUser, isAuthenticated, loadMyOrders } = useStore();
@@ -220,7 +223,7 @@ export default function OrderPrint() {
                   >
                     <td className="py-2.5 px-3 text-[11px] text-ink-500">{idx + 1}</td>
                     <td className="py-2.5 px-3 text-[11px] text-ink-900 font-medium" style={{ maxWidth: '180px' }}>
-                      {item.product.nameEn ?? item.product.name}
+                      {localizedName(item.product, i18n.language)}
                     </td>
                     <td className="py-2.5 px-3 text-[11px] text-ink-500">{item.product.brand}</td>
                     <td className="py-2.5 px-3 text-[11px]">

@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import type { Product } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
+import { localizedName } from '../lib/productName';
 import { ArrowRight, Heart, ShoppingCart } from 'lucide-react';
 import { BADGE_TAGS, hasJapanese, maskDigits } from '../lib/utils';
 import { productPath } from '../lib/productUrl';
@@ -18,7 +19,8 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, showQuickAdd = true }: ProductCardProps) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const displayName = localizedName(product, i18n.language);
   const { isAuthenticated, currentUser, addToCart, showToast, toggleWishlist, isWishlisted } = useStore();
   const { formatPrice, currencyInfo } = useCurrency();
   // Faire: signed-out visitors get the sign-up sheet instead of the product page
@@ -91,7 +93,7 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
       <div className="relative">
         <img
           src={product.image}
-          alt={product.nameEn}
+          alt={displayName}
           loading="lazy"
           className="aspect-square w-full rounded-sm bg-canvas object-cover object-center"
         />
@@ -145,10 +147,10 @@ export default function ProductCard({ product, showQuickAdd = true }: ProductCar
 
         <h3
           className={`line-clamp-1 break-words text-[14px] font-medium leading-5 text-ink-700 ${
-            hasJapanese(product.nameEn) ? 'font-jp' : ''
+            hasJapanese(displayName) ? 'font-jp' : ''
           }`}
         >
-          {product.nameEn}
+          {displayName}
         </h3>
       </div>
 

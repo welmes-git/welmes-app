@@ -3,6 +3,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { X, Plus, Minus, ShoppingBag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { localizedName } from '../lib/productName';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -12,7 +13,7 @@ interface CartDrawerProps {
 export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { cart, removeFromCart, updateCartQuantity, clearCart } = useStore();
   const { formatPrice } = useCurrency();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const total = cart.reduce(
     (sum, item) => sum + (item.setOption?.wholesalePrice ?? item.product.wholesalePrice) * item.quantity,
@@ -69,7 +70,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 >
                   <img
                     src={item.product.image}
-                    alt={item.product.nameEn ?? item.product.name}
+                    alt={localizedName(item.product, i18n.language)}
                     onError={(e) => {
                       (e.target as HTMLImageElement).src =
                         'https://placehold.co/70x70/f0f0f0/999?text=IMG';
@@ -81,7 +82,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       {item.product.brand}
                     </p>
                     <p className="text-[12.5px] font-medium text-ink-700 truncate">
-                      {item.product.nameEn ?? item.product.name}
+                      {localizedName(item.product, i18n.language)}
                     </p>
                     {item.setOption && (
                       <p className="text-[11px] text-ink-500 truncate">

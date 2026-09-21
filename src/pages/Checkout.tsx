@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer, DISPATCH_ACTION } from '@paypal/react-paypal-js';
 import { useTranslation } from 'react-i18next';
+import { localizedName } from '../lib/productName';
 import { useStore } from '../store/useStore';
 import type { ShippingAddress } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
@@ -68,7 +69,7 @@ function genOrderId() {
 
 function CheckoutContent() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { cart, currentUser, addOrder, clearCart, isAuthenticated, showToast } = useStore();
   const { formatPrice, currency, rates } = useCurrency();
   const [step, setStep] = useState<Step>('review');
@@ -339,7 +340,7 @@ function CheckoutContent() {
                       <div className="flex gap-3 items-center">
                         <img
                           src={item.product.image}
-                          alt={item.product.nameEn ?? item.product.name}
+                          alt={localizedName(item.product, i18n.language)}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src =
                               'https://placehold.co/60x60/f0f0f0/999?text=IMG';
@@ -348,8 +349,8 @@ function CheckoutContent() {
                         />
                         <div>
                           <p className="text-[11px] text-ink-300 uppercase font-medium">{item.product.brand}</p>
-                          <p className="text-[13px] text-ink-900 font-medium leading-tight">{item.product.nameEn ?? item.product.name}</p>
-                          {item.product.nameEn && item.product.name !== item.product.nameEn && (
+                          <p className="text-[13px] text-ink-900 font-medium leading-tight">{localizedName(item.product, i18n.language)}</p>
+                          {localizedName(item.product, i18n.language) !== item.product.name && (
                             <p className="text-[11px] text-ink-300 leading-tight">{item.product.name}</p>
                           )}
                           <p className="text-[12px] text-ink-700 font-semibold tabular-nums mt-0.5">
@@ -583,7 +584,7 @@ function CheckoutContent() {
                     <div key={`${item.product.id}-${item.setOption?.id}`} className="flex justify-between text-[12px] py-1 border-b border-line last:border-0">
                       <span className="text-ink-500 truncate pr-2 flex-1">
                         <span className="font-bold text-ink-900 mr-1">{item.setOption?.id}</span>
-                        {item.product.nameEn ?? item.product.name}
+                        {localizedName(item.product, i18n.language)}
                       </span>
                       <span className="shrink-0 text-ink-900 font-semibold">×{item.quantity}</span>
                     </div>

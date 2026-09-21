@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTranslation } from 'react-i18next';
+import { localizedName } from '../lib/productName';
 import { supabase } from '../lib/supabase';
 import { useCurrency } from '../context/CurrencyContext';
 import {
@@ -25,7 +26,7 @@ type Tab = 'orders' | 'account' | 'security';
 
 export default function MyAccount() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { formatPrice } = useCurrency();
   const {
     isAuthenticated,
@@ -303,13 +304,13 @@ export default function MyAccount() {
                                   <div key={idx} className="flex items-center gap-3">
                                     <img
                                       src={item.product.image}
-                                      alt={item.product.nameEn ?? item.product.name}
+                                      alt={localizedName(item.product, i18n.language)}
                                       onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/48x48/f0f0f0/999?text=IMG'; }}
                                       className="w-12 h-12 object-cover rounded-lg border border-line shrink-0"
                                     />
                                     <div className="flex-1 min-w-0">
                                       <p className="text-[12px] text-ink-300 uppercase">{item.product.brand}</p>
-                                      <p className="text-[13px] text-ink-700 truncate">{item.product.nameEn ?? item.product.name}</p>
+                                      <p className="text-[13px] text-ink-700 truncate">{localizedName(item.product, i18n.language)}</p>
                                       {item.setOption && (
                                         <p className="text-[11px] text-ink-500 truncate">
                                           <span className="font-bold text-ink-900">{item.setOption.id}</span> · {item.setOption.description}

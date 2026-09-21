@@ -39,6 +39,8 @@ export interface Product {
   name: string;
   /** Canonical English/romanized name — shown as the primary heading site-wide */
   nameEn: string;
+  /** Per-language product names (products.name_i18n); Japanese stays in `name`. */
+  nameI18n?: Record<string, string>;
   /** English-name workflow is independent from the storefront active/inactive status. */
   nameEnStatus?: ProductNameStatus;
   nameEnConfidence?: number;

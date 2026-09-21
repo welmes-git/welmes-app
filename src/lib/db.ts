@@ -542,6 +542,7 @@ function rowToProduct(row: Record<string, unknown>): Product {
     id:             Number(row.id),
     name:           row.name as string,
     nameEn:         (row.name_en as string) || (row.name as string),
+    nameI18n:       (row.name_i18n as Product['nameI18n']) || undefined,
     nameEnStatus:   (row.name_en_status as Product['nameEnStatus']) || undefined,
     nameEnConfidence: row.name_en_confidence == null ? undefined : Number(row.name_en_confidence),
     nameEnSource:   (row.name_en_source as Product['nameEnSource']) || undefined,
@@ -579,6 +580,7 @@ function productToRow(p: Partial<Product>): Record<string, unknown> {
   const row: Record<string, unknown> = {};
   if (p.name !== undefined)           row.name = p.name;
   if (p.nameEn !== undefined)         row.name_en = p.nameEn;
+  if (p.nameI18n !== undefined)       row.name_i18n = p.nameI18n ?? null;
   if (p.nameEnStatus !== undefined)   row.name_en_status = p.nameEnStatus;
   if (p.nameEnConfidence !== undefined) row.name_en_confidence = p.nameEnConfidence;
   if (p.nameEnSource !== undefined)   row.name_en_source = p.nameEnSource;

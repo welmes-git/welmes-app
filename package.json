@@ -23,7 +23,8 @@
     "translate:desc": "node scripts/translate-product-descriptions.mjs",
     "backfill:desc": "node scripts/backfill-product-descriptions.mjs",
     "refresh:images": "node scripts/refresh-product-images.mjs",
-    "refresh:desc": "node scripts/refresh-product-descriptions.mjs"
+    "refresh:desc": "node scripts/refresh-product-descriptions.mjs",
+    "translate:names": "node scripts/translate-product-names.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

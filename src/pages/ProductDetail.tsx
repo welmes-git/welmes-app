@@ -8,6 +8,7 @@ import { displaySections, sectionLabelKey } from '../lib/productDescription';
 import { SsrProductContext } from '../lib/ssrProductContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
+import { localizedName } from '../lib/productName';
 import ProductSeo from '../components/ProductSeo';
 import ProductCard from '../components/ProductCard';
 import { BADGE_TAGS, hasJapanese, maskDigits } from '../lib/utils';
@@ -106,6 +107,8 @@ export default function ProductDetail() {
     ? [ssrProduct, ...storeProducts.filter((item) => item.id !== ssrProduct.id)]
     : storeProducts;
   const product = allProducts.find((p) => p.id === productId);
+  // Readable name for the active language; falls back to English, then Japanese.
+  const displayName = product ? localizedName(product, i18n.language) : '';
 
   const isVerified = currentUser?.status === 'approved';
   const canSeePrice = isAuthenticated && isVerified;
@@ -246,7 +249,7 @@ export default function ProductDetail() {
             {product.category}
           </Link>
           <span>&gt;</span>
-          <span className="text-ink-700 truncate max-w-[200px]">{product.nameEn}</span>
+          <span className="text-ink-700 truncate max-w-[200px]">{displayName}</span>
         </div>
 
         {/* Product Info */}
@@ -263,7 +266,7 @@ export default function ProductDetail() {
                   <div className="aspect-square bg-canvas border border-line rounded-md overflow-hidden mb-3 relative">
                     <img
                       src={current}
-                      alt={`${product.nameEn} wholesale product image`}
+                      alt={`${displayName} wholesale product image`}
                       className="w-full h-full object-cover"
                     />
                     {imgs.length > 1 && (
@@ -310,10 +313,10 @@ export default function ProductDetail() {
             </Link>
 
             {/* Name */}
-            <h1 className={`mt-1 font-serif text-[30px] font-normal leading-[38px] text-ink-700 ${hasJapanese(product.nameEn) ? 'font-jp' : ''}`}>
-              {product.nameEn}
+            <h1 className={`mt-1 font-serif text-[30px] font-normal leading-[38px] text-ink-700 ${hasJapanese(displayName) ? 'font-jp' : ''}`}>
+              {displayName}
             </h1>
-            {product.name !== product.nameEn && (
+            {product.name !== displayName && (
               <p className={`mb-3 text-[13px] text-ink-500 ${hasJapanese(product.name) ? 'font-jp' : ''}`}>
                 {product.name}
               </p>
