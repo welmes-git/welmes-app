@@ -16,12 +16,16 @@ export default defineConfig(({ isSsrBuild }) => ({
   } : {
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/app.js',
-        assetFileNames(assetInfo) {
-          return assetInfo.name?.endsWith('.css')
-            ? 'assets/app.css'
-            : 'assets/[name]-[hash][extname]';
-        },
+        // Content-hashed names are REQUIRED: vercel.json serves /assets/* with
+        // `max-age=31536000, immutable`, so a stable name like assets/app.js
+        // pinned returning visitors to a year-old bundle. Deploys appeared to do
+        // nothing — the server HTML updated while the browser kept executing old
+        // JavaScript. SSR picks the hashed names up automatically because
+        // server/runtime.mjs serves the built index.html rather than hardcoding
+        // asset paths.
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]',
         manualChunks(id) {
           if (id.includes('/src/locales/')) return 'app-locales';
           if (!id.includes('node_modules')) return undefined;
