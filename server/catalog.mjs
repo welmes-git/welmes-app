@@ -1,6 +1,11 @@
+// Columns fetched for server rendering. Deliberately excludes prices, set
+// pricing and supplier metadata — those must never reach an unauthenticated
+// page. name_i18n/description_i18n ARE included: without them the server HTML
+// (and the bootstrap the client hydrates from) falls back to raw Japanese, which
+// is what search engines would index.
 const PUBLIC_COLUMNS = [
-  'id','name','name_en','brand','category','subcategory','image','images','discount',
-  'tags','rating','reviews','description','stock','status','created_at','updated_at',
+  'id','name','name_en','name_i18n','brand','category','subcategory','image','images','discount',
+  'tags','rating','reviews','description','description_i18n','stock','status','created_at','updated_at',
   'seo_slug','seo_title','seo_description','search_aliases','name_en_status','jan',
 ].join(',');
 
@@ -26,6 +31,7 @@ export function publicRowToProduct(row) {
     id: Number(row.id),
     name: row.name || '',
     nameEn: row.name_en || row.name || '',
+    nameI18n: row.name_i18n || undefined,
     nameEnStatus: row.name_en_status || undefined,
     seoSlug: row.seo_slug || undefined,
     seoTitle: row.seo_title || undefined,
@@ -45,6 +51,7 @@ export function publicRowToProduct(row) {
     rating: Number(row.rating || 0),
     reviews: Number(row.reviews || 0),
     description: row.description || '',
+    descriptionI18n: row.description_i18n || undefined,
     stock: Number(row.stock || 0),
     status: row.status || 'inactive',
     setOptions: [],

@@ -103,10 +103,16 @@ export default function ProductDetail() {
   // real Supabase fetch is still in flight.
   const ssrProduct = useContext(SsrProductContext);
   const storeProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
-  const allProducts = ssrProduct && ssrProduct.id === productId
-    ? [ssrProduct, ...storeProducts.filter((item) => item.id !== ssrProduct.id)]
-    : storeProducts;
-  const product = allProducts.find((p) => p.id === productId);
+  // The SSR payload is a PLACEHOLDER only. It is deliberately stripped of set
+  // options and prices (they must not reach an unauthenticated page), so once the
+  // real fetch lands its product must win — otherwise the page permanently shows
+  // "no set options" and, before catalog.mjs also projected the i18n columns,
+  // untranslated Japanese. Prepending the SSR product instead made it shadow the
+  // fetched one forever.
+  const fetchedProduct = storeProducts.find((p) => p.id === productId);
+  const ssrPlaceholder = ssrProduct && ssrProduct.id === productId ? ssrProduct : undefined;
+  const product = fetchedProduct ?? ssrPlaceholder;
+  const allProducts = storeProducts;
   // Readable name for the active language; falls back to English, then Japanese.
   const displayName = product ? localizedName(product, i18n.language) : '';
 
