@@ -383,7 +383,10 @@
     "orderFailed": "No se pudo guardar el pedido. Inténtalo de nuevo. Si ya pagaste con PayPal, contacta con soporte antes de reintentar.",
     "bankNotConfigured": "La transferencia bancaria aún no está disponible: estos datos son de ejemplo. Usa PayPal o contacta con soporte.",
     "insufficientStock": "Algunos artículos se han agotado. Revisa tu carrito e inténtalo de nuevo.",
-    "fxUnavailable": "Los tipos de cambio no están disponibles temporalmente para esa moneda. Elige JPY o inténtalo más tarde."
+    "fxUnavailable": "Los tipos de cambio no están disponibles temporalmente para esa moneda. Elige JPY o inténtalo más tarde.",
+    "paymentDue": "Vencimiento",
+    "paymentDueNote": "Realiza la transferencia antes del {{date}}. Los pedidos no pagados se liberan después de esa fecha y el stock reservado vuelve a la venta.",
+    "wireFeesNote": "Todos los gastos bancarios, incluidas las comisiones de bancos intermediarios, corren a cargo del remitente. Remita en condiciones \"OUR\" o use una transferencia local a la cuenta indicada para que llegue el importe íntegro."
   },
   "auth": {
     "loginTitle": "Acceso para empresas",

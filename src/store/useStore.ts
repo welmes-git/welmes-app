@@ -146,6 +146,10 @@ export interface Order {
   paidCurrency?: string;
   paidAt?: string;
   paymentError?: string;
+  /** Wire transfers only: when an unpaid order's stock reservation is released. */
+  paymentDueAt?: string;
+  /** charge_amount − paid_amount when a wire arrived short (bank fees). */
+  paymentShortfall?: number;
 }
 
 interface AppState {

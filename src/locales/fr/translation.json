@@ -383,7 +383,10 @@
     "orderFailed": "Impossible d'enregistrer la commande. Veuillez réessayer. Si vous avez déjà payé via PayPal, contactez l'assistance avant de réessayer.",
     "bankNotConfigured": "Le virement bancaire n'est pas encore disponible — ces coordonnées sont des exemples. Utilisez PayPal ou contactez l'assistance.",
     "insufficientStock": "Certains articles ne sont plus en stock. Vérifiez votre panier et réessayez.",
-    "fxUnavailable": "Les taux de change sont momentanément indisponibles pour cette devise. Choisissez JPY ou réessayez plus tard."
+    "fxUnavailable": "Les taux de change sont momentanément indisponibles pour cette devise. Choisissez JPY ou réessayez plus tard.",
+    "paymentDue": "Échéance",
+    "paymentDueNote": "Veuillez effectuer le virement avant le {{date}}. Les commandes impayées sont annulées après cette date et le stock réservé est remis en vente.",
+    "wireFeesNote": "Tous les frais bancaires, y compris ceux des banques intermédiaires, sont à la charge du donneur d'ordre. Veuillez virer en conditions « OUR » ou utiliser un virement local vers le compte ci-dessus afin que le montant facturé arrive intégralement."
   },
   "auth": {
     "loginTitle": "Connexion professionnelle",

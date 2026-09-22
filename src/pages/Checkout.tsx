@@ -7,7 +7,7 @@ import { useStore } from '../store/useStore';
 import type { ShippingAddress } from '../store/useStore';
 import { createPayPalOrder, capturePayPalOrder, paymentErrorKey } from '../lib/paypal';
 import { useCurrency } from '../context/CurrencyContext';
-import { convert, getCurrencyInfo } from '../lib/currency';
+import { getCurrencyInfo } from '../lib/currency';
 import type { CurrencyCode } from '../lib/currency';
 import { BANK_ACCOUNTS, isPlaceholderAccount } from '../config/bankAccounts';
 import {
@@ -85,9 +85,12 @@ function CheckoutContent() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { cart, currentUser, placeOrder, syncOrderAfterPayment, clearCart, isAuthenticated, showToast } = useStore();
-  // `currency` is deliberately not read: it drives the DISPLAY currency only,
-  // while settlement is fixed to CHARGE_CURRENCY.
-  const { formatPrice, rates } = useCurrency();
+  /* Only `formatPrice` is taken. The page no longer converts anything itself:
+     display formatting lives in CurrencyContext and every charge amount comes
+     from the server. `convert`/`rates` used to be needed here to quote wire
+     amounts, which is exactly how the quoted figure drifted from the recorded
+     one. */
+  const { formatPrice } = useCurrency();
   const [step, setStep] = useState<Step>('review');
   const [orderId, setOrderId] = useState('');
   const [poNumber, setPoNumber] = useState('');
@@ -95,7 +98,20 @@ function CheckoutContent() {
   const [errors, setErrors] = useState<Partial<ShippingAddress>>({});
   // Totals shown on the confirmation screen come from the server, not from the
   // client-side preview, so the buyer sees exactly what was recorded.
-  const [confirmedTotals, setConfirmedTotals] = useState({ subtotal: 0, vat: 0, total: 0 });
+  /**
+   * Everything the confirmation screen shows about money, as the server recorded
+   * it. Previously the wire amount was recomputed from live rates at render time,
+   * so the figure the buyer was told to remit could drift away from the
+   * `charge_amount` the order will actually be reconciled against.
+   */
+  const [confirmed, setConfirmed] = useState({
+    subtotal: 0,
+    vat: 0,
+    total: 0,
+    chargeCurrency: CHARGE_CURRENCY as string,
+    chargeAmount: 0,
+    paymentDueAt: null as string | null,
+  });
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'bank_transfer'>('bank_transfer');
   /* Wire transfers arrive in the currency of the account the buyer picks, so the
      order is denominated in that currency and reconciles exactly. JPY is the
@@ -248,8 +264,25 @@ function CheckoutContent() {
     finishOrder(order.orderId, order);
   }
 
-  function finishOrder(id: string, totals: { subtotal: number; vat: number; total: number }) {
-    setConfirmedTotals({ subtotal: totals.subtotal, vat: totals.vat, total: totals.total });
+  function finishOrder(id: string, result: {
+    subtotal: number;
+    vat: number;
+    total: number;
+    chargeCurrency?: string;
+    chargeAmount?: number;
+    paymentDueAt?: string | null;
+  }) {
+    setConfirmed({
+      subtotal: result.subtotal,
+      vat: result.vat,
+      total: result.total,
+      // Fall back to the JPY total rather than recomputing: a missing charge
+      // amount means the server did not denominate the order, and inventing a
+      // converted figure here is what caused the drift in the first place.
+      chargeCurrency: result.chargeCurrency ?? CHARGE_CURRENCY,
+      chargeAmount: result.chargeAmount ?? result.total,
+      paymentDueAt: result.paymentDueAt ?? null,
+    });
     clearCart();
     setOrderId(id);
     setStep('confirmed');
@@ -304,19 +337,28 @@ function CheckoutContent() {
     }
   }
 
-  const selectedBank = BANK_ACCOUNTS.find((b) => b.currency === selectedBankCurrency) ?? BANK_ACCOUNTS[0];
+  /* Before the order exists the buyer is choosing; afterwards the currency is
+     fixed on the order, so the confirmation screen must follow the order rather
+     than local UI state. */
+  const activeBankCurrency = step === 'confirmed' ? confirmed.chargeCurrency : selectedBankCurrency;
+  const selectedBank = BANK_ACCOUNTS.find((b) => b.currency === activeBankCurrency) ?? BANK_ACCOUNTS[0];
   const bankNotConfigured = isPlaceholderAccount(selectedBank);
 
   // Wire transfers must be made in the bank account's currency, so convert the
   // JPY-based total into that currency instead of the display currency
-  const formatBankAmount = (amountJPY: number) => {
-    const code = selectedBankCurrency as CurrencyCode;
-    const info = getCurrencyInfo(code);
-    const value = convert(amountJPY, code, rates);
-    return `${code} ${new Intl.NumberFormat('en-US', {
+  /**
+   * The amount to remit, exactly as the server froze it on the order.
+   *
+   * This used to convert the JPY total with whatever rate the browser happened to
+   * hold, so the figure shown here could differ from `charge_amount` — the value a
+   * received wire is reconciled against. No conversion happens now.
+   */
+  const formatChargeAmount = () => {
+    const info = getCurrencyInfo(confirmed.chargeCurrency as CurrencyCode);
+    return `${confirmed.chargeCurrency} ${new Intl.NumberFormat('en-US', {
       minimumFractionDigits: info.decimals,
       maximumFractionDigits: info.decimals,
-    }).format(value)}`;
+    }).format(confirmed.chargeAmount)}`;
   };
 
   /* ─── Step indicator ─── */
@@ -848,15 +890,15 @@ function CheckoutContent() {
               <div className="px-5 py-4 space-y-2 text-[13px]">
                 <div className="flex justify-between">
                   <span className="text-ink-500">{t('checkout.subtotal')}</span>
-                  <span className="tabular-nums">{formatPrice(confirmedTotals.subtotal)}</span>
+                  <span className="tabular-nums">{formatPrice(confirmed.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-ink-500">{t('checkout.vat')}</span>
-                  <span className="tabular-nums">{formatPrice(confirmedTotals.vat)}</span>
+                  <span className="tabular-nums">{formatPrice(confirmed.vat)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-[15px] pt-3 border-t border-line">
                   <span>{t('checkout.grandTotal')}</span>
-                  <span className="tabular-nums">{formatPrice(confirmedTotals.total)}</span>
+                  <span className="tabular-nums">{formatPrice(confirmed.total)}</span>
                 </div>
               </div>
             </div>
@@ -872,21 +914,10 @@ function CheckoutContent() {
                   <p className="text-[13px] text-ink-500">
                     {t('checkout.bankInstructionsDesc', { orderId })}
                   </p>
-                  <div className="flex gap-1.5 mb-2">
-                    {BANK_ACCOUNTS.map((b) => (
-                      <button
-                        key={b.currency}
-                        onClick={() => setSelectedBankCurrency(b.currency)}
-                        className={`px-3 py-1 rounded text-[11px] font-bold transition-colors ${
-                          selectedBankCurrency === b.currency
-                            ? 'bg-ink-700 text-white'
-                            : 'bg-sunken text-ink-500 border border-line-strong hover:border-ink-300'
-                        }`}
-                      >
-                        {b.currency}
-                      </button>
-                    ))}
-                  </div>
+                  {/* No currency tabs here any more. The order is denominated in
+                      confirmed.chargeCurrency, and letting the buyer switch after
+                      placing it showed an amount the order would never be
+                      reconciled against. */}
                   <div className="bg-sunken rounded-lg border border-line p-3 space-y-1.5 text-[12px]">
                     <BankRow label={t('checkout.bankLabel')} value={selectedBank.bankName} field="c-bank" copiedField={copiedField} onCopy={copyToClipboard} />
                     <BankRow label={t('checkout.accountNameLabel')} value={selectedBank.accountName} field="c-name" copiedField={copiedField} onCopy={copyToClipboard} />
@@ -897,14 +928,33 @@ function CheckoutContent() {
                     )}
                     <div className="pt-1 flex justify-between items-center border-t border-line mt-1">
                       <span className="text-ink-500 font-medium">{t('checkout.amount')}</span>
-                      <span className="font-bold tabular-nums text-ink-900 text-[13px]">{formatBankAmount(confirmedTotals.total)}</span>
+                      <span className="font-bold tabular-nums text-ink-900 text-[13px]">{formatChargeAmount()}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-ink-500 font-medium">{t('checkout.reference')}</span>
                       <span className="font-mono font-bold text-ink-900">{orderId}</span>
                     </div>
+                    {confirmed.paymentDueAt && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-ink-500 font-medium">{t('checkout.paymentDue')}</span>
+                        <span className="font-bold text-ink-900">
+                          {new Date(confirmed.paymentDueAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <p className="text-[11px] text-ink-300">{t('checkout.bankPaymentNote')}</p>
+                  {/* Industry terms put intermediary bank charges on the remitter
+                      ("OUR"), but SHA is most banks' default, so without saying so
+                      the transfer arrives short and the order looks underpaid. */}
+                  <p className="text-[11px] text-ink-500 leading-relaxed">{t('checkout.wireFeesNote')}</p>
+                  {confirmed.paymentDueAt && (
+                    <p className="text-[11px] text-ink-500 leading-relaxed">
+                      {t('checkout.paymentDueNote', {
+                        date: new Date(confirmed.paymentDueAt).toLocaleDateString(),
+                      })}
+                    </p>
+                  )}
                 </div>
               </div>
             )}

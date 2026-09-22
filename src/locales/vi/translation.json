@@ -381,7 +381,10 @@
     "orderFailed": "Không thể lưu đơn hàng. Vui lòng thử lại. Nếu bạn đã thanh toán qua PayPal, hãy liên hệ hỗ trợ trước khi thử lại.",
     "bankNotConfigured": "Chuyển khoản ngân hàng chưa khả dụng — thông tin tài khoản là ví dụ. Vui lòng dùng PayPal hoặc liên hệ hỗ trợ.",
     "insufficientStock": "Một số sản phẩm đã hết hàng. Vui lòng kiểm tra giỏ hàng và thử lại.",
-    "fxUnavailable": "Tạm thời không có tỷ giá cho loại tiền đó. Vui lòng chọn JPY hoặc thử lại sau."
+    "fxUnavailable": "Tạm thời không có tỷ giá cho loại tiền đó. Vui lòng chọn JPY hoặc thử lại sau.",
+    "paymentDue": "Hạn thanh toán",
+    "paymentDueNote": "Vui lòng chuyển khoản trước {{date}}. Đơn chưa thanh toán sẽ bị hủy sau ngày này và hàng đã giữ sẽ được bán lại.",
+    "wireFeesNote": "Mọi phí ngân hàng, bao gồm phí ngân hàng trung gian, do người chuyển tiền chịu. Vui lòng chuyển theo điều kiện \"OUR\" hoặc dùng chuyển khoản nội địa tới tài khoản trên để nhận đủ số tiền trên hóa đơn."
   },
   "auth": {
     "loginTitle": "Đăng nhập thành viên doanh nghiệp",

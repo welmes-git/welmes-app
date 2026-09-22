@@ -381,7 +381,10 @@
     "orderFailed": "Pesanan gagal disimpan. Silakan coba lagi. Jika sudah membayar via PayPal, hubungi dukungan sebelum mencoba lagi.",
     "bankNotConfigured": "Transfer bank belum tersedia — detail rekening ini masih contoh. Silakan gunakan PayPal atau hubungi dukungan.",
     "insufficientStock": "Beberapa produk kehabisan stok. Silakan periksa keranjang Anda dan coba lagi.",
-    "fxUnavailable": "Kurs untuk mata uang tersebut sementara tidak tersedia. Silakan pilih JPY atau coba lagi nanti."
+    "fxUnavailable": "Kurs untuk mata uang tersebut sementara tidak tersedia. Silakan pilih JPY atau coba lagi nanti.",
+    "paymentDue": "Jatuh tempo",
+    "paymentDueNote": "Mohon lakukan transfer sebelum {{date}}. Pesanan yang belum dibayar akan dibatalkan setelah tanggal tersebut dan stok yang dipesan kembali dijual.",
+    "wireFeesNote": "Semua biaya bank, termasuk biaya bank perantara, menjadi tanggungan pengirim. Mohon kirim dengan ketentuan \"OUR\" atau gunakan transfer lokal ke rekening di atas agar jumlah tagihan diterima penuh."
   },
   "auth": {
     "loginTitle": "Masuk Anggota Bisnis",

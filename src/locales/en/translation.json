@@ -384,7 +384,10 @@
     "orderFailed": "Your order could not be saved. Please try again — if you already paid via PayPal, contact support before retrying.",
     "bankNotConfigured": "Bank transfer is not available yet — these account details are placeholders. Please use PayPal or contact support.",
     "insufficientStock": "Some items just went out of stock. Please review your cart and try again.",
-    "fxUnavailable": "Exchange rates are temporarily unavailable for that currency. Please choose JPY or try again shortly."
+    "fxUnavailable": "Exchange rates are temporarily unavailable for that currency. Please choose JPY or try again shortly.",
+    "paymentDue": "Payment due",
+    "paymentDueNote": "Please complete the transfer by {{date}}. Unpaid orders are released after that date and the reserved stock returns to sale.",
+    "wireFeesNote": "All bank charges, including intermediary bank fees, are for the account of the remitter. Please remit under \"OUR\" terms, or use a local transfer to the account above, so that the full invoiced amount arrives."
   },
   "auth": {
     "loginTitle": "Business Member Login",

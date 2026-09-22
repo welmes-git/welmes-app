@@ -193,6 +193,8 @@ export interface PlacedOrder {
   chargeCurrency: string;
   chargeAmount: number;
   fxRate: number;
+  /** Wire transfers only: when the reservation is released if unpaid. */
+  paymentDueAt: string | null;
   reused: boolean;
 }
 
@@ -248,6 +250,7 @@ export async function placeOrder(input: {
       chargeCurrency: String(row.charge_currency ?? 'JPY'),
       chargeAmount:   Number(row.charge_amount ?? row.total),
       fxRate:         Number(row.fx_rate ?? 1),
+      paymentDueAt:   (row.payment_due_at as string | null) ?? null,
       reused:         Boolean(row.reused),
     },
   };
@@ -263,6 +266,69 @@ export async function fetchOrderById(id: string): Promise<Order | null> {
   return rowToOrder(data as Record<string, unknown>);
 }
 
+/** Outcome of recording an incoming wire; a shortfall is reported, not hidden. */
+export interface WirePaymentResult {
+  orderId: string;
+  /** False when the shortfall exceeded tolerance — the order stays unpaid. */
+  accepted: boolean;
+  expected: number;
+  received: number;
+  shortfall: number;
+  tolerance: number;
+  alreadyPaid?: boolean;
+}
+
+/**
+ * Record a received bank transfer (admin only; `is_admin()` gates the RPC).
+ *
+ * A wire rarely arrives at the invoiced amount: intermediary banks deduct their
+ * fee in transit, so even a buyer who remits the exact total lands short. The RPC
+ * accepts a shortfall within tolerance, marks the order paid and still records
+ * what actually arrived; beyond tolerance it records the underpayment and leaves
+ * the order unpaid for a human to decide.
+ */
+export async function recordWirePayment(input: {
+  orderId: string;
+  reference: string;
+  amount: number;
+  currency: string;
+  receivedAt?: string;
+}): Promise<{ result?: WirePaymentResult; error?: string }> {
+  const { data, error } = await supabase.rpc('record_wire_payment', {
+    p_order_id: input.orderId,
+    p_reference: input.reference.trim(),
+    p_amount: input.amount,
+    p_currency: input.currency.toUpperCase(),
+    p_received_at: input.receivedAt ?? new Date().toISOString(),
+  });
+  if (error) { console.error('[recordWirePayment]', error.message); return { error: error.message }; }
+
+  const row = data as Record<string, unknown>;
+  return {
+    result: {
+      orderId:     String(row.order_id),
+      accepted:    Boolean(row.accepted),
+      expected:    Number(row.expected ?? 0),
+      received:    Number(row.received ?? 0),
+      shortfall:   Number(row.shortfall ?? 0),
+      tolerance:   Number(row.tolerance ?? 0),
+      alreadyPaid: Boolean(row.already_paid),
+    },
+  };
+}
+
+/** Wire orders still awaiting payment, soonest deadline first. */
+export async function fetchUnpaidWireOrders(): Promise<Order[]> {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*, order_items(*)')
+    .eq('payment_method', 'bank_transfer')
+    .eq('payment_status', 'unpaid')
+    .neq('status', 'cancelled')
+    .order('payment_due_at', { ascending: true, nullsFirst: false });
+  if (error || !data) return [];
+  return (data as Record<string, unknown>[]).map(rowToOrder);
+}
 export async function fetchOrders(): Promise<Order[]> {
   const { data: orderRows, error } = await supabase
     .from('orders')
@@ -685,6 +751,8 @@ function rowToOrder(row: Record<string, unknown>): Order {
     paidCurrency:       (row.paid_currency as string) || undefined,
     paidAt:             (row.paid_at as string) || undefined,
     paymentError:       (row.payment_error as string) || undefined,
+    paymentDueAt:       (row.payment_due_at as string) || undefined,
+    paymentShortfall:   row.payment_shortfall == null ? undefined : Number(row.payment_shortfall),
   };
 }
 
