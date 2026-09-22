@@ -8,8 +8,17 @@ import { useTranslation } from 'react-i18next';
 
 export default function CurrencySelector({ large = false }: { large?: boolean }) {
   const { selectedCurrency, setSelectedCurrency } = useStore();
-  const { loading, lastUpdated } = useCurrency();
+  const { loading, lastUpdated, ratesUnavailable } = useCurrency();
   const { t } = useTranslation();
+  /* Three distinct states, previously collapsed into two: rates as of a known
+     time, still loading, and unavailable. The last one used to render as
+     "loading" forever while prices were quietly drawn from a hardcoded table
+     that drifts 5-17% from live rates. */
+  const rateLabel = lastUpdated
+    ? t('currency.ratesAsOf', { time: lastUpdated.toLocaleTimeString() })
+    : ratesUnavailable
+      ? t('currency.ratesUnavailable')
+      : t('currency.loadingRates');
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -28,7 +37,7 @@ export default function CurrencySelector({ large = false }: { large?: boolean })
       <button
         onClick={() => setOpen((o) => !o)}
         className={`flex items-center transition-colors hover:text-ink-900 ${large ? 'gap-2 text-[14px] leading-5 text-ink-700' : 'gap-1.5 text-[12px] text-ink-500'}`}
-        title={lastUpdated ? t('currency.ratesAsOf', { time: lastUpdated.toLocaleTimeString() }) : t('currency.loadingRates')}
+        title={rateLabel}
       >
         <span>{current.flag}</span>
         <span className={large ? '' : 'font-semibold'}>{current.code}</span>
@@ -38,10 +47,10 @@ export default function CurrencySelector({ large = false }: { large?: boolean })
 
       {open && (
         <div className="absolute right-0 top-full mt-1.5 w-[200px] bg-canvas border border-line rounded-lg shadow-hover z-50 py-1 overflow-hidden">
-          <p className="text-[10px] tabular-nums text-ink-500 px-3 py-1.5 border-b border-line">
-            {lastUpdated
-              ? t('currency.ratesAsOf', { time: lastUpdated.toLocaleTimeString() })
-              : t('currency.loadingRates')}
+          <p className={`text-[10px] tabular-nums px-3 py-1.5 border-b border-line ${
+            ratesUnavailable ? 'text-signal-error' : 'text-ink-500'
+          }`}>
+            {rateLabel}
           </p>
           {CURRENCIES.map((c) => (
             <button

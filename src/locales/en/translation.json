@@ -750,7 +750,8 @@
   },
   "currency": {
     "ratesAsOf": "Rates as of {{time}}",
-    "loadingRates": "Loading exchange rates…"
+    "loadingRates": "Loading exchange rates…",
+    "ratesUnavailable": "Live rates unavailable — prices are approximate"
   },
   "signupBanner": {
     "title": "The wholesale platform for Japanese beauty",

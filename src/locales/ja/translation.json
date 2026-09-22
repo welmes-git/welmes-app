@@ -739,7 +739,8 @@
   },
   "currency": {
     "ratesAsOf": "{{time}} 時点のレート",
-    "loadingRates": "為替レートを読み込み中…"
+    "loadingRates": "為替レートを読み込み中…",
+    "ratesUnavailable": "為替レートを取得できないため、表示価格は概算です"
   },
   "signupBanner": {
     "title": "日本コスメの卸売プラットフォーム",

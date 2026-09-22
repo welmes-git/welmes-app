@@ -739,7 +739,8 @@
   },
   "currency": {
     "ratesAsOf": "Kurse Stand {{time}}",
-    "loadingRates": "Wechselkurse werden geladen…"
+    "loadingRates": "Wechselkurse werden geladen…",
+    "ratesUnavailable": "Wechselkurse nicht verfügbar — Preise sind Näherungswerte"
   },
   "signupBanner": {
     "title": "Die Großhandelsplattform für japanische Kosmetik",

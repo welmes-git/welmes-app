@@ -739,7 +739,8 @@
   },
   "currency": {
     "ratesAsOf": "Taux à {{time}}",
-    "loadingRates": "Chargement des taux de change…"
+    "loadingRates": "Chargement des taux de change…",
+    "ratesUnavailable": "Taux de change indisponibles — prix approximatifs"
   },
   "signupBanner": {
     "title": "La plateforme de gros pour les cosmétiques japonais",

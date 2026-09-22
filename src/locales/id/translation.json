@@ -737,7 +737,8 @@
   },
   "currency": {
     "ratesAsOf": "Kurs per {{time}}",
-    "loadingRates": "Memuat kurs…"
+    "loadingRates": "Memuat kurs…",
+    "ratesUnavailable": "Kurs terkini tidak tersedia — harga bersifat perkiraan"
   },
   "signupBanner": {
     "title": "Platform grosir kosmetik Jepang",

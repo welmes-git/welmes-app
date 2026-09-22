@@ -743,7 +743,8 @@
   },
   "currency": {
     "ratesAsOf": "Курсы на {{time}}",
-    "loadingRates": "Загрузка курсов валют…"
+    "loadingRates": "Загрузка курсов валют…",
+    "ratesUnavailable": "Курсы недоступны — цены приблизительные"
   },
   "signupBanner": {
     "title": "Оптовая платформа японской косметики",

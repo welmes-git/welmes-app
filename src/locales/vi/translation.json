@@ -737,7 +737,8 @@
   },
   "currency": {
     "ratesAsOf": "Tỷ giá lúc {{time}}",
-    "loadingRates": "Đang tải tỷ giá…"
+    "loadingRates": "Đang tải tỷ giá…",
+    "ratesUnavailable": "Không có tỷ giá trực tiếp — giá hiển thị là gần đúng"
   },
   "signupBanner": {
     "title": "Nền tảng bán sỉ mỹ phẩm Nhật Bản",

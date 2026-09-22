@@ -739,7 +739,8 @@
   },
   "currency": {
     "ratesAsOf": "Tipos de cambio a las {{time}}",
-    "loadingRates": "Cargando tipos de cambio…"
+    "loadingRates": "Cargando tipos de cambio…",
+    "ratesUnavailable": "Tipos de cambio no disponibles — precios aproximados"
   },
   "signupBanner": {
     "title": "La plataforma mayorista de cosmética japonesa",

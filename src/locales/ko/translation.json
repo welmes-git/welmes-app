@@ -748,7 +748,8 @@
   },
   "currency": {
     "ratesAsOf": "{{time}} 기준 환율",
-    "loadingRates": "환율 불러오는 중…"
+    "loadingRates": "환율 불러오는 중…",
+    "ratesUnavailable": "실시간 환율을 가져올 수 없어 표시 가격이 근사값입니다"
   },
   "signupBanner": {
     "title": "일본 화장품 도매, WELMES에서",
