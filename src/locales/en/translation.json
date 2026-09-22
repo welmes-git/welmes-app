@@ -237,7 +237,13 @@
     "reviews": "Reviews",
     "shipping": "Shipping",
     "productDetails": "Product Details",
-    "section": { "overview": "Overview", "usage": "How to Use", "size": "Size & Volume", "spec": "Ingredients & Specs", "shipping": "Shipping" },
+    "section": {
+      "overview": "Overview",
+      "usage": "How to Use",
+      "size": "Size & Volume",
+      "spec": "Ingredients & Specs",
+      "shipping": "Shipping"
+    },
     "brand": "Brand",
     "inStock": "In Stock",
     "outOfStock": "Out of Stock",
@@ -377,7 +383,8 @@
     "routingLabel": "Routing No.",
     "orderFailed": "Your order could not be saved. Please try again — if you already paid via PayPal, contact support before retrying.",
     "bankNotConfigured": "Bank transfer is not available yet — these account details are placeholders. Please use PayPal or contact support.",
-    "insufficientStock": "Some items just went out of stock. Please review your cart and try again."
+    "insufficientStock": "Some items just went out of stock. Please review your cart and try again.",
+    "fxUnavailable": "Exchange rates are temporarily unavailable for that currency. Please choose JPY or try again shortly."
   },
   "auth": {
     "loginTitle": "Business Member Login",

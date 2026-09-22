@@ -237,7 +237,13 @@
     "reviews": "レビュー",
     "shipping": "配送",
     "productDetails": "商品詳細",
-    "section": { "overview": "商品説明", "usage": "使用方法", "size": "サイズ・容量", "spec": "規格・成分", "shipping": "出荷" },
+    "section": {
+      "overview": "商品説明",
+      "usage": "使用方法",
+      "size": "サイズ・容量",
+      "spec": "規格・成分",
+      "shipping": "出荷"
+    },
     "brand": "ブランド",
     "inStock": "在庫あり",
     "outOfStock": "在庫切れ",
@@ -376,7 +382,8 @@
     "routingLabel": "ルーティング番号",
     "orderFailed": "注文を保存できませんでした。もう一度お試しください。PayPalで決済済みの場合は、再試行の前にサポートへご連絡ください。",
     "bankNotConfigured": "銀行振込は現在ご利用いただけません（口座情報は仮のものです）。PayPalをご利用いただくか、サポートへお問い合わせください。",
-    "insufficientStock": "一部の商品の在庫が不足しています。カートをご確認のうえ、もう一度お試しください。"
+    "insufficientStock": "一部の商品の在庫が不足しています。カートをご確認のうえ、もう一度お試しください。",
+    "fxUnavailable": "その通貨の為替レートを一時的に取得できません。JPYを選択するか、しばらくしてからお試しください。"
   },
   "auth": {
     "loginTitle": "ビジネス会員ログイン",

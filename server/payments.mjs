@@ -63,6 +63,51 @@ export function computeCharge(totalJPY, currency, rates) {
   return { currency: code, amount, rate, decimals, value: amount.toFixed(decimals) };
 }
 
+/** Refresh `fx_rates` once a stored rate is older than this. */
+export const FX_REFRESH_AFTER_MS = 6 * 60 * 60 * 1000;
+
+/** Currencies worth keeping in the table — display currencies plus PayPal's. */
+export const TRACKED_CURRENCIES = ['JPY', 'USD', 'EUR', 'GBP', 'CNY', 'KRW', 'SGD', 'AUD'];
+
+/**
+ * Keep `fx_rates` warm.
+ *
+ * `place_order` reads the rate from the database and refuses a foreign-currency
+ * order once the stored rate passes its hard age limit, so something has to write
+ * to that table. Doing it here — opportunistically, on the request path — means
+ * there is no cron to forget: any checkout or price view that finds a stale row
+ * refreshes it. Rates pinned with source='manual' are left alone by the RPC.
+ *
+ * Failures are non-fatal: a stale-but-usable rate keeps working, and only the
+ * hard limit inside place_order blocks an order.
+ */
+export async function syncFxRates(adminRpc, { fetchImpl = fetch, now = Date.now } = {}) {
+  const { rows, error } = await adminRpc.readRates();
+  if (error) return { refreshed: false, reason: `read failed: ${error}` };
+
+  const oldest = rows.length === 0
+    ? 0
+    : Math.min(...rows.map((r) => new Date(r.fetched_at).getTime()));
+  const missing = TRACKED_CURRENCIES.filter((c) => !rows.some((r) => r.currency === c));
+  const stale = rows.length === 0 || now() - oldest > FX_REFRESH_AFTER_MS || missing.length > 0;
+  if (!stale) return { refreshed: false, reason: 'fresh' };
+
+  const { rates, stale: upstreamFailed } = await fetchRates(fetchImpl);
+  if (upstreamFailed) {
+    // Do NOT write FALLBACK_RATES into the table: that is exactly how the old
+    // client-side path turned an outage into a wrong charge that looked normal.
+    return { refreshed: false, reason: 'upstream unavailable' };
+  }
+
+  const payload = {};
+  for (const code of TRACKED_CURRENCIES) {
+    if (Number.isFinite(rates[code]) && rates[code] > 0) payload[code] = rates[code];
+  }
+  const { error: writeError } = await adminRpc.writeRates(payload);
+  if (writeError) return { refreshed: false, reason: `write failed: ${writeError}` };
+  return { refreshed: true, reason: null, count: Object.keys(payload).length };
+}
+
 /** Reject junk before it reaches the RPC; money fields are deliberately ignored. */
 export function parseOrderRequest(body) {
   const rawItems = Array.isArray(body?.items) ? body.items : null;

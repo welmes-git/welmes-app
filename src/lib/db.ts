@@ -209,9 +209,12 @@ export function toOrderLines(items: CartItem[]): OrderLineInput[] {
  *
  * Money is deliberately absent from the payload: the function re-reads each
  * product's wholesale price (or set-option price), recomputes VAT and the total,
- * and reserves stock — all in one transaction. Previously the browser sent
- * `subtotal`/`vat`/`total` straight into an INSERT that RLS only checked for
- * ownership, so any signed-in buyer could order at a price of their choosing.
+ * looks the FX rate up in `fx_rates` itself, and reserves stock — all in one
+ * transaction. Previously the browser sent `subtotal`/`vat`/`total` straight into
+ * an INSERT that RLS only checked for ownership, so any signed-in buyer could
+ * order at a price of their choosing; and even after that was fixed the browser
+ * still supplied `fx_rate`, which let it set the amount a wire transfer would be
+ * reconciled against.
  */
 export async function placeOrder(input: {
   items: CartItem[];
@@ -219,8 +222,8 @@ export async function placeOrder(input: {
   paymentMethod: 'bank_transfer' | 'paypal';
   poNumber?: string;
   notes?: string;
+  /** Currency to denominate the order in. The rate comes from the server. */
   chargeCurrency?: string;
-  fxRate?: number;
   idempotencyKey?: string;
 }): Promise<{ order?: PlacedOrder; error?: string }> {
   const { data, error } = await supabase.rpc('place_order', {
@@ -230,7 +233,7 @@ export async function placeOrder(input: {
     p_po_number: input.poNumber?.trim() || null,
     p_notes: input.notes?.trim() || null,
     p_charge_currency: input.chargeCurrency ?? null,
-    p_fx_rate: input.fxRate ?? null,
+    p_fx_rate: null, // deprecated and ignored by place_order
     p_idempotency_key: input.idempotencyKey ?? null,
   });
   if (error) { console.error('[placeOrder]', error.message); return { error: error.message }; }

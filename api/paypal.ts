@@ -28,7 +28,7 @@
 import { createClient } from '@supabase/supabase-js';
 import {
   parseOrderRequest,
-  fetchRates,
+  syncFxRates,
   currencyDecimals,
   verifyCapture,
   classifyError,
@@ -103,6 +103,29 @@ function adminClient() {
   return createClient(env('SUPABASE_URL', 'VITE_SUPABASE_URL'), key, { auth: { persistSession: false } });
 }
 
+/**
+ * Minimal shape `syncFxRates` needs. Declared structurally because the Supabase
+ * client's generics do not survive being passed through a plain adapter.
+ */
+type FxStore = {
+  from: (table: string) => { select: (columns: string) => Promise<{ data: unknown; error: { message: string } | null }> };
+  rpc: (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+};
+
+/** Lets server/payments.mjs refresh `fx_rates` without knowing about Supabase. */
+function rpcAdapter(client: FxStore) {
+  return {
+    async readRates() {
+      const { data, error } = await client.from('fx_rates').select('currency, rate_jpy, source, fetched_at');
+      return { rows: (data ?? []) as { currency: string; fetched_at: string }[], error: error?.message };
+    },
+    async writeRates(rates: Record<string, number>) {
+      const { error } = await client.rpc('upsert_fx_rates', { p_rates: rates, p_source: 'frankfurter' });
+      return { error: error?.message };
+    },
+  };
+}
+
 function bearer(req: Request): string {
   const header = req.headers.get('authorization') || '';
   return header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : '';
@@ -121,15 +144,13 @@ async function createOrder(req: Request): Promise<Response> {
     return json({ code }, status === 500 ? 400 : status);
   }
 
-  // The rate is fetched here, never accepted from the client, and is frozen on
-  // the order so the amount cannot drift between quote and capture. The RPC
-  // computes the actual amount from its own re-priced total.
-  const { rates, stale } = await fetchRates();
+  // The rate is no longer computed here or accepted from the client:
+  // `place_order` reads it from `fx_rates` and refuses a stale one. We only make
+  // sure the table is current before pricing.
+  try {
+    await syncFxRates(rpcAdapter(adminClient() as unknown as FxStore));
+  } catch { /* non-fatal: place_order enforces the hard age limit itself */ }
   const chargeCurrency = payload.displayCurrency;
-  const fxRate = Number(rates[chargeCurrency] ?? 0);
-  if (!Number.isFinite(fxRate) || fxRate <= 0) {
-    return json({ code: 'FX_UNAVAILABLE', detail: `no rate for ${chargeCurrency}` }, 503);
-  }
   const supabase = userClient(token);
 
   const { data, error } = await supabase.rpc('place_order', {
@@ -139,7 +160,7 @@ async function createOrder(req: Request): Promise<Response> {
     p_po_number: payload.poNumber,
     p_notes: payload.notes,
     p_charge_currency: chargeCurrency,
-    p_fx_rate: fxRate,
+    p_fx_rate: null, // deprecated and ignored by place_order
     p_idempotency_key: payload.idempotencyKey,
   });
   if (error) {
@@ -154,6 +175,7 @@ async function createOrder(req: Request): Promise<Response> {
     vat: number;
     charge_currency: string;
     charge_amount: number;
+    fx_rate: number;
     reused: boolean;
   };
 
@@ -186,7 +208,7 @@ async function createOrder(req: Request): Promise<Response> {
       total: Number(order.total),
       chargeCurrency: order.charge_currency,
       chargeAmount: Number(order.charge_amount),
-      fxStale: stale,
+      fxRate: Number(order.fx_rate ?? 1),
     });
   } catch (error) {
     // PayPal never got the order: release the stock we just reserved instead of

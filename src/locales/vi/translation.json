@@ -237,7 +237,13 @@
     "reviews": "Đánh giá",
     "shipping": "Vận chuyển",
     "productDetails": "Chi tiết sản phẩm",
-    "section": { "overview": "Mô tả", "usage": "Cách dùng", "size": "Kích thước & dung tích", "spec": "Thành phần & thông số", "shipping": "Vận chuyển" },
+    "section": {
+      "overview": "Mô tả",
+      "usage": "Cách dùng",
+      "size": "Kích thước & dung tích",
+      "spec": "Thành phần & thông số",
+      "shipping": "Vận chuyển"
+    },
     "brand": "Thương hiệu",
     "inStock": "Còn hàng",
     "outOfStock": "Hết hàng",
@@ -374,7 +380,8 @@
     "routingLabel": "Số định tuyến",
     "orderFailed": "Không thể lưu đơn hàng. Vui lòng thử lại. Nếu bạn đã thanh toán qua PayPal, hãy liên hệ hỗ trợ trước khi thử lại.",
     "bankNotConfigured": "Chuyển khoản ngân hàng chưa khả dụng — thông tin tài khoản là ví dụ. Vui lòng dùng PayPal hoặc liên hệ hỗ trợ.",
-    "insufficientStock": "Một số sản phẩm đã hết hàng. Vui lòng kiểm tra giỏ hàng và thử lại."
+    "insufficientStock": "Một số sản phẩm đã hết hàng. Vui lòng kiểm tra giỏ hàng và thử lại.",
+    "fxUnavailable": "Tạm thời không có tỷ giá cho loại tiền đó. Vui lòng chọn JPY hoặc thử lại sau."
   },
   "auth": {
     "loginTitle": "Đăng nhập thành viên doanh nghiệp",

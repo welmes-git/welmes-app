@@ -237,7 +237,13 @@
     "reviews": "리뷰",
     "shipping": "배송",
     "productDetails": "상품 상세",
-    "section": { "overview": "상품 설명", "usage": "사용 방법", "size": "사이즈·용량", "spec": "규격·성분", "shipping": "배송" },
+    "section": {
+      "overview": "상품 설명",
+      "usage": "사용 방법",
+      "size": "사이즈·용량",
+      "spec": "규격·성분",
+      "shipping": "배송"
+    },
     "brand": "브랜드",
     "inStock": "재고 있음",
     "outOfStock": "품절",
@@ -375,7 +381,8 @@
     "routingLabel": "라우팅 번호",
     "orderFailed": "주문을 저장하지 못했어요. 다시 시도해 주세요. PayPal 결제가 이미 완료됐다면 다시 시도하기 전에 고객센터로 문의해 주세요.",
     "bankNotConfigured": "아직 계좌이체를 이용할 수 없어요. PayPal로 결제하거나 고객센터로 문의해 주세요.",
-    "insufficientStock": "재고가 부족한 상품이 있어요. 장바구니를 확인한 뒤 다시 시도해 주세요."
+    "insufficientStock": "재고가 부족한 상품이 있어요. 장바구니를 확인한 뒤 다시 시도해 주세요.",
+    "fxUnavailable": "해당 통화의 환율을 일시적으로 사용할 수 없어요. JPY를 선택하거나 잠시 후 다시 시도해 주세요."
   },
   "auth": {
     "loginTitle": "사업자 회원 로그인",

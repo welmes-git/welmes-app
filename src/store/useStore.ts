@@ -206,9 +206,9 @@ interface AppState {
   /** Load orders visible to the current user (own orders, or all for admins) */
   loadMyOrders: () => Promise<void>;
   /**
-   * Create an order via the `place_order` RPC. Prices, VAT, the total and the
-   * stock reservation are all decided by the database — callers pass ids and
-   * quantities only, and get the server's totals back.
+   * Create an order via the `place_order` RPC. Prices, VAT, the total, the FX
+   * rate and the stock reservation are all decided by the database — callers
+   * pass ids, quantities and a currency choice only.
    */
   placeOrder: (input: {
     items: CartItem[];
@@ -217,7 +217,6 @@ interface AppState {
     poNumber?: string;
     notes?: string;
     chargeCurrency?: string;
-    fxRate?: number;
     idempotencyKey?: string;
   }) => Promise<{ order?: db.PlacedOrder; error?: string }>;
   /** Pull a freshly paid order back from the server after /api/paypal ran. */

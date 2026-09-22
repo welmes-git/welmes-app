@@ -237,7 +237,13 @@
     "reviews": "Reseñas",
     "shipping": "Envío",
     "productDetails": "Detalles del producto",
-    "section": { "overview": "Descripción", "usage": "Modo de uso", "size": "Tamaño y volumen", "spec": "Ingredientes y especificaciones", "shipping": "Envío" },
+    "section": {
+      "overview": "Descripción",
+      "usage": "Modo de uso",
+      "size": "Tamaño y volumen",
+      "spec": "Ingredientes y especificaciones",
+      "shipping": "Envío"
+    },
     "brand": "Marca",
     "inStock": "En stock",
     "outOfStock": "Agotado",
@@ -376,7 +382,8 @@
     "routingLabel": "Número de ruta",
     "orderFailed": "No se pudo guardar el pedido. Inténtalo de nuevo. Si ya pagaste con PayPal, contacta con soporte antes de reintentar.",
     "bankNotConfigured": "La transferencia bancaria aún no está disponible: estos datos son de ejemplo. Usa PayPal o contacta con soporte.",
-    "insufficientStock": "Algunos artículos se han agotado. Revisa tu carrito e inténtalo de nuevo."
+    "insufficientStock": "Algunos artículos se han agotado. Revisa tu carrito e inténtalo de nuevo.",
+    "fxUnavailable": "Los tipos de cambio no están disponibles temporalmente para esa moneda. Elige JPY o inténtalo más tarde."
   },
   "auth": {
     "loginTitle": "Acceso para empresas",

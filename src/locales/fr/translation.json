@@ -237,7 +237,13 @@
     "reviews": "Avis",
     "shipping": "Livraison",
     "productDetails": "Détails du produit",
-    "section": { "overview": "Aperçu", "usage": "Utilisation", "size": "Taille et volume", "spec": "Ingrédients et spécifications", "shipping": "Expédition" },
+    "section": {
+      "overview": "Aperçu",
+      "usage": "Utilisation",
+      "size": "Taille et volume",
+      "spec": "Ingrédients et spécifications",
+      "shipping": "Expédition"
+    },
     "brand": "Marque",
     "inStock": "En stock",
     "outOfStock": "Rupture de stock",
@@ -376,7 +382,8 @@
     "routingLabel": "Numéro de routage",
     "orderFailed": "Impossible d'enregistrer la commande. Veuillez réessayer. Si vous avez déjà payé via PayPal, contactez l'assistance avant de réessayer.",
     "bankNotConfigured": "Le virement bancaire n'est pas encore disponible — ces coordonnées sont des exemples. Utilisez PayPal ou contactez l'assistance.",
-    "insufficientStock": "Certains articles ne sont plus en stock. Vérifiez votre panier et réessayez."
+    "insufficientStock": "Certains articles ne sont plus en stock. Vérifiez votre panier et réessayez.",
+    "fxUnavailable": "Les taux de change sont momentanément indisponibles pour cette devise. Choisissez JPY ou réessayez plus tard."
   },
   "auth": {
     "loginTitle": "Connexion professionnelle",

@@ -237,7 +237,13 @@
     "reviews": "评价",
     "shipping": "配送",
     "productDetails": "商品详情",
-    "section": { "overview": "商品说明", "usage": "使用方法", "size": "尺寸・容量", "spec": "规格・成分", "shipping": "发货" },
+    "section": {
+      "overview": "商品说明",
+      "usage": "使用方法",
+      "size": "尺寸・容量",
+      "spec": "规格・成分",
+      "shipping": "发货"
+    },
     "brand": "品牌",
     "inStock": "有货",
     "outOfStock": "缺货",
@@ -376,7 +382,8 @@
     "routingLabel": "路由号码",
     "orderFailed": "订单保存失败，请重试。如已通过PayPal付款，请先联系客服再重试。",
     "bankNotConfigured": "银行转账暂不可用——此账户信息为占位符。请使用PayPal或联系客服。",
-    "insufficientStock": "部分商品库存不足。请检查购物车后重试。"
+    "insufficientStock": "部分商品库存不足。请检查购物车后重试。",
+    "fxUnavailable": "暂时无法获取该货币的汇率。请选择JPY或稍后重试。"
   },
   "auth": {
     "loginTitle": "企业会员登录",

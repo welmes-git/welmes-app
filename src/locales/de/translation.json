@@ -237,7 +237,13 @@
     "reviews": "Bewertungen",
     "shipping": "Versand",
     "productDetails": "Produktdetails",
-    "section": { "overview": "Übersicht", "usage": "Anwendung", "size": "Größe & Volumen", "spec": "Inhaltsstoffe & Spezifikationen", "shipping": "Versand" },
+    "section": {
+      "overview": "Übersicht",
+      "usage": "Anwendung",
+      "size": "Größe & Volumen",
+      "spec": "Inhaltsstoffe & Spezifikationen",
+      "shipping": "Versand"
+    },
     "brand": "Marke",
     "inStock": "Auf Lager",
     "outOfStock": "Ausverkauft",
@@ -376,7 +382,8 @@
     "routingLabel": "Routing-Nummer",
     "orderFailed": "Ihre Bestellung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut. Falls Sie bereits per PayPal gezahlt haben, kontaktieren Sie zuerst den Support.",
     "bankNotConfigured": "Banküberweisung ist noch nicht verfügbar — diese Kontodaten sind Platzhalter. Bitte nutzen Sie PayPal oder kontaktieren Sie den Support.",
-    "insufficientStock": "Einige Artikel sind nicht mehr vorrätig. Bitte prüfen Sie Ihren Warenkorb und versuchen Sie es erneut."
+    "insufficientStock": "Einige Artikel sind nicht mehr vorrätig. Bitte prüfen Sie Ihren Warenkorb und versuchen Sie es erneut.",
+    "fxUnavailable": "Wechselkurse für diese Währung sind vorübergehend nicht verfügbar. Bitte wählen Sie JPY oder versuchen Sie es später erneut."
   },
   "auth": {
     "loginTitle": "Login für Geschäftskunden",

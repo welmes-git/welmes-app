@@ -237,7 +237,13 @@
     "reviews": "Ulasan",
     "shipping": "Pengiriman",
     "productDetails": "Detail Produk",
-    "section": { "overview": "Ikhtisar", "usage": "Cara Pakai", "size": "Ukuran & Volume", "spec": "Bahan & Spesifikasi", "shipping": "Pengiriman" },
+    "section": {
+      "overview": "Ikhtisar",
+      "usage": "Cara Pakai",
+      "size": "Ukuran & Volume",
+      "spec": "Bahan & Spesifikasi",
+      "shipping": "Pengiriman"
+    },
     "brand": "Merek",
     "inStock": "Stok Tersedia",
     "outOfStock": "Stok Habis",
@@ -374,7 +380,8 @@
     "routingLabel": "Nomor Routing",
     "orderFailed": "Pesanan gagal disimpan. Silakan coba lagi. Jika sudah membayar via PayPal, hubungi dukungan sebelum mencoba lagi.",
     "bankNotConfigured": "Transfer bank belum tersedia — detail rekening ini masih contoh. Silakan gunakan PayPal atau hubungi dukungan.",
-    "insufficientStock": "Beberapa produk kehabisan stok. Silakan periksa keranjang Anda dan coba lagi."
+    "insufficientStock": "Beberapa produk kehabisan stok. Silakan periksa keranjang Anda dan coba lagi.",
+    "fxUnavailable": "Kurs untuk mata uang tersebut sementara tidak tersedia. Silakan pilih JPY atau coba lagi nanti."
   },
   "auth": {
     "loginTitle": "Masuk Anggota Bisnis",

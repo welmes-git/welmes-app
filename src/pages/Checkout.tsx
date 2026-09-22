@@ -100,6 +100,16 @@ function CheckoutContent() {
   /** Our order id for the PayPal order currently in flight. */
   const pendingOrderId = useRef<string | null>(null);
 
+  /* ─── Keep the server's FX table warm ───
+     `place_order` reads the charge rate from `fx_rates` and refuses a
+     foreign-currency order once the stored rate passes its hard age limit.
+     Pinging /api/fx on entry means the storefront itself keeps the table
+     current, so there is no cron to forget. Failure is ignored: a JPY order
+     never needs a rate, and any other currency fails loudly in the RPC. */
+  useEffect(() => {
+    fetch('/api/fx').catch(() => {});
+  }, []);
+
   /* ─── PayPal SDK ───
      The SDK must be (re)loaded with the same currency we charge in, otherwise
      order creation fails with a currency mismatch. main.tsx loads it with JPY;
@@ -211,22 +221,29 @@ function CheckoutContent() {
       paymentMethod: 'bank_transfer',
       poNumber,
       notes,
-      // Wire transfers are quoted in the account currency; freezing the rate on
-      // the order is what makes the later incoming payment reconcilable.
+      // Wire transfers are quoted in the account currency. The rate is looked up
+      // server-side from `fx_rates`; sending it from here let a buyer choose the
+      // amount their incoming wire would be reconciled against.
       chargeCurrency: selectedBankCurrency,
-      fxRate: rates[selectedBankCurrency] ?? 1,
       idempotencyKey: idempotencyKey.current,
     });
     setPlacing(false);
 
     if (error || !order) {
       // Keep the cart and stay on this step so the buyer can retry
-      const soldOut = (error ?? '').includes('INSUFFICIENT_STOCK')
-        || (error ?? '').includes('PRODUCT_NOT_FOUND')
-        || (error ?? '').includes('PRODUCT_INACTIVE');
-      const notApproved = (error ?? '').includes('MEMBER_NOT_APPROVED');
+      const message = error ?? '';
+      const soldOut = message.includes('INSUFFICIENT_STOCK')
+        || message.includes('PRODUCT_NOT_FOUND')
+        || message.includes('PRODUCT_INACTIVE');
+      const notApproved = message.includes('MEMBER_NOT_APPROVED');
+      // A stale or missing rate must not be papered over — the old code would
+      // have charged on a months-old fallback rate instead.
+      const fxProblem = message.includes('FX_STALE') || message.includes('FX_UNSUPPORTED');
       showToast(
-        t(soldOut ? 'checkout.insufficientStock' : notApproved ? 'checkout.memberNotApproved' : 'checkout.orderFailed'),
+        t(soldOut ? 'checkout.insufficientStock'
+          : notApproved ? 'checkout.memberNotApproved'
+          : fxProblem ? 'checkout.fxUnavailable'
+          : 'checkout.orderFailed'),
         'error',
       );
       return;
