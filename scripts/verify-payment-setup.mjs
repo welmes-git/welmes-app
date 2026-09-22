@@ -75,12 +75,20 @@ async function checkStep1() {
   console.log('\n── Step 1 — 20260926_secure_checkout.sql ──');
 
   const probe = await rpc('place_order', PLACE_ORDER_ARGS);
-  // Reaching the function's own auth guard proves it exists with this exact
-  // 8-argument signature, which is what src/lib/db.ts sends.
+  // PostgREST resolves the argument list before it checks privileges, so both of
+  // these prove the function exists with this exact 8-argument signature (the one
+  // src/lib/db.ts sends):
+  //   P0001 NOT_AUTHENTICATED  → reachable by anon, i.e. step 4 not applied yet
+  //   42501 permission denied  → step 4 applied, EXECUTE revoked from anon
+  // A wrong or missing signature answers PGRST202 instead.
+  const reachable = probe.message === 'NOT_AUTHENTICATED';
+  const locked = probe.code === '42501';
   record(
-    probe.message === 'NOT_AUTHENTICATED',
+    reachable || locked,
     'place_order exists with the expected signature',
-    probe.message === 'NOT_AUTHENTICATED' ? null : `got ${probe.status} ${probe.code} ${probe.message} — migration not applied?`,
+    reachable || locked
+      ? (locked ? 'EXECUTE revoked from anon (step 4 applied)' : 'reachable by anon (step 4 not applied yet)')
+      : `got ${probe.status} ${probe.code} ${probe.message} — migration not applied, or the signature changed`,
   );
 
   for (const column of ['payment_method', 'payment_status', 'payment_reference', 'charge_currency', 'charge_amount', 'fx_rate', 'paid_at', 'idempotency_key']) {
@@ -118,8 +126,52 @@ async function checkStep4() {
   record(
     denied,
     'place_order is NOT callable with the public anon key',
-    denied ? null : 'still reachable by anon; the function rejects it internally (NOT_AUTHENTICATED) so this is defence-in-depth, not a hole.',
+    denied ? null : 'still reachable by anon. The function rejects anonymous callers itself (NOT_AUTHENTICATED), so this is defence-in-depth rather than a hole — but the lockdown migration has not been applied.',
   );
+}
+
+// ── Authenticated reachability ──────────────────────────────────────────────
+// The lockdown revokes EXECUTE from anon/PUBLIC. If the re-grant to
+// `authenticated` did not land, checkout is dead for every real buyer and no
+// anon-only probe would notice. Calling with an empty cart raises EMPTY_CART
+// before the function writes anything, so this proves the grant without creating
+// an order.
+async function checkAuthenticatedAccess() {
+  console.log('\n── Authenticated access to place_order ──');
+  const email = env.WELMES_ADMIN_EMAIL;
+  const password = env.WELMES_ADMIN_PASSWORD;
+  if (!email || !password) {
+    return record(null, 'no local login available — skipped', 'set WELMES_ADMIN_EMAIL/WELMES_ADMIN_PASSWORD to enable');
+  }
+
+  const signIn = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    method: 'POST', headers: headers(ANON_KEY), body: JSON.stringify({ email, password }),
+  });
+  const session = await signIn.json().catch(() => ({}));
+  if (!signIn.ok || !session.access_token) {
+    return record(false, 'could not sign in to test authenticated access', `${signIn.status} ${session.error_description || session.msg || ''}`);
+  }
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/place_order`, {
+    method: 'POST',
+    headers: { ...headers(ANON_KEY), authorization: `Bearer ${session.access_token}` },
+    body: JSON.stringify(PLACE_ORDER_ARGS),
+  });
+  const body = await res.json().catch(() => ({}));
+  // Any of the function's own validation errors means EXECUTE was granted.
+  const reached = ['EMPTY_CART', 'MEMBER_NOT_APPROVED', 'INVALID_SHIPPING'].includes(body.message);
+  record(
+    reached,
+    'signed-in users can execute place_order',
+    reached
+      ? `reached the function (${body.message})`
+      : `got ${res.status} ${body.code || ''} ${body.message || ''} — checkout is broken for real buyers; re-run the grant in the lockdown migration`,
+  );
+
+  // Leave no session behind.
+  await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+    method: 'POST', headers: { ...headers(ANON_KEY), authorization: `Bearer ${session.access_token}` },
+  }).catch(() => {});
 }
 
 // ── PayPal credentials ─────────────────────────────────────────────────────
@@ -182,6 +234,7 @@ if (!SUPABASE_URL || !ANON_KEY) {
 console.log(`Project: ${SUPABASE_URL}`);
 await checkStep1();
 await checkStep4();
+await checkAuthenticatedAccess();
 await checkPayPal();
 await checkServiceRole();
 
