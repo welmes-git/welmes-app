@@ -30,14 +30,16 @@ import {
   Send,
   Loader2,
   Truck,
+  Landmark,
 } from 'lucide-react';
 import * as db from '../lib/db';
+import WirePayments from '../components/admin/WirePayments';
 import type { SupportRoom, SupportMessage } from '../lib/db';
 import NameReviewPanel from '../components/NameReviewPanel';
 import { matchesSearch } from '../lib/productSearch';
 import type { ProductNameStatus } from '../store/useStore';
 
-type AdminTab = 'dashboard' | 'members' | 'products' | 'orders' | 'support';
+type AdminTab = 'dashboard' | 'members' | 'products' | 'orders' | 'payments' | 'support';
 type MemberStatus = 'all' | 'pending' | 'approved' | 'rejected';
 
 /** Supplier (Superdelivery) change badges — populated by scripts/sd-monitor.mjs */
@@ -64,6 +66,7 @@ const menuItems: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'members',   label: 'Members',     icon: Users },
   { id: 'products',  label: 'Products',    icon: Package },
   { id: 'orders',    label: 'Orders',      icon: ClipboardList },
+  { id: 'payments',  label: 'Wire Payments', icon: Landmark },
   { id: 'support',   label: 'Support Chat', icon: MessageCircle },
 ];
 
@@ -1709,6 +1712,10 @@ export default function AdminDashboard() {
           )}
 
           {/* Orders */}
+          {activeTab === 'payments' && (
+            <WirePayments onSettled={loadOrders} />
+          )}
+
           {activeTab === 'orders' && (
             <div>
               <div className="bg-white rounded-lg shadow-sm overflow-hidden">
