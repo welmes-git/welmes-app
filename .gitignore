@@ -26,6 +26,9 @@ dist-ssr
 # Supplier import session (login cookies)
 scripts/.sd-session.json
 
+# Supabase CLI local state (linked project ref, downloaded CLI metadata)
+supabase/.temp/
+
 # Environment files — never commit (set production values in the Vercel dashboard)
 .env
 .env.*
