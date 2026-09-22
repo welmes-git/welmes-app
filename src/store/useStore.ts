@@ -132,6 +132,20 @@ export interface Order {
   trackingCarrier?: string;
   trackingNumber?: string;
   trackingShippedAt?: string;
+  /* ── Payment ledger (orders.payment_*) ──
+     Written only by place_order / mark_order_paid; `total` is in JPY while
+     `chargeAmount`/`chargeCurrency` are what the buyer is actually asked for,
+     frozen at order time so a capture or wire can be reconciled against it. */
+  paymentMethod?: 'bank_transfer' | 'paypal';
+  paymentStatus?: 'unpaid' | 'paid' | 'failed' | 'refunded';
+  /** PayPal capture id, or the wire reference an admin recorded. */
+  paymentReference?: string;
+  chargeCurrency?: string;
+  chargeAmount?: number;
+  paidAmount?: number;
+  paidCurrency?: string;
+  paidAt?: string;
+  paymentError?: string;
 }
 
 interface AppState {
@@ -191,7 +205,23 @@ interface AppState {
   loadOrders: () => Promise<void>;
   /** Load orders visible to the current user (own orders, or all for admins) */
   loadMyOrders: () => Promise<void>;
-  addOrder: (order: Order) => Promise<{ error?: string }>;
+  /**
+   * Create an order via the `place_order` RPC. Prices, VAT, the total and the
+   * stock reservation are all decided by the database — callers pass ids and
+   * quantities only, and get the server's totals back.
+   */
+  placeOrder: (input: {
+    items: CartItem[];
+    shipping: ShippingAddress;
+    paymentMethod: 'bank_transfer' | 'paypal';
+    poNumber?: string;
+    notes?: string;
+    chargeCurrency?: string;
+    fxRate?: number;
+    idempotencyKey?: string;
+  }) => Promise<{ order?: db.PlacedOrder; error?: string }>;
+  /** Pull a freshly paid order back from the server after /api/paypal ran. */
+  syncOrderAfterPayment: (orderId: string) => Promise<Order | null>;
   updateOrderStatus: (id: string, status: Order['status']) => Promise<void>;
   updateOrderShipping: (id: string, carrier: string, trackingNumber: string) => Promise<void>;
 
@@ -563,31 +593,35 @@ export const useStore = create<AppState>()(
         set({ orders });
       },
 
-      addOrder: async (order) => {
-        // `products.stock` counts pieces, so a set contributes qty × unitsPerSet
-        const stockLines: db.StockLine[] = order.items.map((item) => ({
-          product_id: item.product.id,
-          units: item.quantity * (item.setOption?.unitsPerSet ?? 1),
-        }));
+      placeOrder: async (input) => {
+        // No stock call here any more: `place_order` re-prices the cart, takes
+        // stock and writes the order in a single transaction, so there is no
+        // window in which stock is taken but the order failed to save.
+        const { order, error } = await db.placeOrder(input);
+        if (error || !order) return { error: error ?? 'ORDER_FAILED' };
 
-        // Take stock first (atomic check + decrement) so two concurrent
-        // checkouts can't oversell the same units.
-        const stockRes = await db.decrementStock(stockLines);
-        if (stockRes.error) return { error: stockRes.error };
-
-        const { error } = await db.insertOrder(order);
-        if (error) {
-          await db.restoreStock(stockLines); // compensate — we already took stock
-          return { error };
-        }
-
-        set((state) => ({ orders: [order, ...state.orders] }));
-        get().loadProducts(); // refresh the catalogue so stock counts are current
+        // Refresh from the server rather than optimistically inserting: the
+        // totals, id and payment state all come from the database now.
+        get().loadMyOrders();
+        get().loadProducts(); // stock counts changed
+        const created = await db.fetchOrderById(order.orderId);
         const user = get().currentUser;
-        if (user?.email) {
+        if (created && user?.email) {
+          emailOrderPlaced(created, user.email);
+        }
+        return { order };
+      },
+
+      /** Called after /api/paypal finished creating + capturing server-side. */
+      syncOrderAfterPayment: async (orderId) => {
+        const order = await db.fetchOrderById(orderId);
+        get().loadMyOrders();
+        get().loadProducts();
+        const user = get().currentUser;
+        if (order && user?.email) {
           emailOrderPlaced(order, user.email);
         }
-        return {};
+        return order;
       },
 
       updateOrderStatus: async (id, status) => {

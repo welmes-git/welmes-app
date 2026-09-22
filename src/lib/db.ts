@@ -169,26 +169,96 @@ export async function deleteProductById(id: number) {
 /** Total pieces per line — `products.stock` counts pieces, not sets. */
 export interface StockLine { product_id: number; units: number }
 
-/**
- * Atomically verify and decrement stock for every line. Fails (and changes
- * nothing) if any product is short — the error message carries
- * `INSUFFICIENT_STOCK:<productId>`.
- */
-export async function decrementStock(items: StockLine[]): Promise<{ error?: string }> {
-  if (items.length === 0) return {};
-  const { error } = await supabase.rpc('decrement_product_stock', { p_items: items });
-  if (error) { console.error('[decrementStock]', error.message); return { error: error.message }; }
-  return {};
-}
-
-/** Compensating action when the order insert fails after stock was taken. */
-export async function restoreStock(items: StockLine[]): Promise<void> {
-  if (items.length === 0) return;
-  const { error } = await supabase.rpc('restore_product_stock', { p_items: items });
-  if (error) console.error('[restoreStock]', error.message);
-}
+// NOTE: `decrement_product_stock` / `restore_product_stock` are no longer
+// callable from the browser (execute revoked in 20260926_secure_checkout.sql).
+// `place_order` takes stock inside the same transaction that writes the order,
+// so the old take-then-compensate dance — which lost stock whenever the
+// compensating call failed or the tab closed — is gone.
 
 // ── Orders ───────────────────────────────────────────────────────
+
+/** One cart line as the server wants it: ids and quantity only, never prices. */
+export interface OrderLineInput {
+  product_id: number;
+  quantity: number;
+  set_option_id: string | null;
+}
+
+/** Totals as computed by the database, which is now the only pricing authority. */
+export interface PlacedOrder {
+  orderId: string;
+  subtotal: number;
+  vat: number;
+  total: number;
+  chargeCurrency: string;
+  chargeAmount: number;
+  fxRate: number;
+  reused: boolean;
+}
+
+export function toOrderLines(items: CartItem[]): OrderLineInput[] {
+  return items.map((item) => ({
+    product_id: item.product.id,
+    quantity: item.quantity,
+    set_option_id: item.setOption?.id ?? null,
+  }));
+}
+
+/**
+ * Create an order through the `place_order` RPC.
+ *
+ * Money is deliberately absent from the payload: the function re-reads each
+ * product's wholesale price (or set-option price), recomputes VAT and the total,
+ * and reserves stock — all in one transaction. Previously the browser sent
+ * `subtotal`/`vat`/`total` straight into an INSERT that RLS only checked for
+ * ownership, so any signed-in buyer could order at a price of their choosing.
+ */
+export async function placeOrder(input: {
+  items: CartItem[];
+  shipping: ShippingAddress;
+  paymentMethod: 'bank_transfer' | 'paypal';
+  poNumber?: string;
+  notes?: string;
+  chargeCurrency?: string;
+  fxRate?: number;
+  idempotencyKey?: string;
+}): Promise<{ order?: PlacedOrder; error?: string }> {
+  const { data, error } = await supabase.rpc('place_order', {
+    p_items: toOrderLines(input.items),
+    p_shipping: input.shipping,
+    p_payment_method: input.paymentMethod,
+    p_po_number: input.poNumber?.trim() || null,
+    p_notes: input.notes?.trim() || null,
+    p_charge_currency: input.chargeCurrency ?? null,
+    p_fx_rate: input.fxRate ?? null,
+    p_idempotency_key: input.idempotencyKey ?? null,
+  });
+  if (error) { console.error('[placeOrder]', error.message); return { error: error.message }; }
+
+  const row = data as Record<string, unknown>;
+  return {
+    order: {
+      orderId:        String(row.order_id),
+      subtotal:       Number(row.subtotal),
+      vat:            Number(row.vat),
+      total:          Number(row.total),
+      chargeCurrency: String(row.charge_currency ?? 'JPY'),
+      chargeAmount:   Number(row.charge_amount ?? row.total),
+      fxRate:         Number(row.fx_rate ?? 1),
+      reused:         Boolean(row.reused),
+    },
+  };
+}
+
+export async function fetchOrderById(id: string): Promise<Order | null> {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*, order_items(*)')
+    .eq('id', id)
+    .maybeSingle();
+  if (error || !data) return null;
+  return rowToOrder(data as Record<string, unknown>);
+}
 
 export async function fetchOrders(): Promise<Order[]> {
   const { data: orderRows, error } = await supabase
@@ -209,41 +279,8 @@ export async function fetchOrdersByMemberId(memberId: string): Promise<Order[]> 
   return orderRows.map(rowToOrder);
 }
 
-export async function insertOrder(order: Order): Promise<{ error?: string }> {
-  // Insert order header
-  const { error: orderErr } = await supabase.from('orders').insert([{
-    id:               order.id,
-    member_id:        order.memberId,
-    member_name:      order.memberName,
-    subtotal:         order.subtotal,
-    vat:              order.vat,
-    total:            order.total,
-    status:           order.status,
-    date:             order.date,
-    po_number:        order.poNumber ?? null,
-    notes:            order.notes ?? null,
-    shipping_address: order.shippingAddress ?? null,
-  }]);
-  if (orderErr) { console.error('[insertOrder] header failed:', orderErr); return { error: orderErr.message }; }
-
-  // Insert order items
-  if (order.items.length > 0) {
-    const items = order.items.map((item: CartItem) => ({
-      order_id:         order.id,
-      product_snapshot: item.product,
-      quantity:         item.quantity,
-      set_option:       item.setOption ?? null,
-    }));
-    const { error: itemsErr } = await supabase.from('order_items').insert(items);
-    if (itemsErr) {
-      console.error('[insertOrder] items failed:', itemsErr);
-      // Best-effort rollback so we don't leave a header-only order behind
-      await supabase.from('orders').delete().eq('id', order.id);
-      return { error: itemsErr.message };
-    }
-  }
-  return {};
-}
+// `insertOrder` is gone: INSERT on orders/order_items is revoked for
+// `authenticated`, so `placeOrder` (the `place_order` RPC) is the only way in.
 
 export async function updateOrderStatusById(id: string, status: Order['status']) {
   return supabase.from('orders').update({ status }).eq('id', id);
@@ -634,6 +671,17 @@ function rowToOrder(row: Record<string, unknown>): Order {
     trackingCarrier:    (row.tracking_carrier as string) || undefined,
     trackingNumber:     (row.tracking_number as string) || undefined,
     trackingShippedAt:  (row.tracking_shipped_at as string) || undefined,
+    // Payment ledger — nothing recorded how an order was paid before, which
+    // made settlement, reconciliation and refunds guesswork.
+    paymentMethod:      (row.payment_method as Order['paymentMethod']) || undefined,
+    paymentStatus:      (row.payment_status as Order['paymentStatus']) || undefined,
+    paymentReference:   (row.payment_reference as string) || undefined,
+    chargeCurrency:     (row.charge_currency as string) || undefined,
+    chargeAmount:       row.charge_amount == null ? undefined : Number(row.charge_amount),
+    paidAmount:         row.paid_amount == null ? undefined : Number(row.paid_amount),
+    paidCurrency:       (row.paid_currency as string) || undefined,
+    paidAt:             (row.paid_at as string) || undefined,
+    paymentError:       (row.payment_error as string) || undefined,
   };
 }
 

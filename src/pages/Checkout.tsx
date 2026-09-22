@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { localizedName } from '../lib/productName';
 import { useStore } from '../store/useStore';
 import type { ShippingAddress } from '../store/useStore';
+import { createPayPalOrder, capturePayPalOrder, paymentErrorKey } from '../lib/paypal';
 import { useCurrency } from '../context/CurrencyContext';
 import { convert, getCurrencyInfo } from '../lib/currency';
 import type { CurrencyCode } from '../lib/currency';
@@ -52,36 +53,40 @@ const COUNTRIES = [
 
 const VAT_RATE = 0.1;
 
-// Currencies PayPal accepts; KRW/CNY are unsupported so those fall back to JPY
+// Currencies PayPal accepts; KRW/CNY are unsupported so those fall back to JPY.
+// Kept in sync with PAYPAL_CURRENCIES in server/payments.mjs.
 const PAYPAL_CURRENCIES: CurrencyCode[] = ['JPY', 'USD', 'EUR', 'GBP', 'SGD', 'AUD'];
 
-
-function genOrderId() {
-  const d = new Date();
-  const date = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
-  // 5 chars from a 31-symbol alphabet (~28.6M combinations/day) so two orders
-  // placed on the same day can't realistically collide on the primary key
-  const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-  const bytes = crypto.getRandomValues(new Uint8Array(5));
-  const rand = Array.from(bytes).map((b) => alphabet[b % alphabet.length]).join('');
-  return `ORD-${date}-${rand}`;
+/**
+ * Order ids are issued by `place_order` now — a client-generated id meant a
+ * retried submit created a second order. This key instead lets the server
+ * recognise a retry of the same checkout and return the original order.
+ */
+function genIdempotencyKey() {
+  return crypto.randomUUID();
 }
 
 function CheckoutContent() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { cart, currentUser, addOrder, clearCart, isAuthenticated, showToast } = useStore();
+  const { cart, currentUser, placeOrder, syncOrderAfterPayment, clearCart, isAuthenticated, showToast } = useStore();
   const { formatPrice, currency, rates } = useCurrency();
   const [step, setStep] = useState<Step>('review');
   const [orderId, setOrderId] = useState('');
   const [poNumber, setPoNumber] = useState('');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<Partial<ShippingAddress>>({});
+  // Totals shown on the confirmation screen come from the server, not from the
+  // client-side preview, so the buyer sees exactly what was recorded.
   const [confirmedTotals, setConfirmedTotals] = useState({ subtotal: 0, vat: 0, total: 0 });
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'bank_transfer'>('bank_transfer');
   const [selectedBankCurrency, setSelectedBankCurrency] = useState('USD');
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [placing, setPlacing] = useState(false);
+  /** Stable for the lifetime of this checkout so retries resolve to one order. */
+  const idempotencyKey = useRef(genIdempotencyKey());
+  /** Our order id for the PayPal order currently in flight. */
+  const pendingOrderId = useRef<string | null>(null);
 
   /* ─── PayPal SDK ───
      The SDK must be (re)loaded with the same currency we charge in, otherwise
@@ -176,34 +181,50 @@ function CheckoutContent() {
     return Object.keys(e).length === 0;
   }
 
-  /* ─── Place Order ─── */
-  async function handlePlaceOrder(method: 'paypal' | 'bank_transfer' = 'bank_transfer') {
+  /* ─── Place order (bank transfer) ───
+     Goes straight to the `place_order` RPC: the database re-prices every line,
+     computes VAT/total and reserves stock in one transaction. The amounts below
+     are only a preview — whatever the server returns is what we show and what
+     was stored. */
+  async function handlePlaceOrder() {
     if (placing) return;
-    if (!validateShipping()) return;
-    setPlacing(true);
-    const id = genOrderId();
-    const { error } = await addOrder({
-      id,
-      memberId: currentUser!.id,
-      memberName: currentUser!.companyName,
-      items: [...cart],
-      subtotal,
-      vat,
-      total,
-      status: method === 'paypal' ? 'processing' : 'pending',
-      date: new Date().toISOString().split('T')[0],
-      poNumber: poNumber.trim() || undefined,
-      notes: notes.trim() || undefined,
-      shippingAddress: shipping,
-    });
-    setPlacing(false);
-    if (error) {
-      // Keep the cart and stay on this step so the buyer can retry
-      const soldOut = error.includes('INSUFFICIENT_STOCK') || error.includes('PRODUCT_NOT_FOUND');
-      showToast(t(soldOut ? 'checkout.insufficientStock' : 'checkout.orderFailed'), 'error');
+    if (!validateShipping()) {
+      showToast(t('checkout.fixShippingFirst'), 'error');
       return;
     }
-    setConfirmedTotals({ subtotal, vat, total });
+    setPlacing(true);
+    const { order, error } = await placeOrder({
+      items: cart,
+      shipping,
+      paymentMethod: 'bank_transfer',
+      poNumber,
+      notes,
+      // Wire transfers are quoted in the account currency; freezing the rate on
+      // the order is what makes the later incoming payment reconcilable.
+      chargeCurrency: selectedBankCurrency,
+      fxRate: rates[selectedBankCurrency] ?? 1,
+      idempotencyKey: idempotencyKey.current,
+    });
+    setPlacing(false);
+
+    if (error || !order) {
+      // Keep the cart and stay on this step so the buyer can retry
+      const soldOut = (error ?? '').includes('INSUFFICIENT_STOCK')
+        || (error ?? '').includes('PRODUCT_NOT_FOUND')
+        || (error ?? '').includes('PRODUCT_INACTIVE');
+      const notApproved = (error ?? '').includes('MEMBER_NOT_APPROVED');
+      showToast(
+        t(soldOut ? 'checkout.insufficientStock' : notApproved ? 'checkout.memberNotApproved' : 'checkout.orderFailed'),
+        'error',
+      );
+      return;
+    }
+
+    finishOrder(order.orderId, order);
+  }
+
+  function finishOrder(id: string, totals: { subtotal: number; vat: number; total: number }) {
+    setConfirmedTotals({ subtotal: totals.subtotal, vat: totals.vat, total: totals.total });
     clearCart();
     setOrderId(id);
     setStep('confirmed');
@@ -215,26 +236,47 @@ function CheckoutContent() {
     setTimeout(() => setCopiedField(null), 2000);
   }
 
-  /* ─── PayPal ─── */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function createPayPalOrder(_data: unknown, actions: any) {
-    if (!validateShipping()) return Promise.reject('invalid');
-    const decimals = getCurrencyInfo(paypalCurrency).decimals;
-    const amount = convert(total, paypalCurrency, rates);
-    return actions.order.create({
-      intent: 'CAPTURE',
-      purchase_units: [{
-        amount: {
-          currency_code: paypalCurrency,
-          value: amount.toFixed(decimals),
-        },
-        description: `WELMES Order — ${cart.length} item(s)`,
-      }],
+  /* ─── PayPal ───
+     Both halves run on the server (api/paypal.ts). The browser used to build
+     the amount itself and capture directly, so the charge was whatever the page
+     said it was and nothing ever checked that the money matched the order. */
+  async function createPayPalOrderHandler(): Promise<string> {
+    if (!validateShipping()) {
+      showToast(t('checkout.fixShippingFirst'), 'error');
+      throw new Error('INVALID_SHIPPING');
+    }
+    const created = await createPayPalOrder({
+      items: cart,
+      shipping,
+      poNumber,
+      notes,
+      displayCurrency: paypalCurrency,
+      idempotencyKey: idempotencyKey.current,
     });
+    pendingOrderId.current = created.orderId;
+    if (created.fxStale) console.warn('[checkout] charged on fallback FX rates');
+    return created.paypalOrderId;
   }
 
-  function onPayPalApprove(_data: unknown, actions: { order?: { capture: () => Promise<unknown> } }) {
-    return actions.order!.capture().then(() => handlePlaceOrder('paypal'));
+  async function onPayPalApprove(data: { orderID?: string }) {
+    const ourOrderId = pendingOrderId.current;
+    if (!ourOrderId || !data?.orderID) {
+      showToast(t('checkout.paypalFailed'), 'error');
+      return;
+    }
+    setPlacing(true);
+    try {
+      // The server captures, then compares amount + currency + custom_id against
+      // the stored order before anything is marked paid. A declined or mismatched
+      // capture releases the stock (and refunds) server-side.
+      const result = await capturePayPalOrder(data.orderID, ourOrderId);
+      await syncOrderAfterPayment(result.orderId);
+      finishOrder(result.orderId, result);
+    } catch (error) {
+      showToast(t(paymentErrorKey(error)), 'error');
+    } finally {
+      setPlacing(false);
+    }
   }
 
   const selectedBank = BANK_ACCOUNTS.find((b) => b.currency === selectedBankCurrency) ?? BANK_ACCOUNTS[0];
@@ -698,9 +740,16 @@ function CheckoutContent() {
                       ) : (
                         <PayPalButtons
                           style={{ layout: 'horizontal', color: 'black', shape: 'rect', label: 'paypal', height: 44 }}
-                          createOrder={createPayPalOrder}
+                          disabled={placing}
+                          createOrder={createPayPalOrderHandler}
                           onApprove={onPayPalApprove}
-                          onError={() => showToast(t('checkout.paypalFailed'), 'error')}
+                          onError={(err) => {
+                            // Shipping-validation rejections already showed their
+                            // own message; don't overwrite it with "PayPal failed".
+                            if (String(err).includes('INVALID_SHIPPING')) return;
+                            showToast(t(paymentErrorKey(err)), 'error');
+                          }}
+                          onCancel={() => showToast(t('checkout.paypalCancelled'), 'error')}
                         />
                       )}
                     </div>
@@ -709,7 +758,7 @@ function CheckoutContent() {
                   {/* CTA */}
                   {paymentMethod === 'bank_transfer' && (
                     <button
-                      onClick={() => handlePlaceOrder('bank_transfer')}
+                      onClick={() => handlePlaceOrder()}
                       disabled={placing || bankNotConfigured}
                       className="w-full h-11 bg-ink-700 text-white rounded-lg text-[14px] hover:bg-ink-900 transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
