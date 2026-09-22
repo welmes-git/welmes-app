@@ -58,6 +58,18 @@ const VAT_RATE = 0.1;
 const PAYPAL_CURRENCIES: CurrencyCode[] = ['JPY', 'USD', 'EUR', 'GBP', 'SGD', 'AUD'];
 
 /**
+ * Read once at module scope so the value is inlined in exactly one place.
+ *
+ * Empty when VITE_PAYPAL_CLIENT_ID was absent at BUILD time — the variable is
+ * baked into the bundle, so a Vercel change only takes effect on the next build.
+ * The old code fell back to the SDK's `'test'` placeholder, which rendered a
+ * button that looked fine and failed on click with no clue as to why. PayPal is
+ * now hidden outright when it is not configured, and the reason is logged.
+ */
+const PAYPAL_CLIENT_ID = (import.meta.env.VITE_PAYPAL_CLIENT_ID as string | undefined)?.trim() || '';
+const PAYPAL_CONFIGURED = PAYPAL_CLIENT_ID.length > 0;
+
+/**
  * Order ids are issued by `place_order` now — a client-generated id meant a
  * retried submit created a second order. This key instead lets the server
  * recognise a retry of the same checkout and return the original order.
@@ -102,7 +114,7 @@ function CheckoutContent() {
     paypalDispatch({
       type: DISPATCH_ACTION.RESET_OPTIONS,
       value: {
-        clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
+        clientId: PAYPAL_CLIENT_ID,
         currency: paypalCurrency,
         intent: 'capture',
       },
@@ -672,6 +684,7 @@ function CheckoutContent() {
                       </div>
                     </button>
 
+                    {PAYPAL_CONFIGURED && (
                     <button
                       onClick={() => setPaymentMethod('paypal')}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors ${
@@ -693,6 +706,7 @@ function CheckoutContent() {
                         <p className="text-[10px] text-ink-500">{t('checkout.paypalDesc')}</p>
                       </div>
                     </button>
+                    )}
                   </div>
 
                   {/* Bank transfer details */}
@@ -987,9 +1001,20 @@ function BankRow({
 }
 
 export default function Checkout() {
+  if (!PAYPAL_CONFIGURED && typeof console !== 'undefined') {
+    // Surfaced in the browser console rather than swallowed: the previous
+    // `|| 'test'` fallback made a missing build-time variable look like a
+    // PayPal outage.
+    console.error(
+      '[checkout] VITE_PAYPAL_CLIENT_ID was not set when this bundle was built — ' +
+      'PayPal is hidden. Set it in the Vercel project and redeploy.',
+    );
+  }
   return (
     <PayPalScriptProvider options={{
-      clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test',
+      // 'unconfigured' keeps the provider mountable (CheckoutContent calls
+      // usePayPalScriptReducer) while the PayPal option itself stays hidden.
+      clientId: PAYPAL_CLIENT_ID || 'unconfigured',
       currency: 'JPY',
       intent: 'capture',
     }}>
