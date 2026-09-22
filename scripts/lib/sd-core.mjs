@@ -11,7 +11,26 @@ import { enqueueEnrichmentForProduct } from './product-name-enrichment.mjs';
 import { enqueueTranslationForProduct } from './product-description-i18n.mjs';
 
 // ── 설정 ─────────────────────────────────────────────────────────────
-export const MARGIN = 1.1;             // 卸単価 × 1.1 → WELMES 회원 판매가(wholesale)
+/**
+ * WELMES 판매가 = 卸単価(税抜) × MARGIN
+ *
+ * 1.1 이었던 값을 1.25 로 올렸다. 이유:
+ *
+ * Superdelivery 의 卸単価 는 税抜 이고 결제 시 10% 소비세가 더해진다. 그 소비세는
+ * 수출 매출에 대해 환급받지만, 환급은 지출을 되돌리는 것이라 이익이 아니다.
+ * 즉 1.1 은 "원가 대비 10%" 였다 — 매출 대비로는 9.1%.
+ *
+ * 그 9.1% 로 PayPal 해외 결제 수수료, 국제 운임, 환전 스프레드, 포장·인건비,
+ * 반품·파손을 모두 감당해야 했다. 결제 수수료만으로도 대부분이 사라진다.
+ *
+ * 1.25 는 매출 대비 20% 다. 기존에 체크아웃에서 세금 명목으로 10% 를 더 받아
+ * 실질 1.21 로 청구하고 있었으므로, 바이어 체감 인상폭은 약 3% 에 그친다.
+ * 수출 거래에 부과할 수 없는 세금을 가격으로 정직하게 옮기는 변경이다.
+ *
+ * 국제 운임 요율이 확정되면 다시 조정해야 한다. 특히 무료배송 임계값을 도입할
+ * 경우 그 구간의 운임을 이 마진이 흡수할 수 있는지 재검증할 것.
+ */
+export const MARGIN = 1.25;
 export const ORIGINAL_FALLBACK = 1.5;  // 参考上代(정가)가 오픈프라이스일 때: 単価 × 1.5
 export const DEFAULT_STOCK = 50;       // 재고 표기가 '有り'일 때의 기본값
 export const DELAY_MS = 700;           // 페이지 간 예의 지연

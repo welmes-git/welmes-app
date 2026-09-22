@@ -386,7 +386,12 @@
     "fxUnavailable": "Les taux de change sont momentanément indisponibles pour cette devise. Choisissez JPY ou réessayez plus tard.",
     "paymentDue": "Échéance",
     "paymentDueNote": "Veuillez effectuer le virement avant le {{date}}. Les commandes impayées sont annulées après cette date et le stock réservé est remis en vente.",
-    "wireFeesNote": "Tous les frais bancaires, y compris ceux des banques intermédiaires, sont à la charge du donneur d'ordre. Veuillez virer en conditions « OUR » ou utiliser un virement local vers le compte ci-dessus afin que le montant facturé arrive intégralement."
+    "wireFeesNote": "Tous les frais bancaires, y compris ceux des banques intermédiaires, sont à la charge du donneur d'ordre. Veuillez virer en conditions « OUR » ou utiliser un virement local vers le compte ci-dessus afin que le montant facturé arrive intégralement.",
+    "taxExportExempt": "Taxe (export, 0%)",
+    "taxDomestic": "Taxe à la consommation ({{rate}} %)",
+    "shipping": "Livraison",
+    "shippingQuoted": "Devis séparé",
+    "dutiesNote": "Incoterms : DAP. Le total ne couvre que la marchandise et le fret international. Les droits d'importation, la TVA et les frais de douane sont à la charge du destinataire."
   },
   "auth": {
     "loginTitle": "Connexion professionnelle",

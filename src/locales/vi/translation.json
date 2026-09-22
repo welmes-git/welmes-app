@@ -384,7 +384,12 @@
     "fxUnavailable": "Tạm thời không có tỷ giá cho loại tiền đó. Vui lòng chọn JPY hoặc thử lại sau.",
     "paymentDue": "Hạn thanh toán",
     "paymentDueNote": "Vui lòng chuyển khoản trước {{date}}. Đơn chưa thanh toán sẽ bị hủy sau ngày này và hàng đã giữ sẽ được bán lại.",
-    "wireFeesNote": "Mọi phí ngân hàng, bao gồm phí ngân hàng trung gian, do người chuyển tiền chịu. Vui lòng chuyển theo điều kiện \"OUR\" hoặc dùng chuyển khoản nội địa tới tài khoản trên để nhận đủ số tiền trên hóa đơn."
+    "wireFeesNote": "Mọi phí ngân hàng, bao gồm phí ngân hàng trung gian, do người chuyển tiền chịu. Vui lòng chuyển theo điều kiện \"OUR\" hoặc dùng chuyển khoản nội địa tới tài khoản trên để nhận đủ số tiền trên hóa đơn.",
+    "taxExportExempt": "Thuế (xuất khẩu, 0%)",
+    "taxDomestic": "Thuế tiêu dùng ({{rate}}%)",
+    "shipping": "Phí vận chuyển",
+    "shippingQuoted": "Báo giá riêng",
+    "dutiesNote": "Incoterms: DAP. Tổng tiền chỉ gồm hàng hóa và phí vận chuyển quốc tế. Thuế nhập khẩu, VAT và phí thông quan do người nhận thanh toán."
   },
   "auth": {
     "loginTitle": "Đăng nhập thành viên doanh nghiệp",

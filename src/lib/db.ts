@@ -256,6 +256,55 @@ export async function placeOrder(input: {
   };
 }
 
+/** Server-computed figures for the review step. No arithmetic on this side. */
+export interface OrderQuote {
+  subtotal: number;
+  shippingFee: number;
+  tax: number;
+  taxRate: number;
+  taxMode: 'domestic_vat' | 'export_exempt' | 'none';
+  taxNoteKey: string | null;
+  total: number;
+  totalUnits: number;
+  shipTo: string | null;
+  incoterms: string;
+}
+
+/**
+ * Price a cart without creating anything.
+ *
+ * The checkout used to compute subtotal/VAT/total itself from a local
+ * `VAT_RATE = 0.1`, while `place_order` used its own copy of the same constant.
+ * Now that the rate depends on the destination the two would have drifted, so the
+ * review step asks the database for the numbers it is about to be charged.
+ */
+export async function quoteOrder(
+  items: CartItem[],
+  shipping: Partial<ShippingAddress> & { countryCode?: string },
+): Promise<{ quote?: OrderQuote; error?: string }> {
+  const { data, error } = await supabase.rpc('quote_order', {
+    p_items: toOrderLines(items),
+    p_shipping: shipping,
+  });
+  if (error) return { error: error.message };
+
+  const row = data as Record<string, unknown>;
+  return {
+    quote: {
+      subtotal:    Number(row.subtotal ?? 0),
+      shippingFee: Number(row.shipping_fee ?? 0),
+      tax:         Number(row.tax ?? 0),
+      taxRate:     Number(row.tax_rate ?? 0),
+      taxMode:     (row.tax_mode as OrderQuote['taxMode']) ?? 'none',
+      taxNoteKey:  (row.tax_note_key as string | null) ?? null,
+      total:       Number(row.total ?? 0),
+      totalUnits:  Number(row.total_units ?? 0),
+      shipTo:      (row.ship_to as string | null) ?? null,
+      incoterms:   String(row.incoterms ?? 'DAP'),
+    },
+  };
+}
+
 export async function fetchOrderById(id: string): Promise<Order | null> {
   const { data, error } = await supabase
     .from('orders')

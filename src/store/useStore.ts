@@ -113,7 +113,15 @@ export interface ShippingAddress {
   city: string;
   state: string;
   zipCode: string;
+  /** Display name, shown on labels and invoices. */
   country: string;
+  /**
+   * ISO 3166-1 alpha-2. What tax rules and shipping zones match on — a free-text
+   * country name cannot be looked up, and the old 'Other' option produced
+   * addresses with no resolvable destination at all. Optional because orders
+   * placed before this existed only carry the name.
+   */
+  countryCode?: string;
 }
 
 export interface Order {

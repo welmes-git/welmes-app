@@ -387,7 +387,12 @@
     "fxUnavailable": "Exchange rates are temporarily unavailable for that currency. Please choose JPY or try again shortly.",
     "paymentDue": "Payment due",
     "paymentDueNote": "Please complete the transfer by {{date}}. Unpaid orders are released after that date and the reserved stock returns to sale.",
-    "wireFeesNote": "All bank charges, including intermediary bank fees, are for the account of the remitter. Please remit under \"OUR\" terms, or use a local transfer to the account above, so that the full invoiced amount arrives."
+    "wireFeesNote": "All bank charges, including intermediary bank fees, are for the account of the remitter. Please remit under \"OUR\" terms, or use a local transfer to the account above, so that the full invoiced amount arrives.",
+    "taxExportExempt": "Tax (export, 0%)",
+    "taxDomestic": "Consumption tax ({{rate}}%)",
+    "shipping": "Shipping",
+    "shippingQuoted": "Quoted separately",
+    "dutiesNote": "Incoterms: DAP. The total covers goods and international freight only. Import duties, VAT and customs clearance fees are payable by the recipient."
   },
   "auth": {
     "loginTitle": "Business Member Login",

@@ -386,7 +386,12 @@
     "fxUnavailable": "Wechselkurse für diese Währung sind vorübergehend nicht verfügbar. Bitte wählen Sie JPY oder versuchen Sie es später erneut.",
     "paymentDue": "Zahlungsfrist",
     "paymentDueNote": "Bitte überweisen Sie bis zum {{date}}. Unbezahlte Bestellungen werden danach freigegeben und der reservierte Bestand geht zurück in den Verkauf.",
-    "wireFeesNote": "Alle Bankgebühren, einschließlich Gebühren zwischengeschalteter Banken, trägt der Auftraggeber. Bitte überweisen Sie mit der Weisung \"OUR\" oder nutzen Sie eine Inlandsüberweisung auf das obige Konto, damit der volle Rechnungsbetrag eingeht."
+    "wireFeesNote": "Alle Bankgebühren, einschließlich Gebühren zwischengeschalteter Banken, trägt der Auftraggeber. Bitte überweisen Sie mit der Weisung \"OUR\" oder nutzen Sie eine Inlandsüberweisung auf das obige Konto, damit der volle Rechnungsbetrag eingeht.",
+    "taxExportExempt": "Steuer (Ausfuhr, 0%)",
+    "taxDomestic": "Verbrauchsteuer ({{rate}} %)",
+    "shipping": "Versand",
+    "shippingQuoted": "Separat angeboten",
+    "dutiesNote": "Incoterms: DAP. Der Gesamtbetrag umfasst nur Ware und internationale Fracht. Einfuhrzölle, Umsatzsteuer und Zollabwicklungsgebühren trägt der Empfänger."
   },
   "auth": {
     "loginTitle": "Login für Geschäftskunden",

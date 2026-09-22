@@ -384,7 +384,12 @@
     "fxUnavailable": "Kurs untuk mata uang tersebut sementara tidak tersedia. Silakan pilih JPY atau coba lagi nanti.",
     "paymentDue": "Jatuh tempo",
     "paymentDueNote": "Mohon lakukan transfer sebelum {{date}}. Pesanan yang belum dibayar akan dibatalkan setelah tanggal tersebut dan stok yang dipesan kembali dijual.",
-    "wireFeesNote": "Semua biaya bank, termasuk biaya bank perantara, menjadi tanggungan pengirim. Mohon kirim dengan ketentuan \"OUR\" atau gunakan transfer lokal ke rekening di atas agar jumlah tagihan diterima penuh."
+    "wireFeesNote": "Semua biaya bank, termasuk biaya bank perantara, menjadi tanggungan pengirim. Mohon kirim dengan ketentuan \"OUR\" atau gunakan transfer lokal ke rekening di atas agar jumlah tagihan diterima penuh.",
+    "taxExportExempt": "Pajak (ekspor, 0%)",
+    "taxDomestic": "Pajak konsumsi ({{rate}}%)",
+    "shipping": "Pengiriman",
+    "shippingQuoted": "Dikutip terpisah",
+    "dutiesNote": "Incoterms: DAP. Total hanya mencakup barang dan pengiriman internasional. Bea masuk, PPN, dan biaya kepabeanan ditanggung penerima."
   },
   "auth": {
     "loginTitle": "Masuk Anggota Bisnis",

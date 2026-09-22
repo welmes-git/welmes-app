@@ -5,11 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { localizedName } from '../lib/productName';
 import { useStore } from '../store/useStore';
 import type { ShippingAddress } from '../store/useStore';
+import * as db from '../lib/db';
 import { createPayPalOrder, capturePayPalOrder, paymentErrorKey } from '../lib/paypal';
 import { useCurrency } from '../context/CurrencyContext';
 import { getCurrencyInfo } from '../lib/currency';
 import type { CurrencyCode } from '../lib/currency';
 import { BANK_ACCOUNTS, isPlaceholderAccount } from '../config/bankAccounts';
+import { COUNTRIES, HOME_COUNTRY } from '../config/countries';
 import {
   ChevronRight,
   CheckCircle2,
@@ -30,28 +32,7 @@ const STEPS: { key: Step; labelKey: string }[] = [
   { key: 'confirmed', labelKey: 'checkout.confirmed' },
 ];
 
-const COUNTRIES = [
-  'South Korea',
-  'United States',
-  'Japan',
-  'China',
-  'Australia',
-  'Canada',
-  'United Kingdom',
-  'Germany',
-  'France',
-  'Singapore',
-  'Hong Kong',
-  'Taiwan',
-  'Vietnam',
-  'Thailand',
-  'Indonesia',
-  'Malaysia',
-  'Philippines',
-  'Other',
-];
 
-const VAT_RATE = 0.1;
 
 /**
  * Settlement currency. Fixed to JPY — see PAYPAL_CURRENCIES in
@@ -152,19 +133,40 @@ function CheckoutContent() {
     city: '',
     state: '',
     zipCode: '',
-    country: 'South Korea',
+    country: 'Japan',
+    countryCode: HOME_COUNTRY,
   });
+
+  /* Every figure below comes from `quote_order`. The page used to compute
+     subtotal/VAT/total from a local VAT_RATE while place_order used its own copy;
+     now that the rate depends on the destination, one of the two would always have
+     been wrong. `subtotal` is still derived locally for the per-line display only. */
+  /* ─── Server-side quote ───
+     The destination decides the tax rate (Japan 10%, export 0%), so the quote is
+     refreshed whenever the cart or the country changes. Nothing here is computed
+     locally. */
+  useEffect(() => {
+    if (cart.length === 0) return;
+    let mounted = true;
+    (async () => {
+      const { quote: q } = await db.quoteOrder(cart, shipping);
+      if (mounted && q) setQuote(q);
+    })();
+    return () => { mounted = false; };
+  }, [cart, shipping]);
 
   const subtotal = cart.reduce(
     (sum, item) => sum + (item.setOption?.wholesalePrice ?? item.product.wholesalePrice) * item.quantity,
     0
   );
-  const vat = Math.round(subtotal * VAT_RATE);
-  const total = subtotal + vat;
   const totalUnits = cart.reduce(
     (sum, item) => sum + (item.setOption?.unitsPerSet ?? 1) * item.quantity,
     0
   );
+  const [quote, setQuote] = useState<db.OrderQuote | null>(null);
+  const vat = quote?.tax ?? 0;
+  const shippingFee = quote?.shippingFee ?? 0;
+  const total = quote?.total ?? subtotal;
 
   if (!isAuthenticated) {
     return (
@@ -201,6 +203,18 @@ function CheckoutContent() {
       </div>
     );
   }
+
+
+  /**
+   * Naming the rule matters commercially. A flat "VAT" line on an export order
+   * looked like Japanese tax being charged on top of the import VAT the buyer
+   * already owes at their own border.
+   */
+  const taxLabel = () => {
+    if (!quote || quote.taxMode === 'export_exempt') return t('checkout.taxExportExempt');
+    if (quote.taxMode === 'domestic_vat') return t('checkout.taxDomestic', { rate: Math.round(quote.taxRate * 100) });
+    return t('checkout.vat');
+  };
 
   /* ─── Validation ─── */
   function validateShipping(): boolean {
@@ -523,15 +537,21 @@ function CheckoutContent() {
                     <span className="font-medium tabular-nums">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-ink-500">{t('checkout.vat')}</span>
+                    <span className="text-ink-500">{taxLabel()}</span>
                     <span className="font-medium tabular-nums">{formatPrice(vat)}</span>
+                  </div>
+                  <div className="flex justify-between text-[13px]">
+                    <span className="text-ink-500">{t('checkout.shipping')}</span>
+                    <span className="font-medium tabular-nums">
+                      {shippingFee > 0 ? formatPrice(shippingFee) : t('checkout.shippingQuoted')}
+                    </span>
                   </div>
                   <div className="border-t border-line pt-3 flex justify-between">
                     <span className="text-[14px] font-bold text-ink-900">{t('checkout.grandTotal')}</span>
                     <span className="text-[18px] font-medium tabular-nums text-ink-700">{formatPrice(total)}</span>
                   </div>
                   <p className="text-[10px] text-ink-300 leading-relaxed">
-                    {t('checkout.vatNote')}
+                    {t('checkout.dutiesNote')}
                   </p>
                 </div>
                 <div className="px-5 pb-5">
@@ -592,12 +612,17 @@ function CheckoutContent() {
 
                   <Field label={`${t('checkout.country')} *`}>
                     <select
-                      value={shipping.country}
-                      onChange={(e) => setShipping({ ...shipping, country: e.target.value })}
+                      value={shipping.countryCode ?? HOME_COUNTRY}
+                      onChange={(e) => {
+                        const picked = COUNTRIES.find((c) => c.code === e.target.value);
+                        // Both are stored: the code drives tax and shipping rules,
+                        // the name is what appears on the label and invoice.
+                        setShipping({ ...shipping, countryCode: e.target.value, country: picked?.name ?? '' });
+                      }}
                       className={input(false)}
                     >
                       {COUNTRIES.map((c) => (
-                        <option key={c}>{c}</option>
+                        <option key={c.code} value={c.code}>{c.name}</option>
                       ))}
                     </select>
                   </Field>
@@ -705,13 +730,16 @@ function CheckoutContent() {
                     <span className="tabular-nums">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-[13px]">
-                    <span className="text-ink-500">{t('checkout.vat')}</span>
+                    <span className="text-ink-500">{taxLabel()}</span>
                     <span className="tabular-nums">{formatPrice(vat)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-[15px] pt-2 border-t border-line">
                     <span>{t('cart.total')}</span>
                     <span className="tabular-nums">{formatPrice(total)}</span>
                   </div>
+                  <p className="text-[10px] text-ink-300 leading-relaxed pt-1">
+                    {t('checkout.dutiesNote')}
+                  </p>
                 </div>
                 <div className="px-5 pb-5 space-y-3">
                   {/* Payment method selector */}

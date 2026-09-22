@@ -386,7 +386,12 @@
     "fxUnavailable": "暂时无法获取该货币的汇率。请选择JPY或稍后重试。",
     "paymentDue": "付款期限",
     "paymentDueNote": "请在{{date}}前完成汇款。逾期未付款的订单将被取消，预留库存将重新上架。",
-    "wireFeesNote": "包括中间行费用在内的所有银行费用由汇款人承担。请以\"OUR\"条件汇款，或使用本地转账至上述账户，以确保发票金额全额到账。"
+    "wireFeesNote": "包括中间行费用在内的所有银行费用由汇款人承担。请以\"OUR\"条件汇款，或使用本地转账至上述账户，以确保发票金额全额到账。",
+    "taxExportExempt": "税金（出口免税 0%）",
+    "taxDomestic": "消费税（{{rate}}%）",
+    "shipping": "运费",
+    "shippingQuoted": "另行报价",
+    "dutiesNote": "贸易术语：DAP。显示金额仅含货款与国际运费。进口关税、增值税及清关费用由收货人承担。"
   },
   "auth": {
     "loginTitle": "企业会员登录",
