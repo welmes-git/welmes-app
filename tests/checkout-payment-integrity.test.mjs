@@ -10,7 +10,6 @@ import {
   currencyDecimals,
   resolveChargeCurrency,
   fetchRates,
-  computeCharge,
   parseOrderRequest,
   verifyCapture,
   classifyError,
@@ -26,34 +25,34 @@ const captureBody = ({ amount, currency = 'USD', status = 'COMPLETED', customId 
 
 const expected = { amount: 123.45, currency: 'USD', orderId: 'ORD-20260922-AB12C' };
 
-test('currency support matches what PayPal can settle', () => {
-  assert.deepEqual(PAYPAL_CURRENCIES, ['JPY', 'USD', 'EUR', 'GBP', 'SGD', 'AUD']);
-  // KRW/CNY have rates for display but PayPal cannot charge them
-  assert.equal(resolveChargeCurrency('KRW'), 'JPY');
-  assert.equal(resolveChargeCurrency('CNY'), 'JPY');
-  assert.equal(resolveChargeCurrency('usd'), 'USD');
-  assert.equal(resolveChargeCurrency(undefined), 'JPY');
+test('settlement is JPY only', () => {
+  // Goods are sourced in JPY and the PayPal balance is JPY, so charging a buyer
+  // in their own currency meant PayPal converting back and taking a spread out of
+  // every order. Display currency is a separate concern (CurrencyContext).
+  assert.deepEqual(PAYPAL_CURRENCIES, ['JPY']);
+});
+
+test('every requested currency resolves to the settlement currency', () => {
+  for (const requested of ['USD', 'EUR', 'GBP', 'SGD', 'AUD', 'KRW', 'CNY', 'jpy', '', undefined, null]) {
+    assert.equal(resolveChargeCurrency(requested), 'JPY', `${requested} must settle as JPY`);
+  }
+});
+
+test('JPY is zero-decimal — PayPal rejects "100.00" for yen', () => {
   assert.equal(currencyDecimals('JPY'), 0);
+  assert.equal(currencyDecimals('KRW'), 0);
+  assert.equal(currencyDecimals('CNY'), 0);
   assert.equal(currencyDecimals('USD'), 2);
+  assert.equal(currencyDecimals('EUR'), 2);
 });
 
-test('charge amount is rounded to the currency precision PayPal accepts', () => {
-  const usd = computeCharge(100000, 'USD', { USD: 0.0067 });
-  assert.equal(usd.value, '670.00');
-  assert.equal(usd.currency, 'USD');
-  assert.equal(usd.rate, 0.0067);
-
-  // JPY is zero-decimal: "670.00" is rejected by PayPal
-  const jpy = computeCharge(100000, 'JPY', { JPY: 1 });
-  assert.equal(jpy.value, '100000');
-  assert.equal(jpy.decimals, 0);
-});
-
-test('a non-positive total or rate can never become a charge', () => {
-  assert.throws(() => computeCharge(0, 'USD', { USD: 0.0067 }), /INVALID_TOTAL/);
-  assert.throws(() => computeCharge(-10, 'USD', { USD: 0.0067 }), /INVALID_TOTAL/);
-  assert.throws(() => computeCharge(1000, 'USD', { USD: 0 }), /INVALID_FX_RATE/);
-  assert.throws(() => computeCharge(1000, 'USD', { USD: -1 }), /INVALID_FX_RATE/);
+test('fallback rates still cover every display currency', () => {
+  // Settlement no longer needs them, but the storefront prices every currency in
+  // CURRENCIES, and a missing entry would render a price of zero.
+  for (const code of ['JPY', 'USD', 'EUR', 'GBP', 'CNY', 'KRW', 'SGD', 'AUD']) {
+    assert.ok(FALLBACK_RATES[code] > 0, `${code} needs a fallback rate`);
+  }
+  assert.equal(FALLBACK_RATES.JPY, 1, 'JPY is the base');
 });
 
 test('fx fallback is reported as stale instead of silently charging an old rate', async () => {

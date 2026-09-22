@@ -5,8 +5,21 @@
 // choosing the charge currency, converting the JPY total, and deciding whether
 // a PayPal capture actually paid for the order we created.
 
-/** PayPal cannot settle KRW/CNY; those buyers are charged in JPY. */
-export const PAYPAL_CURRENCIES = ['JPY', 'USD', 'EUR', 'GBP', 'SGD', 'AUD'];
+/**
+ * Currencies we will settle in.
+ *
+ * JPY only, deliberately. Goods are sourced in JPY, the PayPal balance is JPY and
+ * the selling entity books in JPY, so charging a buyer in USD meant PayPal
+ * converting USD→JPY on settlement and taking a spread out of every order —
+ * a guaranteed loss on top of revenue that drifted with the yen.
+ *
+ * Buyers still SEE prices in their own currency (CurrencyContext); only the
+ * settlement currency is fixed. Display and charge are separate concerns.
+ *
+ * A useful side effect: JPY needs no FX rate, so `place_order` can never refuse
+ * a checkout because the rate table went stale.
+ */
+export const PAYPAL_CURRENCIES = ['JPY'];
 
 /** Zero-decimal currencies — PayPal rejects "100.00" for JPY. */
 const ZERO_DECIMAL = new Set(['JPY', 'KRW', 'CNY']);
@@ -47,21 +60,11 @@ export async function fetchRates(fetchImpl = fetch) {
   }
 }
 
-/**
- * Convert a JPY total into the charge currency and round it the way PayPal
- * expects. The rate is returned so it can be frozen onto the order.
- */
-export function computeCharge(totalJPY, currency, rates) {
-  const code = resolveChargeCurrency(currency);
-  const rate = Number(rates?.[code] ?? FALLBACK_RATES[code] ?? 1);
-  if (!Number.isFinite(totalJPY) || totalJPY <= 0) throw new Error('INVALID_TOTAL');
-  if (!Number.isFinite(rate) || rate <= 0) throw new Error('INVALID_FX_RATE');
-  const decimals = currencyDecimals(code);
-  const factor = 10 ** decimals;
-  const amount = Math.round(totalJPY * rate * factor) / factor;
-  if (amount <= 0) throw new Error('INVALID_CHARGE_AMOUNT');
-  return { currency: code, amount, rate, decimals, value: amount.toFixed(decimals) };
-}
+// `computeCharge` used to convert the JPY total here before handing it to PayPal.
+// It is gone: `place_order` computes `charge_amount` in the same transaction that
+// prices the order, and api/paypal.ts sends that stored value verbatim. Keeping a
+// second implementation of the same arithmetic was an invitation for the two to
+// disagree about rounding.
 
 /** Refresh `fx_rates` once a stored rate is older than this. */
 export const FX_REFRESH_AFTER_MS = 6 * 60 * 60 * 1000;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer, DISPATCH_ACTION } from '@paypal/react-paypal-js';
+import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { useTranslation } from 'react-i18next';
 import { localizedName } from '../lib/productName';
 import { useStore } from '../store/useStore';
@@ -53,9 +53,12 @@ const COUNTRIES = [
 
 const VAT_RATE = 0.1;
 
-// Currencies PayPal accepts; KRW/CNY are unsupported so those fall back to JPY.
-// Kept in sync with PAYPAL_CURRENCIES in server/payments.mjs.
-const PAYPAL_CURRENCIES: CurrencyCode[] = ['JPY', 'USD', 'EUR', 'GBP', 'SGD', 'AUD'];
+/**
+ * Settlement currency. Fixed to JPY — see PAYPAL_CURRENCIES in
+ * server/payments.mjs for why. Prices are still DISPLAYED in the buyer's
+ * currency via CurrencyContext.
+ */
+const CHARGE_CURRENCY: CurrencyCode = 'JPY';
 
 /**
  * Read once at module scope so the value is inlined in exactly one place.
@@ -82,7 +85,9 @@ function CheckoutContent() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { cart, currentUser, placeOrder, syncOrderAfterPayment, clearCart, isAuthenticated, showToast } = useStore();
-  const { formatPrice, currency, rates } = useCurrency();
+  // `currency` is deliberately not read: it drives the DISPLAY currency only,
+  // while settlement is fixed to CHARGE_CURRENCY.
+  const { formatPrice, rates } = useCurrency();
   const [step, setStep] = useState<Step>('review');
   const [orderId, setOrderId] = useState('');
   const [poNumber, setPoNumber] = useState('');
@@ -92,7 +97,11 @@ function CheckoutContent() {
   // client-side preview, so the buyer sees exactly what was recorded.
   const [confirmedTotals, setConfirmedTotals] = useState({ subtotal: 0, vat: 0, total: 0 });
   const [paymentMethod, setPaymentMethod] = useState<'paypal' | 'bank_transfer'>('bank_transfer');
-  const [selectedBankCurrency, setSelectedBankCurrency] = useState('USD');
+  /* Wire transfers arrive in the currency of the account the buyer picks, so the
+     order is denominated in that currency and reconciles exactly. JPY is the
+     default; the other accounts stay available for buyers whose bank cannot send
+     yen cheaply. */
+  const [selectedBankCurrency, setSelectedBankCurrency] = useState(CHARGE_CURRENCY as string);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [placing, setPlacing] = useState(false);
   /** Stable for the lifetime of this checkout so retries resolve to one order. */
@@ -111,25 +120,12 @@ function CheckoutContent() {
   }, []);
 
   /* ─── PayPal SDK ───
-     The SDK must be (re)loaded with the same currency we charge in, otherwise
-     order creation fails with a currency mismatch. main.tsx loads it with JPY;
-     when the buyer's display currency is a PayPal-supported non-JPY currency
-     we reset the script options to match. */
-  const paypalCurrency: CurrencyCode = PAYPAL_CURRENCIES.includes(currency) ? currency : 'JPY';
-  const [{ isPending: paypalLoading }, paypalDispatch] = usePayPalScriptReducer();
-  const appliedPaypalCurrency = useRef('JPY');
-  useEffect(() => {
-    if (appliedPaypalCurrency.current === paypalCurrency) return;
-    appliedPaypalCurrency.current = paypalCurrency;
-    paypalDispatch({
-      type: DISPATCH_ACTION.RESET_OPTIONS,
-      value: {
-        clientId: PAYPAL_CLIENT_ID,
-        currency: paypalCurrency,
-        intent: 'capture',
-      },
-    });
-  }, [paypalCurrency, paypalDispatch]);
+     We settle in JPY only, so the SDK's currency never changes and the old
+     RESET_OPTIONS dance is gone. It existed to reload the script whenever the
+     buyer's display currency was another PayPal-settleable currency; charging in
+     the buyer's currency meant PayPal converting back to JPY on settlement and
+     taking a spread out of every order. Display stays multi-currency. */
+  const [{ isPending: paypalLoading }] = usePayPalScriptReducer();
 
   const [shipping, setShipping] = useState<ShippingAddress>({
     company: currentUser?.companyName ?? '',
@@ -279,7 +275,7 @@ function CheckoutContent() {
       shipping,
       poNumber,
       notes,
-      displayCurrency: paypalCurrency,
+      displayCurrency: CHARGE_CURRENCY,
       idempotencyKey: idempotencyKey.current,
     });
     pendingOrderId.current = created.orderId;
