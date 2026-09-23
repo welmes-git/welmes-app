@@ -220,10 +220,14 @@ export default async function handler(a: Request | NodeReq, b?: NodeRes): Promis
     const raw = typeof req.body === 'string'
       ? req.body
       : req.body === undefined || req.body === null ? '' : JSON.stringify(req.body);
+    const method = (req.method || 'POST').toUpperCase();
     const request = new Request(`https://internal.invalid${req.url || '/api/paypal-webhook'}`, {
-      method: (req.method || 'POST').toUpperCase(),
+      method,
       headers,
-      body: raw,
+      // `new Request` throws when a GET or HEAD carries a body, which surfaced as
+      // FUNCTION_INVOCATION_FAILED instead of the 405 the handler would have
+      // returned. api/paypal.ts already guards this the same way.
+      body: ['GET', 'HEAD'].includes(method) ? undefined : raw,
     });
     const response = await handle(request);
     b.statusCode = response.status;
