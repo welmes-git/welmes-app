@@ -391,7 +391,9 @@
     "taxDomestic": "Verbrauchsteuer ({{rate}} %)",
     "shipping": "Versand",
     "shippingQuoted": "Separat angeboten",
-    "dutiesNote": "Incoterms: DAP. Der Gesamtbetrag umfasst nur Ware und internationale Fracht. Einfuhrzölle, Umsatzsteuer und Zollabwicklungsgebühren trägt der Empfänger."
+    "dutiesNote": "Incoterms: DAP. Der Gesamtbetrag umfasst nur Ware und internationale Fracht. Einfuhrzölle, Umsatzsteuer und Zollabwicklungsgebühren trägt der Empfänger.",
+    "selectCountry": "Land auswählen",
+    "errCountry": "Bitte Zielland auswählen"
   },
   "auth": {
     "loginTitle": "Login für Geschäftskunden",

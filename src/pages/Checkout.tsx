@@ -11,7 +11,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { getCurrencyInfo } from '../lib/currency';
 import type { CurrencyCode } from '../lib/currency';
 import { BANK_ACCOUNTS, isPlaceholderAccount } from '../config/bankAccounts';
-import { COUNTRIES, HOME_COUNTRY } from '../config/countries';
+import { COUNTRIES } from '../config/countries';
 import {
   ChevronRight,
   CheckCircle2,
@@ -133,8 +133,13 @@ function CheckoutContent() {
     city: '',
     state: '',
     zipCode: '',
-    country: 'Japan',
-    countryCode: HOME_COUNTRY,
+    /* Deliberately blank. Defaulting to the home country made `quote_order`
+       resolve the domestic rule, so every buyer — including the overseas ones who
+       are the whole point — was shown 10% Japanese consumption tax on the review
+       step before stating a destination. With no country the catch-all export rule
+       applies (0%), and the buyer picks the real one at the shipping step. */
+    country: '',
+    countryCode: '',
   });
 
   /* Every figure below comes from `quote_order`. The page used to compute
@@ -167,6 +172,17 @@ function CheckoutContent() {
   const vat = quote?.tax ?? 0;
   const shippingFee = quote?.shippingFee ?? 0;
   const total = quote?.total ?? subtotal;
+  /* The server's subtotal wins over the locally derived one. They diverge whenever
+     a catalogue price moved after the item was added to the cart, and the server's
+     figure is the one that gets charged. */
+  const shownSubtotal = quote?.subtotal ?? subtotal;
+  /** Current price for a cart line, falling back to the cart snapshot pre-quote. */
+  const linePrice = (productId: number, setOptionId?: string) => {
+    const line = quote?.lines.find(
+      (l) => l.productId === productId && (l.setOptionId ?? undefined) === setOptionId,
+    );
+    return line?.unitPrice;
+  };
 
   if (!isAuthenticated) {
     return (
@@ -225,6 +241,8 @@ function CheckoutContent() {
     if (!shipping.addressLine1.trim()) e.addressLine1 = t('checkout.errAddress');
     if (!shipping.city.trim()) e.city = t('checkout.errCity');
     if (!shipping.zipCode.trim()) e.zipCode = t('checkout.errZip');
+    // Without this the destination — and therefore the tax rate — is unresolvable.
+    if (!shipping.countryCode?.trim()) e.country = t('checkout.errCountry');
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -453,7 +471,9 @@ function CheckoutContent() {
                 </div>
 
                 {cart.map((item) => {
-                  const lineTotal = (item.setOption?.wholesalePrice ?? item.product.wholesalePrice) * item.quantity;
+                  const unitPrice = linePrice(item.product.id, item.setOption?.id)
+                    ?? (item.setOption?.wholesalePrice ?? item.product.wholesalePrice);
+                  const lineTotal = unitPrice * item.quantity;
                   return (
                     <div
                       key={`${item.product.id}-${item.setOption?.id}`}
@@ -477,7 +497,7 @@ function CheckoutContent() {
                             <p className="text-[11px] text-ink-300 leading-tight">{item.product.name}</p>
                           )}
                           <p className="text-[12px] text-ink-700 font-semibold tabular-nums mt-0.5">
-                            {formatPrice(item.setOption?.wholesalePrice ?? item.product.wholesalePrice)} {t('products.perSet')}
+                            {formatPrice(unitPrice)} {t('products.perSet')}
                           </p>
                         </div>
                       </div>
@@ -534,12 +554,14 @@ function CheckoutContent() {
                   </div>
                   <div className="border-t border-line pt-3 flex justify-between text-[13px]">
                     <span className="text-ink-500">{t('checkout.subtotal')}</span>
-                    <span className="font-medium tabular-nums">{formatPrice(subtotal)}</span>
+                    <span className="font-medium tabular-nums">{formatPrice(shownSubtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-[13px]">
-                    <span className="text-ink-500">{taxLabel()}</span>
-                    <span className="font-medium tabular-nums">{formatPrice(vat)}</span>
-                  </div>
+                  {vat > 0 && (
+                    <div className="flex justify-between text-[13px]">
+                      <span className="text-ink-500">{taxLabel()}</span>
+                      <span className="font-medium tabular-nums">{formatPrice(vat)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-[13px]">
                     <span className="text-ink-500">{t('checkout.shipping')}</span>
                     <span className="font-medium tabular-nums">
@@ -610,17 +632,18 @@ function CheckoutContent() {
                     />
                   </Field>
 
-                  <Field label={`${t('checkout.country')} *`}>
+                  <Field label={`${t('checkout.country')} *`} error={errors.country}>
                     <select
-                      value={shipping.countryCode ?? HOME_COUNTRY}
+                      value={shipping.countryCode ?? ''}
                       onChange={(e) => {
                         const picked = COUNTRIES.find((c) => c.code === e.target.value);
                         // Both are stored: the code drives tax and shipping rules,
                         // the name is what appears on the label and invoice.
                         setShipping({ ...shipping, countryCode: e.target.value, country: picked?.name ?? '' });
                       }}
-                      className={input(false)}
+                      className={input(!!errors.country)}
                     >
+                      <option value="" disabled>{t('checkout.selectCountry')}</option>
                       {COUNTRIES.map((c) => (
                         <option key={c.code} value={c.code}>{c.name}</option>
                       ))}
@@ -727,12 +750,14 @@ function CheckoutContent() {
                 <div className="px-5 py-4 border-t border-line space-y-2">
                   <div className="flex justify-between text-[13px]">
                     <span className="text-ink-500">{t('cart.subtotal')}</span>
-                    <span className="tabular-nums">{formatPrice(subtotal)}</span>
+                    <span className="tabular-nums">{formatPrice(shownSubtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-[13px]">
-                    <span className="text-ink-500">{taxLabel()}</span>
-                    <span className="tabular-nums">{formatPrice(vat)}</span>
-                  </div>
+                  {vat > 0 && (
+                    <div className="flex justify-between text-[13px]">
+                      <span className="text-ink-500">{taxLabel()}</span>
+                      <span className="tabular-nums">{formatPrice(vat)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-bold text-[15px] pt-2 border-t border-line">
                     <span>{t('cart.total')}</span>
                     <span className="tabular-nums">{formatPrice(total)}</span>
@@ -920,10 +945,12 @@ function CheckoutContent() {
                   <span className="text-ink-500">{t('checkout.subtotal')}</span>
                   <span className="tabular-nums">{formatPrice(confirmed.subtotal)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-ink-500">{t('checkout.vat')}</span>
-                  <span className="tabular-nums">{formatPrice(confirmed.vat)}</span>
-                </div>
+                {confirmed.vat > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-ink-500">{taxLabel()}</span>
+                    <span className="tabular-nums">{formatPrice(confirmed.vat)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-[15px] pt-3 border-t border-line">
                   <span>{t('checkout.grandTotal')}</span>
                   <span className="tabular-nums">{formatPrice(confirmed.total)}</span>

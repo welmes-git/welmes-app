@@ -391,7 +391,9 @@
     "taxDomestic": "Taxe à la consommation ({{rate}} %)",
     "shipping": "Livraison",
     "shippingQuoted": "Devis séparé",
-    "dutiesNote": "Incoterms : DAP. Le total ne couvre que la marchandise et le fret international. Les droits d'importation, la TVA et les frais de douane sont à la charge du destinataire."
+    "dutiesNote": "Incoterms : DAP. Le total ne couvre que la marchandise et le fret international. Les droits d'importation, la TVA et les frais de douane sont à la charge du destinataire.",
+    "selectCountry": "Choisissez un pays",
+    "errCountry": "Sélectionnez le pays de destination"
   },
   "auth": {
     "loginTitle": "Connexion professionnelle",

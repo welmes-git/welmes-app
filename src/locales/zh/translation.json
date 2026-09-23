@@ -391,7 +391,9 @@
     "taxDomestic": "消费税（{{rate}}%）",
     "shipping": "运费",
     "shippingQuoted": "另行报价",
-    "dutiesNote": "贸易术语：DAP。显示金额仅含货款与国际运费。进口关税、增值税及清关费用由收货人承担。"
+    "dutiesNote": "贸易术语：DAP。显示金额仅含货款与国际运费。进口关税、增值税及清关费用由收货人承担。",
+    "selectCountry": "请选择国家",
+    "errCountry": "请选择配送国家"
   },
   "auth": {
     "loginTitle": "企业会员登录",

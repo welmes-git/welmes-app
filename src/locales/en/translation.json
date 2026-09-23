@@ -392,7 +392,9 @@
     "taxDomestic": "Consumption tax ({{rate}}%)",
     "shipping": "Shipping",
     "shippingQuoted": "Quoted separately",
-    "dutiesNote": "Incoterms: DAP. The total covers goods and international freight only. Import duties, VAT and customs clearance fees are payable by the recipient."
+    "dutiesNote": "Incoterms: DAP. The total covers goods and international freight only. Import duties, VAT and customs clearance fees are payable by the recipient.",
+    "selectCountry": "Select a country",
+    "errCountry": "Select the destination country"
   },
   "auth": {
     "loginTitle": "Business Member Login",

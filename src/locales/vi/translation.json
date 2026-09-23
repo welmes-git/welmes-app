@@ -389,7 +389,9 @@
     "taxDomestic": "Thuế tiêu dùng ({{rate}}%)",
     "shipping": "Phí vận chuyển",
     "shippingQuoted": "Báo giá riêng",
-    "dutiesNote": "Incoterms: DAP. Tổng tiền chỉ gồm hàng hóa và phí vận chuyển quốc tế. Thuế nhập khẩu, VAT và phí thông quan do người nhận thanh toán."
+    "dutiesNote": "Incoterms: DAP. Tổng tiền chỉ gồm hàng hóa và phí vận chuyển quốc tế. Thuế nhập khẩu, VAT và phí thông quan do người nhận thanh toán.",
+    "selectCountry": "Chọn quốc gia",
+    "errCountry": "Vui lòng chọn quốc gia nhận hàng"
   },
   "auth": {
     "loginTitle": "Đăng nhập thành viên doanh nghiệp",

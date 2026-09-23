@@ -391,7 +391,9 @@
     "taxDomestic": "Impuesto al consumo ({{rate}}%)",
     "shipping": "Envío",
     "shippingQuoted": "Se cotiza aparte",
-    "dutiesNote": "Incoterms: DAP. El total cubre solo la mercancía y el flete internacional. Los aranceles de importación, el IVA y las tasas de aduana corren a cargo del destinatario."
+    "dutiesNote": "Incoterms: DAP. El total cubre solo la mercancía y el flete internacional. Los aranceles de importación, el IVA y las tasas de aduana corren a cargo del destinatario.",
+    "selectCountry": "Selecciona un país",
+    "errCountry": "Selecciona el país de destino"
   },
   "auth": {
     "loginTitle": "Acceso para empresas",

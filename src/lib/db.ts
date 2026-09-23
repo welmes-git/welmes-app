@@ -256,8 +256,25 @@ export async function placeOrder(input: {
   };
 }
 
+/** One priced line as the catalogue currently stands, not as the cart remembers it. */
+export interface QuoteLine {
+  productId: number;
+  setOptionId: string | null;
+  quantity: number;
+  unitPrice: number;
+  units: number;
+  lineTotal: number;
+}
+
 /** Server-computed figures for the review step. No arithmetic on this side. */
 export interface OrderQuote {
+  /**
+   * Prices as of now. The cart keeps a full product snapshot in localStorage, so a
+   * catalogue price change leaves it stale — a buyer could see ¥509 per line and be
+   * charged ¥579. Rendering these instead of the cart's own numbers keeps the two
+   * from disagreeing.
+   */
+  lines: QuoteLine[];
   subtotal: number;
   shippingFee: number;
   tax: number;
@@ -291,6 +308,14 @@ export async function quoteOrder(
   const row = data as Record<string, unknown>;
   return {
     quote: {
+      lines: ((row.lines as Record<string, unknown>[]) ?? []).map((l) => ({
+        productId:   Number(l.product_id),
+        setOptionId: (l.set_option_id as string | null) ?? null,
+        quantity:    Number(l.quantity),
+        unitPrice:   Number(l.unit_price),
+        units:       Number(l.units),
+        lineTotal:   Number(l.line_total),
+      })),
       subtotal:    Number(row.subtotal ?? 0),
       shippingFee: Number(row.shipping_fee ?? 0),
       tax:         Number(row.tax ?? 0),

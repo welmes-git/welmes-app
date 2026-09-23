@@ -390,7 +390,9 @@
     "taxDomestic": "소비세 ({{rate}}%)",
     "shipping": "배송비",
     "shippingQuoted": "별도 안내",
-    "dutiesNote": "인코텀즈: DAP. 표시 금액은 상품 대금과 국제 운임만 포함합니다. 수입 관세, 부가세, 통관 수수료는 수취인 부담입니다."
+    "dutiesNote": "인코텀즈: DAP. 표시 금액은 상품 대금과 국제 운임만 포함합니다. 수입 관세, 부가세, 통관 수수료는 수취인 부담입니다.",
+    "selectCountry": "국가를 선택하세요",
+    "errCountry": "배송 국가를 선택해 주세요"
   },
   "auth": {
     "loginTitle": "사업자 회원 로그인",

@@ -389,7 +389,9 @@
     "taxDomestic": "Pajak konsumsi ({{rate}}%)",
     "shipping": "Pengiriman",
     "shippingQuoted": "Dikutip terpisah",
-    "dutiesNote": "Incoterms: DAP. Total hanya mencakup barang dan pengiriman internasional. Bea masuk, PPN, dan biaya kepabeanan ditanggung penerima."
+    "dutiesNote": "Incoterms: DAP. Total hanya mencakup barang dan pengiriman internasional. Bea masuk, PPN, dan biaya kepabeanan ditanggung penerima.",
+    "selectCountry": "Pilih negara",
+    "errCountry": "Pilih negara tujuan"
   },
   "auth": {
     "loginTitle": "Masuk Anggota Bisnis",
