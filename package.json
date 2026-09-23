@@ -9,7 +9,7 @@
     "build:client": "vite build --outDir dist/client",
     "build:server": "vite build --ssr src/entry-server.tsx --outDir dist/server",
     "lint": "eslint .",
-    "typecheck:api": "tsc --noEmit --strict --target es2022 --module esnext --moduleResolution bundler --types node --allowJs --skipLibCheck api/paypal.ts api/ssr.ts api/fx.ts",
+    "typecheck:api": "tsc --noEmit --strict --target es2022 --module esnext --moduleResolution bundler --types node --allowJs --skipLibCheck api/paypal.ts api/ssr.ts api/fx.ts api/paypal-webhook.ts",
     "preview": "vite preview --outDir dist/client",
     "preview:ssr": "node server/preview.mjs",
     "test": "node --test tests/*.test.mjs",
