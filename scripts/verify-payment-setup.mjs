@@ -211,6 +211,60 @@ async function checkPayPal() {
   }
 }
 
+// ── Webhooks ───────────────────────────────────────────────────────────────
+// Registration lives in the PayPal dashboard and belongs to an APP, so a webhook
+// registered against a different app than the credentials we deploy never
+// verifies — and nothing in the running system would say so. This reads it back
+// from the API using the same credentials the endpoint will use.
+async function checkWebhook() {
+  console.log('\n── PayPal webhook ──');
+  if (!PAYPAL_SECRET) {
+    return record(null, 'PAYPAL_CLIENT_SECRET not available locally — skipped');
+  }
+  const configuredId = env.PAYPAL_WEBHOOK_ID;
+  record(Boolean(configuredId), 'PAYPAL_WEBHOOK_ID is set',
+    configuredId ? null : 'without it signature verification answers 503');
+
+  const auth = Buffer.from(`${PAYPAL_ID}:${PAYPAL_SECRET}`).toString('base64');
+  const base = env.PAYPAL_ENV === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+  let token;
+  try {
+    const res = await fetch(`${base}/v1/oauth2/token`, {
+      method: 'POST',
+      headers: { authorization: `Basic ${auth}`, 'content-type': 'application/x-www-form-urlencoded' },
+      body: 'grant_type=client_credentials',
+    });
+    if (!res.ok) throw new Error(`auth ${res.status}`);
+    token = (await res.json()).access_token;
+  } catch (error) {
+    return record(false, 'could not authenticate to list webhooks', error.message);
+  }
+
+  const res = await fetch(`${base}/v1/notifications/webhooks`, { headers: { authorization: `Bearer ${token}` } });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) return record(false, 'could not list webhooks', String(res.status));
+  const hooks = body.webhooks ?? [];
+
+  const mine = hooks.find((w) => String(w.id) === String(configuredId))
+    ?? hooks.find((w) => String(w.url).includes('/api/paypal-webhook'));
+  if (!mine) {
+    return record(false, 'no webhook registered on this app',
+      `${hooks.length} webhook(s) on the app, none matching`);
+  }
+  const idMatches = String(mine.id) === String(configuredId);
+  record(idMatches, 'PAYPAL_WEBHOOK_ID matches the registered webhook',
+    idMatches ? mine.url : `registered id is ${mine.id}`);
+
+  const subscribed = (mine.event_types ?? []).map((e) => e.name);
+  const needed = [
+    'PAYMENT.CAPTURE.REFUNDED', 'PAYMENT.CAPTURE.REVERSED', 'PAYMENT.CAPTURE.DENIED',
+    'CUSTOMER.DISPUTE.CREATED', 'CUSTOMER.DISPUTE.UPDATED', 'CUSTOMER.DISPUTE.RESOLVED',
+  ];
+  const missing = needed.filter((e) => !subscribed.includes(e) && !subscribed.includes('*'));
+  record(missing.length === 0, 'all handled events are subscribed',
+    missing.length === 0 ? `${subscribed.length} event(s)` : `missing: ${missing.join(', ')}`);
+}
+
 // ── Service role ───────────────────────────────────────────────────────────
 async function checkServiceRole() {
   console.log('\n── Supabase service role ──');
@@ -236,6 +290,7 @@ await checkStep1();
 await checkStep4();
 await checkAuthenticatedAccess();
 await checkPayPal();
+await checkWebhook();
 await checkServiceRole();
 
 const failed = results.filter((r) => r.ok === false);
