@@ -162,6 +162,12 @@ for (const row of products) {
       updates.wholesale_price = newS1.wholesalePrice;
       updates.original_price = newS1.originalPrice;
       updates.discount = parsed.discount;
+      // The cost has to move with the price. `set_options` carries each set's
+      // sourcePrice, but reprice-products.mjs reads the top-level column for the
+      // top-level price — leaving it stale would make the two disagree on the next
+      // margin change.
+      updates.sd_wholesale_price = newS1.sourcePrice ?? null;
+      updates.sd_price_checked_at = new Date().toISOString();
     }
     // 재고 — 0Crossing 만 알림, 수치 변동은 조용히 갱신
     if (row.stock > 0 && parsed.stock === 0) {
