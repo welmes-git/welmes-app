@@ -1,61 +1,54 @@
 #!/usr/bin/env node
-// Reprice already-registered products after a MARGIN change.
+// Bring every product onto the current MARGIN, computed from the supplier price we
+// actually pay.
 //
-// MARGIN only applies at import time, so changing the constant leaves every
-// existing row at the old multiplier. This rescales `wholesale_price` and each
-// set option's `wholesalePrice` from the old margin to the new one:
+//     wholesale_price = round(sd_wholesale_price × MARGIN)
 //
-//     卸単価 = current_price / OLD_MARGIN
-//     new    = round(卸単価 × NEW_MARGIN)
+// The first version of this script inferred the cost by dividing the selling price
+// by the previous margin. Collecting the real 卸単価 showed why that could not work:
+// the catalogue was already split — 78 products sat at ×1.25 because sd-monitor had
+// repriced them on its scheduled run while MARGIN was briefly 1.25, and 110 were
+// still at ×1.1. Dividing a ×1.25 price by 1.1 would have inflated it another 13.6%.
 //
-// Dry run by default — repricing the whole catalogue is not something to trigger
-// by accident. Pass --apply to write, and --backup to keep a restorable snapshot.
+// Products without a collected cost are skipped, not guessed. 33 have no
+// `sd_product_id` at all (added outside the importer), so there is nothing to
+// recompute from and their price is left alone.
 //
-//   node scripts/reprice-products.mjs                  # report only
-//   node scripts/reprice-products.mjs --apply --backup
+//   npm run reprice                      # report only
+//   npm run reprice -- --apply --backup
 //
-// Prices only; nothing else on the product is touched.
+// Run `npm run collect:cost -- --apply` first, and stop the sd-monitor schedule
+// while repricing: it writes `round(卸単価 × MARGIN)` too and would move rows
+// underneath this pass.
 import { createClient } from '@supabase/supabase-js';
 import fs from 'node:fs';
 import path from 'node:path';
-import { loadEnvFiles, MARGIN } from './lib/sd-core.mjs';
+import { loadEnvFiles, createSupabase, MARGIN } from './lib/sd-core.mjs';
 
-const OLD_MARGIN = Number(process.env.OLD_MARGIN ?? 1.1);
-const NEW_MARGIN = Number(process.env.NEW_MARGIN ?? MARGIN);
 const APPLY = process.argv.includes('--apply');
 const BACKUP = process.argv.includes('--backup');
+const TARGET = Number(process.env.TARGET_MARGIN ?? MARGIN);
 
 loadEnvFiles();
-
-const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const anon = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-const email = process.env.WELMES_ADMIN_EMAIL;
-const password = process.env.WELMES_ADMIN_PASSWORD;
-
-if (!url || !anon) { console.error('SUPABASE_URL / ANON_KEY missing'); process.exit(2); }
-if (!Number.isFinite(OLD_MARGIN) || OLD_MARGIN <= 0) { console.error('OLD_MARGIN invalid'); process.exit(2); }
-if (!Number.isFinite(NEW_MARGIN) || NEW_MARGIN <= 0) { console.error('NEW_MARGIN invalid'); process.exit(2); }
-
-const rescale = (price) => Math.round((Number(price) / OLD_MARGIN) * NEW_MARGIN);
-
-const supabase = createClient(url, anon, { auth: { persistSession: false } });
-
-if (APPLY) {
-  if (!email || !password) {
-    console.error('WELMES_ADMIN_EMAIL / WELMES_ADMIN_PASSWORD needed to write (products are admin-only)');
-    process.exit(2);
-  }
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) { console.error('admin sign-in failed:', error.message); process.exit(1); }
+for (const key of ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'WELMES_ADMIN_EMAIL', 'WELMES_ADMIN_PASSWORD']) {
+  if (!process.env[key]) { console.error(`${key} missing (.env / .env.local)`); process.exit(2); }
 }
+if (!Number.isFinite(TARGET) || TARGET <= 1) { console.error('TARGET_MARGIN must be > 1'); process.exit(2); }
+
+const supabase = createSupabase(createClient);
+const { error: authErr } = await supabase.auth.signInWithPassword({
+  email: process.env.WELMES_ADMIN_EMAIL,
+  password: process.env.WELMES_ADMIN_PASSWORD,
+});
+if (authErr) { console.error('admin sign-in failed:', authErr.message); process.exit(1); }
 
 const { data: products, error } = await supabase
-  .from('products')
-  .select('id, name, wholesale_price, set_options')
+  .from('products_admin')
+  .select('id, name, wholesale_price, set_options, sd_wholesale_price')
   .order('id');
 if (error) { console.error('fetch failed:', error.message); process.exit(1); }
 
-console.log(`${OLD_MARGIN} → ${NEW_MARGIN}  (${APPLY ? 'APPLY' : 'dry run'})`);
+console.log(`target margin ×${TARGET}  (${APPLY ? 'APPLY' : 'dry run'})`);
 console.log(`${products.length} products\n`);
 
 if (BACKUP && APPLY) {
@@ -64,33 +57,45 @@ if (BACKUP && APPLY) {
   console.log(`backup → ${file}\n`);
 }
 
-let changed = 0, failed = 0, deltaSum = 0;
-for (const p of products) {
-  const oldPrice = Number(p.wholesale_price) || 0;
-  const newPrice = rescale(oldPrice);
+let changed = 0, already = 0, skipped = 0, failed = 0, deltaSum = 0;
+const shown = [];
 
+for (const p of products) {
+  const cost = Number(p.sd_wholesale_price) || 0;
+  if (cost <= 0) { skipped += 1; continue; }
+
+  const oldPrice = Number(p.wholesale_price) || 0;
+  const newPrice = Math.round(cost * TARGET);
+
+  // Set options are priced per set, each from its own collected sourcePrice.
   const oldSets = Array.isArray(p.set_options) ? p.set_options : null;
-  const newSets = oldSets?.map((s) => ({ ...s, wholesalePrice: rescale(s.wholesalePrice) })) ?? null;
+  const newSets = oldSets?.map((s) => {
+    const src = Number(s.sourcePrice) || 0;
+    return src > 0 ? { ...s, wholesalePrice: Math.round(src * TARGET) } : s;
+  }) ?? null;
 
   const priceMoved = newPrice !== oldPrice;
   const setsMoved = JSON.stringify(oldSets) !== JSON.stringify(newSets);
-  if (!priceMoved && !setsMoved) continue;
+  if (!priceMoved && !setsMoved) { already += 1; continue; }
 
   changed += 1;
   deltaSum += newPrice - oldPrice;
-  if (changed <= 10) {
-    console.log(`#${String(p.id).padEnd(5)} ${oldPrice.toLocaleString().padStart(9)} → ${newPrice.toLocaleString().padStart(9)}  ${p.name.slice(0, 40)}`);
+  if (shown.length < 12) {
+    shown.push(`#${String(p.id).padEnd(5)} cost ${String(cost).padStart(7)}  ${String(oldPrice).padStart(7)} → ${String(newPrice).padStart(7)}  (×${(oldPrice / cost).toFixed(2)} → ×${TARGET})  ${p.name.slice(0, 32)}`);
   }
 
   if (!APPLY) continue;
   const patch = { wholesale_price: newPrice };
   if (newSets) patch.set_options = newSets;
-  const { error: upErr } = await supabase.from('products').update(patch).eq('id', p.id);
-  if (upErr) { failed += 1; console.error(`  ✖ #${p.id}: ${upErr.message}`); }
+  const { error: upErr } = await supabase.from('products_admin').update(patch).eq('id', p.id);
+  if (upErr) { failed += 1; console.error(`✖ #${p.id}: ${upErr.message}`); }
 }
 
-if (changed > 10) console.log(`… and ${changed - 10} more`);
-console.log(`\n${changed} would change, ${failed} failed`);
-console.log(`average price move: ${changed ? Math.round(deltaSum / changed).toLocaleString() : 0} JPY`);
+for (const line of shown) console.log(line);
+if (changed > shown.length) console.log(`… and ${changed - shown.length} more`);
+
+console.log(`\n${changed} to change, ${already} already on target, ${skipped} skipped (no collected cost), ${failed} failed`);
+if (changed) console.log(`average move: ${Math.round(deltaSum / changed).toLocaleString()} JPY`);
+if (skipped) console.log(`\n${skipped} products keep their current price: run collect:cost first, or accept that products without an sd_product_id cannot be recomputed.`);
 if (!APPLY) console.log('\nNothing was written. Re-run with --apply --backup to commit.');
 process.exit(failed > 0 ? 1 : 0);

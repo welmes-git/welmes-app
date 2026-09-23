@@ -14,21 +14,18 @@ import { enqueueTranslationForProduct } from './product-description-i18n.mjs';
 /**
  * WELMES 판매가 = 卸単価(税抜) × MARGIN
  *
- * 1.1 이었던 값을 1.25 로 올렸다. 이유:
+ * 상수를 올릴 때는 sd-monitor 스케줄을 먼저 멈출 것. 모니터는 Superdelivery 가격
+ * 변동을 감지하면 `round(卸単価 × MARGIN)` 으로 해당 상품만 갱신하므로, 실행 중에
+ * 상수가 바뀌면 모니터가 건드린 상품만 새 마진이 되어 카탈로그가 갈린다. 실제로
+ * 그렇게 78 개가 1.25, 110 개가 1.1 로 갈렸고, sd_wholesale_price 를 수집해
+ * 되돌렸다. 마진 변경 절차: 모니터 정지 → collect:cost → 상수 변경 → reprice →
+ * 모니터 재개.
  *
- * Superdelivery 의 卸単価 는 税抜 이고 결제 시 10% 소비세가 더해진다. 그 소비세는
- * 수출 매출에 대해 환급받지만, 환급은 지출을 되돌리는 것이라 이익이 아니다.
- * 즉 1.1 은 "원가 대비 10%" 였다 — 매출 대비로는 9.1%.
- *
- * 그 9.1% 로 PayPal 해외 결제 수수료, 국제 운임, 환전 스프레드, 포장·인건비,
- * 반품·파손을 모두 감당해야 했다. 결제 수수료만으로도 대부분이 사라진다.
- *
- * 1.25 는 매출 대비 20% 다. 기존에 체크아웃에서 세금 명목으로 10% 를 더 받아
- * 실질 1.21 로 청구하고 있었으므로, 바이어 체감 인상폭은 약 3% 에 그친다.
- * 수출 거래에 부과할 수 없는 세금을 가격으로 정직하게 옮기는 변경이다.
- *
- * 국제 운임 요율이 확정되면 다시 조정해야 한다. 특히 무료배송 임계값을 도입할
- * 경우 그 구간의 운임을 이 마진이 흡수할 수 있는지 재검증할 것.
+ * 왜 1.25 인가: 卸単価 는 税抜 이고 결제 시 10% 소비세가 더해진다. 그 소비세는 수출
+ * 매출에 대해 환급받지만 환급은 지출을 되돌리는 것이라 이익이 아니다. 즉 1.1 은
+ * 원가 대비 10% — 매출 대비 9.1% 이고, PayPal 해외 수수료만으로 대부분이 사라진다.
+ * 1.25 는 매출 대비 20%. 기존에 체크아웃에서 세금 명목으로 10% 를 더 받아 실질
+ * 1.21 로 청구하고 있었으므로 바이어 체감 인상폭은 약 3% 에 그친다.
  */
 export const MARGIN = 1.25;
 export const ORIGINAL_FALLBACK = 1.5;  // 参考上代(정가)가 오픈프라이스일 때: 単価 × 1.5
@@ -622,7 +619,15 @@ export async function parseProductPage(page, productUrl) {
       .replace(/JAN\s*[：:]\s*\d+/g, '').trim() || `Set ${id}`;
     const wholesale = Math.round(sdSetTotal * MARGIN);
     const original = refPrice ? refPrice * unitsPerSet : Math.round(wholesale * ORIGINAL_FALLBACK);
-    setOptions.push({ id, description: desc, unitsPerSet, wholesalePrice: wholesale, originalPrice: original });
+    // `sourcePrice` is the 卸単価 (税抜) we actually pay. Keeping it means a MARGIN
+    // change is a recomputation instead of dividing the selling price back out —
+    // that inference cannot survive a hand-edited price and cannot recover the
+    // rounding applied here (of 229 products, only 13 divide back to a whole yen).
+    setOptions.push({
+      id, description: desc, unitsPerSet,
+      wholesalePrice: wholesale, originalPrice: original,
+      sourcePrice: sdSetTotal,
+    });
     jan ??= block.match(/JAN\s*[：:]\s*(\d{8,13})/)?.[1] ?? null;
     const rest = block.match(/残り\s*(\d+)/);
     if (/(なし|切れ)/.test(block)) stock = Math.min(stock, 0);
@@ -726,6 +731,10 @@ export async function insertProduct(supabase, p, options = {}) {
     tags: p.tags, description: p.description, stock: p.stock, status: p.status,
     set_options: p.setOptions, sd_product_id: p.sdId, jan: p.jan || null,
     sd_dealer_id: p.dealerId, sd_dealer_name: p.dealerName,
+    // Cost side, admin-only. Recorded at import so a later MARGIN change does not
+    // have to guess it back out of the selling price.
+    sd_wholesale_price: p.setOptions?.[0]?.sourcePrice ?? null,
+    sd_price_checked_at: new Date().toISOString(),
   };
   const { data, error } = await supabase.from('products_admin').insert([row]).select('id').single();
   if (error) {
@@ -792,6 +801,12 @@ export async function insertProduct(supabase, p, options = {}) {
  *   4. 출기업 breadcrumb (업체명 — 브랜드는 아니지만 이전 동작 유지)
  */
 export async function buildProduct(page, parsed, { brandOption = '', knownBrands = [], status = 'inactive' } = {}) {
+  // parseProductPage returns an empty setOptions with `error` set when no set is
+  // purchasable (sold out, or the dealer is not trading with us). Reading
+  // setOptions[0] then threw a bare TypeError that said nothing about the cause.
+  if (!parsed?.setOptions?.length) {
+    throw new Error(parsed?.error?.message || '세트/가격 정보 없음 — buildProduct 호출 전 parsed.error 확인 필요');
+  }
   const dealerBrands = await getDealerBrands(page, parsed.dealerUrl);
   const brand =
     brandOption
