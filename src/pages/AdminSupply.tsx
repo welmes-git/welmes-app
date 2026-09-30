@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import AdminPager from '../components/AdminPager';
+import { useAdminProductPage, useCatalogFacets, useDebounced } from '../hooks/useCatalog';
+import { ADMIN_PAGE_SIZE } from '../lib/catalogQuery';
+import * as db from '../lib/db';
 import * as supply from '../lib/supply';
 import type { PurchaseOrder, PurchaseOrderStatus, Supplier } from '../lib/supply';
 import { buildSettlement, toCsv } from '../lib/settlement';
@@ -48,7 +52,7 @@ function download(filename: string, content: string) {
 
 export default function AdminSupply() {
   const navigate = useNavigate();
-  const { isAuthenticated, isAdmin, products, orders, loadOrders, showToast } = useStore();
+  const { isAuthenticated, isAdmin, orders, loadOrders, showToast } = useStore();
   const [tab, setTab] = useState<Tab>('suppliers');
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [supplyMap, setSupplyMap] = useState(new Map<number, supply.ProductSupply>());
@@ -100,7 +104,7 @@ export default function AdminSupply() {
       <main className="p-6">
         {tab === 'suppliers' && <SuppliersTab suppliers={suppliers} report={report} />}
         {tab === 'prices' && (
-          <PricesTab products={products} suppliers={suppliers} supplyMap={supplyMap} report={report} />
+          <PricesTab suppliers={suppliers} supplyMap={supplyMap} report={report} />
         )}
         {tab === 'orders' && (
           <OrdersTab orders={orders} pos={pos} suppliers={suppliers} report={report} showToast={showToast} />
@@ -226,8 +230,7 @@ function SuppliersTab({ suppliers, report }: { suppliers: Supplier[]; report: Re
 
 // ── Purchase prices ─────────────────────────────────────────────────────────
 
-function PricesTab({ products, suppliers, supplyMap, report }: {
-  products: ReturnType<typeof useStore.getState>['products'];
+function PricesTab({ suppliers, supplyMap, report }: {
   suppliers: Supplier[];
   supplyMap: Map<number, supply.ProductSupply>;
   report: Report;
@@ -240,15 +243,35 @@ function PricesTab({ products, suppliers, supplyMap, report }: {
   const [bulkCost, setBulkCost] = useState('');
   const [costDrafts, setCostDrafts] = useState<Record<number, string>>({});
 
+  const [page, setPage] = useState(1);
+  const [selectingAll, setSelectingAll] = useState(false);
+
   const internalId = suppliers.find((s) => s.isInternal)?.id;
-  const brands = useMemo(() => [...new Set(products.map((p) => p.brand))].sort(), [products]);
-  const rows = products.filter((p) => {
-    if (brand && p.brand !== brand) return false;
-    const mapped = supplyMap.get(p.id);
-    if (onlyUnassigned && mapped && mapped.supplierId !== internalId) return false;
-    const q = search.toLowerCase();
-    return !q || p.nameEn.toLowerCase().includes(q) || p.name.toLowerCase().includes(q) || String(p.id) === q;
-  });
+  const { data: facets } = useCatalogFacets();
+  const brands = useMemo(() => (facets?.brands ?? []).map(([b]) => b).sort(), [facets]);
+  // Filtered and paged in the database (admin_product_page). The search uses
+  // the storefront normaliser, or matches a numeric product id exactly.
+  const debouncedSearch = useDebounced(search.trim(), 300);
+  const filters = useMemo(
+    () => ({ search: debouncedSearch || undefined, brand: brand || null, ownStockOnly: onlyUnassigned }),
+    [debouncedSearch, brand, onlyUnassigned],
+  );
+  useEffect(() => { queueMicrotask(() => setPage(1)); }, [filters]);
+  const query = useMemo(() => ({ ...filters, limit: ADMIN_PAGE_SIZE, offset: (page - 1) * ADMIN_PAGE_SIZE }), [filters, page]);
+  const { data: pageData, loading } = useAdminProductPage(query, { keepPrevious: true });
+  const rows = pageData?.items ?? [];
+  const total = pageData?.total ?? 0;
+
+  const selectAllMatching = async () => {
+    setSelectingAll(true);
+    try {
+      setSelected(new Set(await db.fetchAdminProductIds(filters)));
+    } catch (e) {
+      report({ message: e instanceof Error ? e.message : String(e) }, '');
+    } finally {
+      setSelectingAll(false);
+    }
+  };
 
   const toggle = (id: number) => {
     const next = new Set(selected);
@@ -290,6 +313,11 @@ function PricesTab({ products, suppliers, supplyMap, report }: {
           <input type="checkbox" checked={onlyUnassigned} onChange={(e) => setOnlyUnassigned(e.target.checked)} />
           WELMES stock only
         </label>
+        {total > rows.length && (
+          <button className={btnGhost} onClick={selectAllMatching} disabled={selectingAll}>
+            {selectingAll ? 'Selecting…' : `Select all ${total.toLocaleString()} matching`}
+          </button>
+        )}
       </div>
 
       {selected.size > 0 && (
@@ -312,8 +340,13 @@ function PricesTab({ products, suppliers, supplyMap, report }: {
               <th className={th}>
                 <input
                   type="checkbox"
+                  aria-label="Select all products on this page"
                   checked={rows.length > 0 && rows.every((p) => selected.has(p.id))}
-                  onChange={(e) => setSelected(e.target.checked ? new Set(rows.map((p) => p.id)) : new Set())}
+                  onChange={(e) => {
+                    const next = new Set(selected);
+                    for (const p of rows) { if (e.target.checked) next.add(p.id); else next.delete(p.id); }
+                    setSelected(next);
+                  }}
                 />
               </th>
               <th className={th}>Product</th><th className={th}>Brand</th><th className={th}>Supplier</th>
@@ -350,8 +383,12 @@ function PricesTab({ products, suppliers, supplyMap, report }: {
                 </tr>
               );
             })}
+            {!loading && rows.length === 0 && (
+              <tr><td className={`${td} text-[#888]`} colSpan={7}>No products match.</td></tr>
+            )}
           </tbody>
         </table>
+        <AdminPager page={page} pageSize={ADMIN_PAGE_SIZE} total={total} onPage={setPage} busy={loading} />
       </div>
     </div>
   );

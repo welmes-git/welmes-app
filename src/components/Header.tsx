@@ -6,8 +6,7 @@ import CartDrawer from './CartDrawer';
 import Logo from './Logo';
 import CurrencySelector from './CurrencySelector';
 import { useTranslation } from 'react-i18next';
-import { initialProducts } from '../data/products';
-import { brandsByCount } from '../lib/utils';
+import { useCatalogFacets } from '../hooks/useCatalog';
 import { categoryMenuColumns } from '../config/categoryMenu';
 import { useOutsideClick } from '../hooks/useOutsideClick';
 import { CURRENCIES } from '../lib/currency';
@@ -57,7 +56,7 @@ export default function Header() {
   const location = useLocation();
   const {
     isAuthenticated, isAdmin, currentUser, logout,
-    cart, wishlist, notifications, products, productsLoading, selectedCurrency, setSelectedCurrency,
+    cart, wishlist, notifications, selectedCurrency, setSelectedCurrency,
     markNotificationRead, markAllNotificationsRead, clearNotifications,
   } = useStore();
   const { t, i18n } = useTranslation();
@@ -86,10 +85,9 @@ export default function Header() {
   const [showMobileBrandShop, setShowMobileBrandShop] = useState(false);
   const [brandSearch, setBrandSearch] = useState('');
   // Brand Shop lists brands we actually carry (same fallback as the product pages)
-  const brands = useMemo(
-    () => brandsByCount(products.length > 0 ? products : productsLoading ? [] : initialProducts).map(([b]) => b),
-    [products, productsLoading]
-  );
+  // Counted in the database (catalog_facets) — the header used to need the whole catalogue for this.
+  const { data: facets } = useCatalogFacets();
+  const brands = useMemo(() => (facets?.brands ?? []).map(([b]) => b), [facets]);
   const filteredBrands = useMemo(
     () => brands.filter((b) => b.toLowerCase().includes(brandSearch.trim().toLowerCase())),
     [brands, brandSearch]

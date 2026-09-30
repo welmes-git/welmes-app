@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import type { Order, SetOption, Member } from '../store/useStore';
+import type { Order, SetOption, Member, Product } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
-import { initialProducts, brands } from '../data/products';
+import { brands } from '../data/products';
 import { supabase } from '../lib/supabase';
 import { categoryMenuColumns } from '../config/categoryMenu';
 import enLabels from '../locales/en/translation.json';
@@ -36,7 +36,10 @@ import * as db from '../lib/db';
 import WirePayments from '../components/admin/WirePayments';
 import type { SupportRoom, SupportMessage } from '../lib/db';
 import NameReviewPanel from '../components/NameReviewPanel';
-import { matchesSearch } from '../lib/productSearch';
+import AdminPager from '../components/AdminPager';
+import { useAdminProductCounts, useAdminProductPage, useCatalogFacets, useDebounced } from '../hooks/useCatalog';
+import { ADMIN_PAGE_SIZE } from '../lib/catalogQuery';
+import type { AdminProductQuery } from '../lib/catalogQuery';
 import type { ProductNameStatus } from '../store/useStore';
 
 type AdminTab = 'dashboard' | 'members' | 'products' | 'orders' | 'payments' | 'support';
@@ -91,8 +94,6 @@ export default function AdminDashboard() {
     isAdmin,
     currentUser,
     members,
-    products,
-    productsLoading,
     orders,
     approveMember,
     rejectMember,
@@ -104,7 +105,7 @@ export default function AdminDashboard() {
     updateOrderShipping,
     loadMembers,
     loadOrders,
-    loadProducts,
+    invalidateCatalog,
     logout,
     showToast,
   } = useStore();
@@ -126,6 +127,10 @@ export default function AdminDashboard() {
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<number | null>(null);
+  // Row the edit modal was opened from (the table only holds the current page).
+  const [editingRow, setEditingRow] = useState<Product | null>(null);
+  const [productPage, setProductPage] = useState(1);
+  const [selectingAllProducts, setSelectingAllProducts] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Per-set unit wholesale prices (UI-only; wholesalePrice in SetOption stores the set total)
@@ -166,6 +171,25 @@ export default function AdminDashboard() {
     }
     return map;
   }, [productChanges]);
+
+  // Products tab: searched, filtered and paged in the database
+  // (admin_product_page). The stat cards use head-only counts.
+  const debouncedProductSearch = useDebounced(productSearch.trim(), 300);
+  const productFilters = useMemo<AdminProductQuery>(() => ({
+    search: debouncedProductSearch || undefined,
+    nameStatus: nameReviewFilter === 'all' ? null : nameReviewFilter,
+    ids: changeFilter === 'changed' ? [...changesByProduct.keys()] : null,
+  }), [debouncedProductSearch, nameReviewFilter, changeFilter, changesByProduct]);
+  useEffect(() => { queueMicrotask(() => setProductPage(1)); }, [productFilters]);
+  const productQuery = useMemo(
+    () => (activeTab === 'products'
+      ? { ...productFilters, limit: ADMIN_PAGE_SIZE, offset: (productPage - 1) * ADMIN_PAGE_SIZE }
+      : null),
+    [activeTab, productFilters, productPage],
+  );
+  const { data: productPageData, loading: productsLoading } = useAdminProductPage(productQuery, { keepPrevious: true });
+  const { data: productCounts } = useAdminProductCounts();
+  const { data: catalogFacets } = useCatalogFacets();
 
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -338,10 +362,6 @@ export default function AdminDashboard() {
     return null;
   }
 
-  // Only fall back to the demo catalogue once loading has actually finished
-  // and come back empty — otherwise the real inventory can briefly flash the
-  // demo products while the Supabase fetch is still in flight.
-  const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
 
   // Brand suggestions = hardcoded demo brands + every brand already stored in
   // products (Supabase `brand` is free text, so imported products can carry
@@ -349,15 +369,15 @@ export default function AdminDashboard() {
   // text input with this datalist — a select would silently reset imported
   // brands to brands[0] ('SK-II') when the value isn't in the option list.
   const brandSuggestionSet = new Set<string>(brands);
-  for (const p of allProducts) if (p.brand) brandSuggestionSet.add(p.brand);
+  for (const [b] of catalogFacets?.brands ?? []) brandSuggestionSet.add(b);
   const brandSuggestions = [...brandSuggestionSet].sort();
 
   // Stats — all derived from live data
   const totalMembers = members.length;
   const pendingMembers = members.filter((m) => m.status === 'pending').length;
   const approvedMembers = members.filter((m) => m.status === 'approved').length;
-  const totalProducts = allProducts.length;
-  const activeProducts = allProducts.filter((p) => p.status === 'active').length;
+  const totalProducts = productCounts?.total ?? 0;
+  const activeProducts = productCounts?.active ?? 0;
   const totalOrders = orders.length;
   const pendingOrders = orders.filter((o) => o.status === 'pending').length;
 
@@ -375,17 +395,10 @@ export default function AdminDashboard() {
     return true;
   });
 
-  // Filtered products
-  const filteredProducts = allProducts.filter((p) => {
-    if (changeFilter === 'changed' && !changesByProduct.has(p.id)) return false;
-    if (nameReviewFilter !== 'all' && (p.nameEnStatus ?? 'pending') !== nameReviewFilter) return false;
-    if (productSearch) {
-      // Reuse the storefront matcher so admin search shares the same
-      // NFKD/accent/punctuation normalization (e.g. "Bioré" ↔ "biore").
-      return matchesSearch(p, productSearch);
-    }
-    return true;
-  });
+  // Current page of products (the filters above are applied server-side,
+  // with the storefront search normaliser, so "Bioré" ↔ "biore" still match).
+  const filteredProducts = productPageData?.items ?? [];
+  const filteredTotal = productPageData?.total ?? 0;
 
   const handleAckChanges = async (productId: number) => {
     const { error } = await db.acknowledgeProductChanges(productId);
@@ -403,8 +416,24 @@ export default function AdminDashboard() {
   const allFilteredSelected =
     filteredProducts.length > 0 && filteredProducts.every((p) => selectedProducts.includes(p.id));
 
-  const toggleSelectAllProducts = () =>
-    setSelectedProducts(allFilteredSelected ? [] : filteredProducts.map((p) => p.id));
+  // Header checkbox: this page only. "Select all N matching" covers every page.
+  const toggleSelectAllProducts = () => {
+    const pageIds = filteredProducts.map((p) => p.id);
+    setSelectedProducts((prev) => (allFilteredSelected
+      ? prev.filter((id) => !pageIds.includes(id))
+      : [...new Set([...prev, ...pageIds])]));
+  };
+
+  const selectAllMatchingProducts = async () => {
+    setSelectingAllProducts(true);
+    try {
+      setSelectedProducts(await db.fetchAdminProductIds(productFilters));
+    } catch (e) {
+      showToast(`Could not select products: ${e instanceof Error ? e.message : String(e)}`, 'error');
+    } finally {
+      setSelectingAllProducts(false);
+    }
+  };
 
   const handleBulkStatus = async (status: 'active' | 'inactive') => {
     const result = await bulkUpdateProductStatus(selectedProducts, status);
@@ -418,6 +447,7 @@ export default function AdminDashboard() {
 
   const handleAddProduct = () => {
     setEditingProduct(null);
+    setEditingRow(null);
     setSetUnitPrices([]);
     setProductForm({
       nameEn: '',
@@ -441,8 +471,9 @@ export default function AdminDashboard() {
     setShowProductModal(true);
   };
 
-  const handleEditProduct = (product: (typeof allProducts)[0]) => {
+  const handleEditProduct = (product: Product) => {
     setEditingProduct(product.id);
+    setEditingRow(product);
     const opts = product.setOptions ? [...product.setOptions] : [];
     const u = product.wholesalePrice;
     setSetUnitPrices(
@@ -980,8 +1011,17 @@ export default function AdminDashboard() {
                 {selectedProducts.length > 0 && (
                   <div className="flex flex-wrap items-center gap-3 bg-[#f0f6ff] border-b border-[#4a90e2]/30 px-4 py-2.5">
                     <span className="text-[13px] font-medium text-[#333]">
-                      {selectedProducts.length} selected
+                      {selectedProducts.length.toLocaleString()} selected
                     </span>
+                    {filteredTotal > selectedProducts.length && (
+                      <button
+                        onClick={selectAllMatchingProducts}
+                        disabled={selectingAllProducts}
+                        className="h-8 px-3 border border-[#4a90e2] text-[12px] text-[#4a90e2] rounded hover:bg-white disabled:opacity-50"
+                      >
+                        {selectingAllProducts ? 'Selecting…' : `Select all ${filteredTotal.toLocaleString()} matching`}
+                      </button>
+                    )}
                     <button
                       onClick={() => handleBulkStatus('active')}
                       className="h-8 px-3 bg-green-600 text-white text-[12px] rounded hover:bg-green-700"
@@ -1011,7 +1051,7 @@ export default function AdminDashboard() {
                             type="checkbox"
                             checked={allFilteredSelected}
                             onChange={toggleSelectAllProducts}
-                            aria-label="Select all filtered products"
+                            aria-label="Select all products on this page"
                             className="w-4 h-4 accent-[#4a90e2]"
                           />
                         </th>
@@ -1155,9 +1195,21 @@ export default function AdminDashboard() {
                           </td>
                         </tr>
                       ))}
+                      {!productsLoading && filteredProducts.length === 0 && (
+                        <tr>
+                          <td colSpan={8} className="px-4 py-10 text-center text-[13px] text-[#999]">No products match.</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
+                <AdminPager
+                  page={productPage}
+                  pageSize={ADMIN_PAGE_SIZE}
+                  total={filteredTotal}
+                  onPage={setProductPage}
+                  busy={productsLoading}
+                />
               </div>
 
               {/* Product Modal */}
@@ -1177,14 +1229,14 @@ export default function AdminDashboard() {
                     </div>
                     <div className="p-5 space-y-4">
                       {(() => {
-                        const editing = editingProduct != null ? allProducts.find((p) => p.id === editingProduct) : null;
+                        const editing = editingProduct != null && editingRow?.id === editingProduct ? editingRow : null;
                         if (!editing || !editing.nameEnStatus) return null;
                         return (
                           <NameReviewPanel
                             product={editing}
                             reviewerId={currentUser?.id ?? ''}
                             showToast={showToast}
-                            onApplied={() => { loadProducts(); setShowProductModal(false); }}
+                            onApplied={() => { invalidateCatalog(); setShowProductModal(false); }}
                           />
                         );
                       })()}

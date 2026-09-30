@@ -2,19 +2,22 @@ import { useNavigate } from 'react-router-dom';
 import { Heart, Trash2 } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import { useStore } from '../store/useStore';
-import { initialProducts } from '../data/products';
+import { useProductsByIds } from '../hooks/useCatalog';
 import { useTranslation } from 'react-i18next';
 
 export default function Wishlist() {
   const navigate = useNavigate();
-  const { isAuthenticated, wishlist, toggleWishlist, products, productsLoading, showToast } = useStore();
+  const { isAuthenticated, wishlist, toggleWishlist, showToast } = useStore();
   const { t } = useTranslation();
 
-  // Only fall back to the demo catalogue once loading has actually finished
-  // and come back empty — otherwise a wishlist that genuinely has items can
-  // flash the "your wishlist is empty" state while the real fetch is in flight.
-  const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
-  const wishlistProducts = allProducts.filter((p) => wishlist.includes(p.id));
+  // Only the wishlisted products are fetched, in wishlist order. Keeping the
+  // spinner up while they load stops a non-empty wishlist from flashing the
+  // "your wishlist is empty" state.
+  // keepPrevious + membership filter: removing an item hides it immediately
+  // instead of blanking the page while the shorter list is refetched.
+  const { data, loading } = useProductsByIds(isAuthenticated ? wishlist : [], { keepPrevious: true });
+  const wishlistProducts = (data ?? []).filter((p) => wishlist.includes(p.id));
+  const productsLoading = loading && !data;
 
   if (!isAuthenticated) {
     return (

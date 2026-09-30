@@ -25,8 +25,6 @@ export function productPathForServer(product: Product): string {
 export function renderProductApp(product: Product, url: string): string {
   const previous = useStore.getState();
   useStore.setState({
-    products: [product],
-    productsLoading: false,
     currentUser: null,
     isAuthenticated: false,
     isAdmin: false,

@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { initialProducts } from '../data/products';
+import { useCatalogPage } from '../hooks/useCatalog';
 import ProductCard from '../components/ProductCard';
 import ProductGridSkeleton from '../components/ProductGridSkeleton';
 import { ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react';
@@ -10,19 +10,20 @@ import { categoryMenuColumns } from '../config/categoryMenu';
 import { useTranslation } from 'react-i18next';
 
 
+const WEEKLY_BEST_QUERY = { sort: 'popular', limit: 12 } as const;
+const NEW_ARRIVALS_QUERY = { sort: 'newest', limit: 12 } as const;
+
 export default function Home() {
   const { t } = useTranslation();
-  const { products, productsLoading, isAuthenticated } = useStore();
-  // Only fall back to the demo catalogue once loading has actually finished
-  // and come back empty — otherwise this briefly flashes demo products before
-  // the real Supabase fetch replaces them a moment later.
-  const allProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
-
+  const { isAuthenticated } = useStore();
   // Weekly best = most reviewed; New arrivals = highest id (newest first).
-  // Previously New Arrivals was `slice(4, 12)`, which rendered an empty section
-  // whenever the catalogue held 5 products or fewer.
-  const weeklyBest = [...allProducts].sort((a, b) => b.reviews - a.reviews).slice(0, 12);
-  const newArrivals = [...allProducts].sort((a, b) => b.id - a.id).slice(0, 12);
+  // Each is one 12-item query instead of sorting the whole catalogue here.
+  const best = useCatalogPage(WEEKLY_BEST_QUERY);
+  const arrivals = useCatalogPage(NEW_ARRIVALS_QUERY);
+  const weeklyBest = best.data?.items ?? [];
+  const newArrivals = arrivals.data?.items ?? [];
+  const bestLoading = best.loading;
+  const arrivalsLoading = arrivals.loading;
   const categoryGroups = categoryMenuColumns.flat();
   const categoryTrack = useRef<HTMLDivElement>(null);
   // Bottom sign-up banner: 5 scenes, each a highlighted category word + 4 photos.
@@ -130,7 +131,7 @@ export default function Home() {
             <ChevronRightIcon size={14} />
           </Link>
         </div>
-        {productsLoading ? (
+        {bestLoading ? (
           <ProductGridSkeleton className="product-grid product-grid-2rows" />
         ) : (
           <div className="product-grid product-grid-2rows">
@@ -167,7 +168,7 @@ export default function Home() {
       </section>
 
       {/* New Arrivals */}
-      {(productsLoading || newArrivals.length > 0) && (
+      {(arrivalsLoading || newArrivals.length > 0) && (
         <section className="bg-sunken py-16">
           <div className="page-container">
             <div className="flex items-center justify-between mb-5">
@@ -180,7 +181,7 @@ export default function Home() {
                 <ChevronRightIcon size={14} />
               </Link>
             </div>
-            {productsLoading ? <ProductGridSkeleton className="product-grid product-grid-2rows" /> : (
+            {arrivalsLoading ? <ProductGridSkeleton className="product-grid product-grid-2rows" /> : (
               <div className="product-grid product-grid-2rows">
                 {newArrivals.map((product) => (
                   <ProductCard key={product.id} product={product} />

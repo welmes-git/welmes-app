@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useTranslation } from 'react-i18next';
-import { initialProducts } from '../data/products';
+import { useCatalogPage } from '../hooks/useCatalog';
 import ProductCard from '../components/ProductCard';
 import {
   Clock,
@@ -14,11 +14,15 @@ import {
   Check,
 } from 'lucide-react';
 
+const PREVIEW_QUERY = { sort: 'recent', limit: 4 } as const;
+
 export default function PendingApproval() {
-  const { currentUser, logout, products } = useStore();
+  const { currentUser, logout } = useStore();
   const { t } = useTranslation();
   const status = currentUser?.status ?? 'pending';
-  const previewProducts = (products.length > 0 ? products : initialProducts).slice(0, 4);
+  // Same first four the old full-catalogue slice showed (newest first).
+  const { data: preview } = useCatalogPage(PREVIEW_QUERY);
+  const previewProducts = preview?.items ?? [];
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col items-center justify-center px-4 py-16">

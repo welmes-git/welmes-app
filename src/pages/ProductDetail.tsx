@@ -1,11 +1,10 @@
-import { useState, useEffect, useCallback, useContext } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate, Navigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import type { SetOption } from '../store/useStore';
-import { initialProducts } from '../data/products';
+import { useCatalogPage, useProduct } from '../hooks/useCatalog';
 import { productSlug } from '../lib/productUrl';
 import { displaySections, sectionLabelKey } from '../lib/productDescription';
-import { SsrProductContext } from '../lib/ssrProductContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from 'react-i18next';
 import { localizedName } from '../lib/productName';
@@ -30,7 +29,7 @@ export default function ProductDetail() {
   const { id, slug } = useParams<{ id: string; slug?: string }>();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { products, productsLoading, addToCart, isAuthenticated, currentUser, showToast, toggleWishlist, isWishlisted } =
+  const { addToCart, isAuthenticated, currentUser, showToast, toggleWishlist, isWishlisted } =
     useStore();
   const { formatPrice, currencyInfo } = useCurrency();
   const [setQty, setSetQty] = useState<Record<string, number>>({});
@@ -97,22 +96,20 @@ export default function ProductDetail() {
     loadReviews();
   }
 
-  // Only fall back to the demo catalogue once loading has actually finished
-  // and come back empty — otherwise a real product can flash as "not found"
-  // (or briefly show an unrelated demo product at the same id) while the
-  // real Supabase fetch is still in flight.
-  const ssrProduct = useContext(SsrProductContext);
-  const storeProducts = products.length > 0 ? products : productsLoading ? [] : initialProducts;
-  // The SSR payload is a PLACEHOLDER only. It is deliberately stripped of set
-  // options and prices (they must not reach an unauthenticated page), so once the
-  // real fetch lands its product must win — otherwise the page permanently shows
-  // "no set options" and, before catalog.mjs also projected the i18n columns,
-  // untranslated Japanese. Prepending the SSR product instead made it shadow the
-  // fetched one forever.
-  const fetchedProduct = storeProducts.find((p) => p.id === productId);
-  const ssrPlaceholder = ssrProduct && ssrProduct.id === productId ? ssrProduct : undefined;
-  const product = fetchedProduct ?? ssrPlaceholder;
-  const allProducts = storeProducts;
+  // Only this product is fetched (by id). The SSR payload is a PLACEHOLDER
+  // only: it is deliberately stripped of set options and prices (they must not
+  // reach an unauthenticated page), so once the real row lands it must win —
+  // otherwise the page permanently shows "no set options". useProduct handles
+  // that hand-over; the spinner covers the fetch so a real product never
+  // flashes as "not found".
+  const { data: product, loading: productsLoading } = useProduct(productId);
+  // Related = newest products in the same category (one small query).
+  const relatedCategory = product?.category;
+  const relatedQuery = useMemo(
+    () => (relatedCategory ? { category: relatedCategory, sort: 'recent' as const, limit: 7 } : null),
+    [relatedCategory],
+  );
+  const related = useCatalogPage(relatedQuery);
   // Readable name for the active language; falls back to English, then Japanese.
   const displayName = product ? localizedName(product, i18n.language) : '';
 
@@ -237,8 +234,8 @@ export default function ProductDetail() {
   const selectedRow = 'bg-sunken shadow-[inset_2px_0_0_var(--wm-ink-900)]';
   const wishlisted = isWishlisted(product.id);
 
-  const relatedProducts = allProducts
-    .filter((p) => p.category === product.category && p.id !== product.id)
+  const relatedProducts = (related.data?.items ?? [])
+    .filter((p) => p.id !== product.id)
     .slice(0, 6);
 
   return (

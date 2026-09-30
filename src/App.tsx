@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { useStore } from './store/useStore';
 import { supabase } from './lib/supabase';
 import { productPath } from './lib/productUrl';
+import { useProduct } from './hooks/useCatalog';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
@@ -30,19 +31,19 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'));
  */
 function LegacyProductRedirect() {
   const { id } = useParams<{ id: string }>();
-  const { products } = useStore();
-  const product = products.find((p) => String(p.id) === id);
+  // ProductDetail looks the product up by id and fixes the slug itself.
+  const { data: product, loading } = useProduct(Number(id));
+  if (loading) return null;
   if (!product) return <Navigate to={`/products/${id}`} replace />;
   return <Navigate to={productPath(product)} replace />;
 }
 
 function App() {
-  const { initAuth, loadProducts } = useStore();
+  const { initAuth } = useStore();
 
   useEffect(() => {
     // Restore session on mount
     initAuth();
-    loadProducts();
 
     // Keep auth state in sync with Supabase session changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
@@ -60,7 +61,7 @@ function App() {
     });
 
     return () => subscription.unsubscribe();
-  }, [initAuth, loadProducts]);
+  }, [initAuth]);
 
   return (
     <div className="min-h-screen flex flex-col">

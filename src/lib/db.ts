@@ -3,6 +3,12 @@
  * Components/store import from this file, never directly from supabase.ts.
  */
 import { supabase } from './supabase';
+import { fetchAllRows } from './fetchAllRows';
+import {
+  ADMIN_PAGE_SIZE, STORE_PAGE_SIZE, facetsLocally, queryAdminLocally, queryCatalogLocally,
+} from './catalogQuery';
+import type { AdminProductQuery, CatalogFacets, CatalogPage, CatalogQuery } from './catalogQuery';
+import { initialProducts } from '../data/products';
 export { supabase };
 import type { Product, Member, Order, CartItem, ShippingAddress, AppNotification } from '../store/useStore';
 
@@ -117,22 +123,190 @@ export async function updateMemberById(id: string, fields: Partial<Member>) {
 }
 
 // ── Products ─────────────────────────────────────────────────────
+/** Ids per request when a filter carries an id list in the URL. */
+export const BULK_CHUNK = 300;
+//
+// Screens ask for ONE page (or specific ids) at a time; the database does the
+// searching, filtering, sorting and counting (migration 20261005). Until that
+// migration is applied, the same queries run over the full list fetched once
+// (fetchAllProducts, the previous behaviour) so a frontend deploy never breaks
+// the site. See src/lib/catalogQuery.ts for the shared contract.
 
-export async function fetchProducts(): Promise<Product[]> {
+type RpcError = { code?: string; message?: string } | null;
+
+/** True when PostgREST reports the function is not deployed (yet). */
+function isMissingRpc(error: RpcError): boolean {
+  return !!error && (error.code === 'PGRST202' || /could not find the function/i.test(error.message ?? ''));
+}
+
+let legacyCatalog: { key: string; promise: Promise<{ products: Product[]; canSeePrices: boolean }> } | null = null;
+
+/** Full catalogue for the pre-migration fallback, fetched once per signed-in identity. */
+async function legacyCatalogFor(): Promise<{ products: Product[]; canSeePrices: boolean }> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const key = session?.user?.id ?? 'anon';
+  if (!legacyCatalog || legacyCatalog.key !== key) {
+    const promise = (async () => {
+      const member = session?.user ? await fetchMemberByAuthId(session.user.id) : null;
+      const products = await fetchAllProducts();
+      return {
+        // Local dev without a database: keep showing the demo catalogue.
+        products: products.length ? products : initialProducts,
+        canSeePrices: !!member && (member.isAdmin || member.status === 'approved'),
+      };
+    })();
+    legacyCatalog = { key, promise };
+    promise.catch(() => { if (legacyCatalog?.promise === promise) legacyCatalog = null; });
+  }
+  return legacyCatalog.promise;
+}
+
+/** Drop the fallback copy (after admin edits, sign-in/out). */
+export function invalidateCatalogCache() {
+  legacyCatalog = null;
+}
+
+const toPage = (data: { total?: number; items?: Record<string, unknown>[] } | null): CatalogPage => ({
+  total: Number(data?.total ?? 0),
+  items: (data?.items ?? []).map(rowToProduct),
+});
+
+/** One storefront page. Prices are included only for approved members/admins. */
+export async function fetchCatalogPage(query: CatalogQuery): Promise<CatalogPage> {
+  const { data, error } = await supabase.rpc('catalog_list', {
+    p_search: query.search?.trim() || null,
+    p_category: query.category || null,
+    p_brands: query.brands?.length ? query.brands : null,
+    p_price_min: query.priceMin ?? null,
+    p_price_max: query.priceMax ?? null,
+    p_sort: query.sort ?? 'popular',
+    p_limit: query.limit ?? STORE_PAGE_SIZE,
+    p_offset: query.offset ?? 0,
+  });
+  if (!error) return toPage(data);
+  if (!isMissingRpc(error)) throw new Error(error.message);
+  const { products, canSeePrices } = await legacyCatalogFor();
+  return queryCatalogLocally(products, query, { canSeePrices });
+}
+
+/** Brand counts and price bounds for the filter sidebar and brand menus. */
+export async function fetchCatalogFacets(): Promise<CatalogFacets> {
+  const { data, error } = await supabase.rpc('catalog_facets');
+  if (!error) {
+    return {
+      total: Number(data?.total ?? 0),
+      brands: ((data?.brands ?? []) as [string, number][]).map(([b, n]) => [b, Number(n)]),
+      priceMin: Number(data?.price_min ?? 0),
+      priceMax: Number(data?.price_max ?? 0),
+    };
+  }
+  if (!isMissingRpc(error)) throw new Error(error.message);
+  const { products, canSeePrices } = await legacyCatalogFor();
+  return facetsLocally(products, { canSeePrices });
+}
+
+/** Specific products with detail fields (detail page, wishlist). Keeps `ids` order; unknown ids are dropped. */
+export async function fetchProductsByIds(ids: number[]): Promise<Product[]> {
+  const unique = [...new Set(ids.filter((id) => Number.isSafeInteger(id) && id > 0))];
+  if (!unique.length) return [];
+  const chunks: number[][] = [];
+  for (let i = 0; i < unique.length; i += 200) chunks.push(unique.slice(i, i + 200));
+  const results = await Promise.all(chunks.map((chunk) => supabase.rpc('catalog_by_ids', { p_ids: chunk })));
+  const failed = results.find((r) => r.error);
+  if (!failed) return results.flatMap((r) => ((r.data ?? []) as Record<string, unknown>[]).map(rowToProduct));
+  if (!isMissingRpc(failed.error)) throw new Error(failed.error!.message);
+  const { products } = await legacyCatalogFor();
+  const byId = new Map(products.map((p) => [p.id, p]));
+  return unique.map((id) => byId.get(id)).filter((p): p is Product => !!p);
+}
+
+/** Dashboard stat cards: head-only counts, no rows transferred. */
+export async function fetchAdminProductCounts(): Promise<{ total: number; active: number }> {
+  const [all, active] = await Promise.all([
+    supabase.from('products_admin').select('id', { count: 'exact', head: true }),
+    supabase.from('products_admin').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+  ]);
+  if (all.error) throw new Error(all.error.message);
+  if (active.error) throw new Error(active.error.message);
+  return { total: all.count ?? 0, active: active.count ?? 0 };
+}
+
+const adminRpcParams = (query: AdminProductQuery, idsOnly: boolean) => ({
+  p_search: query.search?.trim() || null,
+  p_name_status: query.nameStatus || null,
+  p_ids: query.ids ?? null,
+  p_brand: query.brand || null,
+  p_own_stock_only: !!query.ownStockOnly,
+  p_limit: query.limit ?? ADMIN_PAGE_SIZE,
+  p_offset: query.offset ?? 0,
+  p_ids_only: idsOnly,
+});
+
+/** Product ids mapped to an external supplier (pre-migration "WELMES stock only" fallback). */
+async function externalSupplyIds(): Promise<Set<number>> {
+  const [{ data: supply }, { data: suppliers }] = await Promise.all([
+    fetchAllRows<{ product_id: number; supplier_id: string }>((from, to) => supabase.from('product_supply')
+      .select('product_id, supplier_id', { count: from === 0 ? 'exact' : undefined })
+      .order('product_id').range(from, to)),
+    supabase.from('suppliers').select('id, is_internal'),
+  ]);
+  const internal = new Set((suppliers ?? []).filter((s) => s.is_internal).map((s) => s.id));
+  return new Set((supply ?? []).filter((s) => !internal.has(s.supplier_id)).map((s) => Number(s.product_id)));
+}
+
+async function adminLocally(query: AdminProductQuery) {
+  const { products } = await legacyCatalogFor();
+  return queryAdminLocally(products, query, { externalSupplyIds: query.ownStockOnly ? await externalSupplyIds() : undefined });
+}
+
+/** One admin page of full product rows (products_admin), newest first. */
+export async function fetchAdminProductPage(query: AdminProductQuery): Promise<CatalogPage> {
+  const { data, error } = await supabase.rpc('admin_product_page', adminRpcParams(query, false));
+  if (!error) return toPage(data);
+  if (!isMissingRpc(error)) throw new Error(error.message);
+  const { total, items } = await adminLocally(query);
+  return { total, items };
+}
+
+/** Every id matching an admin query — for "select all filtered" bulk actions. */
+export async function fetchAdminProductIds(query: AdminProductQuery): Promise<number[]> {
+  const { data, error } = await supabase.rpc('admin_product_page', adminRpcParams(query, true));
+  if (!error) return ((data?.ids ?? []) as unknown[]).map(Number);
+  if (!isMissingRpc(error)) throw new Error(error.message);
+  return (await adminLocally(query)).ids;
+}
+
+/**
+ * The whole catalogue (every row, every column). Only the pre-migration
+ * fallback uses this now — it is what made first load cost 7–14 MB.
+ */
+export async function fetchAllProducts(): Promise<Product[]> {
   const { data: { session } } = await supabase.auth.getSession();
   const member = session?.user ? await fetchMemberByAuthId(session.user.id) : null;
   const source = member?.isAdmin ? 'products_admin' : 'products_public';
-  const { data, error } = await supabase
-    .from(source)
-    .select('*')
-    .order('created_at', { ascending: false });
+  // Page past PostgREST's 1000-row cap; `id` breaks created_at ties so pages
+  // never overlap or skip rows (bulk imports share near-identical timestamps).
+  const { data, error } = await fetchAllRows<Record<string, unknown>>(
+    (from, to) => supabase
+      .from(source)
+      .select('*', { count: from === 0 ? 'exact' : undefined })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .range(from, to),
+    { keyOf: (row) => row.id },
+  );
   if (error || !data) return [];
 
-  let rows = data as Record<string, unknown>[];
+  let rows = data;
   if (member && !member.isAdmin && member.status === 'approved' && rows.length) {
-    const { data: prices, error: priceError } = await supabase
-      .from('product_prices_approved')
-      .select('id,original_price,wholesale_price,discount,set_options');
+    const { data: prices, error: priceError } = await fetchAllRows<Record<string, unknown>>(
+      (from, to) => supabase
+        .from('product_prices_approved')
+        .select('id,original_price,wholesale_price,discount,set_options', { count: from === 0 ? 'exact' : undefined })
+        .order('id', { ascending: true })
+        .range(from, to),
+      { keyOf: (row) => row.id },
+    );
     if (!priceError && prices) {
       const byId = new Map(prices.map((row) => [Number(row.id), row]));
       rows = rows.map((row) => ({ ...row, ...(byId.get(Number(row.id)) ?? {}) }));
@@ -155,9 +329,17 @@ export async function updateProductById(id: number, p: Partial<Product>) {
   return supabase.from('products_admin').update(productToRow(p as Product)).eq('id', id);
 }
 
-/** Bulk status change from the admin products list (checkbox multi-select). */
+/**
+ * Bulk status change from the admin products list (checkbox multi-select).
+ * The ids travel in the URL (`id=in.(…)`), so "select all 5,968" is sent in
+ * chunks — a single request would exceed gateway URL limits.
+ */
 export async function bulkUpdateProductStatusByIds(ids: number[], status: Product['status']) {
-  return supabase.from('products_admin').update({ status }).in('id', ids);
+  for (let i = 0; i < ids.length; i += BULK_CHUNK) {
+    const { error } = await supabase.from('products_admin').update({ status }).in('id', ids.slice(i, i + BULK_CHUNK));
+    if (error) return { error };
+  }
+  return { error: null };
 }
 
 export async function deleteProductById(id: number) {
@@ -735,6 +917,7 @@ function rowToProduct(row: Record<string, unknown>): Product {
     searchAliases:  (row.search_aliases as string[]) || [],
     jan:            (row.jan as string) || undefined,
     updatedAt:      (row.updated_at as string) || (row.created_at as string) || undefined,
+    createdAt:      (row.created_at as string) || undefined,
     brand:          row.brand as string,
     category:       row.category as string,
     subcategory:    (row.subcategory as string) || undefined,

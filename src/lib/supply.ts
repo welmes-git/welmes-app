@@ -3,6 +3,7 @@
  * Every table behind this file is admin-only (RLS); see supabase/migrations/20260916_supply_pilot.sql.
  */
 import { supabase } from './supabase';
+import { fetchAllRows } from './fetchAllRows';
 
 export interface Supplier {
   id: string;
@@ -108,7 +109,13 @@ export async function saveSupplier(s: Omit<Supplier, 'isInternal'> | Omit<Suppli
 // ── Purchase prices ──────────────────────────────────────────────
 
 export async function fetchProductSupply(): Promise<ProductSupply[]> {
-  const { data, error } = await supabase.from('product_supply').select('product_id, supplier_id, cost_price');
+  const { data, error } = await fetchAllRows<{ product_id: number; supplier_id: string; cost_price: number }>(
+    (from, to) => supabase.from('product_supply')
+      .select('product_id, supplier_id, cost_price', { count: from === 0 ? 'exact' : undefined })
+      .order('product_id', { ascending: true })
+      .range(from, to),
+    { keyOf: (row) => row.product_id },
+  );
   if (error) { console.error('[fetchProductSupply]', error.message); return []; }
   return (data ?? []).map((r) => ({ productId: Number(r.product_id), supplierId: r.supplier_id, costPrice: Number(r.cost_price) }));
 }
@@ -116,8 +123,15 @@ export async function fetchProductSupply(): Promise<ProductSupply[]> {
 export async function saveProductSupply(productIds: number[], supplierId: string, costPrice?: number) {
   const now = new Date().toISOString();
   if (costPrice === undefined) {
-    // Reassign supplier only; keeps each product's existing cost
-    return supabase.from('product_supply').update({ supplier_id: supplierId, updated_at: now }).in('product_id', productIds);
+    // Reassign supplier only; keeps each product's existing cost. Chunked: the
+    // ids travel in the URL, and "select all matching" can mean thousands.
+    for (let i = 0; i < productIds.length; i += 300) {
+      const { error } = await supabase.from('product_supply')
+        .update({ supplier_id: supplierId, updated_at: now })
+        .in('product_id', productIds.slice(i, i + 300));
+      if (error) return { error };
+    }
+    return { error: null };
   }
   return supabase.from('product_supply').upsert(
     productIds.map((id) => ({ product_id: id, supplier_id: supplierId, cost_price: costPrice, updated_at: now })),

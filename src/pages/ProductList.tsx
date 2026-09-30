@@ -2,9 +2,11 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
-import { initialProducts, categories } from '../data/products';
-import { brandsByCount, hasJapanese } from '../lib/utils';
-import { matchesSearch } from '../lib/productSearch';
+import { categories } from '../data/products';
+import { hasJapanese } from '../lib/utils';
+import { useCatalogFacets, useCatalogPage, useDebounced } from '../hooks/useCatalog';
+import { STORE_PAGE_SIZE } from '../lib/catalogQuery';
+import type { CatalogQuery } from '../lib/catalogQuery';
 import ProductCard from '../components/ProductCard';
 import ProductGridSkeleton from '../components/ProductGridSkeleton';
 import SignUpBanner from '../components/SignUpBanner';
@@ -17,18 +19,14 @@ type SortOption = 'popular' | 'price-low' | 'price-high' | 'newest' | 'discount'
 export default function ProductList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { products, productsLoading, isAuthenticated } = useStore();
+  const { isAuthenticated } = useStore();
   const { formatPrice } = useCurrency();
   const { t } = useTranslation();
 
-  // Only fall back to the demo catalogue once loading has actually finished
-  // and come back empty — otherwise this briefly flashes demo products before
-  // the real Supabase fetch replaces them a moment later.
-  const allProducts = useMemo(
-    () => products.length > 0 ? products : productsLoading ? [] : initialProducts,
-    [products, productsLoading],
-  );
-  const brands = brandsByCount(allProducts).map(([brand]) => brand);
+  // Brand list (most products first) and price bounds come from one small
+  // aggregate query; the product grid is fetched a page at a time below.
+  const { data: facets } = useCatalogFacets();
+  const brands = useMemo(() => (facets?.brands ?? []).map(([brand]) => brand), [facets]);
 
   const categoryFilter = searchParams.get('category') || 'All';
   const brandFilter    = searchParams.get('brand')    || '';
@@ -68,60 +66,33 @@ export default function ProductList() {
     });
   }, [searchQuery]);
 
-  const itemsPerPage = 60;
+  const itemsPerPage = STORE_PAGE_SIZE;
 
-  const priceMin = useMemo(() => Math.floor(Math.min(...allProducts.map((p) => p.wholesalePrice))), [allProducts]);
-  const priceMax = useMemo(() => Math.ceil(Math.max(...allProducts.map((p) => p.wholesalePrice))), [allProducts]);
+  const priceMin = Math.floor(facets?.priceMin ?? 0);
+  const priceMax = Math.ceil(facets?.priceMax ?? 0);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, Infinity]);
+  // The slider fires on every pixel; only query once it settles.
+  const debouncedPrice = useDebounced(priceRange, 300);
 
-  const filteredProducts = useMemo(() => {
-    let result = [...allProducts];
-
-    // Text search — name, brand, category (product type), tags, aliases, description
-    if (searchQuery) {
-      result = result.filter((p) => matchesSearch(p, searchQuery));
-    } else {
-      // Only apply sidebar filters when NOT in search mode
-      if (selectedCategory !== 'All') {
-        result = result.filter((p) => p.category === selectedCategory);
-      }
-      if (selectedBrands.length > 0) {
-        result = result.filter((p) => selectedBrands.includes(p.brand));
-      }
-    }
-
-    // Price range (always applied)
-    const rangeMax = priceRange[1] === Infinity ? priceMax : priceRange[1];
-    result = result.filter(
-      (p) => p.wholesalePrice >= priceRange[0] && p.wholesalePrice <= rangeMax
-    );
-
-    // Sort
-    switch (sortBy) {
-      case 'price-low':
-        result.sort((a, b) => a.wholesalePrice - b.wholesalePrice);
-        break;
-      case 'price-high':
-        result.sort((a, b) => b.wholesalePrice - a.wholesalePrice);
-        break;
-      case 'discount':
-        result.sort((a, b) => b.discount - a.discount);
-        break;
-      case 'newest':
-        result.sort((a, b) => b.id - a.id);
-        break;
-      default:
-        result.sort((a, b) => b.reviews - a.reviews);
-    }
-
-    return result;
-  }, [allProducts, selectedCategory, selectedBrands, searchQuery, priceRange, sortBy, priceMax]);
-
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // One page, searched/filtered/sorted in the database (catalog_list). Search
+  // mode ignores the sidebar category/brand filters, as before; the price
+  // range always applies (the server ignores it for visitors without prices).
+  const query = useMemo<CatalogQuery>(() => ({
+    search: searchQuery || undefined,
+    category: !searchQuery && selectedCategory !== 'All' ? selectedCategory : null,
+    brands: !searchQuery && selectedBrands.length > 0 ? selectedBrands : null,
+    priceMin: debouncedPrice[0] > 0 ? debouncedPrice[0] : null,
+    priceMax: debouncedPrice[1] === Infinity ? null : debouncedPrice[1],
+    sort: sortBy,
+    limit: itemsPerPage,
+    offset: (currentPage - 1) * itemsPerPage,
+  }), [searchQuery, selectedCategory, selectedBrands, debouncedPrice, sortBy, currentPage, itemsPerPage]);
+  // keepPrevious: paging/filtering swaps the grid in place instead of flashing a skeleton.
+  const { data: page, loading: pageLoading, error: pageError } = useCatalogPage(query, { keepPrevious: true });
+  const productsLoading = !page && pageLoading;
+  const totalProducts = page?.total ?? 0;
+  const paginatedProducts = page?.items ?? [];
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   const toggleBrand = (brand: string) => {
     setSelectedBrands((prev) =>
@@ -317,7 +288,7 @@ export default function ProductList() {
             <div className="flex flex-wrap items-baseline pt-4">
               <h1 className="font-serif text-[30px] font-normal leading-[38px] text-ink-700">{pageTitle}</h1>
               <p className="ml-4 text-[14px] leading-5 tabular-nums text-ink-500">
-                {t('products.products', { count: filteredProducts.length })}
+                {t('products.products', { count: totalProducts })}
               </p>
               <button
                 onClick={() => setFiltersHidden((v) => !v)}
@@ -344,7 +315,7 @@ export default function ProductList() {
               <div className="relative ml-auto shrink-0">
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  onChange={(e) => { setSortBy(e.target.value as SortOption); setCurrentPage(1); }}
                   aria-label={t('products.sortBy')}
                   className={`${PILL} cursor-pointer appearance-none pr-10 focus:outline-none`}
                 >
@@ -363,7 +334,10 @@ export default function ProductList() {
               <ProductGridSkeleton count={10} className={gridCls} />
             ) : (
               <>
-                {filteredProducts.length === 0 && (
+                {pageError && !page && (
+                  <p role="alert" className="py-16 text-center text-[14px] leading-5 text-ink-500">{t('common.error')}</p>
+                )}
+                {page && totalProducts === 0 && (
                   <div className="py-16 text-center">
                     <Search size={48} strokeWidth={1} className="mx-auto mb-4 text-line-strong" />
                     <p className="mb-1 text-[14px] font-medium leading-5 text-ink-700">{t('products.noResults')}</p>

@@ -18,10 +18,8 @@ if (legacyHash.startsWith('#/')) {
   window.history.replaceState(null, '', legacyHash.slice(1));
 }
 
+// The SSR product reaches ProductDetail through SsrProductContext (useProduct).
 const ssrProduct = window.__WELMES_SSR_PRODUCT__;
-if (ssrProduct) {
-  useStore.setState({ products: [ssrProduct], productsLoading: false });
-}
 
 const tree = (
   <StrictMode>

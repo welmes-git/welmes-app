@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { CurrencyCode } from '../lib/currency';
 import type { DescriptionI18n } from '../lib/productDescription';
 import * as db from '../lib/db';
+import { clearCatalogCache } from '../lib/catalogCache';
 import { emailOrderPlaced, emailMemberRegistered, emailMemberApproved, emailMemberRejected, emailOrderShipped, emailOrderStatusChanged } from '../lib/email';
 
 export interface AppNotification {
@@ -56,6 +57,8 @@ export interface Product {
   /** Verified JAN/GTIN candidate; emitted in JSON-LD only when format-valid. */
   jan?: string;
   updatedAt?: string;
+  /** Insertion time; the catalogue's base ordering (newest first). */
+  createdAt?: string;
   brand: string;
   /** Top-level category — one of the 19 mega-menu groups (e.g. "Skincare") */
   category: string;
@@ -170,12 +173,11 @@ interface AppState {
   logout: () => void;
   initAuth: () => Promise<void>;
 
-  // Products
-  products: Product[];
-  /** True until the initial Supabase fetch settles — lets pages show a
-   *  spinner instead of flashing the demo catalogue before real data loads */
-  productsLoading: boolean;
-  loadProducts: () => Promise<void>;
+  // Products — screens query pages/ids themselves (src/hooks/useCatalog.ts).
+  /** Bumped whenever cached catalogue reads may be stale (admin edits, orders
+   *  changing stock). Sign-in/out needs no bump: cache keys include the viewer. */
+  catalogVersion: number;
+  invalidateCatalog: () => void;
   addProduct: (product: Omit<Product, 'id'>) => Promise<Product | null>;
   updateProduct: (id: number, updates: Partial<Product>) => Promise<{ error: { message: string } } | void>;
   deleteProduct: (id: number) => Promise<void>;
@@ -278,7 +280,7 @@ export const useStore = create<AppState>()(
             isAdmin: member.isAdmin,
             authLoading: false,
           });
-          await get().loadProducts();
+          // No catalogue refresh needed: cached reads are keyed by viewer.
           await get().syncCart();
           get().loadNotifications();
         } else {
@@ -304,7 +306,6 @@ export const useStore = create<AppState>()(
           isAuthenticated: true,
           isAdmin: member.isAdmin,
         });
-        await get().loadProducts();
         await get().syncCart();
         get().loadNotifications();
         return true;
@@ -323,51 +324,38 @@ export const useStore = create<AppState>()(
           cart: [],
           wishlist: [],
         });
-        await get().loadProducts();
       },
 
       // ── Products ──────────────────────────────────────────────
-      products: [],
-      productsLoading: true,
+      catalogVersion: 0,
 
-      loadProducts: async () => {
-        const products = await db.fetchProducts();
-        set({ products, productsLoading: false });
+      invalidateCatalog: () => {
+        db.invalidateCatalogCache();
+        clearCatalogCache();
+        set((state) => ({ catalogVersion: state.catalogVersion + 1 }));
       },
 
       addProduct: async (product) => {
         const created = await db.insertProduct(product);
-        if (created) {
-          set((state) => ({ products: [created, ...state.products] }));
-        }
+        if (created) get().invalidateCatalog();
         return created;
       },
 
       updateProduct: async (id, updates) => {
         const result = await db.updateProductById(id, updates);
         if (result?.error) return { error: result.error };
-        set((state) => ({
-          products: state.products.map((p) =>
-            p.id === id ? { ...p, ...updates } : p
-          ),
-        }));
+        get().invalidateCatalog();
       },
 
       bulkUpdateProductStatus: async (ids, status) => {
         const { error } = await db.bulkUpdateProductStatusByIds(ids, status);
         if (error) return { error: { message: error.message } };
-        set((state) => ({
-          products: state.products.map((p) =>
-            ids.includes(p.id) ? { ...p, status } : p
-          ),
-        }));
+        get().invalidateCatalog();
       },
 
       deleteProduct: async (id) => {
         await db.deleteProductById(id);
-        set((state) => ({
-          products: state.products.filter((p) => p.id !== id),
-        }));
+        get().invalidateCatalog();
       },
 
       // ── Members ───────────────────────────────────────────────
@@ -614,7 +602,7 @@ export const useStore = create<AppState>()(
         // Refresh from the server rather than optimistically inserting: the
         // totals, id and payment state all come from the database now.
         get().loadMyOrders();
-        get().loadProducts(); // stock counts changed
+        get().invalidateCatalog(); // stock counts changed; visible pages refetch
         const created = await db.fetchOrderById(order.orderId);
         const user = get().currentUser;
         if (created && user?.email) {
@@ -627,7 +615,7 @@ export const useStore = create<AppState>()(
       syncOrderAfterPayment: async (orderId) => {
         const order = await db.fetchOrderById(orderId);
         get().loadMyOrders();
-        get().loadProducts();
+        get().invalidateCatalog();
         const user = get().currentUser;
         if (order && user?.email) {
           emailOrderPlaced(order, user.email);
