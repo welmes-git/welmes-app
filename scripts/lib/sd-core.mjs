@@ -218,9 +218,71 @@ async function loginHeadful(chromium) {
 // closed. The old visibility check targeted removed/hidden selectors and
 // falsely declared every saved session expired, forcing a headful login on
 // every run (which then timed out under launchd).
-const isLoggedInPage = async (page) =>
+export const isLoggedInPage = async (page) =>
   !String(page.url()).includes('login')
   && await page.locator('a[href*="/logout.do"], a[href*="memberManage"]').count().then(n => n > 0).catch(() => false);
+
+// ── 상품 페이지 로드 + 파싱 (대기·재시도) ─────────────────────────────
+// 고정 1.2초 대기 후 바로 파싱하면 세트 표/가격이 아직 렌더링되지 않았거나,
+// 세션이 조용히 만료되어 도매가가 숨겨진 페이지를 「품절」로 오판했다
+// (드라이런 75개 중 33개 — 재로그인 후 확인하니 가격이 정상 표시됨).
+
+/**
+ * 세트 표에 가격(¥)이 나타나거나 미거래 박스가 뜰 때까지 기다린다.
+ * 타임아웃은 오류가 아니다 — 진짜 품절 페이지는 끝까지 가격이 없다.
+ */
+export async function waitForProductContent(page, { timeout = 8000 } = {}) {
+  await page.waitForFunction(() => {
+    if (document.querySelector('.product-information-box.not-trading')) return true;
+    const t = document.querySelector('table.set-list')?.innerText || '';
+    return /¥\s*[\d,]+/.test(t);
+  }, null, { timeout }).catch(() => {});
+}
+
+/**
+ * 파싱 실패 시 재시도 여부 (순수 함수, 단위 테스트 대상).
+ *   - 성공했거나 재시도 한도에 도달하면 재시도하지 않는다.
+ *   - 로그아웃 상태면 오류 종류와 무관하게 재로그인 후 재시도 (도매가가 숨겨지므로).
+ *   - 로그인 상태의 not_trading 은 확정 — 재시도해도 바뀌지 않는다.
+ *   - 로그인 상태의 no_sets 는 렌더링 지연일 수 있어 한 번 더 본다.
+ * 반환: 'done' | 'relogin' | 'retry'
+ */
+export function decideParseRetry(parsed, { loggedIn, attempt, retries }) {
+  if (!parsed?.error || attempt >= retries) return 'done';
+  if (!loggedIn) return 'relogin';
+  if (parsed.error.kind === 'not_trading') return 'done';
+  return 'retry';
+}
+
+/**
+ * 상품 페이지를 열고 파싱한다. 가격을 못 읽으면 로그인 상태를 확인해
+ * 재로그인 또는 추가 대기 후 재시도한다. sd.ensure() 가 브라우저를 교체할 수
+ * 있으므로 반드시 반환된 page 를 이후 작업(buildProduct 등)에 사용할 것.
+ * 반환: { parsed, page, attempts, relogins }
+ */
+export async function loadAndParseProduct(sd, url, { retries = 2, log = () => {} } = {}) {
+  let page = sd.page();
+  let relogins = 0;
+  for (let attempt = 0; ; attempt++) {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    if (String(page.url()).includes('login')) {
+      await sd.ensure(); relogins++; page = sd.page();
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    }
+    await waitForProductContent(page);
+    const parsed = await parseProductPage(page, url);
+    const loggedIn = parsed.error ? await isLoggedInPage(page) : true;
+    const decision = decideParseRetry(parsed, { loggedIn, attempt, retries });
+    if (decision === 'done') return { parsed, page, attempts: attempt + 1, relogins, loggedIn };
+    if (decision === 'relogin') {
+      log(`  ↻ 로그아웃 상태 감지 — 재로그인 후 재시도 (${attempt + 1}/${retries})`);
+      await sd.ensure(); relogins++; page = sd.page();
+    } else {
+      log(`  ↻ 가격표 미표시 — 대기 후 재시도 (${attempt + 1}/${retries})`);
+      await page.waitForTimeout(3000 * (attempt + 1));
+    }
+  }
+}
 
 /** 저장된 세션으로 headless 컨텍스트. 유효하지 않으면 재로그인 후 재생성. */
 async function getScraperContext(chromium) {
@@ -884,4 +946,50 @@ export function buildTranslationOptions({
   targetLangs, priority = 0, maxAttempts = 3,
 } = {}) {
   return { enabled, provider, model, env, targetLangs, priority, maxAttempts };
+}
+
+// ── 대량 등록 대상 URL 목록 (순수 함수, 단위 테스트 대상) ─────────────
+
+/** 상품 URL → SD 상품 ID (없으면 null) */
+export function sdIdFromUrl(url) {
+  return String(url).match(/pd_p\/(\d+)/)?.[1] ?? null;
+}
+
+/**
+ * 수집 순서(목록 정렬 순)의 URL 을 등록 순서로 바꾼다.
+ *   - SD 상품 ID 기준 중복 제거 (첫 등장 위치 유지)
+ *   - reverse=true 면 뒤집는다 — so=newly(최신순) 목록을 역순 등록하면
+ *     가장 최신 상품이 마지막에 등록되어 WELMES created_at 기준 최상단에 온다.
+ */
+export function orderProductUrls(urls, { reverse = false } = {}) {
+  const seen = new Set();
+  const unique = [];
+  for (const u of urls) {
+    const id = sdIdFromUrl(u);
+    const key = id ?? u;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(u);
+  }
+  return reverse ? unique.reverse() : unique;
+}
+
+/** 이미 등록된 SD 상품 ID 를 제외 (재개 시 페이지 로드 없이 건너뛰기). 순서 유지. */
+export function filterUnregisteredUrls(urls, registeredIds) {
+  const set = registeredIds instanceof Set ? registeredIds : new Set([...registeredIds].map(String));
+  return urls.filter((u) => !set.has(String(sdIdFromUrl(u))));
+}
+
+/** URL 목록 파일 내용 검증 — 형식이 다르면 throw (잘못된 파일로 엉뚱한 등록 방지) */
+export function parseUrlListFile(text) {
+  const data = JSON.parse(text);
+  const urls = Array.isArray(data) ? data : data?.urls;
+  if (!Array.isArray(urls) || !urls.every((u) => typeof u === 'string' && sdIdFromUrl(u))) {
+    throw new Error('URL 목록 파일 형식 오류 — { urls: ["https://www.superdelivery.com/p/r/pd_p/…"] } 이어야 합니다');
+  }
+  for (const u of urls) {
+    const h = new URL(u).hostname;
+    if (!['superdelivery.com', 'www.superdelivery.com'].includes(h)) throw new Error(`URL 목록에 Superdelivery 외 호스트: ${u}`);
+  }
+  return { urls, source: data?.source ?? null, collectedAt: data?.collectedAt ?? null };
 }

@@ -14,6 +14,13 @@
  *   --limit=N      최대 상품 수 (기본 무제한)
  *   --active       inactive 대신 active 등록 (dry-run에서는 미적용)
  *   --dry-run      페이지 파싱·상품 변환까지만 수행 (DB/Storage 변경 없음)
+ *   --enrich       영문명 AI enrichment 작업 큐잉 (기본 OFF)
+ *   --translate    설명 다국어 AI 번역 작업 큐잉 (기본 OFF)
+ *   --reverse      수집한 목록을 역순으로 등록 (so=newly 목록이면 최신 상품이 마지막 = WELMES 최상단)
+ *   --url-file=P   수집 URL 목록 파일. 파일이 있으면 목록 수집을 건너뛰고 재사용,
+ *                  없으면 수집 후 저장 → 중단 후 재실행해도 같은 순서로 이어서 진행
+ *   --retries=N    가격표 미표시·로그아웃 시 재시도 횟수 (기본 2)
+ *   (이미 등록된 SD 상품은 페이지를 열지 않고 사전 제외)
  *
  * 필수 .env.local (git 제외): SD_EMAIL, SD_PASSWORD, WELMES_ADMIN_EMAIL, WELMES_ADMIN_PASSWORD
  * 필수 .env: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
@@ -34,7 +41,9 @@ const { createClient } = await import('@supabase/supabase-js');
 import {
   loadEnvFiles, createSupabase, createSdSession, parseProductPage,
   buildProduct, insertProduct, loadOfficialSources, buildEnrichmentOptions, buildTranslationOptions, BASE, DELAY_MS,
+  loadAndParseProduct, orderProductUrls, filterUnregisteredUrls, parseUrlListFile,
 } from './lib/sd-core.mjs';
+const fs = await import('node:fs');
 
 loadEnvFiles();
 
@@ -48,10 +57,16 @@ const MAX_PAGES = opt('pages') ? Number(opt('pages')) : Infinity;
 const MAX_PRODUCTS = opt('limit') ? Number(opt('limit')) : Infinity;
 const IMPORT_ACTIVE = args.includes('--active');
 const DRY_RUN = args.includes('--dry-run');
-const NO_ENRICH = args.includes('--no-enrich');   // 영문명 enrichment 큐잉 비활성화
-const NO_TRANSLATE = args.includes('--no-translate'); // 설명 다국어 번역 큐잉 비활성화
-const ENRICH_PROVIDER = opt('provider', 'gemini'); // 영문명 생성 AI 공급자
-if (!urlArg) { console.error('사용법: npm run import:sd -- <상품 또는 목록 URL> [--brand=名前] [--pages=N] [--limit=N] [--active] [--provider=gemini] [--no-enrich] [--no-translate] [--dry-run]'); process.exit(1); }
+// AI 번역 큐잉은 기본 OFF (등록만 하고 번역은 나중에 수동 처리). 필요할 때만 --enrich / --translate 로 opt-in.
+// --no-enrich / --no-translate 는 하위 호환용으로 계속 허용(항상 OFF 우선).
+const NO_ENRICH = !args.includes('--enrich') || args.includes('--no-enrich');          // 영문명 enrichment 큐잉
+const NO_TRANSLATE = !args.includes('--translate') || args.includes('--no-translate'); // 설명 다국어 번역 큐잉
+const ENRICH_PROVIDER = opt('provider', 'gemini'); // 영문명 생성 AI 공급자 (--enrich/--translate 시에만 사용)
+const REVERSE = args.includes('--reverse');
+const URL_FILE = opt('url-file', '');
+const RETRIES = Number(opt('retries', 2));
+if (!Number.isInteger(RETRIES) || RETRIES < 0 || RETRIES > 5) { console.error('--retries 는 0~5 정수'); process.exit(1); }
+if (!urlArg) { console.error('사용법: npm run import:sd -- <상품 또는 목록 URL> [--brand=名前] [--pages=N] [--limit=N] [--active] [--enrich] [--translate] [--provider=gemini] [--dry-run]'); process.exit(1); }
 
 // Never navigate an authenticated scraper to an arbitrary host supplied on the
 // command line. It would not receive Superdelivery cookies (host-scoped), but it
@@ -124,7 +139,8 @@ async function collectProductUrls(page, listingUrl) {
     const found = await page.$$eval('a[href*="/p/r/pd_p/"]', as => [...new Set(as.map(a => a.getAttribute('href')))]);
     found.forEach(h => urls.add(new URL(h, BASE).href));
     console.log(`   목록 ${n + 1}: 상품 ${found.length}개 (누적 ${urls.size})`);
-    if (urls.size >= MAX_PRODUCTS) break;
+    // --reverse / --url-file 은 목록 끝까지 알아야 하므로 --limit 로 수집을 자르지 않는다
+    if (!REVERSE && !URL_FILE && urls.size >= MAX_PRODUCTS) break;
     if (!FOLLOW_ALL) break;
     // 次へ 링크 → 다음 페이지
     const next = await page.$$eval('a', as => {
@@ -136,7 +152,7 @@ async function collectProductUrls(page, listingUrl) {
     if (visited.has(current)) break;
     visited.add(current);
   }
-  return [...urls].slice(0, MAX_PRODUCTS === Infinity ? undefined : MAX_PRODUCTS);
+  return [...urls];
 }
 
 // ── 메인 ─────────────────────────────────────────────────────────────
@@ -164,7 +180,7 @@ const ENRICHMENT = buildEnrichmentOptions({
   env: process.env,
 });
 if (!NO_ENRICH) console.log(`🌐 공식 도메인 레지스트리 ${OFFICIAL_SOURCES.length}행 로드 — 영문명 자동 큐잉 활성화 (provider: ${ENRICH_PROVIDER})`);
-else console.log('⏭ --no-enrich: 영문명 enrichment 큐잉을 건너뜁니다');
+else console.log('⏭ 영문명 AI enrichment 큐잉 OFF (켜려면 --enrich)');
 
 const TRANSLATION = buildTranslationOptions({
   enabled: !NO_TRANSLATE,
@@ -172,7 +188,7 @@ const TRANSLATION = buildTranslationOptions({
   env: process.env,
 });
 if (!NO_TRANSLATE) console.log('🌏 상품 설명 다국어 번역 자동 큐잉 활성화 (EN/ZH/KO)');
-else console.log('⏭ --no-translate: 설명 번역 큐잉을 건너뜁니다');
+else console.log('⏭ 설명 AI 번역 큐잉 OFF (켜려면 --translate)');
 
 const sd = await createSdSession(chromium);
 let page = sd.page();
@@ -184,22 +200,59 @@ console.log(`✅ 슈퍼딜리버리 세션 확인 완료${DRY_RUN ? ' (dry-run �
 let listingUrl = mainUrl;
 if (BRAND && !isProductUrl) listingUrl = await resolveBrandUrl(page, mainUrl, BRAND);
 
-const productUrls = isProductUrl ? [mainUrl] : await collectProductUrls(page, listingUrl);
-console.log(`🎯 대상 상품 ${productUrls.length}개${BRAND ? ` (브랜드: ${BRAND})` : ''}${isFinite(MAX_PAGES) || isFinite(MAX_PRODUCTS) ? ` (제한: 페이지 ${isFinite(MAX_PAGES) ? MAX_PAGES : '∞'}, 상품 ${isFinite(MAX_PRODUCTS) ? MAX_PRODUCTS : '∞'})` : ''}`);
-
-let ok = 0, skip = 0, fail = 0, enrichQueued = 0, enrichFailed = 0, translateQueued = 0, translateFailed = 0;
-for (const u of productUrls) {
-  await page.goto(u, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-  await page.waitForTimeout(1200);
-  if (String(page.url()).includes('login')) {
-    await sd.ensure();
-    page = sd.page();
-    await page.goto(u, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1200);
+// 수집 목록: --url-file 이 있으면 재사용(순서 고정), 없으면 수집 후 저장
+let collected;
+if (isProductUrl) collected = [mainUrl];
+else if (URL_FILE && fs.existsSync(URL_FILE)) {
+  const saved = parseUrlListFile(fs.readFileSync(URL_FILE, 'utf8'));
+  collected = saved.urls;
+  console.log(`📂 URL 목록 재사용: ${URL_FILE} (${collected.length}개, 수집 ${saved.collectedAt ?? '?'}, 출처 ${saved.source ?? '?'})`);
+} else {
+  collected = await collectProductUrls(page, listingUrl);
+  if (URL_FILE) {
+    fs.writeFileSync(URL_FILE, JSON.stringify({ source: listingUrl, collectedAt: new Date().toISOString(), urls: collected }, null, 1));
+    console.log(`💾 URL 목록 저장: ${URL_FILE} (${collected.length}개, 수집 순서 그대로)`);
   }
+}
+const ordered = orderProductUrls(collected, { reverse: REVERSE });
+if (REVERSE) console.log('🔃 --reverse: 목록 마지막 상품부터 등록 (최신 상품이 마지막 = 최상단)');
 
-  const parsed = await parseProductPage(page, u);
+// 이미 등록된 SD 상품은 페이지를 열지 않고 제외 — 5천 개 규모 재개 시 수 시간 절약
+const registeredIds = new Set();
+for (let from = 0; ; from += 1000) {
+  const { data, error } = await supabase.from('products_admin').select('sd_product_id').not('sd_product_id', 'is', null).range(from, from + 999);
+  if (error) { console.error(`❌ 기존 등록 상품 조회 실패: ${error.message}`); process.exit(1); }
+  for (const r of data ?? []) registeredIds.add(String(r.sd_product_id));
+  if (!data || data.length < 1000) break;
+}
+const unregistered = filterUnregisteredUrls(ordered, registeredIds);
+const preSkipped = ordered.length - unregistered.length;
+// --limit 은 등록 순서(역순 적용·기등록 제외 후) 기준으로 처리 개수를 제한한다
+const productUrls = unregistered.slice(0, MAX_PRODUCTS === Infinity ? undefined : MAX_PRODUCTS);
+console.log(`🎯 대상 상품 ${productUrls.length}개 (수집 ${ordered.length}, 기등록 사전 제외 ${preSkipped})${BRAND ? ` (브랜드: ${BRAND})` : ''}${isFinite(MAX_PAGES) || isFinite(MAX_PRODUCTS) ? ` (제한: 페이지 ${isFinite(MAX_PAGES) ? MAX_PAGES : '∞'}, 상품 ${isFinite(MAX_PRODUCTS) ? MAX_PRODUCTS : '∞'})` : ''}`);
+
+let ok = 0, skip = preSkipped, fail = 0, enrichQueued = 0, enrichFailed = 0, translateQueued = 0, translateFailed = 0;
+let retriedOk = 0, relogins = 0, n = 0;
+const failKinds = {};
+for (const u of productUrls) {
+  n++;
+  if (n % 50 === 0) console.log(`⏱ 진행 ${n}/${productUrls.length} — 등록 ${ok} / 실패 ${fail} / 재시도 성공 ${retriedOk} / 재로그인 ${relogins}`);
+  let loaded;
+  try {
+    loaded = await loadAndParseProduct(sd, u, { retries: RETRIES, log: console.log });
+  } catch (e) {
+    fail++; failKinds.load_error = (failKinds.load_error ?? 0) + 1;
+    console.log(`✗ [SD ${u.match(/pd_p\/(\d+)/)?.[1]}] 페이지 로드 실패: ${e.message.split('\n')[0]}`);
+    page = sd.page();
+    continue;
+  }
+  page = loaded.page;
+  relogins += loaded.relogins;
+  const parsed = loaded.parsed;
+  if (!parsed.error && loaded.attempts > 1) retriedOk++;
   if (parsed.error) {
+    failKinds[parsed.error.kind] = (failKinds[parsed.error.kind] ?? 0) + 1;
+    if (!loaded.loggedIn) console.log(`  ⚠ 재시도 후에도 로그아웃 상태 — 품절 판정 신뢰 불가`);
     fail++;
     console.log(`✗ [SD ${parsed.sdId}] ${parsed.error.message}`);
     // 품절/미거래 상품도 놓치지 않도록 감시 목록에 등록 — 재입고 시 자동 등록
@@ -256,5 +309,6 @@ for (const u of productUrls) {
   await page.waitForTimeout(DELAY_MS);
 }
 
-console.log(`\n📊 완료${DRY_RUN ? ' (dry-run — 미등록)' : ''}: ${DRY_RUN ? '등록 예정' : '등록'} ${ok} / skip ${skip} / 실패 ${fail}${!NO_ENRICH && !DRY_RUN ? ` | 영문명 큐잉 ${enrichQueued} / 큐잉 실패 ${enrichFailed}` : ''}${!NO_TRANSLATE && !DRY_RUN ? ` | 번역 큐잉 ${translateQueued} / 큐잉 실패 ${translateFailed}` : ''}`);
+console.log(`\n🔍 실패 유형: ${JSON.stringify(failKinds)} | 재시도로 복구 ${retriedOk} | 재로그인 ${relogins}`);
+console.log(`📊 완료${DRY_RUN ? ' (dry-run — 미등록)' : ''}: ${DRY_RUN ? '등록 예정' : '등록'} ${ok} / skip ${skip} / 실패 ${fail}${!NO_ENRICH && !DRY_RUN ? ` | 영문명 큐잉 ${enrichQueued} / 큐잉 실패 ${enrichFailed}` : ''}${!NO_TRANSLATE && !DRY_RUN ? ` | 번역 큐잉 ${translateQueued} / 큐잉 실패 ${translateFailed}` : ''}`);
 await sd.close();

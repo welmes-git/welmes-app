@@ -38,3 +38,4 @@ scripts/.tmp-*
 # Local refresh backups (pre-change image/description snapshots, product data)
 scripts/.image-backup-*.json
 scripts/.desc-backup-*.json
+scripts/.sd-urls-*.json

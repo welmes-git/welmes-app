@@ -36,8 +36,9 @@ const DRY_RUN = args.includes('--dry-run');
 const LIMIT = args.find(a => a.startsWith('--limit=')) ? Number(args.find(a => a.startsWith('--limit=')).split('=')[1]) : Infinity;
 const IDS_ARG = args.find(a => a.startsWith('--ids='));
 const IDS = IDS_ARG ? IDS_ARG.split('=')[1].split(',').map(Number).filter(Boolean) : null;
-const NO_ENRICH = args.includes('--no-enrich');   // 재입고 자동등록 시 영문명 큐잉 비활성화
-const NO_TRANSLATE = args.includes('--no-translate'); // 재입고 자동등록 시 설명 번역 큐잉 비활성화
+// 재입고 자동등록 시 AI 번역 큐잉은 기본 OFF. 필요할 때만 --enrich / --translate 로 opt-in.
+const NO_ENRICH = !args.includes('--enrich') || args.includes('--no-enrich');          // 영문명 큐잉
+const NO_TRANSLATE = !args.includes('--translate') || args.includes('--no-translate'); // 설명 번역 큐잉
 const ENRICH_PROVIDER = args.find(a => a.startsWith('--provider=')) ? args.find(a => a.startsWith('--provider=')).split('=')[1] : 'gemini';
 
 const supabase = createSupabase(createClient);

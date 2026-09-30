@@ -10,7 +10,8 @@ using the shared pure builder `buildEnrichmentJob`. Duplicates never create a
 job, and a queue/API failure is counted separately but never rolls back the
 completed product insert. Products stay `inactive` on registration regardless of
 name confidence; the worker's completion RPC only updates the `name_en_*` fields.
-Disable queuing per run with `--no-enrich`; choose the model provider with
+Queuing is OFF by default; opt in per run with `--enrich` (names) and
+`--translate` (descriptions); choose the model provider with
 `--provider=<gemini|openai|anthropic|qwen|deepseek>`.
 
 ## Prerequisites
