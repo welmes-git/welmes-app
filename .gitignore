@@ -39,3 +39,4 @@ scripts/.tmp-*
 scripts/.image-backup-*.json
 scripts/.desc-backup-*.json
 scripts/.sd-urls-*.json
+scripts/.i18n/
