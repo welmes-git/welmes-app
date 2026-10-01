@@ -743,7 +743,7 @@
     "returnsExchanges": "คืนและเปลี่ยนสินค้า",
     "wholesaleInfo": "ข้อมูลค้าส่ง",
     "businessHours": "จ – ศ  09:00 – 18:00\nพักเที่ยง  12:00 – 13:00\nปิดวันหยุดสุดสัปดาห์และวันหยุดนักขัตฤกษ์",
-    "companyInfo": "บริษัท: WELMES Co., Ltd. | CEO: Kim Daepyo | เลขทะเบียนธุรกิจ: 123-45-67890 | ทะเบียนอีคอมเมิร์ซ: 2025-Seoul Gangnam-0001"
+    "companyInfo": "บริษัท: WELMES Co., Ltd. | CEO: 金居大太郎, KIM MINGYU | เลขทะเบียนธุรกิจ: 123-45-67890 | ทะเบียนอีคอมเมิร์ซ: 2025-Seoul Gangnam-0001"
   },
   "currency": {
     "ratesAsOf": "อัตราแลกเปลี่ยน ณ {{time}}",
