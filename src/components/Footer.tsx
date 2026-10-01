@@ -32,7 +32,7 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-2">
               <Mail size={14} />
-              <span className="text-[12px]">support@welmes.kr</span>
+              <span className="text-[12px]">welmes0001@gmail.com</span>
             </div>
           </div>
 

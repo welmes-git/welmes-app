@@ -202,11 +202,11 @@ export default function PendingApproval() {
               1544-1234 (Mon–Fri 09:00–18:00)
             </a>
             <a
-              href="mailto:support@welmes.kr"
+              href="mailto:welmes0001@gmail.com"
               className="flex items-center gap-3 text-[13px] text-ink-700 hover:text-ink-900 transition-colors"
             >
               <Mail size={14} className="text-ink-500" />
-              support@welmes.kr
+              welmes0001@gmail.com
             </a>
             <Link
               to="/support"

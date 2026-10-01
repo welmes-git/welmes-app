@@ -106,7 +106,7 @@ export default function OrderPrint() {
             </div>
             <p className="text-[11px] text-ink-500 leading-relaxed">
               123 Teheran-ro, Gangnam-gu, Seoul, South Korea<br />
-              Tel: 1544-1234 &nbsp;|&nbsp; support@welmes.kr<br />
+              Tel: 1544-1234 &nbsp;|&nbsp; welmes0001@gmail.com<br />
               Business Reg. No.: 123-45-67890
             </p>
           </div>
@@ -306,7 +306,7 @@ export default function OrderPrint() {
         <div className="border-t border-line pt-4 text-center">
           <p className="text-[10px] text-ink-300">
             WELMES Co., Ltd. &nbsp;|&nbsp; 123 Teheran-ro, Gangnam-gu, Seoul &nbsp;|&nbsp;
-            1544-1234 &nbsp;|&nbsp; support@welmes.kr &nbsp;|&nbsp; www.welmes.kr
+            1544-1234 &nbsp;|&nbsp; welmes0001@gmail.com &nbsp;|&nbsp; www.welmes.kr
           </p>
           <p className="text-[9px] text-line-strong mt-1">
             This document is computer-generated and valid without a physical signature where not required by law.

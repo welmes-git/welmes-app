@@ -233,7 +233,7 @@ export default function CustomerSupport() {
 
   const contactCards = [
     { icon: Phone,  label: t('support.phone'),  value: '1544-1234',        sub: 'Mon – Fri  09:00 – 18:00\n(Lunch 12:00 – 13:00)' },
-    { icon: Mail,   label: t('support.email'),  value: 'support@welmes.kr', sub: 'We reply within 1 business day' },
+    { icon: Mail,   label: t('support.email'),  value: 'welmes0001@gmail.com', sub: 'We reply within 1 business day' },
     { icon: MapPin, label: t('support.address'), value: 'WELMES Tower 15F', sub: '123 Teheran-ro, Gangnam-gu\nSeoul, South Korea' },
     { icon: Clock,  label: t('support.hours'),  value: 'Mon – Fri',        sub: '09:00 – 18:00 KST\nClosed on weekends & holidays' },
   ];
@@ -341,7 +341,7 @@ export default function CustomerSupport() {
               <div className="bg-sunken rounded-sm p-5 space-y-3">
                 {[
                   { label: t('support.phone'), value: '1544-1234' },
-                  { label: t('support.email'), value: 'support@welmes.kr' },
+                  { label: t('support.email'), value: 'welmes0001@gmail.com' },
                   { label: t('support.hours'), value: 'Mon – Fri  09:00 – 18:00 KST' },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex gap-3">
