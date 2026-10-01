@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router';
 import './index.css';
 import { startClientLanguageDetection } from './i18n';
 import App from './App';
+import ScrollManager from './components/ScrollManager';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { useStore } from './store/useStore';
 import type { Product } from './store/useStore';
@@ -24,6 +25,7 @@ const ssrProduct = window.__WELMES_SSR_PRODUCT__;
 const tree = (
   <StrictMode>
     <BrowserRouter>
+      <ScrollManager />
       <SsrProductContext.Provider value={ssrProduct ?? null}>
         <CurrencyProvider>
           <App />

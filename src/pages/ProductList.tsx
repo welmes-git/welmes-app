@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { useCurrency } from '../context/CurrencyContext';
@@ -65,6 +65,15 @@ export default function ProductList() {
       }
     });
   }, [searchQuery]);
+
+  const paginationMounted = useRef(false);
+  useEffect(() => {
+    if (!paginationMounted.current) {
+      paginationMounted.current = true;
+      return;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [currentPage]);
 
   const itemsPerPage = STORE_PAGE_SIZE;
 
